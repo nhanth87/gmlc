@@ -16,7 +16,7 @@
 		The profile configuration
 		This contains required properties:
 			The uri to jboss-service.xml.
-			The uri to the deployers folder.
+			The uri to the deployers' folder.
 			A list of uris to deploy folders. -->
 	<bean name="BootstrapProfileFactory" class="org.jboss.system.server.profileservice.repository.StaticProfileFactory">
       <property name="bindingsURI">${jboss.server.home.url}conf/bindingservice.beans</property>

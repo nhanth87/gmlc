@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import org.mobicents.gmlc.slee.primitives.CivicAddressElements;
 
 import java.text.DecimalFormat;
 
@@ -16,8 +17,6 @@ public class JsonWriter {
 
     protected static final DecimalFormat coordinatesFormat = new DecimalFormat("#0.000000");
     protected static final DecimalFormat uncertaintyFormat = new DecimalFormat("#0.000000");
-    protected static final DecimalFormat areaFormat = new DecimalFormat("#0.00");
-
     public JsonWriter() {
     }
 
@@ -319,7 +318,6 @@ public class JsonWriter {
             jsonObject.add("latitude", JsonNull.INSTANCE);
             nfe.printStackTrace();
         }
-
     }
 
     protected static void writeLongitude(Double longitude, final JsonObject jsonObject) {
@@ -492,22 +490,6 @@ public class JsonWriter {
         }
     }
 
-    protected static void writePolygonArea(Double area, final JsonObject jsonObject) {
-        try {
-            String formattedArea;
-            if (area != null) {
-                formattedArea = areaFormat.format(area);
-                area = Double.valueOf(formattedArea);
-                jsonObject.addProperty("area", area);
-            } else {
-                jsonObject.add("area", JsonNull.INSTANCE);
-            }
-        }  catch (NumberFormatException nfe) {
-            jsonObject.add("area", JsonNull.INSTANCE);
-            nfe.printStackTrace();
-        }
-    }
-
     protected static void writeScreeningAndPresentationIndicators(final Integer screeningAndPresentationIndicators, final JsonObject jsonObject) {
         if (screeningAndPresentationIndicators != null) {
             jsonObject.addProperty("screeningAndPresentationIndicators", screeningAndPresentationIndicators);
@@ -549,11 +531,11 @@ public class JsonWriter {
         }
     }
 
-    protected static void writeRNCId(final Long rncId, final JsonObject jsonObject) {
-        if (rncId != null) {
-            jsonObject.addProperty("rncId", rncId);
+    protected static void writeMmeNumber(final String mmeNumber, final JsonObject jsonObject) {
+        if (mmeNumber != null) {
+            jsonObject.addProperty("mmeNumber", mmeNumber);
         } else {
-            jsonObject.add("rncId", JsonNull.INSTANCE);
+            jsonObject.add("mmeNumber", JsonNull.INSTANCE);
         }
     }
 
@@ -626,7 +608,7 @@ public class JsonWriter {
     protected static void writeLsaLSB(final Boolean lsaLSB, final JsonObject jsonObject) {
         String lsaType;
         if (lsaLSB != null) {
-            if (lsaLSB == false)
+            if (!lsaLSB)
                 lsaType = "PLMN";
             else
                 lsaType = "Universal";
@@ -649,6 +631,7 @@ public class JsonWriter {
         if (mnpStatusCode != null) {
             switch (mnpStatusCode) {
                 case 0:
+                case 5:
                     mnpStatus = "notKnownToBePorted";
                     break;
                 case 1:
@@ -659,9 +642,6 @@ public class JsonWriter {
                     break;
                 case 4:
                     mnpStatus = "ownNumberNotPortedOut";
-                    break;
-                case 5:
-                    mnpStatus = "notKnownToBePorted";
                     break;
                 default:
                     mnpStatus = null;
@@ -757,24 +737,6 @@ public class JsonWriter {
             }
         } catch (NumberFormatException nfe) {
             jsonObject.add("msisdn", JsonNull.INSTANCE);
-            nfe.printStackTrace();
-        }
-    }
-
-    protected static void writeSubscriberIdentity(final String subscriberIdentityAddress, final JsonObject jsonObject) {
-        Long subscriberIdentity = null;
-        try {
-            if (subscriberIdentityAddress != null) {
-                if (!subscriberIdentityAddress.equalsIgnoreCase(""))
-                    subscriberIdentity = Long.valueOf(subscriberIdentityAddress);
-            }
-            if (subscriberIdentity != null) {
-                jsonObject.addProperty("subscriberIdentity", subscriberIdentity);
-            } else {
-                jsonObject.add("subscriberIdentity", JsonNull.INSTANCE);
-            }
-        } catch (NumberFormatException nfe) {
-            jsonObject.add("subscriberIdentity", JsonNull.INSTANCE);
             nfe.printStackTrace();
         }
     }
@@ -895,11 +857,51 @@ public class JsonWriter {
         }
     }
 
+    protected static void writeAdditionalVGmlcAddress(final String addVGmlcAddress, final JsonObject jsonObject) {
+        if (addVGmlcAddress != null) {
+            jsonObject.addProperty("addVGmlcAddress", addVGmlcAddress);
+        } else {
+            jsonObject.add("addVGmlcAddress", JsonNull.INSTANCE);
+        }
+    }
+
     protected static void writePprAddress(final String pprAddress, final JsonObject jsonObject) {
         if (pprAddress != null) {
             jsonObject.addProperty("pprAddress", pprAddress);
         } else {
             jsonObject.add("pprAddress", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeRiaFlags(final Long riaFlags, final JsonObject jsonObject) {
+        if (riaFlags != null) {
+            jsonObject.addProperty("riaFlags", riaFlags);
+        } else {
+            jsonObject.add("riaFlags", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writePlrFlags(final Long plrFlags, final JsonObject jsonObject) {
+        if (plrFlags != null) {
+            jsonObject.addProperty("plrFlags", plrFlags);
+        } else {
+            jsonObject.add("plrFlags", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writePlaFlags(final Long plaFlags, final JsonObject jsonObject) {
+        if (plaFlags != null) {
+            jsonObject.addProperty("plaFlags", plaFlags);
+        } else {
+            jsonObject.add("plaFlags", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeLrrFlags(final Long lrrFlags, final JsonObject jsonObject) {
+        if (lrrFlags != null) {
+            jsonObject.addProperty("lrrFlags", lrrFlags);
+        } else {
+            jsonObject.add("lrrFlags", JsonNull.INSTANCE);
         }
     }
 
@@ -967,11 +969,11 @@ public class JsonWriter {
         }
     }
 
-    protected static void writeDeferredMTLRresponseIndicator(final Boolean deferredMTLRresponseIndicator, final JsonObject jsonObject) {
-        if (deferredMTLRresponseIndicator != null) {
-            jsonObject.addProperty("deferredMTLRresponseIndicator", deferredMTLRresponseIndicator);
+    protected static void writeDeferredMTlrResponseIndicator(final Boolean deferredMTlrResponseIndicator, final JsonObject jsonObject) {
+        if (deferredMTlrResponseIndicator != null) {
+            jsonObject.addProperty("deferredMTLRResponseIndicator", deferredMTlrResponseIndicator);
         } else {
-            jsonObject.add("deferredMTLRresponseIndicator", JsonNull.INSTANCE);
+            jsonObject.add("deferredMTLRResponseIndicator", JsonNull.INSTANCE);
         }
     }
 
@@ -994,7 +996,6 @@ public class JsonWriter {
                     accuracyFulfilmentIndicator = "REQUESTED_ACCURACY_NOT_FULFILLED";
                     break;
                 default:
-                    accuracyFulfilmentIndicator = null;
                     break;
             }
         }
@@ -1021,9 +1022,76 @@ public class JsonWriter {
         }
     }
 
-    protected static void writeCivicAddress(final String civicAddress, final JsonObject jsonObject) {
+    protected static void writeCivicAddress(final CivicAddressElements civicAddress, final JsonObject jsonObject) {
         if (civicAddress != null) {
-            jsonObject.addProperty("civicAddress", civicAddress);
+            if (civicAddress.getCountry() != null)
+                jsonObject.addProperty("country", civicAddress.getCountry());
+            if (civicAddress.getA1() != null)
+                jsonObject.addProperty("A1", civicAddress.getA1());
+            if (civicAddress.getA2() != null)
+                jsonObject.addProperty("A2", civicAddress.getA2());
+            if (civicAddress.getA3() != null)
+                jsonObject.addProperty("A3", civicAddress.getA3());
+            if (civicAddress.getA4() != null)
+                jsonObject.addProperty("A4", civicAddress.getA4());
+            if (civicAddress.getA5() != null)
+                jsonObject.addProperty("A5", civicAddress.getA5());
+            if (civicAddress.getA6() != null)
+                jsonObject.addProperty("A6", civicAddress.getA6());
+            if (civicAddress.getPrm() != null)
+                jsonObject.addProperty("PRM", civicAddress.getPrm());
+            if (civicAddress.getPrd() != null)
+                jsonObject.addProperty("PRD", civicAddress.getPrd());
+            if (civicAddress.getRd() != null)
+                jsonObject.addProperty("RD", civicAddress.getRd());
+            if (civicAddress.getSts() != null)
+                jsonObject.addProperty("STS", civicAddress.getSts());
+            if (civicAddress.getPod() != null)
+                jsonObject.addProperty("POD", civicAddress.getPod());
+            if (civicAddress.getPom() != null)
+                jsonObject.addProperty("POM", civicAddress.getPom());
+            if (civicAddress.getRdsec() != null)
+                jsonObject.addProperty("RDSEC", civicAddress.getRdsec());
+            if (civicAddress.getRdbr() != null)
+                jsonObject.addProperty("RDBR", civicAddress.getRdbr());
+            if (civicAddress.getRdsubbr() != null)
+                jsonObject.addProperty("RDSUBBR", civicAddress.getRdsubbr());
+            if (civicAddress.getHno() != null)
+                jsonObject.addProperty("HNO", civicAddress.getHno());
+            if (civicAddress.getHns() != null)
+                jsonObject.addProperty("HNS", civicAddress.getHns());
+            if (civicAddress.getLmk() != null)
+                jsonObject.addProperty("LMK", civicAddress.getLmk());
+            if (civicAddress.getLoc() != null)
+                jsonObject.addProperty("LOC", civicAddress.getLoc());
+            if (civicAddress.getFlr() != null)
+                jsonObject.addProperty("FLR", civicAddress.getFlr());
+            if (civicAddress.getNam() != null)
+                jsonObject.addProperty("NAM", civicAddress.getNam());
+            if (civicAddress.getPc() != null)
+                jsonObject.addProperty("PC", civicAddress.getPc());
+            if (civicAddress.getBld() != null)
+                jsonObject.addProperty("BLD", civicAddress.getBld());
+            if (civicAddress.getUnit() != null)
+                jsonObject.addProperty("UNIT", civicAddress.getUnit());
+            if (civicAddress.getRoom() != null)
+                jsonObject.addProperty("ROOM", civicAddress.getRoom());
+            if (civicAddress.getSeat() != null)
+                jsonObject.addProperty("SEAT", civicAddress.getSeat());
+            if (civicAddress.getPlc() != null)
+                jsonObject.addProperty("PLC", civicAddress.getPlc());
+            if (civicAddress.getPcn() != null)
+                jsonObject.addProperty("PCN", civicAddress.getPcn());
+            if (civicAddress.getPobox() != null)
+                jsonObject.addProperty("POBOX", civicAddress.getPobox());
+            if (civicAddress.getPn() != null)
+                jsonObject.addProperty("PN=", civicAddress.getPn());
+            if (civicAddress.getMp() != null)
+                jsonObject.addProperty("MP=", civicAddress.getMp());
+            if (civicAddress.getStp() != null)
+                jsonObject.addProperty("STP=", civicAddress.getStp());
+            if (civicAddress.getHnp() != null)
+                jsonObject.addProperty("HNP=", civicAddress.getHnp());
         } else {
             jsonObject.add("civicAddress", JsonNull.INSTANCE);
         }
@@ -1031,57 +1099,169 @@ public class JsonWriter {
 
     protected static void writeBarometricPressure(final Long barometricPressure, final JsonObject jsonObject) {
         if (barometricPressure != null) {
-            jsonObject.addProperty("barometricPressure", barometricPressure);
+            jsonObject.addProperty("measuredPa", barometricPressure);
         } else {
-            jsonObject.add("barometricPressure", JsonNull.INSTANCE);
+            jsonObject.add("measuredPa", JsonNull.INSTANCE);
         }
     }
 
-    protected static void writeGeranPositioningData(final String geranPositioningData, final JsonObject jsonObject) {
-        if (geranPositioningData != null) {
-            jsonObject.addProperty("geranPositioningData", geranPositioningData);
+    protected static void writeAmfInstanceId(final String amfInstanceId, final JsonObject jsonObject) {
+        if (amfInstanceId != null) {
+            jsonObject.addProperty("amfInstanceId", amfInstanceId);
         } else {
-            jsonObject.add("geranPositioningData", JsonNull.INSTANCE);
+            jsonObject.add("amfInstanceId", JsonNull.INSTANCE);
         }
     }
 
-    protected static void writeGeranGanssPositioningData(final String geranGanssPositioningData, final JsonObject jsonObject) {
-        if (geranGanssPositioningData != null) {
-            jsonObject.addProperty("geranGanssPositioningData", geranGanssPositioningData);
+    protected static void writeGeranPositioningMethod(final String geranPositioningMethod, final JsonObject jsonObject) {
+        if (geranPositioningMethod != null) {
+            jsonObject.addProperty("method", geranPositioningMethod);
         } else {
-            jsonObject.add("geranGanssPositioningData", JsonNull.INSTANCE);
+            jsonObject.add("method", JsonNull.INSTANCE);
         }
     }
 
-    protected static void writeUtranPositioningData(final String utranPositioningData, final JsonObject jsonObject) {
-        if (utranPositioningData != null) {
-            jsonObject.addProperty("utranPositioningData", utranPositioningData);
+    protected static void writeGeranPositioningUsage(final Integer geranPositioningUsage, final JsonObject jsonObject) {
+        if (geranPositioningUsage != null) {
+            jsonObject.addProperty("usage", geranPositioningUsage);
         } else {
-            jsonObject.add("utranPositioningData", JsonNull.INSTANCE);
+            jsonObject.add("usage", JsonNull.INSTANCE);
         }
     }
 
-    protected static void writeUtranGanssPositioningData(final String utranGanssPositioningData, final JsonObject jsonObject) {
-        if (utranGanssPositioningData != null) {
-            jsonObject.addProperty("utranGanssPositioningData", utranGanssPositioningData);
+    protected static void writeGeranGanssPositioningMethod(final String geranGanssPositioningMethod, final JsonObject jsonObject) {
+        if (geranGanssPositioningMethod != null) {
+            jsonObject.addProperty("method", geranGanssPositioningMethod);
         } else {
-            jsonObject.add("utranGanssPositioningData", JsonNull.INSTANCE);
+            jsonObject.add("method", JsonNull.INSTANCE);
         }
     }
 
-    protected static void writeUtranAdditionalPositioningData(final String utranAdditionalPositioningData, final JsonObject jsonObject) {
-        if (utranAdditionalPositioningData != null) {
-            jsonObject.addProperty("utranAdditionalPositioningData", utranAdditionalPositioningData);
+    protected static void writeGeranGanssPositioningGanssId(final String geranGanssPositioningGanssId, final JsonObject jsonObject) {
+        if (geranGanssPositioningGanssId != null) {
+            jsonObject.addProperty("ganssId", geranGanssPositioningGanssId);
         } else {
-            jsonObject.add("utranAdditionalPositioningData", JsonNull.INSTANCE);
+            jsonObject.add("ganssId", JsonNull.INSTANCE);
         }
     }
 
-    protected static void writeEUtranPositioningData(final String eUtranPositioningData, final JsonObject jsonObject) {
-        if (eUtranPositioningData != null) {
-            jsonObject.addProperty("eUtranPositioningData", eUtranPositioningData);
+    protected static void writeGeranGanssPositioningUsage(final Integer geranGanssPositioningUsage, final JsonObject jsonObject) {
+        if (geranGanssPositioningUsage != null) {
+            jsonObject.addProperty("usage", geranGanssPositioningUsage);
         } else {
-            jsonObject.add("eUtranPositioningData", JsonNull.INSTANCE);
+            jsonObject.add("usage", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeUtranPositioningMethod(final String utranPositioningMethod, final JsonObject jsonObject) {
+        if (utranPositioningMethod != null) {
+            jsonObject.addProperty("method", utranPositioningMethod);
+        } else {
+            jsonObject.add("method", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeUtranPositioningUsage(final Integer utranPositioningUsage, final JsonObject jsonObject) {
+        if (utranPositioningUsage != null) {
+            jsonObject.addProperty("usage", utranPositioningUsage);
+        } else {
+            jsonObject.add("usage", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeUtranGanssPositioningMethod(final String utranGanssPositioningMethod, final JsonObject jsonObject) {
+        if (utranGanssPositioningMethod != null) {
+            jsonObject.addProperty("method", utranGanssPositioningMethod);
+        } else {
+            jsonObject.add("method", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeUtranGanssPositioningGanssId(final String utranGanssPositioningGanssId, final JsonObject jsonObject) {
+        if (utranGanssPositioningGanssId != null) {
+            jsonObject.addProperty("ganssId", utranGanssPositioningGanssId);
+        } else {
+            jsonObject.add("ganssId", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeUtranGanssPositioningUsage(final Integer utranGanssPositioningUsage, final JsonObject jsonObject) {
+        if (utranGanssPositioningUsage != null) {
+            jsonObject.addProperty("usage", utranGanssPositioningUsage);
+        } else {
+            jsonObject.add("usage", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeUtranAddPositioningMethod(final String utranAddPositioningMethod, final JsonObject jsonObject) {
+        if (utranAddPositioningMethod != null) {
+            jsonObject.addProperty("method", utranAddPositioningMethod);
+        } else {
+            jsonObject.add("method", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeUtranAddPositioningPosId(final String utranAddPositioningId, final JsonObject jsonObject) {
+        if (utranAddPositioningId != null) {
+            jsonObject.addProperty("posId", utranAddPositioningId);
+        } else {
+            jsonObject.add("posId", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeUtranAddPositioningUsage(final Integer utranAddPosUsage, final JsonObject jsonObject) {
+        if (utranAddPosUsage != null) {
+            jsonObject.addProperty("usage", utranAddPosUsage);
+        } else {
+            jsonObject.add("usage", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeEUtranPositioningMethod(final String eutranPositioningMethod, final JsonObject jsonObject) {
+        if (eutranPositioningMethod != null) {
+            jsonObject.addProperty("method", eutranPositioningMethod);
+        } else {
+            jsonObject.add("method", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeEUtranPositioningUsage(final Integer eutranPositioningUsage, final JsonObject jsonObject) {
+        if (eutranPositioningUsage != null) {
+            jsonObject.addProperty("usage", eutranPositioningUsage);
+        } else {
+            jsonObject.add("usage", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeEUtranGnssPositioningMethod(final String eutranGnssPositioningMethod, final JsonObject jsonObject) {
+        if (eutranGnssPositioningMethod != null) {
+            jsonObject.addProperty("method", eutranGnssPositioningMethod);
+        } else {
+            jsonObject.add("method", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeEUtranGnssPositioningGnssId(final String eutranGnssPositioningGanssId, final JsonObject jsonObject) {
+        if (eutranGnssPositioningGanssId != null) {
+            jsonObject.addProperty("ganssId", eutranGnssPositioningGanssId);
+        } else {
+            jsonObject.add("ganssId", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeEUtranGnssPositioningUsage(final Integer eutranGnssPositioningUsage, final JsonObject jsonObject) {
+        if (eutranGnssPositioningUsage != null) {
+            jsonObject.addProperty("usage", eutranGnssPositioningUsage);
+        } else {
+            jsonObject.add("usage", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeEUtranAddPositioningMethod(final String eutranAddPositioningMethod, final JsonObject jsonObject) {
+        if (eutranAddPositioningMethod != null) {
+            jsonObject.addProperty("method", eutranAddPositioningMethod);
+        } else {
+            jsonObject.add("method", JsonNull.INSTANCE);
         }
     }
 
@@ -1243,13 +1423,18 @@ public class JsonWriter {
                     lcsEvent = "EMERGENCY_CALL_RELEASE";
                     break;
                 case 2:
-                    lcsEvent = "MO_LOCATION_REPORT";
+                    lcsEvent = "MO_LR";
                     break;
                 case 3:
                     lcsEvent = "DEFERRED_MT_LR_RESPONSE";
                     break;
+                case 4:
+                    lcsEvent = "DEFERRED_MO_LR_TTTP_INITIATION";
+                    break;
+                case 5:
+                    lcsEvent = "EMERGENCY_CALL_HANDOVER";
+                    break;
                 default:
-                    lcsEvent = null;
                     break;
             }
         }
@@ -1325,7 +1510,7 @@ public class JsonWriter {
     protected static void writeDeferredLocationType(final Long deferredLocationTypeValue, final JsonObject jsonObject) {
         String deferredLocationType = null;
         if (deferredLocationTypeValue != null) {
-            Integer deferredLocationTypeCode = (int) (long) deferredLocationTypeValue;
+            int deferredLocationTypeCode = (int) (long) deferredLocationTypeValue;
             switch (deferredLocationTypeCode) {
                 case 0:
                     deferredLocationType = "UE-AVAILABLE";
@@ -1352,7 +1537,6 @@ public class JsonWriter {
                     deferredLocationType = "MAXIMUM_INTERVAL_EXPIRATION";
                     break;
                 default:
-                    deferredLocationType = null;
                     break;
             }
         }
@@ -1370,9 +1554,6 @@ public class JsonWriter {
                 case 0:
                     terminationCause = "NORMAL";
                     break;
-                case 1:
-                    terminationCause = "ERROR_UNDEFINED";
-                    break;
                 case 2:
                     terminationCause = "INTERNAL_TIMEOUT";
                     break;
@@ -1398,7 +1579,7 @@ public class JsonWriter {
                     terminationCause = "NETWORK_TERMINATION";
                     break;
                 default:
-                    terminationCause = null;
+                    terminationCause = "ERROR_UNDEFINED"; // Any unrecognized value of shall be treated the same as value 1 ("Error Undefined").
                     break;
             }
         }
@@ -1412,13 +1593,10 @@ public class JsonWriter {
     protected static void writeLRRTerminationCause(final Long terminationCauseValue, final JsonObject jsonObject) {
         String terminationCause = null;
         if (terminationCauseValue != null) {
-            Integer terminationCauseCode = (int) (long) terminationCauseValue;
+            int terminationCauseCode = (int) (long) terminationCauseValue;
             switch (terminationCauseCode) {
                 case 0:
                     terminationCause = "NORMAL";
-                    break;
-                case 1:
-                    terminationCause = "ERROR_UNDEFINED";
                     break;
                 case 2:
                     terminationCause = "INTERNAL_TIMEOUT";
@@ -1445,7 +1623,7 @@ public class JsonWriter {
                     terminationCause = "NETWORK_TERMINATION";
                     break;
                 default:
-                    terminationCause = null;
+                    terminationCause = "ERROR_UNDEFINED"; // Any unrecognized value of shall be treated the same as value 1 ("Error Undefined").
                     break;
             }
         }
@@ -1460,11 +1638,11 @@ public class JsonWriter {
                                                         final Boolean r6, final Boolean r7, final JsonObject jsonObject) {
         if (supportedLCSCapabilitySets != null) {
             if (r98_99 || r4 || r5 || r6 || r7) {
-                jsonObject.addProperty("RELEASE98_99", r98_99);
-                jsonObject.addProperty("RELEASE4", r4);
-                jsonObject.addProperty("RELEASE5", r5);
-                jsonObject.addProperty("RELEASE6", r6);
-                jsonObject.addProperty("RELEASE7", r7);
+                jsonObject.addProperty("release98_99", r98_99);
+                jsonObject.addProperty("release4", r4);
+                jsonObject.addProperty("release5", r5);
+                jsonObject.addProperty("release6", r6);
+                jsonObject.addProperty("release7", r7);
             } else {
                 jsonObject.add("lcsCapabilitySets", JsonNull.INSTANCE);
             }
@@ -1477,11 +1655,11 @@ public class JsonWriter {
                                                          final Boolean r7, final JsonObject jsonObject) {
         if (addSupportedLCSCapabilitySets != null) {
             if (r98_99 || r4 || r5 || r6 || r7) {
-                jsonObject.addProperty("RELEASE98_99", r98_99);
-                jsonObject.addProperty("RELEASE4", r4);
-                jsonObject.addProperty("RELEASE5", r5);
-                jsonObject.addProperty("RELEASE6", r6);
-                jsonObject.addProperty("RELEASE7", r7);
+                jsonObject.addProperty("release98_99", r98_99);
+                jsonObject.addProperty("release4", r4);
+                jsonObject.addProperty("release5", r5);
+                jsonObject.addProperty("release6", r6);
+                jsonObject.addProperty("release7", r7);
             } else {
                 jsonObject.add("additionalLCSCapabilitySets", JsonNull.INSTANCE);
             }
@@ -1494,25 +1672,24 @@ public class JsonWriter {
     protected static void writeLCSCapabilitySets(final Long lcsCapabilitySetsCode, final JsonObject jsonObject) {
         String lcsCapabilitySets = null;
         if (lcsCapabilitySetsCode != null) {
-            Integer lcsCapabilitySetsValue = (int) (long) lcsCapabilitySetsCode;
+            int lcsCapabilitySetsValue = (int) (long) lcsCapabilitySetsCode;
             switch (lcsCapabilitySetsValue) {
                 case 0:
-                    lcsCapabilitySets = "RELEASE98_99";
+                    lcsCapabilitySets = "release98_99";
                     break;
                 case 1:
-                    lcsCapabilitySets = "RELEASE4";
+                    lcsCapabilitySets = "release4";
                     break;
                 case 2:
-                    lcsCapabilitySets = "RELEASE5";
+                    lcsCapabilitySets = "release5";
                     break;
                 case 3:
-                    lcsCapabilitySets = "RELEASE6";
+                    lcsCapabilitySets = "release6";
                     break;
                 case 4:
-                    lcsCapabilitySets = "RELEASE7";
+                    lcsCapabilitySets = "release7";
                     break;
                 default:
-                    lcsCapabilitySets = null;
                     break;
             }
         }
@@ -1548,8 +1725,10 @@ public class JsonWriter {
                 case 6:
                     locationEvent = "DELAYED_LOCATION_REPORTING";
                     break;
+                case 7:
+                    locationEvent = "HANDOVER_TO_5GC";
+                    break;
                 default:
-                    locationEvent = null;
                     break;
             }
         }
@@ -1571,7 +1750,6 @@ public class JsonWriter {
                     lcsQoSClass = "BEST_EFFORT";
                     break;
                 default:
-                    lcsQoSClass = null;
                     break;
             }
         }
@@ -1593,7 +1771,6 @@ public class JsonWriter {
                     pseudonymIndicator = "PSEUDONYM_REQUESTED";
                     break;
                 default:
-                    pseudonymIndicator = null;
                     break;
             }
         }
@@ -1625,6 +1802,62 @@ public class JsonWriter {
             jsonObject.addProperty("timeZone", timeZone);
         } else {
             jsonObject.add("timeZone", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeTime(final String time, final JsonObject jsonObject) {
+        if (time != null) {
+            jsonObject.addProperty("time", time);
+        } else {
+            jsonObject.add("time", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeYear(final Integer year, final JsonObject jsonObject) {
+        if (year != null) {
+            jsonObject.addProperty("year", year);
+        } else {
+            jsonObject.add("year", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeMonth(final Integer month, final JsonObject jsonObject) {
+        if (month != null) {
+            jsonObject.addProperty("month", month);
+        } else {
+            jsonObject.add("month", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeDay(final Integer day, final JsonObject jsonObject) {
+        if (day != null) {
+            jsonObject.addProperty("day", day);
+        } else {
+            jsonObject.add("day", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeHour(final Integer hour, final JsonObject jsonObject) {
+        if (hour != null) {
+            jsonObject.addProperty("hour", hour);
+        } else {
+            jsonObject.add("hour", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeMinute(final Integer minute, final JsonObject jsonObject) {
+        if (minute != null) {
+            jsonObject.addProperty("minute", minute);
+        } else {
+            jsonObject.add("minute", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeSecond(final Integer second, final JsonObject jsonObject) {
+        if (second != null) {
+            jsonObject.addProperty("second", second);
+        } else {
+            jsonObject.add("minute", JsonNull.INSTANCE);
         }
     }
 
@@ -1699,7 +1932,6 @@ public class JsonWriter {
                     ratType = "EHRPD";
                     break;
                 default:
-                    ratType = null;
                     break;
             }
         }
@@ -1707,6 +1939,38 @@ public class JsonWriter {
             jsonObject.addProperty("ratType", ratType);
         } else {
             jsonObject.add("ratType", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeLastRatType(final String lastRatType, final JsonObject jsonObject) {
+        if (lastRatType != null) {
+            jsonObject.addProperty("ratType", lastRatType);
+        } else {
+            jsonObject.add("ratType", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeNaESRKRequest(final Boolean naESRKRequest, final JsonObject jsonObject) {
+        if (naESRKRequest != null) {
+            jsonObject.addProperty("naESRKRequest", naESRKRequest);
+        } else {
+            jsonObject.add("naESRKRequest", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeNaESRD(final String naESRD, final JsonObject jsonObject) {
+        if (naESRD != null) {
+            jsonObject.addProperty("naESRD", naESRD);
+        } else {
+            jsonObject.add("naESRD", JsonNull.INSTANCE);
+        }
+    }
+
+    protected static void writeNaESRK(final String naESRK, final JsonObject jsonObject) {
+        if (naESRK != null) {
+            jsonObject.addProperty("naESRK", naESRK);
+        } else {
+            jsonObject.add("naESRK", JsonNull.INSTANCE);
         }
     }
 

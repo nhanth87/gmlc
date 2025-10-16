@@ -20,7 +20,7 @@ import java.util.Arrays;
 
 public class ShUdaAvpValues implements Serializable {
 
-  private static final long serialVersionUID = 3278600363572091996L;
+  private static final long serialVersionUID =1L;
 
   private static final int DIAMETER_Sh_VENDOR_ID = 10415;
 

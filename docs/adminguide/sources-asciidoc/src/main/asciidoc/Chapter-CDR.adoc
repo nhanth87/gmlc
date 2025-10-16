@@ -7,7 +7,8 @@
 
 The CDR generated in the text file contains the parameters shown below, separated by the pipe ("|") character:
 ----
-TIMESTAMPID
+TIMESTAMP
+ID
 USER
 RECORD STATUS
 STATUS CODE
@@ -28,38 +29,29 @@ ISDN ADDRESS NATURE
 ISDN NUMBERING PLAN INDICATOR
 ISDN ADDRESS DIGITS
 DIAMETER SESSION ID
-DIAMETER OPERATION COMMAND HOST
-DIAMETER COMMAND ORIGIN REALM
-DIAMETER COMMAND DESTINATION HOST
-DIAMETER COMMAND DESTINATION REALM
+DIAMETER ORIGIN HOST
+DIAMETER ORIGIN REALM
+DIAMETER DESTINATION HOST
+DIAMETER DESTINATION REALM
 SLP SOCKET ADDRESS
 SLP SOCKET PORT
 SET SOCKET ADDRESS
 SET SOCKET PORT
-LOCATION NUMBER ODD FLAG
-LOCATION NUMBER NAI
-LOCATION NUMBER INNI
-LOCATION NUMBER NPI
-LOCATION NUMBER APRI
-LOCATION NUMBER SI
-LOCATION NUMBER ADDRESS
+MSISDN ADDRESS
+IMSI
+IMEI
+LMSI
 CGI-SAI-LAI MCC
 CGI-SAI-LAI MNC
 CGI-SAI-LAI LAC
-CGI-SAI CI
-VLR NUMBER
-MSC NUMBER
-AGE OF LOCATION INFORMATION
-GEOGRAPHICAL INFO TYPE OF SHAPE
-GEOGRAPHICAL INFO LATITUDE
-GEOGRAPHICAL INFO LONGITUDE
-GEOGRAPHICAL INFO UNCERTAINTY
-GEODETIC INFO TYPE OF SHAPE
-GEODETIC INFO LATITUDE
-GEODETIC INFO LONGITUDE
-GEODETIC INFO UNCERTAINTY
-GEODETIC INFO CONFIDENCE
-GEODETIC INFO SCREENING AND PRESENTATION INDICATORS
+CGI-SAI-LAI CI
+SAI PRESENT
+RAI MCC
+RAI MNC
+RAI LAC
+RAI RAC
+LSA ID
+LSA ID PLMN SIGNIFICANT
 ECGI MCC
 ECGI MNC
 ECGI ECI
@@ -69,173 +61,33 @@ ESMLC CELL INFO PORTION ID
 TAI MCC
 TAI MNC
 TAI TAC
-EPS LOCATION INFO GEOGRAPHICAL TYPE OF SHAPE
-EPS LOCATION INFO GEOGRAPHICAL LATITUDE
-EPS LOCATION INFO GEOGRAPHICAL LONGITUDE
-EPS LOCATION INFO GEOGRAPHICAL UNCERTAINTY
-EPS LOCATION INFO GEODETIC TYPE OF SHAPE
-EPS LOCATION INFO GEODETIC LATITUDE
-EPS LOCATION INFO GEODETIC LONGITUDE
-EPS LOCATION INFO GEODETIC UNCERTAINTY
-EPS LOCATION INFO GEODETIC CONFIDENCE
-EPS LOCATION INFO GEODETIC SCREENING AND PRESENTATION INDICATORS
-EPS LOCATION INFO MME NAME
-PS CGI-SAI-LAI MCC
-PS CGI-SAI-LAI MNC
-PS CGI-SAI-LAI LAC
-PS CGI-SAI CI
-RAI MCC
-RAI MNC
-RAI LAC
-RAI RAC
-PS CGI-SAI-LAI MCC
-PS CGI-SAI-LAI MNC
-PS CGI-SAI-LAI LAC
-PS CGI-SAI CI
-RAI MCC
-RAI MNC
-RAI LAC
-RAI RAC
-PS GEOGRAPHICAL INFO TYPE OF SHAPE
-PS GEOGRAPHICAL INFO LATITUDE
-PS GEOGRAPHICAL INFO LONGITUDE
-PS GEOGRAPHICAL INFO UNCERTAINTY
-PS GEODETIC INFO TYPE OF SHAPE
-PS GEODETIC INFO LATITUDE
-PS GEODETIC INFO LONGITUDE
-PS GEODETIC INFO UNCERTAINTY
-PS GEODETIC INFO CONFIDENCE
-PR GEODETIC INFO SCREENING AND PRESENTATION INDICATORS
-LSA ID
-LSA ID PLMN SIGNIFICANT
-SGSN NUMBER
-SAI PRESENT
-SUBSCRIBER STATE
-NOT REACHABLE REASON STATE
-MS CLASSMARK 2
-GPRS MS CLASS MS RADIO ACCESS CAPABILITY
-GPRS MS CLASS MS NETWORK CAPABILITY
-MNP NUMBER PORTABILITY STATUS
-MNP IMSI
-MNP MSISDN
-MNP ROUTEING NUMBER
 5GS NRCGI MCC
 5GS NRCGI MNC
 5GS NRCGI NCI
-5GS AMF ADDRESS
-5GS SMSF ADDRESS
-VISITED PLMNID MCC
-VISITED PLMNID MNC
-LOCAL TIME ZONE
-DAYLIGHT SAVING TIME
-RAT TYPE
-CURRENT LOCATION RETRIEVED
-IMSI
-LMSI
+5GS NR-TAI MCC
+5GS NR-TAI MNC
+5GS NR-TAI TAC
 NETWORK NODE NUMBER
-MAP LSM ADDITIONAL NUMBER (MSC)
-MAP LSM ADDITIONAL NUMBER (SGSN)
-MME NAME
-MME REALM
+GPRS NODE INDICATOR
+VLR NUMBER
+SGSN NUMBER
 SGSN NAME
 SGSN REALM
+MME NAME
+MME REALM
+MSC NUMBER
+3GPP AAA Server Name
+LCS Capabilities Sets
 H-GMLC ADDRESS TYPE
 H-GMLC ADDRESS DATA
 V-GMLC ADDRESS TYPE
 V-GMLC ADDRESS DATA
 PPR ADDRESS TYPE
 PPR ADDRESS DATA
-LOCATION ESTIMATE TYPE OF SHAPE
-LOCATION ESTIMATE LATITUDE
-LOCATION ESTIMATE LONGITUDE
-LOCATION ESTIMATE UNCERTAINTY
-LOCATION ESTIMATE UNCERTAINTY SEMI MAJOR AXIS
-LOCATION ESTIMATE UNCERTAINTY SEMI MINOR AXIS
-LOCATION ESTIMATE CONFIDENCE
-LOCATION ESTIMATE ANGLE OF MAJOR AXIS
-LOCATION ESTIMATE ALTITUDE
-LOCATION ESTIMATE UNCERTAINTY ALTITUDE
-LOCATION ESTIMATE INNER RADIUS
-LOCATION ESTIMATE UNCERTAINTY RADIUS
-LOCATION ESTIMATE OFFSET ANGLE
-LOCATION ESTIMATE INCLUDED ANGLE
-ADDITIONAL LOCATION ESTIMATE TYPE OF SHAPE
-ADDITIONAL LOCATION ESTIMATE POLYGON NUMBER OF POINTS
-ADDITIONAL LOCATION POLYGON LATITUDE POINT 1
-ADDITIONAL LOCATION POLYGON LONGITUDE POINT 1
-ADDITIONAL LOCATION POLYGON LATITUDE POINT 2
-ADDITIONAL LOCATION POLYGON LONGITUDE POINT 2
-ADDITIONAL LOCATION POLYGON LATITUDE POINT 3
-ADDITIONAL LOCATION POLYGON LONGITUDE POINT 3
-ADDITIONAL LOCATION POLYGON LATITUDE POINT 4
-ADDITIONAL LOCATION POLYGON LONGITUDE POINT 4
-ADDITIONAL LOCATION POLYGON LATITUDE POINT 5
-ADDITIONAL LOCATION POLYGON LONGITUDE POINT 5
-ADDITIONAL LOCATION POLYGON LATITUDE POINT 6
-ADDITIONAL LOCATION POLYGON LONGITUDE POINT 6
-ADDITIONAL LOCATION POLYGON LATITUDE POINT 7
-ADDITIONAL LOCATION POLYGON LONGITUDE POINT 7
-ADDITIONAL LOCATION POLYGON LATITUDE POINT 8
-ADDITIONAL LOCATION POLYGON LONGITUDE POINT 8
-ADDITIONAL LOCATION POLYGON LATITUDE POINT 9
-ADDITIONAL LOCATION POLYGON LONGITUDE POINT 9
-ADDITIONAL LOCATION POLYGON LATITUDE POINT 10
-ADDITIONAL LOCATION POLYGON LONGITUDE POINT 10
-ADDITIONAL LOCATION POLYGON LATITUDE POINT 11
-ADDITIONAL LOCATION POLYGON LONGITUDE POINT 11
-ADDITIONAL LOCATION POLYGON LATITUDE POINT 12
-ADDITIONAL LOCATION POLYGON LONGITUDE POINT 12
-ADDITIONAL LOCATION POLYGON LATITUDE POINT 13
-ADDITIONAL LOCATION POLYGON LONGITUDE POINT 13
-ADDITIONAL LOCATION POLYGON LATITUDE POINT 14
-ADDITIONAL LOCATION POLYGON LONGITUDE POINT 14
-ADDITIONAL LOCATION POLYGON LATITUDE POINT 15
-ADDITIONAL LOCATION POLYGON LONGITUDE POINT 15
-POLYGON CENTROID LATITUDE
-POLYGON CENTROID LONGITUDE
-ADDITIONAL LOCATION ESTIMATE LATITUDE
-ADDITIONAL LOCATION ESTIMATE LONGITUDE
-ADDITIONAL LOCATION ESTIMATE UNCERTAINTY
-ADDITIONAL LOCATION ESTIMATE UNCERTAINTY SEMI MAJOR AXIS
-ADDITIONAL LOCATION ESTIMATE UNCERTAINTY SEMI MINOR AXIS
-ADDITIONAL LOCATION ESTIMATE ANGLE OF MAJOR AXIS
-ADDITIONAL LOCATION ESTIMATE CONFIDENCE
-ADDITIONAL LOCATION ESTIMATE ALTITUDE
-ADDITIONAL LOCATION ESTIMATE UNCERTAINTY ALTITUDE
-ADDITIONAL LOCATION ESTIMATE INNER RADIUS
-ADDITIONAL LOCATION ESTIMATE UNCERTAINTY RADIUS
-ADDITIONAL LOCATION ESTIMATE OFFSET ANGLE
-ADDITIONAL LOCATION ESTIMATE INCLUDED ANGLE
-AGE OF LOCATION ESTIMATE
-GERAN POSITIONING DATA
-GERAN GANSS POSITIONING DATA
-UTRAN POSITIONING DATA
-UTRAN GANSS POSITIONING DATA
-UTRAN ADDITIONAL POSITIONING DATA
-E-UTRAN POSITIONING DATA
-DEFERRED MT LR RESPONSE INDICATOR
-LCS CGI MCC
-LCS CGI MNC
-LCS CGI LAC
-LCS CGI CI
-ECGI MCC
-ECGI MNC
-ECGI ECI
-ECGI ENBID
-ECGI CI
-ESMLC CELL INFO PORTION ID
-PSEUDONYM INDICATOR
-ACCURACY FULFILLMENT INDICATOR
-SEQUENCE NUMBER
-HORIZONTAL VELOCITY ESTIMATE
-VELOCITY ESTIMATE BEARING
-VERTICAL VELOCITY ESTIMATE
-VELOCITY ESTIMATE HORIZONTAL UNCERTAINTY
-VELOCITY ESTIMATE VERTICAL UNCERTAINTY
-VELOCITY ESTIMATE TYPE
-SERVING NODE ADDRESS MSC NUMBER
-SERVING NODE ADDRESS SGSN NUMBER
-SERVING NODE ADDRESS MME NUMBER
+5GS AMF ADDRESS
+5GS SMSF ADDRESS
+VISITED PLMNID MCC
+VISITED PLMNID MNC
 LCS CLIENT TYPE
 LCS CLIENT NAME
 LCS CLIENT DCS
@@ -247,20 +99,82 @@ LCS CLIENT INT ID
 LCS CLIENT REQUESTOR DCS
 LCS CLIENT REQUESTOR FI
 LCS CLIENT REQUESTOR STRING
+PSEUDONYM INDICATOR
+TYPE OF SHAPE
+LATITUDE
+LONGITUDE
+UNCERTAINTY
+CONFIDENCE
+GEODETIC INFO SCREENING AND PRESENTATION INDICATORS
+UNCERTAINTY SEMI MAJOR AXIS
+UNCERTAINTY SEMI MINOR AXIS
+ANGLE OF MAJOR AXIS
+ALTITUDE
+UNCERTAINTY ALTITUDE
+INNER RADIUS
+UNCERTAINTY RADIUS
+OFFSET ANGLE
+INCLUDED ANGLE
+POLYGON NUMBER OF POINTS
+POLYGON LATITUDE POINT 1
+POLYGON LONGITUDE POINT 1
+POLYGON LATITUDE POINT 2
+POLYGON LONGITUDE POINT 2
+POLYGON LATITUDE POINT 3
+POLYGON LONGITUDE POINT 3
+POLYGON LATITUDE POINT 4
+POLYGON LONGITUDE POINT 4
+POLYGON LATITUDE POINT 5
+POLYGON LONGITUDE POINT 5
+POLYGON LATITUDE POINT 6
+POLYGON LONGITUDE POINT 6
+POLYGON LATITUDE POINT 7
+POLYGON LONGITUDE POINT 7
+POLYGON LATITUDE POINT 8
+POLYGON LONGITUDE POINT 8
+POLYGON LATITUDE POINT 9
+POLYGON LONGITUDE POINT 9
+POLYGON LATITUDE POINT 10
+POLYGON LONGITUDE POINT 10
+POLYGON LATITUDE POINT 11
+POLYGON LONGITUDE POINT 11
+POLYGON LATITUDE POINT 12
+POLYGON LONGITUDE POINT 12
+POLYGON LATITUDE POINT 13
+POLYGON LONGITUDE POINT 13
+POLYGON LATITUDE POINT 14
+POLYGON LONGITUDE POINT 14
+POLYGON LATITUDE POINT 15
+POLYGON LONGITUDE POINT 15
+POLYGON CENTROID LATITUDE
+POLYGON CENTROID LONGITUDE
+AGE OF LOCATION INFORMATION
+CURRENT LOCATION RETRIEVED
 LCS QoS HORIZONTAL ACCURACY
 LCS QoS VERTICAL ACCURACY
 LCS QoS VERTICAL COORDINATE REQUESTED
 LCS QoS RESPONSE TIME
 LCS QoS CLASS
-CLIENT REFERENCE NUMBER
-LCS REFERENCE NUMBER
+ACCURACY FULFILLMENT INDICATOR
+GERAN POSITIONING DATA
+GERAN GANSS POSITIONING DATA
+UTRAN POSITIONING DATA
+UTRAN GANSS POSITIONING DATA
+UTRAN ADDITIONAL POSITIONING DATA
+E-UTRAN POSITIONING DATA
+HORIZONTAL VELOCITY ESTIMATE
+VELOCITY ESTIMATE BEARING
+VERTICAL VELOCITY ESTIMATE
+VELOCITY ESTIMATE HORIZONTAL UNCERTAINTY
+VELOCITY ESTIMATE VERTICAL UNCERTAINTY
+VELOCITY ESTIMATE TYPE
 LCS SERVICE TYPE ID
-BAROMETRIC PRESSURE
-CIVIC ADDRESS
+MO-LR SHORT-CIRCUIT INDICATOR
+REPORTING PLMN LIST
+CLIENT REFERENCE NUMBER
 LCS EVENT
-MSISDN ADDRESS
-IMEI
 LOCATION EVENT TYPE
+DEFERRED MT LR RESPONSE INDICATOR
 DEFERRED MT-LR DATA NETWORK NODE NUMBER
 DEFERRED MT-LR DATA GPRS NODE IND
 DEFERRED MT-LR DATA ADDITIONAL NUMBER
@@ -277,12 +191,42 @@ DEFERRED MT-LR DATA ADD LCS CAPS R4
 DEFERRED MT-LR DATA ADD LCS CAPS R5
 DEFERRED MT-LR DATA ADD LCS CAPS R6
 DEFERRED MT-LR DATA ADD LCS CAPS R7
-TERMINATION CAUSE
-REPORTING AMOUNT
-REPORTING INTERVAL
-MO-LR SHORT-CIRCUIT INDICATOR
-REPORTING PLMN LIST
-1xRTT-RCID
+DEFERRED MT-LR DATA TERMINATION CAUSE
+PERIODIC LDR INFO REPORTING AMOUNT
+PERIODIC LDR INFO REPORTING INTERVAL
+LCS REFERENCE NUMBER
+SEQUENCE NUMBER
+BAROMETRIC PRESSURE
+CIVIC ADDRESS
+NA-ESRK Request
+NA-ESRD
+NA-ESRK
+AMF INSTANCE ID
+SLh RIA FLAGS
+SLg PLR FLAGS
+SLg PLA FLAGS
+SLg LRR FLAGS
+SLg LRA FLAGS
+SUBSCRIBER STATE
+NOT REACHABLE REASON STATE
+LOCAL TIME ZONE
+DAYLIGHT SAVING TIME
+RAT TYPE
+LOCATION NUMBER ODD FLAG
+LOCATION NUMBER NAI
+LOCATION NUMBER INNI
+LOCATION NUMBER NPI
+LOCATION NUMBER APRI
+LOCATION NUMBER SI
+LOCATION NUMBER ADDRESS
+MNP NUMBER PORTABILITY STATUS
+MNP IMSI
+MNP MSISDN
+MNP ROUTEING NUMBER
+
+MS CLASSMARK 2
+GPRS MS CLASS MS RADIO ACCESS CAPABILITY
+GPRS MS CLASS MS NETWORK CAPABILITY
 ----
 
 
@@ -361,16 +305,16 @@ The target MSISDN digits.
 .DIAMETER SESSION ID
 Session ID of the Diameter command that created this CDR.
 
-.DIAMETER OPERATION COMMAND HOST
+.DIAMETER ORIGIN HOST
 Diameter host name that originated the Diameter command (corresponds to a core network entity, i.e. HSS, MME, SGSN, DSC, DRA, etc.)
 
-.DIAMETER COMMAND ORIGIN REALM
+.DIAMETER ORIGIN REALM
 Realm of the host that originated the Diameter command (corresponds to a core network entity, i.e. HSS, MME, SGSN, DSC, DRA, etc.)
 
-.DIAMETER COMMAND DESTINATION HOST
+.DIAMETER DESTINATION HOST
 Diameter host name to where the Diameter command has been conveyed (corresponds to the GMLC host name).
 
-.DIAMETER COMMAND DESTINATION REALM
+.DIAMETER DESTINATION REALM
 Realm of the host to where the Diameter command has been conveyed (corresponds to the GMLC host realm).
 
 .SLP SOCKET ADDRESS
@@ -385,33 +329,19 @@ Internet address of the TLS socket at the SUPL Enabled Terminal (SET) through wh
 .SET SOCKET PORT
 Port number of the TLS socket at the SUPL Enabled Terminal (SET) through which the connection has been established to send and receive SUPL requests and responses.
 
-.LOCATION NUMBER ODD FLAG
-Location Number `odd flag` (ITU-T Q.763) retrieved via SS7 MAP ATI or PSI or Diameter Sh UDR/UDA/UDA. Possible values are: `true` (`ODD`) or `false` (EVEN).
 
-.LOCATION NUMBER NAI
-Location Number `Nature of Address Indicator` (ITU-T Q.763).
-Possible values are: `0` (`spare`), `1` (`reserved for subscriber number -national use-`), `2` (`reserved for unknown -national use-`),
-`3` (`national significant number -national use-`), `4` (`international number`), `5-111` (`spare`), `112-126` (`reserved for national use`), `127` (`spare`).
+.MSISDN ADDRESS
+ITU-T E.164 address digits of the target subscriber.
 
-.LOCATION NUMBER INNI
-Location Number `International Network Number Indicator` (ITU-T Q.763).
-Possible values are: `0` (`false - routing to internal number allowed`), `1` (`true - routing to internal number not allowed`).
+.IMSI
+`International Mobile Subscriber Identity`. ITU-T E.212 value of the target subscriber.
 
-.LOCATION NUMBER NPI
-Location Number `Numbering Plan Indicator` (ITU-T Q.763).
-Possible values are: `0` (`spare`), `1` (`ISDN (telephony) numbering plan as per ITU-T Recommendation E.164`), `2` (`spare`), `3` (`Data numbering plan as per ITU-T Recommendation X.121`), `4` (`Telex numbering plan as per ITU-T Recommendation F.69 -national use-`),
-`5` (`private numbering plan`), `6` (`reserved for national use`), `7` (`spare`).
+.IMEI
+`International Mobile Equipment Identity` as for 3GPP TS 22.016/23.003.
 
-.LOCATION NUMBER APRI
-Location Number `Address Presentation Restricted Indicator` (ITU-T Q.763).
-Possible values are: `0` (`presentation allowed`), `1` (`presentation restricted`), `2` (`address not available -national use-`), `3` (`spare`).
-
-.LOCATION NUMBER SI
-Location Number `Screening Indicator` (ITU-T Q.763).
-Possible values are: `0` (`reserved`), `1` (`user provided, verified and passed`), `2` (`network`), `3` (`network provided`).
-
-.LOCATION NUMBER ADDRESS
-Location Number `address digits` (ITU-T Q.763).
+.LMSI
+`Local Mobile Station Identity` (LMSI) that could be retrieved by SS7 MAP ATI and SS7 MAP PSI.
+LMSI is a temporary identification that can be assigned to a visiting MS or UE. The LMSI is allocated by the VLR upon location updates and sent to the HLR along with the IMSI.
 
 .CGI-SAI-LAI MCC
 `Mobile Country Code` of the Cell Global Identification or Service Area Identification or Location Area Identification retrieved from the CS domain.
@@ -425,51 +355,26 @@ Location Number `address digits` (ITU-T Q.763).
 .CGI-SAI CI
 `Cell Identity` or `Service Area Code` of the Cell Global Identification or Service Area Identification retrieved from the CS domain.
 
-.VLR NUMBER
-ITU-T E.164 number which identifies the VLR (`VLR Global Title address digits`).
+.SAI PRESENT
+Indication if Service Area Identification is present. Possible values are `true` or `false`. In case it is set to `true`, the `CGI-SAI CI` corresponds to the `Service Area Code`.
 
-.MSC NUMBER
-ITU-T E.164 number which identifies the MSC (`MSC Global Title address digits`).
+.RAI MCC
+`Routing Area Identification Mobile Country Code`, retrieved from the PS domain.
 
-.AGE OF LOCATION INFORMATION
-Indication in minutes of how old the gathered location information is.
+.RAI MNC
+`Routing Area Identification Mobile Network Code`, retrieved from the PS domain.
 
-.GEOGRAPHICAL INFO TYPE OF SHAPE
-As described in 3GPP TS 23.032 (Geographical Area Description), it can only be `EllipsoidPointWithUncertaintyCircle` for MAP ATI or MAP PSI.
+.RAI LAC
+`Routing Area Identification Location Area Code`, retrieved from the PS domain.
 
-.GEOGRAPHICAL INFO LATITUDE
-Expressed in the range -90, +90 (as for WGS84 -World Geodetic System 1984-, negative decimal values refer to South degrees of latitude, while positive to North degrees of latitude).
+.RAI RAC
+`Routing Area Identification Routing Area Code`, retrieved from the PS domain.
 
-.GEOGRAPHICAL INFO LONGITUDE
-Expressed in the range -180, +180 (as for WGS84, negative decimal values refer to West degrees of longitude, while positive to East degrees of longitude).
+.LSA ID
+`Localised Service Area ID` retrieved from the PS domain.
 
-.GEOGRAPHICAL INFO UNCERTAINTY
-Method of describing the uncertainty for latitude and longitude indicating a radius, thus the subscriber is located within the circle defined by an ellipsoid and the radius.
-Possible values between 0 and 1800000 meters (1800 Km).
-
-.GEODETIC INFO TYPE OF SHAPE
-As described in 3GPP TS 23.032 (Geographical Area Description), it can only be `EllipsoidPointWithUncertaintyCircle` for MAP ATI or MAP PSI.
-
-.GEODETIC INFO LATITUDE
-Geodetic latitude is determined by the angle between the equatorial plane and the normal to the ellipsoid.
-Expressed in the range -90, +90 (as for WGS84 -World Geodetic System 1984-, negative decimal values refer to South degrees of latitude, while positive to North degrees of latitude).
-
-.GEODETIC INFO LONGITUDE
-Expressed in the range -180, +180 (as for WGS84, negative decimal values refer to West degrees of longitude, while positive to East degrees of longitude).
-
-.GEODETIC INFO UNCERTAINTY
-Method of describing the uncertainty for latitude and longitude indicating a radius, thus the subscriber is located within the circle defined by an ellipsoid and the radius.
-Possible values between 0 and 1800000 meters (1800 Km).
-
-.GEODETIC INFO CONFIDENCE
-The confidence by which the position of a target entity is known to be within the shape description (expressed as a percentage).
-
-.GEODETIC INFO SCREENING AND PRESENTATION INDICATORS
-Indicators `allowed` or `not allowed` geodetic info and if it is `user` or `network provided`.
-
-.EPS LOCATION INFO MME NAME
-String which contains the LTE EPC `MME-Name` in a format consistent with the Network Access Identifier (NAI) specification.
-Retrieved by SS7 MAP ATI or MAP PSI (CS domain) or Diameter Sh UDR/UDA.
+.LSA ID PLMN SIGNIFICANT
+Indicates if LSA ID is PLMN significant number or Universal, retrieved from the PS domain. Possible values are `PLMN` or `Universal`.
 
 .ECGI MCC
 `E-UTRAN (LTE) Cell Global Identity Mobile Country Code`, obtained from the EPS (LTE).
@@ -498,136 +403,6 @@ Retrieved by SS7 MAP ATI or MAP PSI (CS domain) or Diameter Sh UDR/UDA.
 .TAI TAC
 `Tracking Area Identity Tracking Area Code`, obtained from the EPS (LTE).
 
-.EPS LOCATION INFO GEOGRAPHICAL TYPE OF SHAPE
-Same as _GEOGRAPHICAL INFO TYPE OF SHAPE_ but obtained from the EPS (LTE).
-
-.EPS LOCATION INFO GEOGRAPHICAL LATITUDE
-Same as _GEOGRAPHICAL INFO LATITUDE_ but obtained from the EPS (LTE).
-
-.EPS LOCATION INFO GEOGRAPHICAL LONGITUDE
-Same as _GEOGRAPHICAL INFO LONGITUDE_ but obtained from the EPS (LTE).
-
-.EPS LOCATION INFO GEOGRAPHICAL UNCERTAINTY
-Same as _GEOGRAPHICAL INFO UNCERTAINTY_ but obtained from the EPS (LTE).
-
-.EPS LOCATION INFO GEODETIC TYPE OF SHAPE
-Same as _GEOGRAPHICAL GEODETIC TYPE OF SHAPE_ but obtained from the EPS (LTE).
-
-.EPS LOCATION INFO GEODETIC LATITUDE
-Same as _GEODETIC INFO LATITUDE_ but obtained from the EPS (LTE).
-
-.EPS LOCATION INFO GEODETIC LONGITUDE
-Same as _GEODETIC INFO LONGITUDE_ but obtained from the EPS (LTE).
-
-.EPS LOCATION INFO GEODETIC UNCERTAINTY
-Same as _GEODETIC INFO UNCERTAINTY_ but obtained from the EPS (LTE).
-
-.EPS LOCATION INFO GEODETIC CONFIDENCE
-Same as _GEODETIC INFO CONFIDENCE_ but obtained from the EPS (LTE).
-
-.EPS LOCATION INFO GEODETIC SCREENING AND PRESENTATION INDICATORS
-Same as _GEODETIC INFO SCREENING AND PRESENTATION INDICATORS_ but obtained from the EPS (LTE).
-
-.PS CGI-SAI-LAI MCC
-`Mobile Country Code` of the Cell Global Identification or Service Area Identification or Location Area Identification obtained from the PS domain.
-
-.PS CGI-SAI-LAI  MNC
-`Mobile Network Code` of the Cell Global Identification or Service Area Identification or Location Area Identification obtained from the PS domain.
-
-.PS CGI-SAI-LAI  LAC
-`Location Area Code` of the Cell Global Identification or Service Area Identification or Location Area Identification obtained from the PS domain.
-
-.PS CGI-SAI CI
-`Cell Identity` or Service Area Code of the Cell Global Identification or Service Area Identification obtained from the PS domain.
-
-.SGSN NUMBER
-`SGSN Global Title` of the SGSN currently providing service to the target subscriber.
-
-.PS AGE OF LOCATION INFORMATION
-Same as _AGE OF LOCATION INFORMATION_ but from the `PSLocationInformation` retrieved from the PS domain.
-
-.PS GEOGRAPHICAL INFO TYPE OF SHAPE
-Same as _GEOGRAPHICAL INFO TYPE OF SHAPE_ but from the `PSLocationInformation` retrieved from the PS domain.
-
-.PS GEOGRAPHICAL INFO LATITUDE
-Same as _GEOGRAPHICAL INFO LATITUDE_ but from the `PSLocationInformation` retrieved from the PS domain.
-
-.PS GEOGRAPHICAL INFO LONGITUDE
-Same as _GEOGRAPHICAL INFO LONGITUDE_ but from the `PSLocationInformation` retrieved from the PS domain.
-
-.PS GEOGRAPHICAL INFO UNCERTAINTY
-Same as _GEOGRAPHICAL INFO UNCERTAINTY_ but from the `PSLocationInformation` retrieved from the PS domain.
-
-.PS GEODETIC INFO TYPE OF SHAPE
-Same as _GEODETIC INFO TYPE OF SHAPE_ but from the `PSLocationInformation` retrieved from the PS domain.
-
-.PS GEODETIC INFO LATITUDE
-Same as _GEODETIC INFO LATITUDE_ but from the `PSLocationInformation` retrieved from the PS domain.
-
-.PS GEODETIC INFO LONGITUDE
-Same as _GEODETIC INFO LONGITUDE_ but from the `PSLocationInformation` retrieved from the PS domain.
-
-.PS GEODETIC INFO UNCERTAINTY
-Same as _GEODETIC INFO UNCERTAINTY_ but from the `PSLocationInformation` retrieved from the PS domain.
-
-.PS GEODETIC INFO CONFIDENCE
-Same as _GEODETIC INFO CONFIDENCE_ but from the `PSLocationInformation` retrieved from the PS domain.
-
-.PS GEODETIC INFO SCREENING AND PRESENTATION INDICATORS
-Same as _GEODETIC INFO SCREENING AND PRESENTATION INDICATORS_ but from the `PSLocationInformation` retrieved from the PS domain.
-
-.LSA ID
-`Localised Service Area ID` retrieved from the PS domain.
-
-.LSA ID PLMN SIGNIFICANT
-Indicates if LSA ID is PLMN significant number or Universal, retrieved from the PS domain. Possible values are `PLMN` or `Universal`.
-
-.RAI MCC
-`Routing Area Identification Mobile Country Code`, retrieved from the PS domain.
-
-.RAI MNC
-`Routing Area Identification Mobile Network Code`, retrieved from the PS domain.
-
-.RAI LAC
-`Routing Area Identification Location Area Code`, retrieved from the PS domain.
-
-.RAI RAC
-`Routing Area Identification Routing Area Code`, retrieved from the PS domain.
-
-.SAI PRESENT
-Indication if Service Area Identification is present. Possible values are `true` or `false`.
-
-.CURRENT LOCATION RETRIEVED
-Indication if location information retrieved is current or not. Possible values are `true` or `false`.
-
-.SUBSCRIBER STATE
-Indication of whether the subscriber is `assumedIdle` or `camelBusy`, `netDetNotReachable` or `notProvidedFromVLR` (CS domain), or `notProvidedFromSGSNorMME`, `psDetached`, `psAttachedNotReachableForPaging`, `psAttachedReachableForPaging`, `psPDPActiveNotReachableForPaging`, `psPDPActiveReachableForPaging` or `netDetNotReachable` (PS domain).
-
-.NOT REACHABLE REASON STATE
-Whenever _SUBSCRIBER STATE_ is `netDetNotReachable`. Possible values are: `msPurged`, `imsiDetached`, `restrictedArea`, or `notRegistered`.
-
-.MS CLASSMARK 2
-Descriptor of `radio network-related capabilities` of the MS or UE in use by the served subscriber (e.g MT-SMS, voice broadcast or group call services, etc.). Only hexadecimal bytes values are shown for now
-
-.GPRS MS CLASS MS RADIO ACCESS CAPABILITY
-`MS radio access capabilities` (e.g. radio access technologies support) as part of the GRPS MS Class (only hexadecimal bytes values are shown for now).
-
-.GPRS MS CLASS MS NETWORK CAPABILITY
-`MS network capabilities` (e.g. SMS) as part of the GRPS MS Class (only hexadecimal bytes values are shown for now).
-
-.MNP NUMBER PORTABILITY STATUS
-`Mobile Number Portability status` (as part of MNP Info Result retrieved either by SS7 MAP ATI or PSI).
-Possible values are: `0` (`notKnownToBePorted`), `1` (`ownNumberPortedOut`), `2` (`foreignNumberPortedToForeignNetwork`), `4` (`ownNumberNotPortedOut`) and `5` (`foreignNumberPortedIn`).
-
-.MNP MSISDN
-`Mobile Number Portability` information result `MSISDN`.
-
-.MNP IMSI
-`Mobile Number Portability` information result `IMSI`.
-
-.MNP ROUTEING NUMBER
-`Mobile Number Portability` information result `routing number`.
-
 .5GS NRCGI MCC
 `Mobile Country Code` contained in the 5GS NR (New Radio) Cell Global Identification.
 
@@ -637,57 +412,47 @@ Possible values are: `0` (`notKnownToBePorted`), `1` (`ownNumberPortedOut`), `2`
 .5GS NRCGI NCI
 `NR Cell Identity` contained in the NR (New Radio) Cell Global Identification.
 
-.5GS AMF ADDRESS
-5GS `Access and Mobility Management Function` (AMF) address.
+.5GS NR-TAI MCC
+`Tracking Area Identity Mobile Country Code`, obtained from the 5GS.
 
-.5GS SMSF ADDRESS
-5GS `SMS Function` (SMSF) address.
+.5GS NR-TAI MNC
+`Tracking Area Identity Mobile Network Code`, obtained from the 5GS.
 
-.VISITED PLMNID MCC
-`Mobile Country Code` contained in the Visited PLMN ID obtained via Diameter Sh UDR/UD.
-
-.VISITED PLMNID MNC
-`Mobile Network Code` contained in the Visited PLMN ID obtained via Diameter Sh UDR/UD.
-
-.LOCAL TIME ZONE
-`Time zone` of the target subscriber obtained via Diameter Sh UDR/UD.
-
-.DAYLIGHT SAVING TIME
-`Daylight saving time` of the time zone of the target subscriber obtained via Diameter Sh UDR/UD.
-
-.RAT TYPE
-`Radio Access Technology` type of the target subscriber obtained via Diameter Sh UDR/UD. Possible values are: `WLAN`, `VIRTUAL`, `UTRAN`, `GERAN`, `GAN`, `HSPA_EVOLUTION`, `EUTRAN`, `EUTRAN-NB-IoT`, `NR`, `LTE-M`, `CDMA2000_1X`, `HRPD`, `UMB` and `EHRPD`.
-
-.IMSI
-`International Mobile Subscriber Identity`. ITU-T E.212 value of the target subscriber.
-
-.LMSI
-`Local Mobile Station Identity` (LMSI) that could be retrieved by SS7 MAP ATI and SS7 MAP PSI.
-LMSI is a temporary identification that can be assigned to a visiting MS or UE. The LMSI is allocated by the VLR upon location updates and sent to the HLR along with the IMSI.
+.5GS NR-TAI TAC
+`Tracking Area Identity Tracking Area Code`, obtained from the 5GS.
 
 .NETWORK NODE NUMBER
 `Network Node Number` (GT digits of the network entity at which the target subscriber is currently attached to, i.e., MSC/VLR or SGSN).
 
-.GPRS NI
-GPRS Node Indicator. Possible values are `true` or `false`.
+.GPRS NODE INDICATOR
+GPRS Node Indicator. Possible values are `true` or `false`. If set to `true`, it means that the `NETWORK NODE NUMBER` corresponds to the SGSN.
 
-MAP LSM ADDITIONAL NUMBER (MSC)
-Additional MSC GT retrieved by SS7 MAP SRILCS, or SS7 MAP SLR as part of the deferred MT-LR data.
+.VLR NUMBER
+ITU-T E.164 number which identifies the VLR (`VLR Global Title address digits`).
 
-.MAP LSM ADDITIONAL NUMBER (SGSN)
-Additional SGSN GT retrieved by SS7 MAP SRILCS, or SS7 MAP SLR as part of the deferred MT-LR data.
-
-.MME NAME
-String which contains the LTE EPC MME-Name in a format consistent with the Network Access Identifier (NAI) specification.
-
-.MME REALM
-String in the NAI that immediately follows the "@" character of the MME-Name.
+.SGSN NUMBER
+`SGSN Global Title` of the SGSN currently providing service to the target subscriber.
 
 .SGSN NAME
-String which contains the SGSN-Name in a format consistent with the NAI specification.
+String which contains the SGSN-Name included in the network node serving the targeted user, in a format consistent with the Network Access Identifier (NAI) specification.
 
 .SGSN REALM
-String in the NAI that immediately follows the "@" character of the SGSN-Name.
+String in the NAI that immediately follows the "@" character of the SGSN-Name included in the network node serving the targeted user.
+
+.MME NAME
+String which contains the MME-Name included in the network node serving the targeted user, in a format consistent with the Network Access Identifier (NAI) specification.
+
+.MME REALM
+String in the NAI that immediately follows the "@" character of the MME-Name included in the network node serving the targeted user.
+
+.MSC NUMBER
+ITU-T E.164 number which identifies the MSC (`MSC Global Title address digits`).
+
+.3GPP AAA Server Name
+String which contains the 3GPP-AAA-Server-Name included in the network node serving the targeted user, in a format consistent with the Network Access Identifier (NAI) specification.
+
+.LCS Capabilities Sets
+Location services capabilities supported in the network node serving the targeted user. Possible values are: `release98_99`, `release4`, `release5`, `release6` or `release7`.
 
 .H-GMLC ADDRESS TYPE
 Home Network GMLC type of address (e.g. IPv4).
@@ -707,159 +472,17 @@ Visited Network GMLC address.
 .PPR ADDRESS DATA
 `Privacy Profile Register` address.
 
-.LOCATION ESTIMATE TYPE OF SHAPE
-Indicates the Geographical Area Definitions supported as per 3GPP TS 23.032 included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`.
-Possible values are: `EllipsoidPoint`, `EllipsoidPointWithUncertaintyCircle`, `EllipsoidPointWithUncertaintyEllipse`, `Polygon`, `EllipsoidPointWithAltitude`, `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid` and `ellipsoidArc`.
+.5GS AMF ADDRESS
+5GS `Access and Mobility Management Function` (AMF) address.
 
-.LOCATION ESTIMATE LATITUDE
-Degrees of latitude (in decimal values) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`.
+.5GS SMSF ADDRESS
+5GS `SMS Function` (SMSF) address.
 
-.LOCATION ESTIMATE LONGITUDE
-Degrees of latitude (in decimal values) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`.
+.VISITED PLMNID MCC
+`Mobile Country Code` contained in the Visited PLMN ID obtained via Diameter Sh UDR/UD or MAP ATI or MAP PSI.
 
-.LOCATION ESTIMATE UNCERTAINTY
-Latitude/Longitude uncertainty (in meters) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to type of shape `EllipsoidPointWithUncertaintyCircle`.
-
-.LOCATION ESTIMATE UNCERTAINTY SEMI MAJOR AXIS
-Semi-major axis uncertainty (in meters) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to types of shapes `EllipsoidPointWithUncertaintyEllipse` and `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
-
-.LOCATION ESTIMATE UNCERTAINTY SEMI MINOR AXIS
-Semi-minor axis uncertainty (in meters) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to types of shapes `EllipsoidPointWithUncertaintyEllipse` and `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
-
-.LOCATION ESTIMATE CONFIDENCE
-The confidence by which the position of a target entity is known to be within the shape description (expressed as a percentage) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`.
-Only applies to types of shapes `EllipsoidPointWithUncertaintyEllipse`, `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid` and `EllipsoidArc`.
-
-.LOCATION ESTIMATE ANGLE OF MAJOR AXIS
-Orientation of major axis included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to types of shapes `EllipsoidPointWithUncertaintyEllipse` and `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
-
-.LOCATION ESTIMATE ALTITUDE
-Altitude (in meters) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to types of shapes `EllipsoidPointWithAltitude`, `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
-
-.LOCATION ESTIMATE UNCERTAINTY ALTITUDE
-Altitude uncertainty (in meters) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to type of shape `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
-
-.LOCATION ESTIMATE INNER RADIUS
-Inner radius (in meters) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to type of shape `EllipsoidArc`.
-
-.LOCATION ESTIMATE UNCERTAINTY RADIUS
-Inner radius uncertainty (in meters) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to type of shape `EllipsoidArc`.
-
-.LOCATION ESTIMATE OFFSET ANGLE
-Offset angle included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to type of shape `EllipsoidArc`.
-
-.LOCATION ESTIMATE INCLUDED ANGLE
-Included angle contained in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to type of shape `EllipsoidArc`.
-
-.ADDITIONAL LOCATION ESTIMATE LATITUDE
-Same as _LOCATION ESTIMATE LATITUDE_. Only applies to SS7 MAP PSL for type of shape `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
-
-.ADDITIONAL LOCATION ESTIMATE LONGITUDE
-Same as _LOCATION ESTIMATE LONGITUDE_. Only applies to SS7 MAP PSL for type of shape `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
-
-.ADDITIONAL LOCATION POLYGON LATITUDE POINT N
-Degrees of latitude (in decimal values) included in either SS7 MAP PSL `Additional Location Estimate` or SLg PLR/PLA `Location Estimate` for type of shape `Polygon` with 1 ? N ? 15.
-
-.ADDITIONAL LOCATION POLYGON LONGITUDE POINT N
-Degrees of longitude (in decimal values) included in either SS7 MAP PSL `Additional Location Estimate` or SLg PLR/PLA `Location Estimate` for type of shape `Polygon` with 1 ? N ? 15.
-
-.POLYGON CENTROID LATITUDE
-Degrees of latitude (in decimal values) of the type of shape `Polygon` included in either SS7 MAP PSL `Additional Location Estimate` or SLg PLR/PLA `Location Estimate`
-
-.POLYGON CENTROID LONGITUDE
-Degrees of longitude (in decimal values) of the type of shape `Polygon` included in either SS7 MAP PSL `Additional Location Estimate` or SLg PLR/PLA `Location Estimate`
-
-.ADDITIONAL LOCATION ESTIMATE UNCERTAINTY SEMI MAJOR AXIS
-Same as _LOCATION ESTIMATE UNCERTAINTY SEMI MAJOR AXIS_. Only applies to SS7 MAP PSL for type of shape `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
-
-.ADDITIONAL LOCATION ESTIMATE UNCERTAINTY SEMI MINOR AXIS
-Same as _LOCATION ESTIMATE UNCERTAINTY SEMI MINOR AXIS_. Only applies to SS7 MAP PSL for type of shape `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
-
-.ADDITIONAL LOCATION ESTIMATE CONFIDENCE
-Same as _LOCATION ESTIMATE UNCERTAINTY CONFIDENCE_. Only applies to SS7 MAP PSL for type of shape `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
-
-.ADDITIONAL LOCATION ESTIMATE ANGLE OF MAJOR AXIS
-Same as _LOCATION ESTIMATE ANGLE OF MAJOR AXIS_. Only applies to SS7 MAP PSL for type of shape `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
-
-.ADDITIONAL LOCATION ESTIMATE ALTITUDE
-Same as _LOCATION ESTIMATE UNCERTAINTY ALTITUDE_. Only applies to SS7 MAP PSL for type of shape `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
-
-.ADDITIONAL LOCATION ESTIMATE UNCERTAINTY ALTITUDE
-Same as _LOCATION ESTIMATE UNCERTAINTY ALTITUDE_. Only applies to SS7 MAP PSL for type of shape `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
-
-.AGE OF LOCATION ESTIMATE
-Age of location estimate (in minutes) of either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`.
-
-.GERAN POSITIONING DATA
-Hexadecimal value (for now) of GERAN positioning data, attainable only in either SS7 MAP PSL or SLg PLR/PLA. Part of the GERAN Positioning Information which, if present, indicates the usage of each positioning method that was attempted to determine the location estimate, either successfully or unsuccessfully. Applicable only when the UE is attached to GERAN access and when the message is sent by the SGSN.
-
-.GERAN GANSS POSITIONING DATA
-As part of GERAN Positioning Information, hexadecimal value (for now) of GERAN GANSS (Galileo and Additional Navigation Satellite Systems) positioning data, attainable only in either SS7 MAP PSL or SLg PLR/PLA.
-
-.UTRAN POSITIONING DATA
-Hexadecimal value (for now) of UTRAN positioning data. Part of the UTRAN Positioning Information which, if present, indicates the usage of each positioning method that was attempted to determine the location estimate, either successfully or unsuccessfully. Applicable only when the UE is attached to UTRAN access and when the message is sent by the SGSN or combined MME/SGSN, attainable only in either SS7 MAP PSL or SLg PLR/PLA.
-
-.UTRAN GANSS POSITIONING DATA
-As part of UTRAN Positioning Information, hexadecimal value (for now) of UTRAN GANSS (Galileo and Additional Navigation Satellite Systems) positioning data, attainable only in either SS7 MAP PSL or SLg PLR/PLA.
-
-.UTRAN ADDITIONAL POSITIONING DATA
-As part of UTRAN Positioning Information, hexadecimal value (for now) of UTRAN additional positioning data, attainable only in SLg PLR/PLA.
-
-.E-UTRAN POSITIONING DATA
-Hexadecimal value (for now) of E-UTRAN positioning data, attainable only in SLg PLR/PLA. Part of the E-UTRAN Positioning Information which, if present, indicates the usage of each positioning method that was attempted to determine the location estimate, either successfully or unsuccessfully. The internal structure and encoding is defined in 3GPP TS 29.171. Applicable only when the UE is attached to E-UTRAN access and when the message is sent by the MME or the combined MME/SGSN.
-
-.DEFERRED MT LR RESPONSE INDICATOR
-Indicates if a Mobile-Terminating Location-Report is expected (MAP LSM operations or Diameter SLg commands). Possible values are true or false.
-
-.LCS CGI MCC
-`Mobile Country Code` retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA).
-
-.LCS CGI MNC
-`Mobile Network Code` retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA).
-
-.LCS CGI LAC
-`Location Area Code` retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA).
-
-.LCS CGI CI
-`Cell Identity` or `Service Area Code` retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA).
-
-.PSEUDONYM INDICATOR
-`Pseudonym Indicator` in MAP SLR. Possible vales are `PSEUDONYM_NOT_REQUESTED` or `PSEUDONYM_REQUESTED`.
-
-.ACCURACY FULFILLMENT INDICATOR
-`Accuracy fulfillment Indicator` retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA). Possible vales are `REQUESTED_ACCURACY_FULFILLED` or `REQUESTED_ACCURACY_NOT_FULFILLED`.
-
-.SEQUENCE NUMBER
-`Sequence number` retrieved by SS7 MAP SLR.
-
-.HORIZONTAL VELOCITY ESTIMATE
-`Horizontal speed` estimate retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA).
-
-.VELOCITY ESTIMATE BEARING
-Velocity estimate `bearing` either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA).
-
-.VERTICAL VELOCITY ESTIMATE
-`Vertical speed` estimate retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA).
-
-.VELOCITY ESTIMATE HORIZONTAL UNCERTAINTY
-Horizontal velocity estimate `uncertainty` retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA).
-
-.VELOCITY ESTIMATE VERTICAL UNCERTAINTY
-Vertical velocity estimate `uncertainty` retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA).
-
-.VELOCITY ESTIMATE TYPE
-Velocity estimate type retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA).
-Possible values are `HorizontalVelocity`, `HorizontalWithVerticalVelocity`, `HorizontalVelocityWithUncertainty` and `HorizontalWithVerticalVelocityAndUncertainty`.
-
-.SERVING NODE ADDRESS SGSN NUMBER
-`SGSN Global Title` retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (LRR/LRA).
-
-.SERVING NODE ADDRESS MME NUMBER
-`MME Number` retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (LRR/LRA).
-
-.LCS CLIENT TYPE
-Location Services Client Type applicable only for MAP LSM operations (PSL or SLR).
-Possible values are: `0` (`emergency`), `1` (`value-added services`), `2` (`PLMN operator services`), `3` (`lawful interception`).
+.VISITED PLMNID MNC
+`Mobile Network Code` contained in the Visited PLMN ID obtained via Diameter Sh UDR/UD or MAP ATI or MAP PSI.
 
 .LCS CLIENT NAME
 Location Services Client Name applicable only for either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (LRR/LRA).
@@ -891,6 +514,75 @@ LCS Client Requestor Format Indicator, applicable only for either by MAP LSM ope
 .LCS CLIENT REQUESTOR STRING
 LCS Client Requestor String, applicable only for either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (LRR/LRA).
 
+.PSEUDONYM INDICATOR
+`Pseudonym Indicator` in MAP SLR. Possible vales are `PSEUDONYM_NOT_REQUESTED` or `PSEUDONYM_REQUESTED`.
+
+.TYPE OF SHAPE
+As described in 3GPP TS 23.032 (Geographical Area Description). It can only be `EllipsoidPointWithUncertaintyCircle` for MAP ATI or MAP PSI, while for SS7 MAP PSL/SLR or SLg PLR/PLA `Location Estimate`, the possible values are: `EllipsoidPoint`, `EllipsoidPointWithUncertaintyCircle`, `EllipsoidPointWithUncertaintyEllipse`, `Polygon`, `EllipsoidPointWithAltitude`, `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid` and `ellipsoidArc`.
+
+.LATITUDE
+Expressed in the range -90, +90 (as for WGS84 -World Geodetic System 1984-, negative decimal values refer to South degrees of latitude, while positive to North degrees of latitude).
+
+.LONGITUDE
+Expressed in the range -180, +180 (as for WGS84, negative decimal values refer to West degrees of longitude, while positive to East degrees of longitude).
+
+.UNCERTAINTY
+Method of describing the uncertainty for latitude and longitude indicating a radius, thus the subscriber is located within the circle defined by an ellipsoid and the radius. Possible values between 0 and 1800000 meters (1800 Km).
+
+.CONFIDENCE
+The confidence by which the position of a target entity is known to be within the shape description (expressed as a percentage).
+
+.GEODETIC INFO SCREENING AND PRESENTATION INDICATORS
+Indicators `allowed` or `not allowed` geodetic info and if it is `user` or `network provided`.
+
+.UNCERTAINTY
+Latitude/Longitude uncertainty (in meters) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to type of shape `EllipsoidPointWithUncertaintyCircle`.
+
+.UNCERTAINTY SEMI MAJOR AXIS
+Semi-major axis uncertainty (in meters) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to types of shapes `EllipsoidPointWithUncertaintyEllipse` and `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
+
+.UNCERTAINTY SEMI MINOR AXIS
+Semi-minor axis uncertainty (in meters) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to types of shapes `EllipsoidPointWithUncertaintyEllipse` and `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
+
+.ANGLE OF MAJOR AXIS
+Orientation of major axis included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to types of shapes `EllipsoidPointWithUncertaintyEllipse` and `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
+
+.ALTITUDE
+Altitude (in meters) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to types of shapes `EllipsoidPointWithAltitude`, `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
+
+.UNCERTAINTY ALTITUDE
+Altitude uncertainty (in meters) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to type of shape `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`.
+
+.INNER RADIUS
+Inner radius (in meters) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to type of shape `EllipsoidArc`.
+
+.UNCERTAINTY RADIUS
+Inner radius uncertainty (in meters) included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to type of shape `EllipsoidArc`.
+
+.LOCATION ESTIMATE OFFSET ANGLE
+Offset angle included in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to type of shape `EllipsoidArc`.
+
+.LOCATION ESTIMATE INCLUDED ANGLE
+Included angle contained in either SS7 MAP PSL or SLg PLR/PLA `Location Estimate`. Only applies to type of shape `EllipsoidArc`.
+
+.POLYGON LATITUDE POINT N
+Degrees of latitude (in decimal values) included in either SS7 MAP PSL `Additional Location Estimate` or SLg PLR/PLA `Location Estimate` for type of shape `Polygon` with 1 ? N ? 15.
+
+.POLYGON LONGITUDE POINT N
+Degrees of longitude (in decimal values) included in either SS7 MAP PSL `Additional Location Estimate` or SLg PLR/PLA `Location Estimate` for type of shape `Polygon` with 1 ? N ? 15.
+
+.POLYGON CENTROID LATITUDE
+Degrees of latitude (in decimal values) of the type of shape `Polygon` included in either SS7 MAP PSL `Additional Location Estimate` or SLg PLR/PLA `Location Estimate`
+
+.POLYGON CENTROID LONGITUDE
+Degrees of longitude (in decimal values) of the type of shape `Polygon` included in either SS7 MAP PSL `Additional Location Estimate` or SLg PLR/PLA `Location Estimate`
+
+.AGE OF LOCATION INFORMATION
+Indication in minutes how old the gathered location information/estimate is.
+
+.CURRENT LOCATION RETRIEVED
+Indication if location information retrieved is current or not. Possible values are `true` or `false`.
+
 .LCS QoS HORIZONTAL ACCURACY
 Horizontal accuracy as part of LCS Quality of Service (QoS), applicable only for either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (LRR/LRA).
 The horizontal location error should be less than the error indicated by the uncertainty code with 67% confidence.
@@ -910,38 +602,71 @@ Possible values are: `LOW_DELAY` (`0`), `DELAY_TOLERANT` (`1`).
 Class of LCS QoS, applicable only for either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (LRR/LRA).
 Possible values are: `ASSURED` (`0`), `BEST EFFORT` (`1`).
 
-.CLIENT REFERENCE NUMBER
-Location Services reference number sent by the GMLC client, applicable only for either by MAP PSL operation or Diameter SLg commands (PLR/PLA).
-Used for correlating MT-LR and EPC-MT-LR (location reports).
+.ACCURACY FULFILLMENT INDICATOR
+`Accuracy fulfillment Indicator` retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA). Possible vales are `REQUESTED_ACCURACY_FULFILLED` or `REQUESTED_ACCURACY_NOT_FULFILLED`.
 
-.LCS REFERENCE NUMBER
-Location Services reference number generated internally by the GMLC and exchanged with the core network. Applicable only for either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA and LRR/LRA).
-Used for correlating MT-LR and EPC-MT-LR (location reports).
+.GERAN POSITIONING DATA
+Hexadecimal value (for now) of GERAN positioning data, attainable only in either SS7 MAP PSL or SLg PLR/PLA. Part of the GERAN Positioning Information which, if present, indicates the usage of each positioning method that was attempted to determine the location estimate, either successfully or unsuccessfully. Applicable only when the UE is attached to GERAN access and when the message is sent by the SGSN.
+
+.GERAN GANSS POSITIONING DATA
+As part of GERAN Positioning Information, hexadecimal value (for now) of GERAN GANSS (Galileo and Additional Navigation Satellite Systems) positioning data, attainable only in either SS7 MAP PSL or SLg PLR/PLA.
+
+.UTRAN POSITIONING DATA
+Hexadecimal value (for now) of UTRAN positioning data. Part of the UTRAN Positioning Information which, if present, indicates the usage of each positioning method that was attempted to determine the location estimate, either successfully or unsuccessfully. Applicable only when the UE is attached to UTRAN access and when the message is sent by the SGSN or combined MME/SGSN, attainable only in either SS7 MAP PSL or SLg PLR/PLA.
+
+.UTRAN GANSS POSITIONING DATA
+As part of UTRAN Positioning Information, hexadecimal value (for now) of UTRAN GANSS (Galileo and Additional Navigation Satellite Systems) positioning data, attainable only in either SS7 MAP PSL or SLg PLR/PLA.
+
+.UTRAN ADDITIONAL POSITIONING DATA
+As part of UTRAN Positioning Information, hexadecimal value (for now) of UTRAN additional positioning data, attainable only in SLg PLR/PLA.
+
+.E-UTRAN POSITIONING DATA
+Hexadecimal value (for now) of E-UTRAN positioning data, attainable only in SLg PLR/PLA. Part of the E-UTRAN Positioning Information which, if present, indicates the usage of each positioning method that was attempted to determine the location estimate, either successfully or unsuccessfully. The internal structure and encoding is defined in 3GPP TS 29.171. Applicable only when the UE is attached to E-UTRAN access and when the message is sent by the MME or the combined MME/SGSN.
+
+.HORIZONTAL VELOCITY ESTIMATE
+`Horizontal speed` estimate retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA).
+
+.VELOCITY ESTIMATE BEARING
+Velocity estimate `bearing` either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA).
+
+.VERTICAL VELOCITY ESTIMATE
+`Vertical speed` estimate retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA).
+
+.VELOCITY ESTIMATE HORIZONTAL UNCERTAINTY
+Horizontal velocity estimate `uncertainty` retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA).
+
+.VELOCITY ESTIMATE VERTICAL UNCERTAINTY
+Vertical velocity estimate `uncertainty` retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA).
+
+.VELOCITY ESTIMATE TYPE
+Velocity estimate type retrieved either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA or LRR/LRA).
+Possible values are `HorizontalVelocity`, `HorizontalWithVerticalVelocity`, `HorizontalVelocityWithUncertainty` and `HorizontalWithVerticalVelocityAndUncertainty`.
 
 .LCS SERVICE TYPE ID
 Applicable only for either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (LRR/LRA), refers to the service type identity of the location service.
 It is an integer value lower than 128, which refer to the following: `emergencyServices` (`0`), `emergencyAlertServices` (`1`), `personTracking` (`2`), `fleetManagement` (`3`), `assetManagement` (`4`), `trafficCongestionReporting` (`5`), `roadsideAssistance` (`6`), `routingToNearestCommercialEnterprise` (`7`),
 `navigation` (`8`), `citySightseeing` (`9`), `localizedAdvertising` (`10`), `mobileYellowPages` (`11`), `trafficAndPublicTransportationInfo` (`12`), `weather` (`13`), `assetAndServiceFinding` (`14`), `gaming` (`15`), `findYourFriend` (`16`), `dating` (`17`), `chatting` (`18`), `routeFinding` (`19`), `whereAmI` (`20`).
 
-.BAROMETRIC PRESSURE
-Indicates the `barometric pressure` of the geographical area at which the UE is located. Applicable only for Diameter SLg commands (LRR/LRA), i.
+.MO-LR SHORT-CIRCUIT INDICATOR
+Indicates if the MO-LR short circuit feature is used for obtaining location estimate.
 
-.CIVIC ADDRESS
-Indicates the `civic address` correspondent with the geographical area at which the UE is located. Applicable only for Diameter SLg commands (LRR/LRA), i.
+.REPORTING PLMN LIST
+List of reporting Public Land Mobile Networks (PLMN). If present, it shall contain a list of PLMNs (`MCC-MNC`) in which the subsequent location estimates must be obtained, or the subsequent triggered or periodic events must be reported, by the UE as part of a periodic MO-LR TTTP or periodic MT-LR procedure
+
+.CLIENT REFERENCE NUMBER
+Location Services reference number sent by the GMLC client, applicable only for either by MAP PSL operation or Diameter SLg commands (PLR/PLA).
+Used for correlating MT-LR and EPC-MT-LR (location reports).
 
 .LCS EVENT
 Applicable only for either by MAP SLR or Diameter SLg LRR/LRA, refers to the type of event that triggered the location report.
 Possible values are: `0` (`EMERGENCY_CALL_ORIGINATION`), `1` (`EMERGENCY_CALL_RELEASE`), `2` (`MO_LOCATION_REPORT`), `3` (`DEFERRED_MT_LR_RESPONSE`).
 
-.MSISDN ADDRESS
-ITU-T E.164 address digits of the target subscriber.
-
-.IMEI
-`International Mobile Equipment Identity` as for 3GPP TS 22.016/23.003.
-
 .LOCATION EVENT TYPE
 Applicable only for either by MAP SLR or Diameter SLg LRR/LRA, it refers to the type of event of the deferred MT-LR data.
 Possible values are: `0` (`MS available`), `1` (`entering into area`), `2` (`leaving from area`), `3` (`being inside area`), `4` (`periodic LDR`), `5` (`motion event`), `6` (`LDR activated`), `7` (`maximum interval expiration`).
+
+.DEFERRED MT LR RESPONSE INDICATOR
+Indicates if a Mobile-Terminating Location-Report is expected (MAP LSM operations or Diameter SLg commands). Possible values are true or false.
 
 .DEFERRED MT-LR DATA NETWORK NODE NUMBER
 Applicable only for either by MAP SLR or Diameter SLg LRR/LRA, as part of the deferred MT-LR data, it refers to the address digits of serving network node.
@@ -991,25 +716,123 @@ Applicable only for either by MAP SLR or Diameter SLg LRR/LRA, as part of the de
 .DEFERRED MT-LR DATA ADD LCS CAPS R7
 Applicable only for either by MAP SLR or Diameter SLg LRR/LRA, as part of the deferred MT-LR data, it indicates if additional LCS Capabilities Release 7 applies or not (true or false).
 
-.TERMINATION CAUSE
+.DEFERRED MT-LR DATA TERMINATION CAUSE
 Applicable only for either by MAP SLR or Diameter SLg LRR/LRA, as part of the deferred MT-LR data, it refers to the MT location report termination cause.
 Possible values are: `0` (`Normal`), `1` (`Error Undefined`), `2` (`Internal Timeout`), `3` (`Congestion`), `4` (`MT_LR_Restart`), `5` (`Privacy Violation`), `6` (`Shape of Location Estimate Not Supported`), `7` (`Subscriber Termination`), `8` (`UE Termination`) or `9` (`Network Termination`).
 
-.REPORTING AMOUNT
+.PERIODIC LDR INFO REPORTING AMOUNT
 Applicable only for either by MAP SLR or Diameter SLg LRR/LRA, as part of the periodic LDR info, it refers to the reporting frequency. Possible vales are between 1 and 8639999.
 
-.REPORTING INTERVAL
+.PERIODIC LDR INFO REPORTING INTERVAL
 Applicable only for either by MAP SLR or Diameter SLg LRR/LRA, as part of the periodic LDR info, it refers to the reporting interval in seconds. Possible vales are between 1 and 8639999.
 Reporting-Interval x Reporting-Amount shall not exceed 8639999 (99 days, 23 hours, 59 minutes and 59 seconds) for compatibility with OMA MLP and RLP.
 
-.MO-LR SHORT-CIRCUIT INDICATOR
-Indicates if the MO-LR short circuit feature is used for obtaining location estimate.
+.LCS REFERENCE NUMBER
+Location Services reference number generated internally by the GMLC and exchanged with the core network. Applicable only for either by MAP LSM operations (PSL or SLR) or Diameter SLg commands (PLR/PLA and LRR/LRA).
+Used for correlating MT-LR and EPC-MT-LR (location reports).
 
-.REPORTING PLMN LIST
-List of reporting Public Land Mobile Networks (PLMN). If present, it shall contain a list of PLMNs (`MCC-MNC`) in which the subsequent location estimates must be obtained, or the subsequent triggered or periodic events must be reported, by the UE as part of a periodic MO-LR TTTP or periodic MT-LR procedure
+.SEQUENCE NUMBER
+`Sequence number` retrieved by SS7 MAP SLR.
 
-.1xRTT-RCID
-If present, it shall contain the 1xRTT Reference Cell ID uniquely identifying of the target cell location for handover of an IMS ermergency call. This Information Element is applicable only when the UE is making handover toa cdma2000 1xRTT access and when the message is sent by the MME or the MME part of the combined MME/SGSN.
+.BAROMETRIC PRESSURE
+Indicates the `barometric pressure` of the geographical area at which the UE is located. Applicable only for Diameter SLg commands (LRR/LRA), i.
+
+.CIVIC ADDRESS
+Indicates the `civic address` correspondent with the geographical area at which the UE is located. Applicable only for Diameter SLg commands (LRR/LRA), i.
+
+.NA-ESRK Request
+Indication that a location report requests the GMLC to allocate a `North American Emergency Services Routing Key` (NA-ESRK) based on the target MS location estimate (only applies to emergency services calls in North America).
+
+.NA-ESRD
+`North American Emergency Services Routing Digits` (only applies to emergency services calls in North America).
+
+.NA-ESRK
+`North American Emergency Services Routing Key` (only applies to emergency services calls in North America).
+
+.AMF INSTANCE ID
+Identifies the Access and Mobility Management Function (AMF) ID for LCS Handover to 5GC. It corresponds to the AMF-Instance-Id AVP, which is of type UTF8String and shall be coded as the NfInstanceId according to clause 5.3.2-1, in 3GPP TS 29.571, i.e., a string uniquely identifying a NF instance. The format of the NF Instance ID shall be a Universally Unique Identifier (UUID) version 4, as described in IETF RFC 4122. The String identifying the AMF ID is composed of AMF Region ID (8 bits), AMF Set ID (10 bits) and AMF Pointer (6 bits) as specified in clause 2.10.1 of 3GPP TS 23.003, i.e.,
+<AMF Identifier> = <AMF Region ID><AMF Set ID><AMF Pointer>. It is encoded as a string of 6 hexadecimal characters (i.e., 24 bits). AMF Region ID pattern: '^[A-Fa-f0-9]{6}$', AMF Set ID and AMF Pointer patterns: '^[A-Fa-f0-9]{2}$',
+
+.SLh RIA FLAGS
+Numeric value indicating a bit mask, only for bit 0: "_Combined-MME/SGSN-Supporting-Optimized-LCS-Proc_". When set (`1`), it means that the UE is served by the MME and the SGSN parts of the same combined MME/SGSN and this combined MME/SGSN supports the optimized LCS procedure.
+
+.SLg PLR FLAGS
+Numeric value indicating a bit mask. The argument must be an integer value for a bit mask for bit 0 (MO-LR-ShortCircuit-Indicator), bit 1 (Optimized-LCS-Proc-Req) and bit 2 (Delayed-Location-Reporting-Support-Indicator). Delayed-Location-Reporting-Support-Indicator bit is set as default, then the "plrFlags" parameter shall appear with the value 4 or higher (up to 7), as Delayed-Location-Reporting-Support-Indicator bit is the third most significant bit of PLR-Flags AVP.
+
+.SLg PLA FLAGS
+Numeric value indicating a bit mask, as per table 7.4.53/1 of 3GPP TS 29.172, namely: bit 0 _Deferred-MT-LR-Response-Indicator_, when set, indicates that the message is sent in response to the deferred-MT location request; bit 1 _MO-LR-ShortCircuit-Indicator_, when set, indicates that the MO-LR short circuit feature is accepted by the UE, for periodic location reporting (applicable only when the message is sent over Lgd interface); bit 2 _Optimized-LCS-Proc-Performed_, when set, indicates that the combined MME/SGSN has performed the optimized LCS procedure to retrieve the location of the target UE (applicable only when the message is sent for the MT-LR procedure over the Lgd interface); bit 3 _UE-Transiently-Not-Reachable-Indicator_, when set, indicates that the UE is transiently not reachable due to power saving (e.g. UE is in extended idle mode DRX or in Power Saving Mode), and that the location information will be returned in a subsequent Subscriber Location Report when the UE becomes reachable.
+
+.SLg LRR FLAGS
+Numeric value indicating a bit mask. When Lgd/SLg-Indicator is set (bit 0), it indicates that the LRR request source node is an SGSN or a combined MME/SGSN to which the UE is attached via UTRAN or GERAN). When MO-LR-ShortCircuit-Indicator is set (bit 1), it indicates that the MO-LR short circuit feature is used by the UE for location estimate (applies only when for deferred MT-LR procedure and when the message is sent over Lgd interface). When bit 2 is set (bit 2), it indicates that the UE is requesting to use MO-LR short circuit feature for location estimate (applies only when periodic MO-LR TTTP procedure is initiated by the UE and when the message is sent over Lgd interface).
+
+.SLg LRA FLAGS
+Numeric value indicating a bit mask. Only applies for bit 0 (MO-LR-ShortCircuit-Indicator). When set (`1`), indicates that the MO-LR short circuit feature is used for obtaining location estimate. This bit is applicable only when the message is sent over Lgd interface.
+
+.SUBSCRIBER STATE
+Indication of whether the subscriber is `assumedIdle` or `camelBusy`, `netDetNotReachable` or `notProvidedFromVLR` (CS domain), or `notProvidedFromSGSNorMME`, `psDetached`, `psAttachedNotReachableForPaging`, `psAttachedReachableForPaging`, `psPDPActiveNotReachableForPaging`, `psPDPActiveReachableForPaging` or `netDetNotReachable` (PS domain).
+
+.NOT REACHABLE REASON STATE
+Whenever _SUBSCRIBER STATE_ is `netDetNotReachable`. Possible values are: `msPurged`, `imsiDetached`, `restrictedArea`, or `notRegistered`.
+
+.LOCAL TIME ZONE
+`Time zone` of the target subscriber obtained via Diameter Sh UDR/UD or MAP ATI or MAP PSI.
+
+.DAYLIGHT SAVING TIME
+`Daylight saving time` of the time zone of the target subscriber obtained via Diameter Sh UDR/UD or MAP ATI or MAP PSI.
+
+.RAT TYPE
+`Radio Access Technology` type of the target subscriber obtained via Diameter Sh UDR/UD or MAP ATI or MAP PSI. Possible values are: `WLAN`, `VIRTUAL`, `UTRAN`, `GERAN`, `GAN`, `HSPA_EVOLUTION`, `EUTRAN`, `EUTRAN-NB-IoT`, `NR`, `LTE-M`, `CDMA2000_1X`, `HRPD`, `UMB` and `EHRPD`.
+
+.LOCATION NUMBER ODD FLAG
+Location Number `odd flag` (ITU-T Q.763) retrieved via SS7 MAP ATI or PSI or Diameter Sh UDR/UDA/UDA. Possible values are: `true` (`ODD`) or `false` (EVEN).
+
+.LOCATION NUMBER NAI
+Location Number `Nature of Address Indicator` (ITU-T Q.763).
+Possible values are: `0` (`spare`), `1` (`reserved for subscriber number -national use-`), `2` (`reserved for unknown -national use-`),
+`3` (`national significant number -national use-`), `4` (`international number`), `5-111` (`spare`), `112-126` (`reserved for national use`), `127` (`spare`).
+
+.LOCATION NUMBER INNI
+Location Number `International Network Number Indicator` (ITU-T Q.763).
+Possible values are: `0` (`false - routing to internal number allowed`), `1` (`true - routing to internal number not allowed`).
+
+.LOCATION NUMBER NPI
+Location Number `Numbering Plan Indicator` (ITU-T Q.763).
+Possible values are: `0` (`spare`), `1` (`ISDN (telephony) numbering plan as per ITU-T Recommendation E.164`), `2` (`spare`), `3` (`Data numbering plan as per ITU-T Recommendation X.121`), `4` (`Telex numbering plan as per ITU-T Recommendation F.69 -national use-`),
+`5` (`private numbering plan`), `6` (`reserved for national use`), `7` (`spare`).
+
+.LOCATION NUMBER APRI
+Location Number `Address Presentation Restricted Indicator` (ITU-T Q.763).
+Possible values are: `0` (`presentation allowed`), `1` (`presentation restricted`), `2` (`address not available -national use-`), `3` (`spare`).
+
+.LOCATION NUMBER SI
+Location Number `Screening Indicator` (ITU-T Q.763).
+Possible values are: `0` (`reserved`), `1` (`user provided, verified and passed`), `2` (`network`), `3` (`network provided`).
+
+.LOCATION NUMBER ADDRESS
+Location Number `address digits` (ITU-T Q.763).
+
+.MNP NUMBER PORTABILITY STATUS
+`Mobile Number Portability status` (as part of MNP Info Result retrieved either by SS7 MAP ATI or PSI).
+Possible values are: `0` (`notKnownToBePorted`), `1` (`ownNumberPortedOut`), `2` (`foreignNumberPortedToForeignNetwork`), `4` (`ownNumberNotPortedOut`) and `5` (`foreignNumberPortedIn`).
+
+.MNP MSISDN
+`Mobile Number Portability` information result `MSISDN`.
+
+.MNP IMSI
+`Mobile Number Portability` information result `IMSI`.
+
+.MNP ROUTEING NUMBER
+`Mobile Number Portability` information result `routing number`.
+
+.MS CLASSMARK 2
+Descriptor of `radio network-related capabilities` of the MS or UE in use by the served subscriber (e.g., MT-SMS, voice broadcast or group call services, etc.) Only hexadecimal bytes values are shown for now
+
+.GPRS MS CLASS MS RADIO ACCESS CAPABILITY
+`MS radio access capabilities` (e.g. radio access technologies support) as part of the GPRS MS Class (only hexadecimal bytes values are shown for now).
+
+.GPRS MS CLASS MS NETWORK CAPABILITY
+`MS network capabilities` (e.g. SMS) as part of the GPRS MS Class (only hexadecimal bytes values are shown for now).
+
 
 .RECORD STATUS Description
 [width="100%", cols="30%,70%"]
@@ -1046,13 +869,17 @@ If present, it shall contain the 1xRTT Reference Cell ID uniquely identifying of
 
 |ATI_CGI_STATE_SUCCESS| Successful SS7 MAP ATI operation including CGI or SAI and subscriber's state (idle or busy, attached or detached, not provide by VLR -CS domain-, not provided by SGSN or MME, PDP active reachable or not for paging -PS domain-).
 
-|ATI_LAI_STATE_SUCCESS| Successful SS7 MAP ATI operation including LAI and subscriber's state but no further location information like Cell Id (CI) or Service Area Code (SAC).
+|ATI_LAI_STATE_SUCCESS| Successful SS7 MAP ATI operation including LAI and subscriber's state but no further location information like Cell ID (CI) or Service Area Code (SAC).
 
 |ATI_STATE_SUCCESS| Successful SS7 MAP ATI operation including subscriber status but no further location information.
 
 |ATI_ECGI_STATE_SUCCESS| Successful SS7 MAP ATI operation including ECGI (LTE CGI) but no Geographical or Geodetic information.
 
 |ATI_TAI_SUCCESS| Successful SS7 MAP ATI operation including TAI (LTE Tracking Area Identification) but neither ECGI nor Geographical nor Geodetic information.
+
+|ATI_NCGI_SUCCESS| Successful SS7 MAP ATI operation including NCGI (5GS New Radio Cell Global Identification) but neither Geographical nor Geodetic information.
+
+|ATI_NRTAI_SUCCESS| Successful SS7 MAP ATI operation including NR-TAI (5GS New Radio Tracking Area Identification) but neither NR-CGI nor Geographical nor Geodetic information.
 
 |ATI_RAI_SUCCESS| Successful SS7 MAP ATI operation including RAI (GPRS Routing Area Identification) but no further location information.
 
@@ -1068,7 +895,7 @@ If present, it shall contain the 1xRTT Reference Cell ID uniquely identifying of
 
 |ATI_PS_CGI_STATE_SUCCESS| Successful SS7 MAP ATI operation including CGI or SAI and subscriber's state (ATI conveyed to the PS domain).
 
-|ATI_PS_LAI_STATE_SUCCESS| Successful SS7 MAP ATI operation including LAI and subscriber's state but no further location information like Cell Id (CI) or Service Area Code (SAC). ATI conveyed to the PS domain.
+|ATI_PS_LAI_STATE_SUCCESS| Successful SS7 MAP ATI operation including LAI and subscriber's state but no further location information like Cell ID (CI) or Service Area Code (SAC). ATI conveyed to the PS domain.
 
 |ATI_PS_STATE_SUCCESS| Successful SS7 MAP ATI operation including subscriber status but no further location information (ATI conveyed to the PS domain).
 
@@ -1238,7 +1065,7 @@ If present, it shall contain the 1xRTT Reference Cell ID uniquely identifying of
 
 |PSI_CGI_SUCCESS| Successful SS7 MAP PSI operation including CGI or SAI but no Geographical or Geodetic information.
 
-|PSI_LAI_STATE_SUCCESS| Successful SS7 MAP PSI operation including LAI and subscriber's state but no further location information like Cell Id (CI) or Service Area Code (SAC).
+|PSI_LAI_STATE_SUCCESS| Successful SS7 MAP PSI operation including LAI and subscriber's state but no further location information like Cell ID (CI) or Service Area Code (SAC).
 
 |PSI_LAI_SUCCESS| Successful SS7 MAP PSI operation including LAI but no CGI or SAI or Geographical or Geodetic information.
 
@@ -1247,6 +1074,10 @@ If present, it shall contain the 1xRTT Reference Cell ID uniquely identifying of
 |PSI_ECGI_STATE_SUCCESS| Successful SS7 MAP PSI operation including ECGI (LTE CGI) but no Geographical or Geodetic information.
 
 |PSI_TAI_SUCCESS| Successful SS7 MAP PSI operation including TAI (LTE Tracking Area Identification) but neither ECGI nor Geographical nor Geodetic information.
+
+|PSI_NCGI_SUCCESS| Successful SS7 MAP PSI operation including NCGI (5GS New Radio Cell Global Identification) but neither Geographical nor Geodetic information.
+
+|PSI_NRTAI_SUCCESS| Successful SS7 MAP PSI operation including NR-TAI (5GS New Radio Tracking Area Identification) but neither NR-CGI nor Geographical nor Geodetic information.
 
 |PSI_RAI_SUCCESS| Successful SS7 MAP PSI operation including RAI (GPRS Routing Area Identification) but no further location information.
 
@@ -1262,7 +1093,7 @@ If present, it shall contain the 1xRTT Reference Cell ID uniquely identifying of
 
 |PSI_PS_CGI_STATE_SUCCESS| Successful SS7 MAP PSI operation including CGI or SAI and subscriber's state (ATI conveyed to the PS domain).
 
-|PSI_PS_LAI_STATE_SUCCESS| Successful SS7 MAP PSI operation including LAI and subscriber's state but no further location information like Cell Id (CI) or Service Area Code (SAC). ATI conveyed to the PS domain.
+|PSI_PS_LAI_STATE_SUCCESS| Successful SS7 MAP PSI operation including LAI and subscriber's state but no further location information like Cell ID (CI) or Service Area Code (SAC). ATI conveyed to the PS domain.
 
 |PSI_PS_STATE_SUCCESS| Successful SS7 MAP PSI operation including subscriber status but no further location information (ATI conveyed to the PS domain).
 
@@ -1328,9 +1159,9 @@ If present, it shall contain the 1xRTT Reference Cell ID uniquely identifying of
 
 |LTE_RIR_UNABLE_TO_DELIVER| Unsuccessful Diameter SLh RIR/RIA command (received Diameter error code 3002)
 
-|LTE_RIR_UNSPECIFIED_ERROR| Unsuccessful Diameter SLh RIR/RIA command (unspecified error most likely due to an runtime exception).
+|LTE_RIR_UNSPECIFIED_ERROR| Unsuccessful Diameter SLh RIR/RIA command (unspecified error most likely due to a runtime exception).
 
-|LTE_RIR_SYSTEM_FAILURE| Unsuccessful Diameter SLh RIR/RIA command (received Diameter error different than those specified by 3GPP TS 29.171).
+|LTE_RIR_SYSTEM_FAILURE| Unsuccessful Diameter SLh RIR/RIA command (received Diameter error different from those specified by 3GPP TS 29.171).
 
 |LTE_PLR_SUCCESS| Successful Diameter SLg PLR/PLA command including preceding RIA AVPs, and PLA AVPs like the Location Estimate.
 
@@ -1354,13 +1185,13 @@ If present, it shall contain the 1xRTT Reference Cell ID uniquely identifying of
 
 |LTE_PLR_UNSPECIFIED_ERROR| (unspecified error most likely due to an runtime exception).
 
-|LTE_PLR_SYSTEM_FAILURE| Unsuccessful Diameter SLh PLR/PLA command (received Diameter error different than those specified by 3GPP TS 29.172).
+|LTE_PLR_SYSTEM_FAILURE| Unsuccessful Diameter SLh PLR/PLA command (received Diameter error different from those specified by 3GPP TS 29.172).
 
 |LTE_LRR_SUCCESS| Successful Diameter SLg LRR/LRA command including mandatory AVPs like the Location Estimate.
 
-|LTE_LRR_SYSTEM_FAILURE| Unsuccessful Diameter SLh LRR/LRA command (received Diameter error different than those specified by 3GPP TS 29.172).
+|LTE_LRR_SYSTEM_FAILURE| Unsuccessful Diameter SLh LRR/LRA command (received Diameter error different from those specified by 3GPP TS 29.172).
 
-|LTE_LRR_UNSPECIFIED_ERROR| Unsuccessful Diameter SLh LRR/LRA command (unspecified error most likely due to an runtime exception).
+|LTE_LRR_UNSPECIFIED_ERROR| Unsuccessful Diameter SLh LRR/LRA command (unspecified error most likely due to a runtime exception).
 
 |IMS_UDR_SUCCESS| Successful Diameter Sh UDR/UDA command including location information AVPs.
 
@@ -1392,9 +1223,9 @@ If present, it shall contain the 1xRTT Reference Cell ID uniquely identifying of
 
 |IMS_UDR_DSAI_NOT_AVAILABLE| Unsuccessful Sh UDR/UDA command (received Diameter error code 5108).
 
-|IMS_UDR_SYSTEM_FAILURE| Unsuccessful Diameter Sh UDR/UDA command (received Diameter error different than those specified by 3GPP TS 29.329).
+|IMS_UDR_SYSTEM_FAILURE| Unsuccessful Diameter Sh UDR/UDA command (received Diameter error different from those specified by 3GPP TS 29.329).
 
-|IMS_UDR_UNSPECIFIED_ERROR| Unsuccessful Diameter Sh UDR/UDA command (unspecified error most likely due to an runtime exception).
+|IMS_UDR_UNSPECIFIED_ERROR| Unsuccessful Diameter Sh UDR/UDA command (unspecified error most likely due to a runtime exception).
 
 |FAILED_NOT_IMPLEMENTED| The requested operation has not been implemented.
 |=================================================================================================================================================================================================================================

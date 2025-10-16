@@ -18,22 +18,23 @@
     <!-- SMPP resource adaptor for SIF (SUPL initiation function) -->
     <property name="checkout.restcomm-smpp-ra.dir" value="${checkout.dir}/restcomm-smpp-ra" />
     <property name="restcomm-smpp-ra.version" value="7.1.0-134" />
+    <property name="checkout.permission-extension.dir" value="${checkout.dir}/Permission-Extension" />
     <property name="paic.url" value="http://45.79.17.57/PAIC_Extended" />
-
-    <property name="restcomm.gmlc.release.version" value="5.0.0-SNAPSHOT"/>
+    <property name="restcomm.gmlc.release.version" value="6.0.1-SNAPSHOT"/>
 
     <!-- Options for referring to release resource versions -->
     <!-- SLEE stuff -->
-    <property name="restcomm-slee.version" value="8.0.0-2" />
-    <property name="wildfly_version" value="10.1.0" />
+    <property name="restcomm-slee.version" value="8.2.1-29" />
+    <property name="wildfly_version" value="24.0.1" />
+    <property name="permission.extension.version" value="1.0.0-15" />
 
     <!-- jss7 stack and MAP RA -->
-    <property name="restcomm-jss7.version" value="8.3.0-259" />
+    <property name="restcomm-jss7.version" value="9.0.0-318" />
     <property name="checkout.restcomm-jss7.dir" value="${checkout.dir}/Extended-jSS7-${restcomm-jss7.version}" />
 
     <!-- MAP RA -->
-    <property name="restcomm-map-ra.build-number" value="162" />
-    <property name="restcomm-map-ra.version" value="8.0.0-${restcomm-map-ra.build-number}" />
+    <property name="restcomm-map-ra.build-number" value="215" />
+    <property name="restcomm-map-ra.version" value="9.0.0-${restcomm-map-ra.build-number}" />
     <property name="restcomm-map-ra.download.zip.url" value="${paic.url}/jain-slee.ss7/${restcomm-map-ra.version}/resources/map.zip" />
 
     <!-- Required version of smpp must include latest added events -->
@@ -47,15 +48,14 @@
     <property name="restcomm-smpp-ra.distro.jar.path" value="${checkout.dir}/${restcomm-smpp-ra.download.jar.file}" />
     <property name="restcomm-smpp-ra.distro.docs.path" value="${checkout.dir}/${restcomm-smpp-ra.download.docs.file}" />
 
-
     <!-- Diameter mux  -->
-    <property name="restcomm-diam.build-number" value="198" />
-    <property name="restcomm-diam.version" value="1.7.4-${restcomm-diam.build-number}" />
+    <property name="restcomm-diam.build-number" value="302" />
+    <property name="restcomm-diam.version" value="2.0.0-${restcomm-diam.build-number}" />
     <property name="restcomm-diam.zip" value="restcomm-diameter-mux-wildfly-${restcomm-diam.version}.zip"/>
     <property name="restcomm-diam.download.url" value="${paic.url}/extended_jdiameter/${restcomm-diam.version}/${restcomm-diam.zip}" />
 
     <!-- Diameter RAs -->
-    <property name="diam.slee.ra.version" value ="7.2.1-32" />
+    <property name="diam.slee.ra.version" value ="7.3.0-102" />
     <property name="diam.ra.zip.files" value ="diameter-base.zip,diameter-slg.zip,diameter-slh.zip,diameter-sh-client.zip,diameter-sh-server.zip"/>
     <property name="diam.ra.zip.files.base.url" value ="${paic.url}/jain_slee_diameter/${diam.slee.ra.version}"/>
     <property name="restcomm-diam.distro.zip.path" value="${checkout.dir}/${restcomm-diam.zip}" />
@@ -66,7 +66,7 @@
     <property name="diam.sh-server.ra.jar" value ="diameter-restcomm-slee-ra-diameter-sh-server-ra-DU-${diam.slee.ra.version}.jar" />
 
     <!-- SUPL ULP RA -->
-    <property name="jainslee-supl-ulp-ra.build-number" value="55" />
+    <property name="jainslee-supl-ulp-ra.build-number" value="59" />
     <property name="jainslee-supl-ulp-ra.version" value="1.0.0-${jainslee-supl-ulp-ra.build-number}" />
     <property name="jainslee-supl-ulp-ra.download.zip.url" value="${paic.url}/jain-slee.supl/${jainslee-supl-ulp-ra.version}/ulp.zip" />
     <property name="jainslee-supl-ulp-ra.zip.files" value ="ulp.zip"/>
@@ -86,7 +86,7 @@
     <property name="release.build.goals" value="clean install dependency:tree -Dmaven.test.skip=true"/>
     <property name="release.ts.deploy.goals.local" value="clean deploy -DaltDeploymentRepository=local-output::default::file:///tmp/output"/>
 
-    <property name="wildfly.home.relative.path" value="wildfly-10.1.0.Final"/>
+    <property name="wildfly.home.relative.path" value="wildfly-24.0.1.Final"/>
     <property name="jboss.home" value ="${release.dir}/${wildfly.home.relative.path}/"/>
     <property name="deploy.dir" value="${jboss.home}/standalone/deployments" />
 
@@ -96,6 +96,27 @@
     <property name="restcomm-slee.http.version" value="7.2.0-161" />
 
     <property name="download_restcomm-slee.http.zip" value="${paic.url}/jain_slee_http/${restcomm-slee.http.version}/extra/restcomm-http.zip" />
+
+    <!-- PERMISSION EXTENSIONS -->
+    <property name="permission-extension.download.distro.file" value="Permission-Extensions-${permission.extension.version}.zip" />
+    <property name="permission-extension.download.url" value="${paic.url}/permission-extension/${permission-extension.download.distro.file}" />
+    <property name="permission-extension.distro.zip.path" value="${checkout.dir}/${permission-extension.download.distro.file}" />
+
+    <available file="${permission-extension.distro.zip.path}" property="got.permission-extension" />
+    <target name="get-permission-extension" unless="got.permission-extension">
+        <echo>Downloading Permission Extensions: ${permission.extension.version}(${permission-extension.download.url})</echo>
+        <exec failonerror="true" executable="wget">
+            <arg value="${permission-extension.download.url}" />
+            <arg value="--output-document=${permission-extension.download.distro.file}" />
+            <arg value="--no-check-certificate" />
+        </exec>
+        <move file="${base.dir}/${permission-extension.download.distro.file}" todir="${checkout.dir}" />
+    </target>
+
+    <target name="extract-permission-extension" depends="get-permission-extension">
+        <delete dir="${checkout.permission-extension.dir}" failonerror="false" />
+        <unzip src="${permission-extension.distro.zip.path}" dest="${checkout.permission-extension.dir}" />
+    </target>
 
     <condition property="mvn.executable" value="${sys.M2_HOME}\bin\mvn.bat" else="mvn">
         <os family="windows"/>
@@ -170,8 +191,9 @@
             get-redis,
             get-restcomm-diam,
             get-cloudhopper,
-            get-ulp-ra" />
-    <target name="extract-deps" depends="extract-restcomm-slee,extract-restcomm-jss7,build-smpp-ra-copy,extract-restcomm-map-ra-docs,extract-restcomm-smpp-ra-docs,extract-restcomm-diam" />
+            get-ulp-ra,
+            get-permission-extension" />
+    <target name="extract-deps" depends="extract-restcomm-slee,extract-restcomm-jss7,build-smpp-ra-copy,extract-restcomm-map-ra-docs,extract-restcomm-smpp-ra-docs,extract-restcomm-diam,extract-permission-extension" />
     <!--target name="extract-deps" depends="extract-restcomm-slee,extract-restcomm-jss7,extract-restcomm-map-ra-docs" /-->
 
     <target name="get-mongodb">
@@ -479,6 +501,17 @@
         <copy file="${release.dir}/resources/diameter-sh-server/${diam.sh-server.ra.jar}"
               todir="${deploy.dir}" failonerror="true" />
 
+        <echo>Copy Permission Extensions</echo>
+        <copy todir="${release.dir}/extra/permission-extension" failonerror="true">
+            <fileset dir="${checkout.permission-extension.dir}/Permission-Extensions-${permission.extension.version}">
+                <include name="**" />
+            </fileset>
+        </copy>
+        <ant antfile="${release.dir}/extra/permission-extension/wildfly/build.xml" target="deploy">
+            <property name="basedir" value="${release.dir}/extra/permission-extension/wildfly" />
+        </ant>
+        <copy file="${checkout.permission-extension.dir}/Permission-Extensions-${permission.extension.version}/ui/permission-management.war" todir="${jboss.home}/standalone/deployments" failonerror="true" />
+
         <echo>Copy SUPL UL RA</echo>
         <copy file="${release.dir}/resources/ulp/${jainslee-supl-ulp-ra.jar}" todir="${deploy.dir}"
               failonerror="true"/>
@@ -487,6 +520,9 @@
 
         <!--default-->
         <copy file="${checkout.restcomm-gmlc.dir}/core/slee/services/du/target/gmlc-services-du-${restcomm.gmlc.release.version}.jar" todir="${deploy.dir}" failonerror="true" />
+
+        <copy file="${checkout.restcomm-gmlc.dir}/core/bootstrap/src/main/config/data/PermissionManagement_users.xml" todir="${jboss.home}/standalone/data" failonerror="true">
+        </copy>
 
         <!--tools-->
         <copy todir="${release.dir}/tools/restcomm-jss7-simulator" failonerror="true">

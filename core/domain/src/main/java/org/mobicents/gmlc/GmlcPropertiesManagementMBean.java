@@ -78,6 +78,18 @@ public interface GmlcPropertiesManagementMBean {
 
   void setDiameterGmlcNumber(String diameterUserName);
 
+  String getDiameterGmlcAddress();
+
+  void setDiameterGmlcAddress(String diameterGmlcAddress);
+
+  String getDiameterGmlcAddressType();
+
+  void setDiameterGmlcAddressType(String diameterGmlcAddressType);
+
+  Boolean getUseRiaGmlcAddress();
+
+  void setUseRiaGmlcAddress(Boolean useRiaGmlcAddress);
+
   String getLcsNonTriggeredReportOption();
 
   void setLcsNonTriggeredReportOption(String lcsNonTriggeredReportOption);

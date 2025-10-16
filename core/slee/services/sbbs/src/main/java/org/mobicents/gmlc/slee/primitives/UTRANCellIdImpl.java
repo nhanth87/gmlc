@@ -2,13 +2,13 @@ package org.mobicents.gmlc.slee.primitives;
 
 import javolution.xml.XMLFormat;
 import javolution.xml.stream.XMLStreamException;
+
 import org.mobicents.protocols.asn.AsnInputStream;
 import org.mobicents.protocols.asn.AsnOutputStream;
 import org.restcomm.protocols.ss7.map.api.MAPException;
 import org.restcomm.protocols.ss7.map.primitives.OctetStringBase;
 import org.restcomm.protocols.ss7.map.primitives.TbcdString;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 
 /**
@@ -188,16 +188,27 @@ public class UTRANCellIdImpl extends OctetStringBase implements UTRANCellId {
 
         @Override
         public void read(javolution.xml.XMLFormat.InputElement xml, UTRANCellIdImpl utranCellId) throws XMLStreamException {
-            String s = xml.getAttribute(DATA, DEFAULT_VALUE);
-            if (s != null) {
-                utranCellId.data = DatatypeConverter.parseHexBinary(s);
+            int mcc = xml.getAttribute(MCC, DEFAULT_INT_VALUE);
+            int mnc = xml.getAttribute(MNC, DEFAULT_INT_VALUE);
+            int uci = xml.getAttribute(UCI, DEFAULT_INT_VALUE);
+
+            try {
+                utranCellId.setData(mcc, mnc, uci);
+            } catch (MAPException e) {
+                throw new XMLStreamException("MAPException when deserializing UTRANCellIdImpl", e);
             }
         }
 
         @Override
         public void write(UTRANCellIdImpl utranCellId, javolution.xml.XMLFormat.OutputElement xml) throws XMLStreamException {
-            if (utranCellId.data != null) {
-                xml.setAttribute(DATA, DatatypeConverter.printHexBinary(utranCellId.data));
+            try {
+                xml.setAttribute(MCC, utranCellId.getMCC());
+                xml.setAttribute(MNC, utranCellId.getMNC());
+                xml.setAttribute(UCI, utranCellId.getUci());
+            } catch (MAPException e) {
+                throw new XMLStreamException("MAPException when serializing UTRANCellIdImpl", e);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
     };

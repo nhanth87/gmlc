@@ -8,7 +8,7 @@ public enum HttpRequestType {
     MLP("mlp"),
     UNSUPPORTED("404");
 
-    private String path;
+    private final String path;
 
     HttpRequestType(String path) {
         this.path = path;

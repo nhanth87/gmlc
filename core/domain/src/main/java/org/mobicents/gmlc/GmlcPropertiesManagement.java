@@ -39,6 +39,9 @@ public class GmlcPropertiesManagement implements GmlcPropertiesManagementMBean {
   protected static final String DIAMETER_DEST_REALM = "diameterdestrealm";
   protected static final String DIAMETER_DEST_HOST = "diameterdesthost";
   protected static final String DIAMETER_GMLC_NUMBER = "diametergmlcnumber";
+  protected static final String DIAMETER_GMLC_ADDRESS = "diametergmlcaddress";
+  protected static final String DIAMETER_GMLC_ADDRESS_TYPE = "diametergmlcaddresstype";
+  protected static final String RIA_GMLC_ADDRESS = "riagmlcaddress";
 
   protected static final String LCS_NON_TRIGGERED_REPORT_OPTION = "lcsnontriggeredreportoption";
   protected static final String LCS_URL_CALLBACK = "lcsurlcallback";
@@ -130,6 +133,9 @@ public class GmlcPropertiesManagement implements GmlcPropertiesManagementMBean {
   private String diameterDestRealm = "restcomm.org";
   private String diameterDestHost = "simulator";
   private String diameterGmlcNumber = "598970755909";
+  private String diameterGmlcAddress = "1.1.1.1";
+  private String diameterGmlcAddressType = "4";
+  private Boolean useRiaGmlcAddress = false;
 
   private String lcsNonTriggeredReportOption = "json";
 
@@ -344,6 +350,39 @@ public class GmlcPropertiesManagement implements GmlcPropertiesManagementMBean {
   @Override
   public void setDiameterGmlcNumber(String diameterGmlcNumber) {
     this.diameterGmlcNumber = diameterGmlcNumber;
+    this.store();
+  }
+
+  @Override
+  public String getDiameterGmlcAddress() {
+    return diameterGmlcAddress;
+  }
+
+  @Override
+  public void setDiameterGmlcAddress(String diameterGmlcAddress) {
+    this.diameterGmlcAddress = diameterGmlcAddress;
+    this.store();
+  }
+
+  @Override
+  public String getDiameterGmlcAddressType() {
+    return diameterGmlcAddressType;
+  }
+
+  @Override
+  public void setDiameterGmlcAddressType(String diameterGmlcAddressType) {
+    this.diameterGmlcAddressType = diameterGmlcAddressType;
+    this.store();
+  }
+
+  @Override
+  public Boolean getUseRiaGmlcAddress() {
+    return useRiaGmlcAddress;
+  }
+
+  @Override
+  public void setUseRiaGmlcAddress(Boolean useRiaGmlcAddress) {
+    this.useRiaGmlcAddress = useRiaGmlcAddress;
     this.store();
   }
 
@@ -732,6 +771,9 @@ public class GmlcPropertiesManagement implements GmlcPropertiesManagementMBean {
       writer.write(this.diameterDestRealm, DIAMETER_DEST_REALM, String.class);
       writer.write(this.diameterDestHost, DIAMETER_DEST_HOST, String.class);
       writer.write(this.diameterGmlcNumber, DIAMETER_GMLC_NUMBER, String.class);
+      writer.write(this.diameterGmlcAddress, DIAMETER_GMLC_ADDRESS, String.class);
+      writer.write(this.diameterGmlcAddressType, DIAMETER_GMLC_ADDRESS_TYPE, String.class);
+      writer.write(this.useRiaGmlcAddress, RIA_GMLC_ADDRESS, Boolean.class);
 
       writer.write(this.lcsNonTriggeredReportOption, LCS_NON_TRIGGERED_REPORT_OPTION, String.class);
       writer.write(this.lcsUrlCallback, LCS_URL_CALLBACK, String.class);
@@ -776,7 +818,7 @@ public class GmlcPropertiesManagement implements GmlcPropertiesManagementMBean {
   /**
    * Load and create LinkSets and Link from persisted file
    *
-   * @throws Exception
+   * @throws FileNotFoundException when file is not found
    */
   public void load() throws FileNotFoundException {
 
@@ -800,6 +842,9 @@ public class GmlcPropertiesManagement implements GmlcPropertiesManagementMBean {
       diameterDestRealm = reader.read(DIAMETER_DEST_REALM, String.class);
       diameterDestHost = reader.read(DIAMETER_DEST_HOST, String.class);
       diameterGmlcNumber = reader.read(DIAMETER_GMLC_NUMBER, String.class);
+      diameterGmlcAddress = reader.read(DIAMETER_GMLC_ADDRESS, String.class);
+      diameterGmlcAddressType = reader.read(DIAMETER_GMLC_ADDRESS_TYPE, String.class);
+      useRiaGmlcAddress = reader.read(RIA_GMLC_ADDRESS, Boolean.class);
 
       lcsNonTriggeredReportOption = reader.read(LCS_NON_TRIGGERED_REPORT_OPTION, String.class);
       lcsUrlCallback = reader.read(LCS_URL_CALLBACK, String.class);
@@ -838,13 +883,13 @@ public class GmlcPropertiesManagement implements GmlcPropertiesManagementMBean {
       if (logger.isInfoEnabled()) {
         logger.info(String.format("GmlcProperties GMLC {GT: '%s', SSN: %d}, HLR { SSN: %d }, MSC { SSN: %d }, VLR { SSN: %d }, SGSN { SSN: %d }," +
                 "MaxMapVersion: %d, MaxActCntOrigin: %d " + "Dialog Timeout: %d, Event Context Suspend Delivery Timeout: %d, " +
-                "Diameter { OrigRealm: '%s', OrigHost: '%s', DestRealm: '%s', DestHost: '%s', UserName: '%s' }, " +
+                "Diameter { OrigRealm: '%s', OrigHost: '%s', DestRealm: '%s', DestHost: '%s', GmlcNumber: '%s', GmlcAddress: '%s', GmlcAddressType: '%s', useRiaGmlcAddress: '%s' }, " +
                 "LCS NON TRIGGERED REPORT OPTION { API: '%s' }, LCS URL CALLBACK { URL: '%s' }, MONGODB {Host: '%s', Port: %d, Database: '%s'}," +
                 "SUPL { SUPL_ENABLED: '%s', SSL_ENABLED: '%s', SSL_PORT: %d, NO_SSL_PORT: %d, TLS_CERT_PATH: '%s', TLS_CERT_PWD: '%s', SUPL_SESSION_EXPIRED: %d, SUPL_PERIODIC_SESSION_EXPIRED: %d, " +
                         "SMPP_HOST: '%s', SMPP_PORT: '%d', SMPP_SID: '%s', SMPP_PWD: '%s', FQDN: '%s' }," +
                 "REDIS { REDIS_DB_HOST: '%S', REDIS_DB_PORT: %d }, GLaaS {ENABLED: '%s', ENDPOINT: '%s', APP TOKEN: '%s', THREAD POLL: '%s' }",
             gmlcGt, gmlcSsn, hlrSsn, mscSsn, vlrSsn, sgsnSsn, maxMapVersion, maxActivityCount, dialogTimeout, eventContextSuspendDeliveryTimeout,
-            diameterOriginRealm, diameterOriginHost, diameterDestRealm, diameterDestHost, diameterGmlcNumber, lcsNonTriggeredReportOption,
+            diameterOriginRealm, diameterOriginHost, diameterDestRealm, diameterDestHost, diameterGmlcNumber, diameterGmlcAddress, diameterGmlcAddressType, useRiaGmlcAddress, lcsNonTriggeredReportOption,
             lcsUrlCallback, mongoHost, mongoPort, mongoDatabase, suplEnabled, suplSslEnabled, suplSslPort, suplNoSslPort, suplTlsCertPath, suplTlsCertPwd, suplSessionExpired, suplPeriodicSessionExpired,
             smppHost, smppPort, smppSid, smppPwd, fqdn, redisHost, redisPort, glaasEnabled, glaasCdrEndpoint, glaasAppToken, glassThreadPoll));
       }

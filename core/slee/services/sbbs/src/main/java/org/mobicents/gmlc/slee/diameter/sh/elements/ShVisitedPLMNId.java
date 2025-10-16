@@ -40,14 +40,14 @@ public class ShVisitedPLMNId {
         if (visitedPlmnIdStr == null || !(visitedPlmnIdStr.length() == 5 || visitedPlmnIdStr.length() == 6))
             return;
 
-        String byte01 = "", byte02 = "", byte03 = "";
+        String byte01, byte02, byte03;
         visitedPlmnIdStr = visitedPlmnIdStr.length() == 5 ? visitedPlmnIdStr + "F" : visitedPlmnIdStr;
         // First Byte = MCC digit 2 + MCC digit 1
-        byte01 = visitedPlmnIdStr.charAt(1) + "" + visitedPlmnIdStr.charAt(0);
+        byte01 = visitedPlmnIdStr.charAt(1) + String.valueOf(visitedPlmnIdStr.charAt(0));
         // Second Byte = MNC digit 3 + MCC digit 3
-        byte02 = visitedPlmnIdStr.charAt(5) + "" + visitedPlmnIdStr.charAt(2);
+        byte02 = visitedPlmnIdStr.charAt(5) + String.valueOf(visitedPlmnIdStr.charAt(2));
         // Third Byte = MNC digit 2 + MNC digit 1
-        byte03 = visitedPlmnIdStr.charAt(4) + "" + visitedPlmnIdStr.charAt(3);
+        byte03 = visitedPlmnIdStr.charAt(4) + String.valueOf(visitedPlmnIdStr.charAt(3));
 
         byte[] visitedPlmnIdBytes = decodeHexString(byte01 + byte02 + byte03);
         this.visitedPlmnId = new PlmnIdImpl(visitedPlmnIdBytes);

@@ -77,8 +77,8 @@ public class OnErrorResponseJsonBuilder {
         writeOperationErrorReason(errorMessage, errorResponseJsonObject);
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String errorReportJson = gson.toJson(errorResponseJsonObject);
-        return errorReportJson;
+
+        return gson.toJson(errorResponseJsonObject);
     }
 
 }

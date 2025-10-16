@@ -4,9 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import org.apache.log4j.Logger;
-import org.mobicents.gmlc.slee.map.PsiResponseValues;
-import org.mobicents.gmlc.slee.map.SriForSmResponseValues;
-import org.mobicents.gmlc.slee.map.SriResponseValues;
+import org.mobicents.gmlc.slee.map.PsiResponseParams;
 import org.mobicents.gmlc.slee.primitives.EUTRANCGI;
 import org.mobicents.gmlc.slee.primitives.EUTRANCGIImpl;
 import org.mobicents.gmlc.slee.primitives.RoutingAreaId;
@@ -15,11 +13,25 @@ import org.mobicents.gmlc.slee.primitives.TrackingAreaId;
 import org.mobicents.gmlc.slee.primitives.TrackingAreaIdImpl;
 import org.restcomm.protocols.ss7.isup.message.parameter.LocationNumber;
 import org.restcomm.protocols.ss7.map.api.MAPException;
+import org.restcomm.protocols.ss7.map.api.primitives.LMSI;
+import org.restcomm.protocols.ss7.map.api.primitives.PlmnId;
+import org.restcomm.protocols.ss7.map.api.service.mobility.locationManagement.UsedRATType;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.EUtranCgi;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.NRCellGlobalId;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.NRTAId;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.TAId;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberManagement.FQDN;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberManagement.LSAIdentity;
+import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.EUtranCgiImpl;
+import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.NRTAIdImpl;
+import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.TAIdImpl;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberManagement.LSAIdentityImpl;
+
+import java.nio.charset.StandardCharsets;
 
 import static org.mobicents.gmlc.slee.http.JsonWriter.bytesToHexString;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAddressPresentationRestrictedIndicator;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeAmfAddress;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAol;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeCellId;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeConfidence;
@@ -31,6 +43,7 @@ import static org.mobicents.gmlc.slee.http.JsonWriter.writeImei;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeImsi;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeInternalNetworkNumberIndicator;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeLac;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeLastRatType;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeLatitude;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeLmsi;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeLocationNumberAddress;
@@ -52,6 +65,7 @@ import static org.mobicents.gmlc.slee.http.JsonWriter.writeMsisdn;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeNatureOfAddressIndicator;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeNetwork;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeNotReachableReason;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeNrCellId;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeNumberingPlanIndicator;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeOddFlag;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeOperation;
@@ -64,6 +78,7 @@ import static org.mobicents.gmlc.slee.http.JsonWriter.writeScreeningIndicator;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeServiceAreaCode;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeSgsnNumber;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeSubscriberState;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeTime;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeTrackingAreaCode;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeTypeOfShape;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeUncertainty;
@@ -83,38 +98,33 @@ public class PsiResponseJsonBuilder {
     /**
      * Handle generating the appropriate HTTP response in JSON format
      *
-     * @param psiResponseValues         Subscriber Information values gathered from PSI response event
-     * @param imsi                      IMSI value used on PSI attempt
-     * @param sriForSmResponseValues    Subscriber Information values gathered from SRISM response event
-     * @param sriResponseValues         Subscriber Information values gathered from SRI response event
+     * @param psiResponseParams         Subscriber Information values gathered from PSI response event
+     * @param imsi                      IMSI value used on PSI attempt (gathered from SRI or SRISM response or HTTP request)
+     * @param msisdn                    MSISDN value of the target subscriber
+     * @param lmsi                      LMSI value gathered from SRISM response event
      */
-    public static String buildJsonResponseForPsi(PsiResponseValues psiResponseValues, String imsi, SriForSmResponseValues sriForSmResponseValues,
-                                                 SriResponseValues sriResponseValues, String msisdn) throws MAPException {
+    public static String buildJsonResponseForPsi(PsiResponseParams psiResponseParams, String imsi, String msisdn, LMSI lmsi) throws MAPException {
 
-        Integer csMcc, csMnc, csLac, csCiOrSac, psMcc, psMnc, psLac, psCiOrSac, ecgiMcc, ecgiMnc, ecgiCi, raiMcc, raiMnc, raiLac, rac, taiMcc, taiMnc, tac,
-            natureOfAddressIndicator, numberingPlanIndicator, internalNetworkNumberIndicator, addressPresentationRestrictedIndicator, screeningIndicator,
-            ageOfLocationInfo, geodeticConfidence, gprsGeodeticConfidence, epsGeodeticConfidence, geodeticScreeningAndPresentationIndicators,
-            gprsGeodeticScreeningAndPresentationIndicators, epsGeodeticScreeningAndPresentationIndicators, mnpInfoResultNumberPortabilityStatus;
+        int csMcc, csMnc, csLac, csCiOrSac, psMcc, psMnc, psLac, psCiOrSac, ecgiMcc, ecgiMnc, ecgiCi, raiMcc, raiMnc, raiLac, rac, taiMcc, taiMnc, tac,
+                nrCgiMcc, nrCgiMnc, nrTaiMcc, nrTaiMnc, nrTaiTac, vPlmnIdMcc, vPlmnIdMnc,
+                natureOfAddressIndicator, numberingPlanIndicator, internalNetworkNumberIndicator, addressPresentationRestrictedIndicator, screeningIndicator,
+                ageOfLocationInfo, geodeticConfidence, gprsGeodeticConfidence, epsGeodeticConfidence, geodeticScreeningAndPresentationIndicators,
+                gprsGeodeticScreeningAndPresentationIndicators, epsGeodeticScreeningAndPresentationIndicators,
+                nrGeodeticConfidence, nrGeodeticScreeningAndPresentationIndicators, year, month, day, hour, minute, second;
         csMcc = csMnc = csLac = csCiOrSac = psMcc = psMnc = psLac = psCiOrSac = ecgiMcc = ecgiMnc = ecgiCi = raiMcc = raiMnc = raiLac = rac = taiMcc = taiMnc = tac =
-            natureOfAddressIndicator = numberingPlanIndicator = internalNetworkNumberIndicator = addressPresentationRestrictedIndicator =
-                screeningIndicator = ageOfLocationInfo = geodeticConfidence = gprsGeodeticConfidence = epsGeodeticConfidence =
-                    geodeticScreeningAndPresentationIndicators = gprsGeodeticScreeningAndPresentationIndicators = epsGeodeticScreeningAndPresentationIndicators =
-                        mnpInfoResultNumberPortabilityStatus = null;
-        String locationNumberAddressDigits, csSubscriberState, psSubscriberState, notReachableReason, vlrNumber, mscNumber, mmeName, sgsnNumber, lsaId,
-            imei, mnpInfoResultMSISDN, mnpInfoResultIMSI, mnpInfoResultRouteingNumber, geographicalTypeOfShape, geodeticTypeOfShape, gprsGeographicalTypeOfShape,
-            gprsGeodeticTypeOfShape, epsGeographicalTypeOfShape, epsGeodeticTypeOfShape, lmsi, msClassmark, msNetCap, msRASCap;
-        locationNumberAddressDigits = csSubscriberState = psSubscriberState = notReachableReason = vlrNumber = mscNumber = mmeName = sgsnNumber = lsaId = imei = mnpInfoResultMSISDN =
-            mnpInfoResultIMSI = mnpInfoResultRouteingNumber = geographicalTypeOfShape = geodeticTypeOfShape = gprsGeographicalTypeOfShape = gprsGeodeticTypeOfShape =
-                epsGeographicalTypeOfShape = epsGeodeticTypeOfShape = lmsi = msClassmark = msNetCap = msRASCap = null;
-        Double geographicalLatitude, geographicalLongitude, geographicalUncertainty, geodeticLatitude, geodeticLongitude, geodeticUncertainty;
-        geographicalLatitude = geographicalLongitude = geographicalUncertainty = geodeticLatitude = geodeticLongitude = geodeticUncertainty = null;
-        Double epsGeographicalLatitude, epsGeographicalLongitude, epsGeographicalUncertainty, epsGeodeticLatitude, epsGeodeticLongitude, epsGeodeticUncertainty;
-        epsGeographicalLatitude = epsGeographicalLongitude = epsGeographicalUncertainty = epsGeodeticLatitude = epsGeodeticLongitude = epsGeodeticUncertainty = null;
-        Double gprsGeographicalLatitude, gprsGeographicalLongitude, gprsGeographicalUncertainty, gprsGeodeticLatitude, gprsGeodeticLongitude, gprsGeodeticUncertainty;
-        gprsGeographicalLatitude = gprsGeographicalLongitude = gprsGeographicalUncertainty = gprsGeodeticLatitude = gprsGeodeticLongitude = gprsGeodeticUncertainty = null;
-        Long ecgiEci = null, ecgiENBId = null;
-        Boolean oddFlag, saiPresent, currentLocationRetrieved, lsaUniversal;
-        oddFlag = currentLocationRetrieved = lsaUniversal = null;
+                nrCgiMcc = nrCgiMnc = nrTaiMcc = nrTaiMnc = nrTaiTac = vPlmnIdMcc = vPlmnIdMnc = -1;
+        Integer mnpInfoResultNumberPortabilityStatus = null;
+        String locationNumberAddressDigits, csSubscriberState, psSubscriberState, epsSubscriberState, notReachableReason, vlrNumber, mscNumber, mmeName, sgsnNumber, amfAddressString, lsaId,
+                imei, lastUeActivityTime, lastRatType, mnpInfoResultMSISDN, mnpInfoResultIMSI, mnpInfoResultRouteingNumber, geographicalTypeOfShape, geodeticTypeOfShape, gprsGeographicalTypeOfShape,
+                gprsGeodeticTypeOfShape, epsGeographicalTypeOfShape, epsGeodeticTypeOfShape, nrGeographicalTypeOfShape, nrGeodeticTypeOfShape, lmsiHexValue, msClassmark, msNetCap, msRASCap;
+         csSubscriberState = psSubscriberState = epsSubscriberState = notReachableReason = imei = lastUeActivityTime = lastRatType =
+                mnpInfoResultMSISDN = mnpInfoResultIMSI = mnpInfoResultRouteingNumber = lmsiHexValue = msClassmark = msNetCap = msRASCap = null;
+        double geographicalLatitude, geographicalLongitude, geographicalUncertainty, geodeticLatitude, geodeticLongitude, geodeticUncertainty;
+        double epsGeographicalLatitude, epsGeographicalLongitude, epsGeographicalUncertainty, epsGeodeticLatitude, epsGeodeticLongitude, epsGeodeticUncertainty;
+        double gprsGeographicalLatitude, gprsGeographicalLongitude, gprsGeographicalUncertainty, gprsGeodeticLatitude, gprsGeodeticLongitude, gprsGeodeticUncertainty;
+        double nrGeographicalLatitude, nrGeographicalLongitude, nrGeographicalUncertainty, nrGeodeticLatitude, nrGeodeticLongitude, nrGeodeticUncertainty;
+        Long ecgiEci = null, ecgiENBId = null, nrCgiCi = null;
+        boolean oddFlag, saiPresent, lsaUniversal;
         saiPresent = false;
 
         JsonObject psiSubscriberInformationJsonObject = new JsonObject();
@@ -122,36 +132,25 @@ public class PsiResponseJsonBuilder {
         writeProtocol("MAP", psiSubscriberInformationJsonObject);
         writeOperation("PSI", psiSubscriberInformationJsonObject);
         writeOperationResult("SUCCESS", psiSubscriberInformationJsonObject);
-        JsonObject psiLocationInformationJsonObject = new JsonObject();
-        JsonObject psiLocationInformationEPSJsonObject = new JsonObject();
-        JsonObject psiLocationInformationGPRSJsonObject = new JsonObject();
-        JsonObject csCgiOrLaiOrSaiJsonObject = new JsonObject();
-        JsonObject psCgiOrLaiOrSaiJsonObject = new JsonObject();
-        JsonObject locationNumberJsonObject = new JsonObject();
-        JsonObject eUtranCgiJsonObject = new JsonObject();
-        JsonObject raiJsonObject = new JsonObject();
-        JsonObject lsaJsonObject = new JsonObject();
-        JsonObject taiJsonObject = new JsonObject();
-        JsonObject psiGeographicalInformationJsonObject = new JsonObject();
-        JsonObject psiGeodeticInformationJsonObject = new JsonObject();
-        JsonObject psiEPSGeographicalInformationJsonObject = new JsonObject();
-        JsonObject psiEPSGeodeticInformationJsonObject = new JsonObject();
-        JsonObject psiGPRSGeographicalInformationJsonObject = new JsonObject();
-        JsonObject psiGPRSGeodeticInformationJsonObject = new JsonObject();
-        JsonObject psiMnpInfoResultJsonObject = new JsonObject();
-        JsonObject psiGprsMsClassJsonObject = new JsonObject();
+        JsonObject psiCSLocationInformationJsonObject = null;
+        JsonObject psiCsEPSLocationInformationJsonObject;
+        JsonObject psiPSLocationInformationJsonObject = null;
+        JsonObject psiEPSLocationInformationJsonObject = null;
+        JsonObject psi5GSLocationInformationJsonObject = null;
 
-        if (psiResponseValues != null) {
+        if (psiResponseParams != null) {
 
-            if (psiResponseValues.getLocationInformation() != null) {
+            if (psiResponseParams.getLocationInformation() != null) {
+                psiCSLocationInformationJsonObject = new JsonObject();
 
-                if (psiResponseValues.getLocationInformation().getSaiPresent() != false) {
+                if (psiResponseParams.getLocationInformation().getSaiPresent()) {
                     saiPresent = true;
                 }
 
-                if (psiResponseValues.getLocationInformation().getLocationNumber() != null) {
-                    if (psiResponseValues.getLocationInformation().getLocationNumber().getLocationNumber() != null) {
-                        LocationNumber locationNumber = psiResponseValues.getLocationInformation().getLocationNumber().getLocationNumber();
+                if (psiResponseParams.getLocationInformation().getLocationNumber() != null) {
+                    if (psiResponseParams.getLocationInformation().getLocationNumber().getLocationNumber() != null) {
+                        JsonObject locationNumberJsonObject = new JsonObject();
+                        LocationNumber locationNumber = psiResponseParams.getLocationInformation().getLocationNumber().getLocationNumber();
                         oddFlag = locationNumber.isOddFlag();
                         natureOfAddressIndicator = locationNumber.getNatureOfAddressIndicator();
                         internalNetworkNumberIndicator = locationNumber.getInternalNetworkNumberIndicator();
@@ -159,108 +158,109 @@ public class PsiResponseJsonBuilder {
                         addressPresentationRestrictedIndicator = locationNumber.getAddressRepresentationRestrictedIndicator();
                         screeningIndicator = locationNumber.getScreeningIndicator();
                         locationNumberAddressDigits = locationNumber.getAddress();
-                    }
-                    // Write CS Location Information values
-                    if (oddFlag != null)
+                        // Write CS Location Information values
                         writeOddFlag(oddFlag, locationNumberJsonObject);
-                    writeNatureOfAddressIndicator(natureOfAddressIndicator, locationNumberJsonObject);
-                    writeInternalNetworkNumberIndicator(internalNetworkNumberIndicator, locationNumberJsonObject);
-                    writeNumberingPlanIndicator(numberingPlanIndicator, locationNumberJsonObject);
-                    writeAddressPresentationRestrictedIndicator(addressPresentationRestrictedIndicator, locationNumberJsonObject);
-                    writeScreeningIndicator(screeningIndicator, locationNumberJsonObject);
-                    writeLocationNumberAddress(locationNumberAddressDigits, locationNumberJsonObject);
+                        writeNatureOfAddressIndicator(natureOfAddressIndicator, locationNumberJsonObject);
+                        writeInternalNetworkNumberIndicator(internalNetworkNumberIndicator, locationNumberJsonObject);
+                        writeNumberingPlanIndicator(numberingPlanIndicator, locationNumberJsonObject);
+                        writeAddressPresentationRestrictedIndicator(addressPresentationRestrictedIndicator, locationNumberJsonObject);
+                        writeScreeningIndicator(screeningIndicator, locationNumberJsonObject);
+                        writeLocationNumberAddress(locationNumberAddressDigits, locationNumberJsonObject);
+                        psiCSLocationInformationJsonObject.add("LocationNumber", locationNumberJsonObject);
+                    }
                 }
-                psiLocationInformationJsonObject.add("LocationNumber", locationNumberJsonObject);
 
-                if (psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
-                    if (psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
-                        csMcc = psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC();
-                        csMnc = psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC();
-                        csLac = psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac();
-                    } else if (psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
-                        csMcc = psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
-                        csMnc = psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC();
-                        csLac = psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
-                        csCiOrSac = psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
+                if (psiResponseParams.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
+                    JsonObject csCgiOrLaiOrSaiJsonObject = new JsonObject();
+                    if (psiResponseParams.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
+                        csMcc = psiResponseParams.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC();
+                        csMnc = psiResponseParams.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC();
+                        csLac = psiResponseParams.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac();
+                    } else if (psiResponseParams.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
+                        csMcc = psiResponseParams.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
+                        csMnc = psiResponseParams.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC();
+                        csLac = psiResponseParams.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
+                        csCiOrSac = psiResponseParams.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
                     }
                     writeMcc(csMcc, csCgiOrLaiOrSaiJsonObject);
                     writeMnc(csMnc, csCgiOrLaiOrSaiJsonObject);
                     writeLac(csLac, csCgiOrLaiOrSaiJsonObject);
                     if (!saiPresent) {
-                        if (csCiOrSac != null) {
+                        if (csCiOrSac != -1) {
                             writeCellId(csCiOrSac, csCgiOrLaiOrSaiJsonObject);
-                            psiLocationInformationJsonObject.add("CGI", csCgiOrLaiOrSaiJsonObject);
+                            psiCSLocationInformationJsonObject.add("CGI", csCgiOrLaiOrSaiJsonObject);
                         } else {
-                            if (csLac != null)
-                                psiLocationInformationJsonObject.add("LAI", csCgiOrLaiOrSaiJsonObject);
+                            if (csLac != -1)
+                                psiCSLocationInformationJsonObject.add("LAI", csCgiOrLaiOrSaiJsonObject);
                         }
                     } else {
-                        if (csCiOrSac != null) {
+                        if (csCiOrSac != -1) {
                             writeServiceAreaCode(csCiOrSac, csCgiOrLaiOrSaiJsonObject);
-                            psiLocationInformationJsonObject.add("SAI", csCgiOrLaiOrSaiJsonObject);
+                            psiCSLocationInformationJsonObject.add("SAI", csCgiOrLaiOrSaiJsonObject);
                         } else {
-                            if (csLac != null)
-                                psiLocationInformationJsonObject.add("LAI", csCgiOrLaiOrSaiJsonObject);
+                            if (csLac != -1)
+                                psiCSLocationInformationJsonObject.add("LAI", csCgiOrLaiOrSaiJsonObject);
                         }
                     }
                 }
-                if (csCiOrSac != null)
-                    writeSaiPresent(saiPresent, psiLocationInformationJsonObject);
+                if (csCiOrSac != -1)
+                    writeSaiPresent(saiPresent, psiCSLocationInformationJsonObject);
 
-                if (psiResponseValues.getLocationInformation().getGeographicalInformation() != null) {
-                    geographicalLatitude = psiResponseValues.getLocationInformation().getGeographicalInformation().getLatitude();
-                    geographicalLongitude = psiResponseValues.getLocationInformation().getGeographicalInformation().getLongitude();
-                    geographicalTypeOfShape = psiResponseValues.getLocationInformation().getGeographicalInformation().getTypeOfShape().name();
-                    geographicalUncertainty = psiResponseValues.getLocationInformation().getGeographicalInformation().getUncertainty();
+                if (psiResponseParams.getLocationInformation().getGeographicalInformation() != null) {
+                    JsonObject psiGeographicalInformationJsonObject = new JsonObject();
+                    geographicalLatitude = psiResponseParams.getLocationInformation().getGeographicalInformation().getLatitude();
+                    geographicalLongitude = psiResponseParams.getLocationInformation().getGeographicalInformation().getLongitude();
+                    geographicalTypeOfShape = psiResponseParams.getLocationInformation().getGeographicalInformation().getTypeOfShape().name();
+                    geographicalUncertainty = psiResponseParams.getLocationInformation().getGeographicalInformation().getUncertainty();
                     writeTypeOfShape(geographicalTypeOfShape, psiGeographicalInformationJsonObject);
                     writeLatitude(geographicalLatitude, psiGeographicalInformationJsonObject);
                     writeLongitude(geographicalLongitude, psiGeographicalInformationJsonObject);
                     writeUncertainty(geographicalUncertainty, geographicalLatitude, geographicalLongitude, psiGeographicalInformationJsonObject);
+                    psiCSLocationInformationJsonObject.add("GeographicalInformation", psiGeographicalInformationJsonObject);
                 }
-                psiLocationInformationJsonObject.add("GeographicalInformation", psiGeographicalInformationJsonObject);
 
-                if (psiResponseValues.getLocationInformation().getGeodeticInformation() != null) {
-                    geodeticLatitude = psiResponseValues.getLocationInformation().getGeodeticInformation().getLatitude();
-                    geodeticLongitude = psiResponseValues.getLocationInformation().getGeodeticInformation().getLongitude();
-                    geodeticTypeOfShape = psiResponseValues.getLocationInformation().getGeodeticInformation().getTypeOfShape().name();
-                    geodeticUncertainty = psiResponseValues.getLocationInformation().getGeodeticInformation().getUncertainty();
-                    geodeticConfidence = psiResponseValues.getLocationInformation().getGeodeticInformation().getConfidence();
-                    geodeticScreeningAndPresentationIndicators = psiResponseValues.getLocationInformation().getGeodeticInformation().getScreeningAndPresentationIndicators();
+                if (psiResponseParams.getLocationInformation().getGeodeticInformation() != null) {
+                    JsonObject psiGeodeticInformationJsonObject = new JsonObject();
+                    geodeticLatitude = psiResponseParams.getLocationInformation().getGeodeticInformation().getLatitude();
+                    geodeticLongitude = psiResponseParams.getLocationInformation().getGeodeticInformation().getLongitude();
+                    geodeticTypeOfShape = psiResponseParams.getLocationInformation().getGeodeticInformation().getTypeOfShape().name();
+                    geodeticUncertainty = psiResponseParams.getLocationInformation().getGeodeticInformation().getUncertainty();
+                    geodeticConfidence = psiResponseParams.getLocationInformation().getGeodeticInformation().getConfidence();
+                    geodeticScreeningAndPresentationIndicators = psiResponseParams.getLocationInformation().getGeodeticInformation().getScreeningAndPresentationIndicators();
                     writeTypeOfShape(geodeticTypeOfShape, psiGeodeticInformationJsonObject);
                     writeLatitude(geodeticLatitude, psiGeodeticInformationJsonObject);
                     writeLongitude(geodeticLongitude, psiGeodeticInformationJsonObject);
                     writeUncertainty(geodeticUncertainty, geodeticLatitude, geodeticLongitude, psiGeodeticInformationJsonObject);
                     writeConfidence(geodeticConfidence, geodeticLatitude, geodeticLongitude, psiGeodeticInformationJsonObject);
                     writeScreeningAndPresentationIndicators(geodeticScreeningAndPresentationIndicators, geodeticLatitude, geodeticLongitude, psiGeodeticInformationJsonObject);
-                }
-                psiLocationInformationJsonObject.add("GeodeticInformation", psiGeodeticInformationJsonObject);
-
-                if (psiResponseValues.getLocationInformation().getAgeOfLocationInformation() != null) {
-                    ageOfLocationInfo = psiResponseValues.getLocationInformation().getAgeOfLocationInformation().intValue();
-                    writeAol(ageOfLocationInfo, psiLocationInformationJsonObject);
+                    psiCSLocationInformationJsonObject.add("GeodeticInformation", psiGeodeticInformationJsonObject);
                 }
 
-                if (psiResponseValues.getLocationInformation().getCurrentLocationRetrieved() != false)
-                    currentLocationRetrieved = true;
-                else
-                    currentLocationRetrieved = false;
-                if (currentLocationRetrieved != null)
-                    writeCurrentLocationRetrieved(currentLocationRetrieved, psiLocationInformationJsonObject);
-
-                if (psiResponseValues.getLocationInformation().getVlrNumber() != null) {
-                    vlrNumber = psiResponseValues.getLocationInformation().getVlrNumber().getAddress();
-                    writeVlrNumber(vlrNumber, psiLocationInformationJsonObject);
+                if (psiResponseParams.getLocationInformation().getAgeOfLocationInformation() != null) {
+                    ageOfLocationInfo = psiResponseParams.getLocationInformation().getAgeOfLocationInformation();
+                    writeAol(ageOfLocationInfo, psiCSLocationInformationJsonObject);
                 }
 
-                if (psiResponseValues.getLocationInformation().getMscNumber() != null) {
-                    mscNumber = psiResponseValues.getLocationInformation().getMscNumber().getAddress();
-                    writeMscNumber(mscNumber, psiLocationInformationJsonObject);
+                if (psiResponseParams.getLocationInformation().getCurrentLocationRetrieved()) {
+                    writeCurrentLocationRetrieved(true, psiCSLocationInformationJsonObject);
                 }
 
-                if (psiResponseValues.getLocationInformation().getLocationInformationEPS() != null) {
+                if (psiResponseParams.getLocationInformation().getVlrNumber() != null) {
+                    vlrNumber = psiResponseParams.getLocationInformation().getVlrNumber().getAddress();
+                    writeVlrNumber(vlrNumber, psiCSLocationInformationJsonObject);
+                }
 
-                    if (psiResponseValues.getLocationInformation().getLocationInformationEPS().getEUtranCellGlobalIdentity() != null) {
-                        EUTRANCGI eutrancgi = new EUTRANCGIImpl(psiResponseValues.getLocationInformation().getLocationInformationEPS().getEUtranCellGlobalIdentity().getData());
+                if (psiResponseParams.getLocationInformation().getMscNumber() != null) {
+                    mscNumber = psiResponseParams.getLocationInformation().getMscNumber().getAddress();
+                    writeMscNumber(mscNumber, psiCSLocationInformationJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformation().getLocationInformationEPS() != null) {
+                    psiCsEPSLocationInformationJsonObject = new JsonObject();
+
+                    if (psiResponseParams.getLocationInformation().getLocationInformationEPS().getEUtranCellGlobalIdentity() != null) {
+                        JsonObject csLocInfoEutranCgiJsonObject = new JsonObject();
+                        EUTRANCGI eutrancgi = new EUTRANCGIImpl(psiResponseParams.getLocationInformation().getLocationInformationEPS().getEUtranCellGlobalIdentity().getData());
                         try {
                             ecgiMcc = eutrancgi.getMCC();
                             ecgiMnc = eutrancgi.getMNC();
@@ -268,270 +268,560 @@ public class PsiResponseJsonBuilder {
                             ecgiENBId = eutrancgi.getENodeBId();
                             ecgiCi = eutrancgi.getCi();
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            logger.error(e.getMessage());
                         }
-                        writeMcc(ecgiMcc, eUtranCgiJsonObject);
-                        writeMnc(ecgiMnc, eUtranCgiJsonObject);
-                        writeEUtranEci(ecgiEci, eUtranCgiJsonObject);
-                        writeENBId(ecgiENBId, eUtranCgiJsonObject);
-                        writeEUtranCellId(ecgiCi, eUtranCgiJsonObject);
+                        writeMcc(ecgiMcc, csLocInfoEutranCgiJsonObject);
+                        writeMnc(ecgiMnc, csLocInfoEutranCgiJsonObject);
+                        writeEUtranEci(ecgiEci, csLocInfoEutranCgiJsonObject);
+                        writeENBId(ecgiENBId, csLocInfoEutranCgiJsonObject);
+                        writeEUtranCellId(ecgiCi, csLocInfoEutranCgiJsonObject);
+                        psiCsEPSLocationInformationJsonObject.add("ECGI", csLocInfoEutranCgiJsonObject);
                     }
-                    psiLocationInformationEPSJsonObject.add("ECGI", eUtranCgiJsonObject);
 
-                    if (psiResponseValues.getLocationInformation().getLocationInformationEPS().getTrackingAreaIdentity() != null) {
-                        TrackingAreaId tai = new TrackingAreaIdImpl(psiResponseValues.getLocationInformation().getLocationInformationEPS().getTrackingAreaIdentity().getData());
+                    if (psiResponseParams.getLocationInformation().getLocationInformationEPS().getTrackingAreaIdentity() != null) {
+                        JsonObject csLocInfoTaiJsonObject = new JsonObject();
+                        TrackingAreaId tai = new TrackingAreaIdImpl(psiResponseParams.getLocationInformation().getLocationInformationEPS().getTrackingAreaIdentity().getData());
                         try {
                             taiMcc = tai.getMCC();
                             taiMnc = tai.getMNC();
                             tac = tai.getTAC();
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            logger.error(e.getMessage());
                         }
-                        writeMcc(taiMcc, taiJsonObject);
-                        writeMnc(taiMnc, taiJsonObject);
-                        writeTrackingAreaCode(tac, taiJsonObject);
-                    }
-                    psiLocationInformationEPSJsonObject.add("TAI", taiJsonObject);
-
-                    if (psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeographicalInformation() != null) {
-                        epsGeographicalLatitude = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeographicalInformation().getLatitude();
-                        epsGeographicalLongitude = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeographicalInformation().getLongitude();
-                        epsGeographicalTypeOfShape = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeographicalInformation().getTypeOfShape().name();
-                        epsGeographicalUncertainty = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeographicalInformation().getUncertainty();
-                        writeTypeOfShape(epsGeographicalTypeOfShape, psiEPSGeographicalInformationJsonObject);
-                        writeLatitude(epsGeographicalLatitude, psiEPSGeographicalInformationJsonObject);
-                        writeLongitude(epsGeographicalLongitude, psiEPSGeographicalInformationJsonObject);
-                        writeUncertainty(epsGeographicalUncertainty, epsGeographicalLatitude, epsGeographicalLongitude, psiEPSGeographicalInformationJsonObject);
-                    }
-                    psiLocationInformationEPSJsonObject.add("GeographicalInformation", psiEPSGeographicalInformationJsonObject);
-
-                    if (psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeodeticInformation() != null) {
-                        epsGeodeticLatitude = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getLatitude();
-                        epsGeodeticLongitude = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getLongitude();
-                        epsGeodeticTypeOfShape = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getTypeOfShape().name();
-                        epsGeodeticUncertainty = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getUncertainty();
-                        epsGeodeticConfidence = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getConfidence();
-                        epsGeodeticScreeningAndPresentationIndicators = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getScreeningAndPresentationIndicators();
-                        writeTypeOfShape(epsGeodeticTypeOfShape, psiEPSGeodeticInformationJsonObject);
-                        writeLatitude(epsGeodeticLatitude, psiEPSGeodeticInformationJsonObject);
-                        writeLongitude(epsGeodeticLongitude, psiEPSGeodeticInformationJsonObject);
-                        writeUncertainty(epsGeodeticUncertainty, epsGeodeticLatitude, epsGeodeticLongitude, psiEPSGeodeticInformationJsonObject);
-                        writeConfidence(epsGeodeticConfidence, epsGeodeticLatitude, epsGeodeticLongitude, psiEPSGeodeticInformationJsonObject);
-                        writeScreeningAndPresentationIndicators(epsGeodeticScreeningAndPresentationIndicators, epsGeodeticLatitude, epsGeodeticLongitude, psiEPSGeodeticInformationJsonObject);
-                    }
-                    psiLocationInformationEPSJsonObject.add("GeodeticInformation", psiEPSGeodeticInformationJsonObject);
-
-                    if (psiResponseValues.getLocationInformation().getLocationInformationEPS().getAgeOfLocationInformation() != null) {
-                        ageOfLocationInfo = psiResponseValues.getLocationInformation().getLocationInformationEPS().getAgeOfLocationInformation().intValue();
-                        writeAol(ageOfLocationInfo, psiLocationInformationEPSJsonObject);
+                        writeMcc(taiMcc, csLocInfoTaiJsonObject);
+                        writeMnc(taiMnc, csLocInfoTaiJsonObject);
+                        writeTrackingAreaCode(tac, csLocInfoTaiJsonObject);
+                        psiCsEPSLocationInformationJsonObject.add("TAI", csLocInfoTaiJsonObject);
                     }
 
-                    if (psiResponseValues.getLocationInformation().getLocationInformationEPS().getCurrentLocationRetrieved() != false)
-                        currentLocationRetrieved = true;
-                    else
-                        currentLocationRetrieved = false;
-                    if (currentLocationRetrieved != null)
-                        writeCurrentLocationRetrieved(currentLocationRetrieved, psiLocationInformationEPSJsonObject);
-
-                    if (psiResponseValues.getLocationInformation().getLocationInformationEPS().getMmeName() != null) {
-                        mmeName = new String(psiResponseValues.getLocationInformation().getLocationInformationEPS().getMmeName().getData());
-                        writeMmeName(mmeName, psiLocationInformationEPSJsonObject);
+                    if (psiResponseParams.getLocationInformation().getLocationInformationEPS().getGeographicalInformation() != null) {
+                        JsonObject csLocInfoEPSGeographicalInformationJsonObject = new JsonObject();
+                        epsGeographicalLatitude = psiResponseParams.getLocationInformation().getLocationInformationEPS().getGeographicalInformation().getLatitude();
+                        epsGeographicalLongitude = psiResponseParams.getLocationInformation().getLocationInformationEPS().getGeographicalInformation().getLongitude();
+                        epsGeographicalTypeOfShape = psiResponseParams.getLocationInformation().getLocationInformationEPS().getGeographicalInformation().getTypeOfShape().name();
+                        epsGeographicalUncertainty = psiResponseParams.getLocationInformation().getLocationInformationEPS().getGeographicalInformation().getUncertainty();
+                        writeTypeOfShape(epsGeographicalTypeOfShape, csLocInfoEPSGeographicalInformationJsonObject);
+                        writeLatitude(epsGeographicalLatitude, csLocInfoEPSGeographicalInformationJsonObject);
+                        writeLongitude(epsGeographicalLongitude, csLocInfoEPSGeographicalInformationJsonObject);
+                        writeUncertainty(epsGeographicalUncertainty, epsGeographicalLatitude, epsGeographicalLongitude, csLocInfoEPSGeographicalInformationJsonObject);
+                        psiCsEPSLocationInformationJsonObject.add("GeographicalInformation", csLocInfoEPSGeographicalInformationJsonObject);
                     }
+
+                    if (psiResponseParams.getLocationInformation().getLocationInformationEPS().getGeodeticInformation() != null) {
+                        JsonObject csLocInfoEPSGeodeticInformationJsonObject = new JsonObject();
+                        epsGeodeticLatitude = psiResponseParams.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getLatitude();
+                        epsGeodeticLongitude = psiResponseParams.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getLongitude();
+                        epsGeodeticTypeOfShape = psiResponseParams.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getTypeOfShape().name();
+                        epsGeodeticUncertainty = psiResponseParams.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getUncertainty();
+                        epsGeodeticConfidence = psiResponseParams.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getConfidence();
+                        epsGeodeticScreeningAndPresentationIndicators = psiResponseParams.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getScreeningAndPresentationIndicators();
+                        writeTypeOfShape(epsGeodeticTypeOfShape, csLocInfoEPSGeodeticInformationJsonObject);
+                        writeLatitude(epsGeodeticLatitude, csLocInfoEPSGeodeticInformationJsonObject);
+                        writeLongitude(epsGeodeticLongitude, csLocInfoEPSGeodeticInformationJsonObject);
+                        writeUncertainty(epsGeodeticUncertainty, epsGeodeticLatitude, epsGeodeticLongitude, csLocInfoEPSGeodeticInformationJsonObject);
+                        writeConfidence(epsGeodeticConfidence, epsGeodeticLatitude, epsGeodeticLongitude, csLocInfoEPSGeodeticInformationJsonObject);
+                        writeScreeningAndPresentationIndicators(epsGeodeticScreeningAndPresentationIndicators, epsGeodeticLatitude, epsGeodeticLongitude, csLocInfoEPSGeodeticInformationJsonObject);
+                        psiCsEPSLocationInformationJsonObject.add("GeodeticInformation", csLocInfoEPSGeodeticInformationJsonObject);
+                    }
+
+                    if (psiResponseParams.getLocationInformation().getLocationInformationEPS().getAgeOfLocationInformation() != null) {
+                        ageOfLocationInfo = psiResponseParams.getLocationInformation().getLocationInformationEPS().getAgeOfLocationInformation();
+                        writeAol(ageOfLocationInfo, psiCsEPSLocationInformationJsonObject);
+                    }
+
+                    if (psiResponseParams.getLocationInformation().getLocationInformationEPS().getCurrentLocationRetrieved()) {
+                        writeCurrentLocationRetrieved(true, psiCsEPSLocationInformationJsonObject);
+                    }
+
+                    if (psiResponseParams.getLocationInformation().getLocationInformationEPS().getMmeName() != null) {
+                        mmeName = new String(psiResponseParams.getLocationInformation().getLocationInformationEPS().getMmeName().getData());
+                        writeMmeName(mmeName, psiCsEPSLocationInformationJsonObject);
+                    }
+
+                    // Write EPS Location Information values
+                    psiCSLocationInformationJsonObject.add("EPSLocationInformation", psiCsEPSLocationInformationJsonObject);
                 }
             }
 
-            if (psiResponseValues.getLocationInformationGPRS() != null) {
+            if (psiResponseParams.getLocationInformationGPRS() != null) {
+                psiPSLocationInformationJsonObject = new JsonObject();
 
-                if (psiResponseValues.getLocationInformationGPRS().isSaiPresent())
+                if (psiResponseParams.getLocationInformationGPRS().isSaiPresent())
                     saiPresent = true;
 
-                if (psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
-                    psMcc = psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC();
-                    psMnc = psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC();
-                    psLac = psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac();
-                } else if (psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
-                    psMcc = psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
-                    psMnc = psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC();
-                    psLac = psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
-                    psCiOrSac = psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
-                }
-                writeMcc(psMcc, psCgiOrLaiOrSaiJsonObject);
-                writeMnc(psMnc, psCgiOrLaiOrSaiJsonObject);
-                writeLac(psLac, psCgiOrLaiOrSaiJsonObject);
-                if (!saiPresent) {
-                    if (psCiOrSac != null) {
-                        writeCellId(psCiOrSac, psCgiOrLaiOrSaiJsonObject);
-                        psiLocationInformationGPRSJsonObject.add("CGI", psCgiOrLaiOrSaiJsonObject);
-                    } else {
-                        if (psLac != null)
-                            psiLocationInformationGPRSJsonObject.add("LAI", psCgiOrLaiOrSaiJsonObject);
+                if (psiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
+                    JsonObject psCgiOrLaiOrSaiJsonObject = new JsonObject();
+                    if (psiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
+                        psMcc = psiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC();
+                        psMnc = psiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC();
+                        psLac = psiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac();
+                    } else if (psiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
+                        psMcc = psiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
+                        psMnc = psiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC();
+                        psLac = psiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
+                        psCiOrSac = psiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
                     }
-                } else {
-                    if (psCiOrSac != null) {
-                        writeServiceAreaCode(psCiOrSac, psCgiOrLaiOrSaiJsonObject);
-                        psiLocationInformationGPRSJsonObject.add("SAI", psCgiOrLaiOrSaiJsonObject);
+                    writeMcc(psMcc, psCgiOrLaiOrSaiJsonObject);
+                    writeMnc(psMnc, psCgiOrLaiOrSaiJsonObject);
+                    writeLac(psLac, psCgiOrLaiOrSaiJsonObject);
+                    if (!saiPresent) {
+                        if (psCiOrSac != -1) {
+                            writeCellId(psCiOrSac, psCgiOrLaiOrSaiJsonObject);
+                            psiPSLocationInformationJsonObject.add("CGI", psCgiOrLaiOrSaiJsonObject);
+                        } else {
+                            if (psLac != -1)
+                                psiPSLocationInformationJsonObject.add("LAI", psCgiOrLaiOrSaiJsonObject);
+                        }
                     } else {
-                        if (psLac != null)
-                            psiLocationInformationGPRSJsonObject.add("LAI", psCgiOrLaiOrSaiJsonObject);
+                        if (psCiOrSac != -1) {
+                            writeServiceAreaCode(psCiOrSac, psCgiOrLaiOrSaiJsonObject);
+                            psiPSLocationInformationJsonObject.add("SAI", psCgiOrLaiOrSaiJsonObject);
+                        } else {
+                            if (psLac != -1)
+                                psiPSLocationInformationJsonObject.add("LAI", psCgiOrLaiOrSaiJsonObject);
+                        }
                     }
                 }
-                if (psCiOrSac != null)
-                    writeSaiPresent(saiPresent, psiLocationInformationGPRSJsonObject);
 
-                if (psiResponseValues.getLocationInformationGPRS().getRouteingAreaIdentity() != null) {
-                    RoutingAreaId rai = new RoutingAreaIdImpl(psiResponseValues.getLocationInformationGPRS().getRouteingAreaIdentity().getData());
+                if (psCiOrSac != -1)
+                    writeSaiPresent(saiPresent, psiPSLocationInformationJsonObject);
+
+                if (psiResponseParams.getLocationInformationGPRS().getRouteingAreaIdentity() != null) {
+                    JsonObject raiJsonObject = new JsonObject();
+                    RoutingAreaId rai = new RoutingAreaIdImpl(psiResponseParams.getLocationInformationGPRS().getRouteingAreaIdentity().getData());
                     try {
                         raiMcc = rai.getMCC();
                         raiMnc = rai.getMNC();
                         raiLac = rai.getLAC();
                         rac = rai.getRAC();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        logger.error(e.getMessage());
                     }
                     writeMcc(raiMcc, raiJsonObject);
                     writeMnc(raiMnc, raiJsonObject);
                     writeLac(raiLac, raiJsonObject);
                     writeRoutingAreaCode(rac, raiJsonObject);
+                    psiPSLocationInformationJsonObject.add("RAI", raiJsonObject);
                 }
-                psiLocationInformationGPRSJsonObject.add("RAI", raiJsonObject);
 
-                if (psiResponseValues.getLocationInformationGPRS().getLSAIdentity() != null) {
-                    LSAIdentity lsaIdentity = new LSAIdentityImpl(psiResponseValues.getLocationInformationGPRS().getLSAIdentity().getData());
+                if (psiResponseParams.getLocationInformationGPRS().getLSAIdentity() != null) {
+                    JsonObject lsaJsonObject = new JsonObject();
+                    LSAIdentity lsaIdentity = new LSAIdentityImpl(psiResponseParams.getLocationInformationGPRS().getLSAIdentity().getData());
                     lsaUniversal = lsaIdentity.isPlmnSignificantLSA(); // isPlmnSignificantLSA means the opposite in jSS7 implementation
-                    lsaId = new String(psiResponseValues.getLocationInformationGPRS().getLSAIdentity().getData());
+                    lsaId = new String(psiResponseParams.getLocationInformationGPRS().getLSAIdentity().getData());
                     writeLsaLSB(lsaUniversal, lsaJsonObject);
                     writeLsaId(lsaId, lsaJsonObject);
+                    psiPSLocationInformationJsonObject.add("LSA", lsaJsonObject);
                 }
-                psiLocationInformationGPRSJsonObject.add("LSA", lsaJsonObject);
 
-                if (psiResponseValues.getLocationInformationGPRS().getGeographicalInformation() != null) {
-                    gprsGeographicalLatitude = psiResponseValues.getLocationInformationGPRS().getGeographicalInformation().getLatitude();
-                    gprsGeographicalLongitude = psiResponseValues.getLocationInformationGPRS().getGeographicalInformation().getLongitude();
-                    gprsGeographicalUncertainty = psiResponseValues.getLocationInformationGPRS().getGeographicalInformation().getUncertainty();
-                    gprsGeographicalTypeOfShape = psiResponseValues.getLocationInformationGPRS().getGeographicalInformation().getTypeOfShape().name();
+                if (psiResponseParams.getLocationInformationGPRS().getGeographicalInformation() != null) {
+                    JsonObject psiGPRSGeographicalInformationJsonObject = new JsonObject();
+                    gprsGeographicalLatitude = psiResponseParams.getLocationInformationGPRS().getGeographicalInformation().getLatitude();
+                    gprsGeographicalLongitude = psiResponseParams.getLocationInformationGPRS().getGeographicalInformation().getLongitude();
+                    gprsGeographicalUncertainty = psiResponseParams.getLocationInformationGPRS().getGeographicalInformation().getUncertainty();
+                    gprsGeographicalTypeOfShape = psiResponseParams.getLocationInformationGPRS().getGeographicalInformation().getTypeOfShape().name();
                     writeTypeOfShape(gprsGeographicalTypeOfShape, psiGPRSGeographicalInformationJsonObject);
                     writeLatitude(gprsGeographicalLatitude, psiGPRSGeographicalInformationJsonObject);
                     writeLongitude(gprsGeographicalLongitude, psiGPRSGeographicalInformationJsonObject);
                     writeUncertainty(gprsGeographicalUncertainty, gprsGeographicalLatitude, gprsGeographicalLongitude, psiGPRSGeographicalInformationJsonObject);
+                    psiPSLocationInformationJsonObject.add("GeographicalInformation", psiGPRSGeographicalInformationJsonObject);
                 }
-                psiLocationInformationGPRSJsonObject.add("GeographicalInformation", psiGPRSGeographicalInformationJsonObject);
 
-                if (psiResponseValues.getLocationInformationGPRS().getGeodeticInformation() != null) {
-                    gprsGeodeticTypeOfShape = psiResponseValues.getLocationInformationGPRS().getGeodeticInformation().getTypeOfShape().name();
-                    gprsGeodeticLatitude = psiResponseValues.getLocationInformationGPRS().getGeodeticInformation().getLatitude();
-                    gprsGeodeticLongitude = psiResponseValues.getLocationInformationGPRS().getGeodeticInformation().getLongitude();
-                    gprsGeodeticUncertainty = psiResponseValues.getLocationInformationGPRS().getGeodeticInformation().getUncertainty();
-                    gprsGeodeticConfidence = psiResponseValues.getLocationInformationGPRS().getGeodeticInformation().getConfidence();
-                    gprsGeodeticScreeningAndPresentationIndicators = psiResponseValues.getLocationInformationGPRS().getGeodeticInformation().getScreeningAndPresentationIndicators();
+                if (psiResponseParams.getLocationInformationGPRS().getGeodeticInformation() != null) {
+                    JsonObject psiGPRSGeodeticInformationJsonObject = new JsonObject();
+                    gprsGeodeticTypeOfShape = psiResponseParams.getLocationInformationGPRS().getGeodeticInformation().getTypeOfShape().name();
+                    gprsGeodeticLatitude = psiResponseParams.getLocationInformationGPRS().getGeodeticInformation().getLatitude();
+                    gprsGeodeticLongitude = psiResponseParams.getLocationInformationGPRS().getGeodeticInformation().getLongitude();
+                    gprsGeodeticUncertainty = psiResponseParams.getLocationInformationGPRS().getGeodeticInformation().getUncertainty();
+                    gprsGeodeticConfidence = psiResponseParams.getLocationInformationGPRS().getGeodeticInformation().getConfidence();
+                    gprsGeodeticScreeningAndPresentationIndicators = psiResponseParams.getLocationInformationGPRS().getGeodeticInformation().getScreeningAndPresentationIndicators();
                     writeTypeOfShape(gprsGeodeticTypeOfShape, psiGPRSGeodeticInformationJsonObject);
                     writeLatitude(gprsGeodeticLatitude, psiGPRSGeodeticInformationJsonObject);
                     writeLongitude(gprsGeodeticLongitude, psiGPRSGeodeticInformationJsonObject);
                     writeUncertainty(gprsGeodeticUncertainty, gprsGeodeticLatitude, gprsGeodeticLongitude, psiGPRSGeodeticInformationJsonObject);
                     writeConfidence(gprsGeodeticConfidence, gprsGeodeticLatitude, gprsGeodeticLongitude, psiGPRSGeodeticInformationJsonObject);
                     writeScreeningAndPresentationIndicators(gprsGeodeticScreeningAndPresentationIndicators, gprsGeodeticLatitude, gprsGeodeticLongitude, psiGPRSGeodeticInformationJsonObject);
-                }
-                psiLocationInformationGPRSJsonObject.add("GeodeticInformation", psiGPRSGeodeticInformationJsonObject);
-
-                if (psiResponseValues.getLocationInformationGPRS().getAgeOfLocationInformation() != null) {
-                    ageOfLocationInfo = psiResponseValues.getLocationInformationGPRS().getAgeOfLocationInformation().intValue();
-                    writeAol(ageOfLocationInfo, psiLocationInformationGPRSJsonObject);
+                    psiPSLocationInformationJsonObject.add("GeodeticInformation", psiGPRSGeodeticInformationJsonObject);
                 }
 
-                if (psiResponseValues.getLocationInformationGPRS().isCurrentLocationRetrieved())
-                    currentLocationRetrieved = true;
-                else
-                    currentLocationRetrieved= false;
-                if (currentLocationRetrieved != null)
-                    writeCurrentLocationRetrieved(currentLocationRetrieved, psiLocationInformationGPRSJsonObject);
+                if (psiResponseParams.getLocationInformationGPRS().getAgeOfLocationInformation() != null) {
+                    ageOfLocationInfo = psiResponseParams.getLocationInformationGPRS().getAgeOfLocationInformation();
+                    writeAol(ageOfLocationInfo, psiPSLocationInformationJsonObject);
+                }
 
-                if (psiResponseValues.getLocationInformationGPRS().getSGSNNumber() != null) {
-                    sgsnNumber = psiResponseValues.getLocationInformationGPRS().getSGSNNumber().getAddress();
-                    writeSgsnNumber(sgsnNumber, psiLocationInformationGPRSJsonObject);
+                if (psiResponseParams.getLocationInformationGPRS().isCurrentLocationRetrieved()) {
+                    writeCurrentLocationRetrieved(true, psiPSLocationInformationJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformationGPRS().getSGSNNumber() != null) {
+                    sgsnNumber = psiResponseParams.getLocationInformationGPRS().getSGSNNumber().getAddress();
+                    writeSgsnNumber(sgsnNumber, psiPSLocationInformationJsonObject);
                 }
             }
 
-            if (psiResponseValues.getMnpInfoRes() != null) {
-                if (psiResponseValues.getMnpInfoRes().getNumberPortabilityStatus() != null) {
-                    mnpInfoResultNumberPortabilityStatus = psiResponseValues.getMnpInfoRes().getNumberPortabilityStatus().getType();
+            if (psiResponseParams.getMnpInfoRes() != null) {
+                if (psiResponseParams.getMnpInfoRes().getNumberPortabilityStatus() != null) {
+                    mnpInfoResultNumberPortabilityStatus = psiResponseParams.getMnpInfoRes().getNumberPortabilityStatus().getType();
                 }
-                if (psiResponseValues.getMnpInfoRes().getMSISDN() != null) {
-                    mnpInfoResultMSISDN = psiResponseValues.getMnpInfoRes().getMSISDN().getAddress();
+                if (psiResponseParams.getMnpInfoRes().getMSISDN() != null) {
+                    mnpInfoResultMSISDN = psiResponseParams.getMnpInfoRes().getMSISDN().getAddress();
                 }
-                if (psiResponseValues.getMnpInfoRes().getIMSI() != null) {
-                    mnpInfoResultIMSI = new String(psiResponseValues.getMnpInfoRes().getIMSI().getData().getBytes());
+                if (psiResponseParams.getMnpInfoRes().getIMSI() != null) {
+                    mnpInfoResultIMSI = new String(psiResponseParams.getMnpInfoRes().getIMSI().getData().getBytes());
                 }
-                if (psiResponseValues.getRouteingNumber() != null) {
-                    mnpInfoResultRouteingNumber = psiResponseValues.getRouteingNumber().getRouteingNumber();
+                if (psiResponseParams.getMnpInfoRes().getRouteingNumber() != null) {
+                    mnpInfoResultRouteingNumber = psiResponseParams.getMnpInfoRes().getRouteingNumber().getRouteingNumber();
                 }
             }
 
-            if (psiResponseValues.getImei() != null) {
-                imei = psiResponseValues.getImei().getIMEI();
+            if (psiResponseParams.getImei() != null) {
+                imei = psiResponseParams.getImei().getIMEI();
             }
 
-            if (psiResponseValues.getSubscriberState() != null) {
-                csSubscriberState = psiResponseValues.getSubscriberState().getSubscriberStateChoice().toString();
-                if (psiResponseValues.getSubscriberState().getNotReachableReason() != null)
-                    notReachableReason = psiResponseValues.getSubscriberState().getNotReachableReason().name();
+            if (psiResponseParams.getSubscriberState() != null) {
+                csSubscriberState = psiResponseParams.getSubscriberState().getSubscriberStateChoice().toString();
+                if (psiResponseParams.getSubscriberState().getNotReachableReason() != null)
+                    notReachableReason = psiResponseParams.getSubscriberState().getNotReachableReason().name();
             }
-            if (psiResponseValues.getPsSubscriberState() != null) {
-                psSubscriberState = psiResponseValues.getPsSubscriberState().getChoice().toString();
-                if (psiResponseValues.getPsSubscriberState().getNetDetNotReachable() != null)
-                    notReachableReason = psiResponseValues.getPsSubscriberState().getNetDetNotReachable().name();
-            }
-
-            if (psiResponseValues.getMsClassmark2() != null) {
-                msClassmark = bytesToHexString(psiResponseValues.getMsClassmark2().getData());
+            if (psiResponseParams.getPsSubscriberState() != null) {
+                psSubscriberState = psiResponseParams.getPsSubscriberState().getChoice().toString();
+                if (psiResponseParams.getPsSubscriberState().getNetDetNotReachable() != null)
+                    notReachableReason = psiResponseParams.getPsSubscriberState().getNetDetNotReachable().name();
             }
 
-            if (psiResponseValues.getGprsmsClass() != null) {
-                msNetCap = bytesToHexString(psiResponseValues.getGprsmsClass().getMSNetworkCapability().getData());
-                msRASCap = bytesToHexString(psiResponseValues.getGprsmsClass().getMSRadioAccessCapability().getData());
+            if (psiResponseParams.getMsClassmark2() != null) {
+                msClassmark = bytesToHexString(psiResponseParams.getMsClassmark2().getData());
+            }
+
+            if (psiResponseParams.getGprsMSClass() != null) {
+                msNetCap = bytesToHexString(psiResponseParams.getGprsMSClass().getMSNetworkCapability().getData());
+                msRASCap = bytesToHexString(psiResponseParams.getGprsMSClass().getMSRadioAccessCapability().getData());
+            }
+
+            if (psiResponseParams.getLastUEActivityTime() != null) {
+                year = psiResponseParams.getLastUEActivityTime().getYear();
+                month = psiResponseParams.getLastUEActivityTime().getMonth();
+                day = psiResponseParams.getLastUEActivityTime().getDay();
+                hour = psiResponseParams.getLastUEActivityTime().getHour();
+                minute = psiResponseParams.getLastUEActivityTime().getMinute();
+                second = psiResponseParams.getLastUEActivityTime().getSecond();
+                lastUeActivityTime = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
+            }
+
+            if (psiResponseParams.getLastRATType() != null) {
+                UsedRATType usedRATType = UsedRATType.getInstance(psiResponseParams.getLastRATType().getCode());
+                lastRatType = usedRATType.name();
+            }
+
+            // TODO psiResponseParams.getTimeZone() & psiResponseParams.getDaylightSavingTime()
+
+            if (psiResponseParams.getEpsSubscriberState() != null) {
+                epsSubscriberState = psiResponseParams.getEpsSubscriberState().getChoice().toString();
+                if (psiResponseParams.getEpsSubscriberState().getNetDetNotReachable() != null)
+                    notReachableReason = psiResponseParams.getEpsSubscriberState().getNetDetNotReachable().name();
+            }
+
+            if (psiResponseParams.getLocationInformationEPS() != null) {
+                JsonObject epsLocInfoEutranCgiJsonObject = new JsonObject();
+                psiEPSLocationInformationJsonObject = new JsonObject();
+                if (psiResponseParams.getLocationInformationEPS().getEUtranCellGlobalIdentity() != null) {
+                    EUtranCgi eUtranCgi = new EUtranCgiImpl(psiResponseParams.getLocationInformationEPS().getEUtranCellGlobalIdentity().getData());
+                    try {
+                        ecgiMcc = eUtranCgi.getMCC();
+                        ecgiMnc = eUtranCgi.getMNC();
+                        ecgiEci = eUtranCgi.getEci();
+                        ecgiENBId = eUtranCgi.getENodeBId();
+                        ecgiCi = eUtranCgi.getCi();
+                    } catch (Exception e) {
+                        logger.error(e.getMessage());
+                    }
+                    writeMcc(ecgiMcc, epsLocInfoEutranCgiJsonObject);
+                    writeMnc(ecgiMnc, epsLocInfoEutranCgiJsonObject);
+                    writeEUtranEci(ecgiEci, epsLocInfoEutranCgiJsonObject);
+                    writeENBId(ecgiENBId, epsLocInfoEutranCgiJsonObject);
+                    writeEUtranCellId(ecgiCi, epsLocInfoEutranCgiJsonObject);
+                    psiEPSLocationInformationJsonObject.add("ECGI", epsLocInfoEutranCgiJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformationEPS().getTrackingAreaIdentity() != null) {
+                    JsonObject epsLocInfoTaiJsonObject = new JsonObject();
+                    TAId tai = new TAIdImpl(psiResponseParams.getLocationInformationEPS().getTrackingAreaIdentity().getData());
+                    try {
+                        taiMcc = tai.getMCC();
+                        taiMnc = tai.getMNC();
+                        tac = tai.getTAC();
+                    } catch (Exception e) {
+                        logger.error(e.getMessage());
+                    }
+                    writeMcc(taiMcc, epsLocInfoTaiJsonObject);
+                    writeMnc(taiMnc, epsLocInfoTaiJsonObject);
+                    writeTrackingAreaCode(tac, epsLocInfoTaiJsonObject);
+                    psiEPSLocationInformationJsonObject.add("TAI", epsLocInfoTaiJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformationEPS().getGeographicalInformation() != null) {
+                    JsonObject psiNonCsEpsGeographicalInformationJsonObject = new JsonObject();
+                    epsGeographicalLatitude = psiResponseParams.getLocationInformationEPS().getGeographicalInformation().getLatitude();
+                    epsGeographicalLongitude = psiResponseParams.getLocationInformationEPS().getGeographicalInformation().getLongitude();
+                    epsGeographicalTypeOfShape = psiResponseParams.getLocationInformationEPS().getGeographicalInformation().getTypeOfShape().name();
+                    epsGeographicalUncertainty = psiResponseParams.getLocationInformationEPS().getGeographicalInformation().getUncertainty();
+                    writeTypeOfShape(epsGeographicalTypeOfShape, psiNonCsEpsGeographicalInformationJsonObject);
+                    writeLatitude(epsGeographicalLatitude, psiNonCsEpsGeographicalInformationJsonObject);
+                    writeLongitude(epsGeographicalLongitude, psiNonCsEpsGeographicalInformationJsonObject);
+                    writeUncertainty(epsGeographicalUncertainty, epsGeographicalLatitude, epsGeographicalLongitude, psiNonCsEpsGeographicalInformationJsonObject);
+                    psiEPSLocationInformationJsonObject.add("GeographicalInformation", psiNonCsEpsGeographicalInformationJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformationEPS().getGeodeticInformation() != null) {
+                    JsonObject psiNonCsEpsGeodeticInformationJsonObject = new JsonObject();
+                    epsGeodeticLatitude = psiResponseParams.getLocationInformationEPS().getGeodeticInformation().getLatitude();
+                    epsGeodeticLongitude = psiResponseParams.getLocationInformationEPS().getGeodeticInformation().getLongitude();
+                    epsGeodeticTypeOfShape = psiResponseParams.getLocationInformationEPS().getGeodeticInformation().getTypeOfShape().name();
+                    epsGeodeticUncertainty = psiResponseParams.getLocationInformationEPS().getGeodeticInformation().getUncertainty();
+                    epsGeodeticConfidence = psiResponseParams.getLocationInformationEPS().getGeodeticInformation().getConfidence();
+                    epsGeodeticScreeningAndPresentationIndicators = psiResponseParams.getLocationInformationEPS().getGeodeticInformation().getScreeningAndPresentationIndicators();
+                    writeTypeOfShape(epsGeodeticTypeOfShape, psiNonCsEpsGeodeticInformationJsonObject);
+                    writeLatitude(epsGeodeticLatitude, psiNonCsEpsGeodeticInformationJsonObject);
+                    writeLongitude(epsGeodeticLongitude, psiNonCsEpsGeodeticInformationJsonObject);
+                    writeUncertainty(epsGeodeticUncertainty, epsGeodeticLatitude, epsGeodeticLongitude, psiNonCsEpsGeodeticInformationJsonObject);
+                    writeConfidence(epsGeodeticConfidence, epsGeodeticLatitude, epsGeodeticLongitude, psiNonCsEpsGeodeticInformationJsonObject);
+                    writeScreeningAndPresentationIndicators(epsGeodeticScreeningAndPresentationIndicators, epsGeodeticLatitude, epsGeodeticLongitude, psiNonCsEpsGeodeticInformationJsonObject);
+                    psiEPSLocationInformationJsonObject.add("GeodeticInformation", psiNonCsEpsGeodeticInformationJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformationEPS().getAgeOfLocationInformation() != null) {
+                    ageOfLocationInfo = psiResponseParams.getLocationInformationEPS().getAgeOfLocationInformation();
+                    writeAol(ageOfLocationInfo, psiEPSLocationInformationJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformationEPS().getCurrentLocationRetrieved()) {
+                    writeCurrentLocationRetrieved(true, psiEPSLocationInformationJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformationEPS().getMmeName() != null) {
+                    mmeName = new String(psiResponseParams.getLocationInformationEPS().getMmeName().getData());
+                    writeMmeName(mmeName, psiEPSLocationInformationJsonObject);
+                }
+            }
+
+            if (psiResponseParams.getLocationInformation5GS() != null) {
+                psi5GSLocationInformationJsonObject = new JsonObject();
+
+                if (psiResponseParams.getLocationInformation5GS().getNRCellGlobalId() != null) {
+                    JsonObject nrCgiJsonObject = new JsonObject();
+                    NRCellGlobalId nrCellGlobalId = psiResponseParams.getLocationInformation5GS().getNRCellGlobalId();
+                    try {
+                        nrCgiMcc = nrCellGlobalId.getMCC();
+                        nrCgiMnc = nrCellGlobalId.getMNC();
+                        nrCgiCi = nrCellGlobalId.getNCI();
+                    } catch (Exception e) {
+                        logger.error(e.getMessage());
+                    }
+                    writeMcc(nrCgiMcc, nrCgiJsonObject);
+                    writeMnc(nrCgiMnc, nrCgiJsonObject);
+                    writeNrCellId(nrCgiCi, nrCgiJsonObject);
+                    psi5GSLocationInformationJsonObject.add("NCGI", nrCgiJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformation5GS().getNRTAId() != null) {
+                    JsonObject nrTaiJsonObject = new JsonObject();
+                    NRTAId nrtaId = new NRTAIdImpl(psiResponseParams.getLocationInformation5GS().getNRTAId().getData());
+                    try {
+                        nrTaiMcc = nrtaId.getMCC();
+                        nrTaiMnc = nrtaId.getMNC();
+                        nrTaiTac = nrtaId.getNrTAC();
+                    } catch (Exception e) {
+                        logger.error(e.getMessage());
+                    }
+                    writeMcc(nrTaiMcc, nrTaiJsonObject);
+                    writeMnc(nrTaiMnc, nrTaiJsonObject);
+                    writeTrackingAreaCode(nrTaiTac, nrTaiJsonObject);
+                    psi5GSLocationInformationJsonObject.add("NR-TAI", nrTaiJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformation5GS().getEUtranCgi() != null) {
+                    JsonObject locInfo5gsEutranCgiJsonObject = new JsonObject();
+                    EUtranCgi eUtranCgi = new EUtranCgiImpl(psiResponseParams.getLocationInformation5GS().getEUtranCgi().getData());
+                    try {
+                        ecgiMcc = eUtranCgi.getMCC();
+                        ecgiMnc = eUtranCgi.getMNC();
+                        ecgiEci = eUtranCgi.getEci();
+                        ecgiENBId = eUtranCgi.getENodeBId();
+                        ecgiCi = eUtranCgi.getCi();
+                    } catch (Exception e) {
+                        logger.error(e.getMessage());
+                    }
+                    writeMcc(ecgiMcc, locInfo5gsEutranCgiJsonObject);
+                    writeMnc(ecgiMnc, locInfo5gsEutranCgiJsonObject);
+                    writeEUtranEci(ecgiEci, locInfo5gsEutranCgiJsonObject);
+                    writeENBId(ecgiENBId, locInfo5gsEutranCgiJsonObject);
+                    writeEUtranCellId(ecgiCi, locInfo5gsEutranCgiJsonObject);
+                    psi5GSLocationInformationJsonObject.add("ECGI", locInfo5gsEutranCgiJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformation5GS().getTAId() != null) {
+                    JsonObject locInfo5gsTaiJsonObject = new JsonObject();
+                    TAId tai = new TAIdImpl(psiResponseParams.getLocationInformation5GS().getTAId().getData());
+                    try {
+                        taiMcc = tai.getMCC();
+                        taiMnc = tai.getMNC();
+                        tac = tai.getTAC();
+                    } catch (Exception e) {
+                        logger.error(e.getMessage());
+                    }
+                    writeMcc(taiMcc, locInfo5gsTaiJsonObject);
+                    writeMnc(taiMnc, locInfo5gsTaiJsonObject);
+                    writeTrackingAreaCode(tac, locInfo5gsTaiJsonObject);
+                    psi5GSLocationInformationJsonObject.add("TAI", locInfo5gsTaiJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformation5GS().getGeographicalInformation() != null) {
+                    JsonObject psi5gsGeographicalInformationJsonObject = new JsonObject();
+                    nrGeographicalTypeOfShape = psiResponseParams.getLocationInformation5GS().getGeographicalInformation().getTypeOfShape().name();
+                    nrGeographicalLatitude = psiResponseParams.getLocationInformation5GS().getGeographicalInformation().getLatitude();
+                    nrGeographicalLongitude = psiResponseParams.getLocationInformation5GS().getGeographicalInformation().getLongitude();
+                    nrGeographicalUncertainty = psiResponseParams.getLocationInformation5GS().getGeographicalInformation().getUncertainty();
+                    writeTypeOfShape(nrGeographicalTypeOfShape, psi5gsGeographicalInformationJsonObject);
+                    writeLatitude(nrGeographicalLatitude, psi5gsGeographicalInformationJsonObject);
+                    writeLongitude(nrGeographicalLongitude, psi5gsGeographicalInformationJsonObject);
+                    writeUncertainty(nrGeographicalUncertainty, nrGeographicalLatitude, nrGeographicalLongitude, psi5gsGeographicalInformationJsonObject);
+                    psi5GSLocationInformationJsonObject.add("GeographicalInformation", psi5gsGeographicalInformationJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformation5GS().getGeodeticInformation() != null) {
+                    JsonObject psi5gsGeodeticInformationJsonObject = new JsonObject();
+                    nrGeodeticTypeOfShape = psiResponseParams.getLocationInformation5GS().getGeodeticInformation().getTypeOfShape().name();
+                    nrGeodeticLatitude = psiResponseParams.getLocationInformation5GS().getGeodeticInformation().getLatitude();
+                    nrGeodeticLongitude = psiResponseParams.getLocationInformation5GS().getGeodeticInformation().getLongitude();
+                    nrGeodeticUncertainty = psiResponseParams.getLocationInformation5GS().getGeodeticInformation().getUncertainty();
+                    nrGeodeticConfidence = psiResponseParams.getLocationInformation5GS().getGeodeticInformation().getConfidence();
+                    nrGeodeticScreeningAndPresentationIndicators = psiResponseParams.getLocationInformation5GS().getGeodeticInformation().getScreeningAndPresentationIndicators();
+                    writeTypeOfShape(nrGeodeticTypeOfShape, psi5gsGeodeticInformationJsonObject);
+                    writeLatitude(nrGeodeticLatitude, psi5gsGeodeticInformationJsonObject);
+                    writeLongitude(nrGeodeticLongitude, psi5gsGeodeticInformationJsonObject);
+                    writeUncertainty(nrGeodeticUncertainty, nrGeodeticLatitude, nrGeodeticLongitude, psi5gsGeodeticInformationJsonObject);
+                    writeConfidence(nrGeodeticConfidence, nrGeodeticLatitude, nrGeodeticLongitude, psi5gsGeodeticInformationJsonObject);
+                    writeScreeningAndPresentationIndicators(nrGeodeticScreeningAndPresentationIndicators, nrGeodeticLatitude, nrGeodeticLongitude, psi5gsGeodeticInformationJsonObject);
+                    psi5GSLocationInformationJsonObject.add("GeodeticInformation", psi5gsGeodeticInformationJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformation5GS().getAMFAddress() != null) {
+                    FQDN amfAddress = psiResponseParams.getLocationInformation5GS().getAMFAddress();
+                    amfAddressString = new String(amfAddress.getData(), StandardCharsets.UTF_8);
+                    writeAmfAddress(amfAddressString, psi5GSLocationInformationJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformation5GS().getAgeOfLocationInformation() != null) {
+                    ageOfLocationInfo = psiResponseParams.getLocationInformation5GS().getAgeOfLocationInformation();
+                    writeAol(ageOfLocationInfo, psi5GSLocationInformationJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformation5GS().isCurrentLocationRetrieved()) {
+                    writeCurrentLocationRetrieved(true, psi5GSLocationInformationJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformation5GS() != null) {
+                    JsonObject vPlmnIdJsonObject = new JsonObject();
+                    if (psiResponseParams.getLocationInformation5GS().getVPlmnId() != null) {
+                        PlmnId vPlmnId = psiResponseParams.getLocationInformation5GS().getVPlmnId();
+                        try {
+                            vPlmnIdMcc = vPlmnId.getMcc();
+                            vPlmnIdMnc = vPlmnId.getMnc();
+                        } catch (Exception e) {
+                            logger.error(e.getMessage());
+                        }
+                        writeMcc(vPlmnIdMcc, vPlmnIdJsonObject);
+                        writeMnc(vPlmnIdMnc, vPlmnIdJsonObject);
+                    }
+                    psi5GSLocationInformationJsonObject.add("VisitedPLMNId", vPlmnIdJsonObject);
+                }
+
+                if (psiResponseParams.getLocationInformation5GS().getUsedRATType() != null) {
+                    JsonObject nrUsedRatTypeJsonObject = new JsonObject();
+                    UsedRATType usedRATType = UsedRATType.getInstance(psiResponseParams.getLocationInformation5GS().getUsedRATType().getCode());
+                    String ratType = usedRATType.name();
+                    writeLastRatType(ratType, nrUsedRatTypeJsonObject);
+                    psi5GSLocationInformationJsonObject.add("Used-RAT-Type", nrUsedRatTypeJsonObject);
+                }
             }
         }
 
-        if (sriForSmResponseValues != null) {
-            if (sriForSmResponseValues.getLmsi() != null)
-                lmsi = bytesToHex(sriForSmResponseValues.getLmsi().getData());
+        // Write Subscriber Information values gathered via SRI/SRISM or PSI
+        if (msisdn != null)
+            writeMsisdn(msisdn, psiSubscriberInformationJsonObject);
+        if (imsi != null)
+            writeImsi(imsi, psiSubscriberInformationJsonObject);
+        if (imei != null)
+            writeImei(imei, psiSubscriberInformationJsonObject);
+        if (lmsi != null) {
+            if (lmsi.getData() != null)
+                lmsiHexValue = bytesToHex(lmsi.getData());
+            writeLmsi(lmsiHexValue, psiSubscriberInformationJsonObject);
         }
 
-        // Write EPS Location Information values
-        psiLocationInformationJsonObject.add("EPSLocationInformation", psiLocationInformationEPSJsonObject);
         // Write CS Location Information values which might include EPS Location Information values
-        psiSubscriberInformationJsonObject.add("CSLocationInformation", psiLocationInformationJsonObject);
+        if (psiCSLocationInformationJsonObject != null)
+            psiSubscriberInformationJsonObject.add("CSLocationInformation", psiCSLocationInformationJsonObject);
 
         // Write GPRS Location Information values
-        psiSubscriberInformationJsonObject.add("PSLocationInformation", psiLocationInformationGPRSJsonObject);
+        if (psiPSLocationInformationJsonObject != null)
+            psiSubscriberInformationJsonObject.add("PSLocationInformation", psiPSLocationInformationJsonObject);
 
-        // Write rest of Subscriber Information values
-        writeMsisdn(msisdn, psiSubscriberInformationJsonObject);
-        writeImsi(imsi, psiSubscriberInformationJsonObject);
-        writeImei(imei, psiSubscriberInformationJsonObject);
-        writeLmsi(lmsi, psiSubscriberInformationJsonObject);
+        // Write EPS Location Information values (not included in CS Location Information)
+        if (psiEPSLocationInformationJsonObject != null)
+            psiSubscriberInformationJsonObject.add("EPSLocationInformation", psiEPSLocationInformationJsonObject);
+
+        // Write 5GS Location Information values
+        if (psi5GSLocationInformationJsonObject != null)
+            psiSubscriberInformationJsonObject.add("5GSLocationInformation", psi5GSLocationInformationJsonObject);
+
+        // Write Subscriber State
         if (csSubscriberState != null)
             writeSubscriberState(csSubscriberState, psiSubscriberInformationJsonObject);
         else if (psSubscriberState != null)
             writeSubscriberState(psSubscriberState, psiSubscriberInformationJsonObject);
-        writeNotReachableReason(notReachableReason, psiSubscriberInformationJsonObject);
+        else if (epsSubscriberState != null)
+            writeSubscriberState(epsSubscriberState, psiSubscriberInformationJsonObject);
+        if (notReachableReason != null)
+            writeNotReachableReason(notReachableReason, psiSubscriberInformationJsonObject);
+
         // Write MNP Information Result values
         if (mnpInfoResultNumberPortabilityStatus != null || mnpInfoResultMSISDN != null || mnpInfoResultIMSI != null || mnpInfoResultRouteingNumber != null) {
+            JsonObject psiMnpInfoResultJsonObject = new JsonObject();
             writeMnpStatus(mnpInfoResultNumberPortabilityStatus, psiMnpInfoResultJsonObject);
             writeMnpMsisdn(mnpInfoResultMSISDN, psiMnpInfoResultJsonObject);
             writeMnpImsi(mnpInfoResultIMSI, psiMnpInfoResultJsonObject);
             writeMnpRouteingNumber(mnpInfoResultRouteingNumber, psiMnpInfoResultJsonObject);
             psiSubscriberInformationJsonObject.add("MNPInfoResult", psiMnpInfoResultJsonObject);
         }
-        writeMSClassmark(msClassmark, psiSubscriberInformationJsonObject);
+
+        // Write MS Classmark
+        if (msClassmark != null)
+            writeMSClassmark(msClassmark, psiSubscriberInformationJsonObject);
+
         // Write GPRS MS Class values
-        if (msNetCap != null || msRASCap != null) {
-            writeMSNetworkCapability(msNetCap, psiGprsMsClassJsonObject);
-            writeMSRadioAccessCapability(msRASCap, psiGprsMsClassJsonObject);
+        if (msNetCap != null) {
+            JsonObject psiGprsMsClassJsonObject = new JsonObject();
+            writeMSNetworkCapability(msNetCap, psiGprsMsClassJsonObject); // TODO: fix decoding of this value
+            writeMSRadioAccessCapability(msRASCap, psiGprsMsClassJsonObject); // TODO: fix decoding of this value
             psiSubscriberInformationJsonObject.add("GPRSMSClass", psiGprsMsClassJsonObject);
         }
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String psiResponseJson = gson.toJson(psiSubscriberInformationJsonObject);
-        return psiResponseJson;
-    }
+        // Write last UE activity time
+        if (lastUeActivityTime != null) {
+            JsonObject psiLastUeActivityTime = new JsonObject();
+            writeTime(lastUeActivityTime, psiLastUeActivityTime);
+            psiSubscriberInformationJsonObject.add("LastUEActivityTime", psiLastUeActivityTime);
+        }
 
+        // Write Last RAT type
+        if (lastRatType != null) {
+            JsonObject psiLastRatType = new JsonObject();
+            writeLastRatType(lastRatType, psiLastRatType);
+            psiSubscriberInformationJsonObject.add("LastRATType", psiLastRatType);
+        }
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(psiSubscriberInformationJsonObject);
+    }
 }

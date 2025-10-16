@@ -1,13 +1,15 @@
 package org.mobicents.gmlc.slee.http;
 
+import com.google.common.collect.Multimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import org.apache.log4j.Logger;
-import org.mobicents.gmlc.slee.map.PslResponseValues;
-import org.mobicents.gmlc.slee.map.SriForLcsResponseValues;
+import org.mobicents.gmlc.slee.map.PslResponseParams;
+import org.mobicents.gmlc.slee.map.SriLcsResponseParams;
+import org.mobicents.gmlc.slee.primitives.CivicAddressElements;
+import org.mobicents.gmlc.slee.primitives.CivicAddressXmlReader;
 import org.mobicents.gmlc.slee.primitives.EllipsoidPoint;
-import org.mobicents.gmlc.slee.primitives.Polygon;
 import org.mobicents.gmlc.slee.primitives.PolygonImpl;
 import org.restcomm.protocols.ss7.map.api.MAPException;
 import org.restcomm.protocols.ss7.map.api.primitives.CellGlobalIdOrServiceAreaIdFixedLength;
@@ -21,24 +23,36 @@ import javax.xml.bind.DatatypeConverter;
 import java.awt.geom.Point2D;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.mobicents.gmlc.slee.gis.GeographicHelper.polygonCentroid;
 import static org.mobicents.gmlc.slee.http.JsonWriter.bytesToHexString;
 import static org.mobicents.gmlc.slee.http.JsonWriter.write3gppAaaServerName;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAccuracyFulfilmentIndicator;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeAdditionalLCSCapabilitySets;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAdditionalNetworkNodeNumber;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeAdditionalVGmlcAddress;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAgeOfLocationEstimate;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAltitude;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAngleOfMajorAxis;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeBarometricPressure;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeBearing;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeCellId;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeCivicAddress;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeClientReferenceNumber;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeConfidence;
-import static org.mobicents.gmlc.slee.http.JsonWriter.writeDeferredMTLRresponseIndicator;
-import static org.mobicents.gmlc.slee.http.JsonWriter.writeGeranGanssPositioningData;
-import static org.mobicents.gmlc.slee.http.JsonWriter.writeGeranPositioningData;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeDeferredMTlrResponseIndicator;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeGeranGanssPositioningGanssId;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeGeranGanssPositioningMethod;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeGeranGanssPositioningUsage;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeGeranPositioningMethod;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeGeranPositioningUsage;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeGprsNodeIndicator;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeHGmlcAddress;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeHorizontalSpeed;
@@ -52,8 +66,10 @@ import static org.mobicents.gmlc.slee.http.JsonWriter.writeLmsi;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeLongitude;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeMcc;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeMmeName;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeMmeNumber;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeMnc;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeMoLrShortCircuitIndicator;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeMscNumber;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeMsisdn;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeNetwork;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeNetworkNodeNumber;
@@ -65,6 +81,8 @@ import static org.mobicents.gmlc.slee.http.JsonWriter.writePprAddress;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeProtocol;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeServiceAreaCode;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeSgsnName;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeSgsnNumber;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeSupportedLCSCapabilitySets;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeTypeOfShape;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeUncertainty;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeUncertaintyAltitude;
@@ -73,8 +91,14 @@ import static org.mobicents.gmlc.slee.http.JsonWriter.writeUncertaintyInnerRadiu
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeUncertaintySemiMajorAxis;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeUncertaintySemiMinorAxis;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeUncertaintyVerticalSpeed;
-import static org.mobicents.gmlc.slee.http.JsonWriter.writeUtranGanssPositioningData;
-import static org.mobicents.gmlc.slee.http.JsonWriter.writeUtranPositioningData;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeUtranAddPositioningMethod;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeUtranAddPositioningPosId;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeUtranAddPositioningUsage;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeUtranGanssPositioningGanssId;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeUtranGanssPositioningMethod;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeUtranGanssPositioningUsage;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeUtranPositioningMethod;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeUtranPositioningUsage;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeVGmlcAddress;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeVelocityType;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeVerticalSpeed;
@@ -93,24 +117,17 @@ public class PslResponseJsonBuilder {
     /**
      * Handle generating the appropriate HTTP response in JSON format
      *
-     * @param sri                   Subscriber Information values gathered from SRILCS response event
+     * @param sriLcs                Subscriber Information values gathered from SRILCS response event
      * @param psl                   Subscriber Information values gathered from PSL response event
      * @param sriPslMsisdn          Subscriber's MSISDN
      * @param sriPslImsi            Subscriber's IMSI
      * @param clientReferenceNumber Reference Number gathered from the originating HTTP request sent by the GMLC Client
      * @param lcsReferenceNumber    LCS-ReferenceNumber exchanged between the GMLC and the UMTS core network
      */
-    public static String buildJsonResponseForPsl(SriForLcsResponseValues sri, PslResponseValues psl, String sriPslMsisdn, String sriPslImsi,
+    public static String buildJsonResponseForPsl(SriLcsResponseParams sriLcs, PslResponseParams psl, String sriPslMsisdn, String sriPslImsi,
                                                  Integer clientReferenceNumber, Integer lcsReferenceNumber) throws MAPException {
 
-        String msisdn, imsi, lmsi, networkNodeNumber, additionalNumber, mmeName, sgsnName, tgppAAAServerName, hGmlcAddress, vGmlcAddress, pprAddress,
-            typeOfShape,
-            additionalTypeOfShape, velocityType, geranPositioningInfo, geranGanssPositioningData, utranPositioningData, utranGanssPositioningData;
-        msisdn = imsi = lmsi = networkNodeNumber = additionalNumber = mmeName = sgsnName = tgppAAAServerName = hGmlcAddress = vGmlcAddress = pprAddress =
-            typeOfShape = additionalTypeOfShape = velocityType = geranPositioningInfo = geranGanssPositioningData = utranPositioningData =
-                utranGanssPositioningData = null;
-        Boolean gprsNodeIndicator, deferredMTLRresponseIndicator, molrShortCircuitIndicator;
-        gprsNodeIndicator = deferredMTLRresponseIndicator = molrShortCircuitIndicator = null;
+        String typeOfShape, additionalTypeOfShape = null;
         Double latitude, longitude, uncertainty, uncertaintySemiMajorAxis, uncertaintySemiMinorAxis, uncertaintyAltitude, uncertaintyInnerRadius,
             angleOfMajorAxis, offsetAngle, includedAngle;
         latitude = longitude = uncertainty = uncertaintySemiMajorAxis = uncertaintySemiMinorAxis = uncertaintyAltitude = uncertaintyInnerRadius =
@@ -120,17 +137,18 @@ public class PslResponseJsonBuilder {
         additionalLatitude = additionalLongitude = additionalUncertainty = additionalUncertaintySemiMajorAxis = additionalUncertaintySemiMinorAxis =
             additionalUncertaintyAltitude = additionalUncertaintyInnerRadius = additionalAngleOfMajorAxis = additionalOffsetAngle =
                 additionalIncludedAngle = null;
-        Integer mcc, mnc, lac, ciOrSac, aol, additionalNumberOfPoints, confidence, additionalConfidence, altitude, additionalAltitude,
+        int mcc, mnc, lac, ciOrSac, aol, numberOfPoints, confidence, additionalConfidence, altitude, additionalAltitude,
             innerRadius, additionalInnerRadius, accuracyFulfilmentIndicator, horizontalSpeed, bearing, verticalSpeed, uncertaintyHorizontalSpeed,
             uncertaintyVerticalSpeed;
-        mcc = mnc = lac = ciOrSac = aol = additionalNumberOfPoints = confidence = additionalConfidence = altitude = additionalAltitude =
-            innerRadius = additionalInnerRadius = accuracyFulfilmentIndicator = horizontalSpeed = bearing = verticalSpeed = uncertaintyHorizontalSpeed =
-                uncertaintyVerticalSpeed = null;
-        Boolean saiPresent = false;
-        Polygon polygon = null, additionalPolygon = null;
-        EllipsoidPoint[] polygonEllipsoidPoints = null, additionalPolygonEllipsoidPoints = null;
-        Double[][] polygonArray = null;
+        mcc = mnc = lac = ciOrSac = numberOfPoints = confidence = additionalConfidence = altitude = additionalAltitude =
+            innerRadius = additionalInnerRadius = horizontalSpeed = bearing = verticalSpeed = uncertaintyHorizontalSpeed =
+                uncertaintyVerticalSpeed = -1;
+        PolygonImpl polygon = null;
+        EllipsoidPoint[] polygonEllipsoidPoints;
+        Double[][] polygonArray;
 
+        JsonObject sriForLcsJsonObject = null;
+        JsonObject pslJsonObject = null;
         JsonObject sriPslJsonObject = new JsonObject();
         writeNetwork("GSM/UMTS", sriPslJsonObject);
         writeProtocol("MAP", sriPslJsonObject);
@@ -138,112 +156,174 @@ public class PslResponseJsonBuilder {
         writeOperationResult("SUCCESS", sriPslJsonObject);
         writeClientReferenceNumber(clientReferenceNumber, sriPslJsonObject);
         writeLcsReferenceNumber(lcsReferenceNumber, sriPslJsonObject);
-        JsonObject sriForLcsJsonObject = new JsonObject();
-        JsonObject pslJsonObject = new JsonObject();
-        JsonObject pslLocationEstimateJsonObject = new JsonObject();
-        JsonObject pslAdditionalLocationEstimateJsonObject = new JsonObject();
-        JsonObject pslAdditionalLocationEstimatePolygonPointsJsonObject = new JsonObject();
-        JsonObject pslAdditionalLocationEstimatePolygonCentroidObject = new JsonObject();
-        JsonObject pslVelocityEstimateJsonObject = new JsonObject();
-        JsonObject pslCgiOrSaiOrLaiJsonObject = new JsonObject();
-        JsonObject pslGeranInfoJsonObject = new JsonObject();
-        JsonObject pslUtranInfoJsonObject = new JsonObject();
 
-
-        if (sri != null) {
+        /**************************/
+        /*** MAP SRILCS values ***/
+        /*************************/
+        if (sriLcs != null) {
+            sriForLcsJsonObject = new JsonObject();
             // Get SRILCS response values
-            if (sri.getMsisdn() != null) {
-                msisdn = sri.getMsisdn().getAddress();
-                writeMsisdn(msisdn, sriForLcsJsonObject);
-            } else {
-                msisdn = sriPslMsisdn;
-                writeMsisdn(msisdn, sriForLcsJsonObject);
-            }
 
-            if (sri.getImsi() != null) {
-                imsi = new String(sri.getImsi().getData().getBytes());
+            /*** targetMS [0] SubscriberIdentity ***/
+            if (sriLcs.getMsisdn() != null) {
+                writeMsisdn(sriLcs.getMsisdn().getAddress(), sriForLcsJsonObject);
+            } else {
+                writeMsisdn(sriPslMsisdn, sriForLcsJsonObject);
+            }
+            if (sriLcs.getImsi() != null) {
+                String imsi = new String(sriLcs.getImsi().getData().getBytes());
                 writeImsi(imsi, sriForLcsJsonObject);
             } else {
-                imsi = sriPslImsi;
-                writeImsi(imsi, sriForLcsJsonObject);
+                writeImsi(sriPslImsi, sriForLcsJsonObject);
             }
 
-            if (sri.getLmsi() != null) {
-                lmsi = bytesToHex(sri.getLmsi().getData());
+            /*** lcsLocationInfo [1] LCSLocationInfo ***/
+            /*** networkNode-Number ISDN-AddressString ***/
+            if (sriLcs.getNetworkNodeNumber() != null) {
+                writeNetworkNodeNumber(sriLcs.getNetworkNodeNumber().getAddress(), sriForLcsJsonObject);
+            }
+
+            /*** gprsNodeIndicator [2] NULL OPTIONAL ***/
+            if (sriLcs.isGprsNodeIndicator() != null) {
+                // gprsNodeIndicator is set only if the SGSN number is sent as the Network Node Number
+                writeGprsNodeIndicator(sriLcs.isGprsNodeIndicator(), sriForLcsJsonObject);
+            }
+
+            /*** lcsLocationInfo [1] LCSLocationInfo ***/
+            /*** lmsi [0] LMSI OPTIONAL ***/
+            if (sriLcs.getLmsi() != null) {
+                String lmsi = bytesToHex(sriLcs.getLmsi().getData());
                 writeLmsi(lmsi, sriForLcsJsonObject);
             }
 
-            if (sri.getNetworkNodeNumber() != null) {
-                networkNodeNumber = sri.getNetworkNodeNumber().getAddress();
-                writeNetworkNodeNumber(networkNodeNumber, sriForLcsJsonObject);
-            }
-
-            if (sri.getAdditionalNumber() != null) {
-                if (sri.getAdditionalNumber().getMSCNumber() != null)
-                    additionalNumber = sri.getAdditionalNumber().getMSCNumber().getAddress();
-                else if (sri.getAdditionalNumber().getSGSNNumber() != null)
-                    additionalNumber = sri.getAdditionalNumber().getSGSNNumber().getAddress();
+            /*** lcsLocationInfo [1] LCSLocationInfo ***/
+            /*** additional-Number [3] Additional-Number OPTIONAL ***/
+            if (sriLcs.getAdditionalNumber() != null) {
+                String additionalNumber = null;
+                if (sriLcs.getAdditionalNumber().getMSCNumber() != null)
+                    additionalNumber = sriLcs.getAdditionalNumber().getMSCNumber().getAddress();
+                else if (sriLcs.getAdditionalNumber().getSGSNNumber() != null)
+                    additionalNumber = sriLcs.getAdditionalNumber().getSGSNNumber().getAddress();
                 writeAdditionalNetworkNodeNumber(additionalNumber, sriForLcsJsonObject);
             }
 
-            if (sri.isGprsNodeIndicator() != null) {
-                gprsNodeIndicator = sri.isGprsNodeIndicator();
-                writeGprsNodeIndicator(gprsNodeIndicator, sriForLcsJsonObject);
+            /*** lcsLocationInfo [1] LCSLocationInfo ***/
+            /*** supportedLCS-CapabilitySets [4] SupportedLCS-CapabilitySets OPTIONAL ***/
+            if (sriLcs.getSupportedLCSCapabilitySets() != null) {
+                JsonObject supportedLCSCapSetsJsonObject = new JsonObject();
+                boolean supportedLCSCapabilitySetRelease98_99 = sriLcs.getSupportedLCSCapabilitySets().getCapabilitySetRelease98_99();
+                boolean supportedLCSCapabilitySetRelease4 = sriLcs.getSupportedLCSCapabilitySets().getCapabilitySetRelease4();
+                boolean supportedLCSCapabilitySetRelease5 = sriLcs.getSupportedLCSCapabilitySets().getCapabilitySetRelease5();
+                boolean supportedLCSCapabilitySetRelease6 = sriLcs.getSupportedLCSCapabilitySets().getCapabilitySetRelease6();
+                boolean supportedLCSCapabilitySetRelease7 = sriLcs.getSupportedLCSCapabilitySets().getCapabilitySetRelease7();
+                writeSupportedLCSCapabilitySets(true, supportedLCSCapabilitySetRelease98_99, supportedLCSCapabilitySetRelease4,
+                        supportedLCSCapabilitySetRelease5, supportedLCSCapabilitySetRelease6, supportedLCSCapabilitySetRelease7, supportedLCSCapSetsJsonObject);
+                sriForLcsJsonObject.add("SupportedLCSCapabilitySets", supportedLCSCapSetsJsonObject);
             }
 
-            if (sri.getMmeName() != null) {
-                mmeName = new String(sri.getMmeName().getData());
+            /*** lcsLocationInfo [1] LCSLocationInfo ***/
+            /*** additional-LCS-CapabilitySets [5] SupportedLCS-CapabilitySets OPTIONAL ***/
+            if (sriLcs.getAddSupportedLCSCapabilitySets() != null) {
+                JsonObject additionalLCSCapSetsJsonObject = new JsonObject();
+                boolean addSupportedLCSCapabilitySetRelease98_99 = sriLcs.getAddSupportedLCSCapabilitySets().getCapabilitySetRelease98_99();
+                boolean addSupportedLCSCapabilitySetRelease4 = sriLcs.getAddSupportedLCSCapabilitySets().getCapabilitySetRelease4();
+                boolean addSupportedLCSCapabilitySetRelease5 = sriLcs.getAddSupportedLCSCapabilitySets().getCapabilitySetRelease5();
+                boolean addSupportedLCSCapabilitySetRelease6 = sriLcs.getAddSupportedLCSCapabilitySets().getCapabilitySetRelease6();
+                boolean addSupportedLCSCapabilitySetRelease7 = sriLcs.getAddSupportedLCSCapabilitySets().getCapabilitySetRelease7();
+                writeAdditionalLCSCapabilitySets(true, addSupportedLCSCapabilitySetRelease98_99, addSupportedLCSCapabilitySetRelease4, addSupportedLCSCapabilitySetRelease5,
+                        addSupportedLCSCapabilitySetRelease6, addSupportedLCSCapabilitySetRelease7, additionalLCSCapSetsJsonObject);
+                sriForLcsJsonObject.add("AdditionalLCSCapabilitySets", additionalLCSCapSetsJsonObject);
+            }
+
+            /*** lcsLocationInfo [1] LCSLocationInfo ***/
+            /*** mme-Name [6] DiameterIdentity OPTIONAL ***/
+            if (sriLcs.getMmeName() != null) {
+                String mmeName = new String(sriLcs.getMmeName().getData());
                 writeMmeName(mmeName, sriForLcsJsonObject);
             }
 
-            if (sri.getSgsnName() != null) {
-                sgsnName = new String(sri.getSgsnName().getData());
-                writeSgsnName(sgsnName, sriForLcsJsonObject);
-            }
-
-            if (sri.getAaaServerName() != null) {
-                tgppAAAServerName = new String(sri.getAaaServerName().getData());
+            /*** lcsLocationInfo [1] LCSLocationInfo ***/
+            /*** aaa-Server-Name [8] DiameterIdentity OPTIONAL ***/
+            if (sriLcs.getAaaServerName() != null) {
+                String tgppAAAServerName = new String(sriLcs.getAaaServerName().getData());
                 write3gppAaaServerName(tgppAAAServerName, sriForLcsJsonObject);
             }
 
-            if (sri.gethGmlcAddress() != null) {
-                hGmlcAddress = bytesToHexString(sri.gethGmlcAddress().getGSNAddressData());
-                try {
-                    InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(hGmlcAddress));
-                    hGmlcAddress = address.getHostAddress();
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                }
-                writeHGmlcAddress(hGmlcAddress, sriForLcsJsonObject);
+            /*** lcsLocationInfo [1] LCSLocationInfo ***/
+            /*** sgsn-Name [9] DiameterIdentity OPTIONAL ***/
+            if (sriLcs.getSgsnName() != null) {
+                String sgsnName = new String(sriLcs.getSgsnName().getData());
+                writeSgsnName(sgsnName, sriForLcsJsonObject);
             }
 
-            if (sri.getvGmlcAddress() != null) {
-                vGmlcAddress = bytesToHexString(sri.getvGmlcAddress().getGSNAddressData());
+            /*** lcsLocationInfo [1] LCSLocationInfo ***/
+            /*** sgsn-Realm [10] DiameterIdentity OPTIONAL ***/
+            if (sriLcs.getSgsnRealm() != null) {
+                String sgsnRealm = new String(sriLcs.getSgsnRealm().getData());
+                writeSgsnName(sgsnRealm, sriForLcsJsonObject);
+            }
+
+            /*** v-gmlc-Address [3] GSN-Address OPTIONAL ***/
+            if (sriLcs.getVGmlcAddress() != null) {
+                String vGmlcAddress = bytesToHexString(sriLcs.getVGmlcAddress().getGSNAddressData());
                 try {
                     InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(vGmlcAddress));
                     vGmlcAddress = address.getHostAddress();
                 } catch (UnknownHostException e) {
-                    e.printStackTrace();
+                    logger.error(e.getMessage());
                 }
                 writeVGmlcAddress(vGmlcAddress, sriForLcsJsonObject);
             }
 
-            if (sri.getPprAddress() != null) {
-                pprAddress = bytesToHexString(sri.getPprAddress().getGSNAddressData());
+            /*** h-gmlc-Address [4] GSN-Address OPTIONAL ***/
+            if (sriLcs.getHGmlcAddress() != null) {
+                String hGmlcAddress = bytesToHexString(sriLcs.getHGmlcAddress().getGSNAddressData());
+                try {
+                    InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(hGmlcAddress));
+                    hGmlcAddress = address.getHostAddress();
+                } catch (UnknownHostException e) {
+                    logger.error(e.getMessage());
+                }
+                writeHGmlcAddress(hGmlcAddress, sriForLcsJsonObject);
+            }
+
+            /*** ppr-Address [5] GSN-Address OPTIONAL ***/
+            if (sriLcs.getPprAddress() != null) {
+                String pprAddress = bytesToHexString(sriLcs.getPprAddress().getGSNAddressData());
                 try {
                     InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(pprAddress));
                     pprAddress = address.getHostAddress();
                 } catch (UnknownHostException e) {
-                    e.printStackTrace();
+                    logger.error(e.getMessage());
                 }
                 writePprAddress(pprAddress, sriForLcsJsonObject);
             }
+
+            /*** additional-v-gmlc-Address [6] GSN-Address OPTIONAL ***/
+            if (sriLcs.getAddVGmlcAddress() != null) {
+                String addVGmlcAddress = bytesToHexString(sriLcs.getAddVGmlcAddress().getGSNAddressData());
+                try {
+                    InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(addVGmlcAddress));
+                    addVGmlcAddress = address.getHostAddress();
+                } catch (UnknownHostException e) {
+                    logger.error(e.getMessage());
+                }
+                writeAdditionalVGmlcAddress(addVGmlcAddress, sriForLcsJsonObject);
+            }
         }
 
+        /***********************/
+        /*** MAP PSL values ***/
+        /**********************/
         if (psl != null) {
-            // Get PSL response values
-            // Location Estimate
+
+            pslJsonObject = new JsonObject();
+
+            // Get MAP PSL response values
+
+            /*** locationEstimate Ext-GeographicalInformation, ***/
             if (psl.getLocationEstimate() != null) {
+                JsonObject pslLocationEstimateJsonObject = new JsonObject();
                 ExtGeographicalInformation locationEstimate = psl.getLocationEstimate();
                 typeOfShape = locationEstimate.getTypeOfShape().name();
                 if (locationEstimate.getTypeOfShape() != TypeOfShape.Polygon) {
@@ -261,44 +341,7 @@ public class PslResponseJsonBuilder {
                     offsetAngle = locationEstimate.getOffsetAngle();
                     includedAngle = locationEstimate.getIncludedAngle();
                 }
-            }
-
-            // Additional Location Estimate
-            if (psl.getAdditionalLocationEstimate() != null) {
-                AddGeographicalInformation additionalLocationEstimate = psl.getAdditionalLocationEstimate();
-                additionalTypeOfShape = additionalLocationEstimate.getTypeOfShape().name();
-                if (additionalLocationEstimate.getTypeOfShape() != TypeOfShape.Polygon) {
-                    additionalLatitude = additionalLocationEstimate.getLatitude();
-                    additionalLongitude = additionalLocationEstimate.getLongitude();
-                    additionalUncertainty = additionalLocationEstimate.getUncertainty();
-                    additionalUncertaintySemiMajorAxis = additionalLocationEstimate.getUncertaintySemiMajorAxis();
-                    additionalUncertaintySemiMinorAxis = additionalLocationEstimate.getUncertaintySemiMinorAxis();
-                    additionalAngleOfMajorAxis = additionalLocationEstimate.getAngleOfMajorAxis();
-                    additionalConfidence = additionalLocationEstimate.getConfidence();
-                    additionalAltitude = additionalLocationEstimate.getAltitude();
-                    additionalUncertaintyAltitude = additionalLocationEstimate.getUncertaintyAltitude();
-                    additionalInnerRadius = additionalLocationEstimate.getInnerRadius();
-                    additionalUncertaintyInnerRadius = additionalLocationEstimate.getUncertaintyRadius();
-                    additionalOffsetAngle = additionalLocationEstimate.getOffsetAngle();
-                    additionalIncludedAngle = additionalLocationEstimate.getIncludedAngle();
-                } else {
-                    // PSL Additional Location Estimate for TypeOfShape.Polygon
-                    additionalPolygon = new PolygonImpl(additionalLocationEstimate.getData());
-                    additionalNumberOfPoints = additionalPolygon.getNumberOfPoints();
-                    additionalPolygonEllipsoidPoints = new EllipsoidPoint[additionalNumberOfPoints];
-                    for (int point = 0; point < additionalNumberOfPoints; point++) {
-                        additionalPolygonEllipsoidPoints[point] = additionalPolygon.getEllipsoidPoint(point);
-                    }
-                    try {
-                        ((PolygonImpl) additionalPolygon).setData(additionalPolygonEllipsoidPoints);
-                    } catch (MAPException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            // Write Location Estimate values from PSL
-            if (typeOfShape != null) {
+                // Write Location Estimate values from PSL
                 writeTypeOfShape(typeOfShape, pslLocationEstimateJsonObject);
                 if (typeOfShape.equalsIgnoreCase("EllipsoidPoint")) {
                     writeLatitude(latitude, pslLocationEstimateJsonObject);
@@ -332,116 +375,185 @@ public class PslResponseJsonBuilder {
                     writeIncludedAngle(includedAngle, pslLocationEstimateJsonObject);
                     writeConfidence(confidence, pslLocationEstimateJsonObject);
                 }
-            }
-            if (additionalTypeOfShape != null) {
-                if (additionalTypeOfShape.equalsIgnoreCase("Polygon")) {
-                    typeOfShape = "Polygon";
-                    writeTypeOfShape(typeOfShape, pslLocationEstimateJsonObject);
-                }
-            }
-            pslJsonObject.add("LocationEstimate", pslLocationEstimateJsonObject);
-
-            if (psl.getAdditionalLocationEstimate() != null) {
-                // Write Additional Location Estimate values from PSL
-                writeTypeOfShape(additionalTypeOfShape, pslAdditionalLocationEstimateJsonObject);
-                if (additionalTypeOfShape != null) {
-                    if (additionalTypeOfShape.equalsIgnoreCase("EllipsoidPoint")) {
-                        writeLatitude(additionalLatitude, pslAdditionalLocationEstimateJsonObject);
-                        writeLongitude(additionalLongitude, pslAdditionalLocationEstimateJsonObject);
-                    } else if (additionalTypeOfShape.equalsIgnoreCase("EllipsoidPointWithUncertaintyCircle")) {
-                        writeLatitude(additionalLatitude, pslAdditionalLocationEstimateJsonObject);
-                        writeLongitude(additionalLongitude, pslAdditionalLocationEstimateJsonObject);
-                        writeUncertainty(additionalUncertainty, pslAdditionalLocationEstimateJsonObject);
-                    } else if (additionalTypeOfShape.equalsIgnoreCase("EllipsoidPointWithUncertaintyEllipse")) {
-                        writeLatitude(additionalLatitude, pslAdditionalLocationEstimateJsonObject);
-                        writeLongitude(additionalLongitude, pslAdditionalLocationEstimateJsonObject);
-                        writeUncertaintySemiMajorAxis(additionalUncertaintySemiMajorAxis, pslAdditionalLocationEstimateJsonObject);
-                        writeUncertaintySemiMinorAxis(additionalUncertaintySemiMinorAxis, pslAdditionalLocationEstimateJsonObject);
-                        writeAngleOfMajorAxis(additionalAngleOfMajorAxis, pslAdditionalLocationEstimateJsonObject);
-                        writeConfidence(additionalConfidence, pslAdditionalLocationEstimateJsonObject);
-                    } else if (additionalTypeOfShape.equalsIgnoreCase("Polygon")) {
-                        polygonArray = new Double[additionalNumberOfPoints][additionalNumberOfPoints];
-                        Double lat, lon;
-                        if (additionalNumberOfPoints > 2 && additionalNumberOfPoints <= 15) {
-                            writeNumberOfPoints(additionalNumberOfPoints, pslAdditionalLocationEstimateJsonObject);
-                            for (int index=0; index < additionalNumberOfPoints; index++) {
-                                lat = additionalPolygon.getEllipsoidPoint(index).getLatitude();
-                                lon = additionalPolygon.getEllipsoidPoint(index).getLongitude();
-                                polygonArray[index][0] = lat;
-                                polygonArray[index][1] = lon;
-                                String additionalPolygonPoint = "polygonPoint"+(index+1);
-                                writeLatitude(lat, pslAdditionalLocationEstimatePolygonPointsJsonObject);
-                                writeLongitude(lon, pslAdditionalLocationEstimatePolygonPointsJsonObject);
-                                pslAdditionalLocationEstimateJsonObject.add(additionalPolygonPoint, pslAdditionalLocationEstimatePolygonPointsJsonObject);
-                                pslAdditionalLocationEstimatePolygonPointsJsonObject = new JsonObject();
-                            }
-                            List<Point2D> listOfPoints = new ArrayList<>();
-                            Point2D[] point2D = new Point2D.Double[polygonArray.length];
-                            Point2D polygonPoint;
-                            for (int point = 0; point < polygonArray.length; point++) {
-                                lat = polygonArray[point][0];
-                                lon = polygonArray[point][1];
-                                polygonPoint = new Point2D.Double(lat,lon);
-                                listOfPoints.add(polygonPoint);
-                                point2D[point] = listOfPoints.get(point);
-                            }
-                            if (polygonCentroid(point2D) != null) {
-                                writeLatitude(polygonCentroid(point2D).getX(), pslAdditionalLocationEstimatePolygonCentroidObject);
-                                writeLongitude(polygonCentroid(point2D).getY(), pslAdditionalLocationEstimatePolygonCentroidObject);
-                                pslAdditionalLocationEstimateJsonObject.add("polygonCentroid", pslAdditionalLocationEstimatePolygonCentroidObject);
-                            }
+                if (psl.getAdditionalLocationEstimate() != null) {
+                    if (psl.getAdditionalLocationEstimate().getTypeOfShape() != null)
+                        additionalTypeOfShape = psl.getAdditionalLocationEstimate().getTypeOfShape().name();
+                    if (additionalTypeOfShape != null) {
+                        if (additionalTypeOfShape.equalsIgnoreCase("Polygon")) {
+                            typeOfShape = "Polygon";
+                            writeTypeOfShape(typeOfShape, pslLocationEstimateJsonObject);
                         }
-                    } else if (additionalTypeOfShape.equalsIgnoreCase("EllipsoidPointWithAltitude")) {
-                        writeLatitude(additionalLatitude, pslAdditionalLocationEstimateJsonObject);
-                        writeLongitude(additionalLongitude, pslAdditionalLocationEstimateJsonObject);
-                        writeAltitude(additionalAltitude, pslAdditionalLocationEstimateJsonObject);
-                    } else if (additionalTypeOfShape.equalsIgnoreCase("EllipsoidPointWithAltitudeAndUncertaintyEllipsoid")) {
-                        writeLatitude(additionalLatitude, pslAdditionalLocationEstimateJsonObject);
-                        writeLongitude(additionalLongitude, pslAdditionalLocationEstimateJsonObject);
-                        writeAltitude(additionalAltitude, pslAdditionalLocationEstimateJsonObject);
-                        writeUncertaintySemiMajorAxis(additionalUncertaintySemiMajorAxis, pslAdditionalLocationEstimateJsonObject);
-                        writeUncertaintySemiMinorAxis(additionalUncertaintySemiMinorAxis, pslAdditionalLocationEstimateJsonObject);
-                        writeAngleOfMajorAxis(additionalAngleOfMajorAxis, pslAdditionalLocationEstimateJsonObject);
-                        writeUncertaintyAltitude(additionalUncertaintyAltitude, pslAdditionalLocationEstimateJsonObject);
-                        writeConfidence(additionalConfidence, pslAdditionalLocationEstimateJsonObject);
-                    } else if (additionalTypeOfShape.equalsIgnoreCase("EllipsoidArc")) {
-                        writeLatitude(additionalLatitude, pslAdditionalLocationEstimateJsonObject);
-                        writeLongitude(additionalLongitude, pslAdditionalLocationEstimateJsonObject);
-                        writeInnerRadius(additionalInnerRadius, pslAdditionalLocationEstimateJsonObject);
-                        writeUncertaintyInnerRadius(additionalUncertaintyInnerRadius, pslAdditionalLocationEstimateJsonObject);
-                        writeOffsetAngle(additionalOffsetAngle, pslAdditionalLocationEstimateJsonObject);
-                        writeIncludedAngle(additionalIncludedAngle, pslAdditionalLocationEstimateJsonObject);
-                        writeConfidence(additionalConfidence, pslAdditionalLocationEstimateJsonObject);
                     }
                 }
-                pslJsonObject.add("AdditionalLocationEstimate", pslAdditionalLocationEstimateJsonObject);
+                pslJsonObject.add("LocationEstimate", pslLocationEstimateJsonObject);
             }
 
-            if (psl.getAgeOfLocationEstimate() <= Integer.MAX_VALUE && psl.getAgeOfLocationEstimate() >= Integer.MIN_VALUE) {
+            /*** ageOfLocationEstimate [0] AgeOfLocationInformation OPTIONAL ***/
+            if (psl.getAgeOfLocationEstimate() != null) {
                 aol = psl.getAgeOfLocationEstimate();
                 writeAgeOfLocationEstimate(aol, pslJsonObject);
             }
 
-            if (psl.getAccuracyFulfilmentIndicator() != null) {
-                accuracyFulfilmentIndicator = psl.getAccuracyFulfilmentIndicator().getIndicator();
-                writeAccuracyFulfilmentIndicator(accuracyFulfilmentIndicator, pslJsonObject);
+            /*** add-LocationEstimate [2] Add-GeographicalInformation OPTIONAL ***/
+            // Additional Location Estimate
+            if (psl.getAdditionalLocationEstimate() != null) {
+                JsonObject pslAdditionalLocationEstimateJsonObject = new JsonObject();
+                AddGeographicalInformation additionalLocationEstimate = psl.getAdditionalLocationEstimate();
+                additionalTypeOfShape = additionalLocationEstimate.getTypeOfShape().name();
+                if (additionalLocationEstimate.getTypeOfShape() != TypeOfShape.Polygon) {
+                    additionalLatitude = additionalLocationEstimate.getLatitude();
+                    additionalLongitude = additionalLocationEstimate.getLongitude();
+                    additionalUncertainty = additionalLocationEstimate.getUncertainty();
+                    additionalUncertaintySemiMajorAxis = additionalLocationEstimate.getUncertaintySemiMajorAxis();
+                    additionalUncertaintySemiMinorAxis = additionalLocationEstimate.getUncertaintySemiMinorAxis();
+                    additionalAngleOfMajorAxis = additionalLocationEstimate.getAngleOfMajorAxis();
+                    additionalConfidence = additionalLocationEstimate.getConfidence();
+                    additionalAltitude = additionalLocationEstimate.getAltitude();
+                    additionalUncertaintyAltitude = additionalLocationEstimate.getUncertaintyAltitude();
+                    additionalInnerRadius = additionalLocationEstimate.getInnerRadius();
+                    additionalUncertaintyInnerRadius = additionalLocationEstimate.getUncertaintyRadius();
+                    additionalOffsetAngle = additionalLocationEstimate.getOffsetAngle();
+                    additionalIncludedAngle = additionalLocationEstimate.getIncludedAngle();
+                } else {
+                    // PSL Additional Location Estimate for TypeOfShape.Polygon
+                    polygon = new PolygonImpl(additionalLocationEstimate.getData());
+                    numberOfPoints = polygon.getNumberOfPoints();
+                    polygonEllipsoidPoints = new EllipsoidPoint[numberOfPoints];
+                    for (int point = 0; point < numberOfPoints; point++) {
+                        polygonEllipsoidPoints[point] = polygon.getEllipsoidPoint(point);
+                    }
+                    try {
+                        polygon.setData(polygonEllipsoidPoints);
+                    } catch (MAPException e) {
+                        logger.error(e.getMessage());
+                    }
+                }
+                // Write Additional Location Estimate values from PSL
+                writeTypeOfShape(additionalTypeOfShape, pslAdditionalLocationEstimateJsonObject);
+                if (additionalTypeOfShape.equalsIgnoreCase("EllipsoidPoint")) {
+                    writeLatitude(additionalLatitude, pslAdditionalLocationEstimateJsonObject);
+                    writeLongitude(additionalLongitude, pslAdditionalLocationEstimateJsonObject);
+                } else if (additionalTypeOfShape.equalsIgnoreCase("EllipsoidPointWithUncertaintyCircle")) {
+                    writeLatitude(additionalLatitude, pslAdditionalLocationEstimateJsonObject);
+                    writeLongitude(additionalLongitude, pslAdditionalLocationEstimateJsonObject);
+                    writeUncertainty(additionalUncertainty, pslAdditionalLocationEstimateJsonObject);
+                } else if (additionalTypeOfShape.equalsIgnoreCase("EllipsoidPointWithUncertaintyEllipse")) {
+                    writeLatitude(additionalLatitude, pslAdditionalLocationEstimateJsonObject);
+                    writeLongitude(additionalLongitude, pslAdditionalLocationEstimateJsonObject);
+                    writeUncertaintySemiMajorAxis(additionalUncertaintySemiMajorAxis, pslAdditionalLocationEstimateJsonObject);
+                    writeUncertaintySemiMinorAxis(additionalUncertaintySemiMinorAxis, pslAdditionalLocationEstimateJsonObject);
+                    writeAngleOfMajorAxis(additionalAngleOfMajorAxis, pslAdditionalLocationEstimateJsonObject);
+                    writeConfidence(additionalConfidence, pslAdditionalLocationEstimateJsonObject);
+                } else if (additionalTypeOfShape.equalsIgnoreCase("Polygon")) {
+                    JsonObject pslAdditionalLocationEstimatePolygonPointsJsonObject = new JsonObject();
+                    JsonObject pslAdditionalLocationEstimatePolygonCentroidObject = new JsonObject();
+                    polygonArray = new Double[numberOfPoints][numberOfPoints];
+                    Double lat, lon;
+                    if (numberOfPoints > 2 && numberOfPoints <= 15) {
+                        writeNumberOfPoints(numberOfPoints, pslAdditionalLocationEstimateJsonObject);
+                        for (int index = 0; index < numberOfPoints; index++) {
+                            lat = polygon.getEllipsoidPoint(index).getLatitude();
+                            lon = polygon.getEllipsoidPoint(index).getLongitude();
+                            polygonArray[index][0] = lat;
+                            polygonArray[index][1] = lon;
+                            String additionalPolygonPoint = "polygonPoint" + (index + 1);
+                            writeLatitude(lat, pslAdditionalLocationEstimatePolygonPointsJsonObject);
+                            writeLongitude(lon, pslAdditionalLocationEstimatePolygonPointsJsonObject);
+                            pslAdditionalLocationEstimateJsonObject.add(additionalPolygonPoint, pslAdditionalLocationEstimatePolygonPointsJsonObject);
+                            pslAdditionalLocationEstimatePolygonPointsJsonObject = new JsonObject();
+                        }
+                        List<Point2D> listOfPoints = new ArrayList<>();
+                        Point2D[] point2D = new Point2D.Double[polygonArray.length];
+                        Point2D polygonPoint;
+                        for (int point = 0; point < polygonArray.length; point++) {
+                            lat = polygonArray[point][0];
+                            lon = polygonArray[point][1];
+                            polygonPoint = new Point2D.Double(lat, lon);
+                            listOfPoints.add(polygonPoint);
+                            point2D[point] = listOfPoints.get(point);
+                        }
+                        polygonCentroid(point2D);
+                        writeLatitude(polygonCentroid(point2D).getX(), pslAdditionalLocationEstimatePolygonCentroidObject);
+                        writeLongitude(polygonCentroid(point2D).getY(), pslAdditionalLocationEstimatePolygonCentroidObject);
+                        pslAdditionalLocationEstimateJsonObject.add("polygonCentroid", pslAdditionalLocationEstimatePolygonCentroidObject);
+                    }
+                } else if (additionalTypeOfShape.equalsIgnoreCase("EllipsoidPointWithAltitude")) {
+                    writeLatitude(additionalLatitude, pslAdditionalLocationEstimateJsonObject);
+                    writeLongitude(additionalLongitude, pslAdditionalLocationEstimateJsonObject);
+                    writeAltitude(additionalAltitude, pslAdditionalLocationEstimateJsonObject);
+                } else if (additionalTypeOfShape.equalsIgnoreCase("EllipsoidPointWithAltitudeAndUncertaintyEllipsoid")) {
+                    writeLatitude(additionalLatitude, pslAdditionalLocationEstimateJsonObject);
+                    writeLongitude(additionalLongitude, pslAdditionalLocationEstimateJsonObject);
+                    writeAltitude(additionalAltitude, pslAdditionalLocationEstimateJsonObject);
+                    writeUncertaintySemiMajorAxis(additionalUncertaintySemiMajorAxis, pslAdditionalLocationEstimateJsonObject);
+                    writeUncertaintySemiMinorAxis(additionalUncertaintySemiMinorAxis, pslAdditionalLocationEstimateJsonObject);
+                    writeAngleOfMajorAxis(additionalAngleOfMajorAxis, pslAdditionalLocationEstimateJsonObject);
+                    writeUncertaintyAltitude(additionalUncertaintyAltitude, pslAdditionalLocationEstimateJsonObject);
+                    writeConfidence(additionalConfidence, pslAdditionalLocationEstimateJsonObject);
+                } else if (additionalTypeOfShape.equalsIgnoreCase("EllipsoidArc")) {
+                    writeLatitude(additionalLatitude, pslAdditionalLocationEstimateJsonObject);
+                    writeLongitude(additionalLongitude, pslAdditionalLocationEstimateJsonObject);
+                    writeInnerRadius(additionalInnerRadius, pslAdditionalLocationEstimateJsonObject);
+                    writeUncertaintyInnerRadius(additionalUncertaintyInnerRadius, pslAdditionalLocationEstimateJsonObject);
+                    writeOffsetAngle(additionalOffsetAngle, pslAdditionalLocationEstimateJsonObject);
+                    writeIncludedAngle(additionalIncludedAngle, pslAdditionalLocationEstimateJsonObject);
+                    writeConfidence(additionalConfidence, pslAdditionalLocationEstimateJsonObject);
+                }
+                pslJsonObject.add("AdditionalLocationEstimate", pslAdditionalLocationEstimateJsonObject);
             }
 
-            if (psl.isDeferredMTLRResponseIndicator() != null) {
-                deferredMTLRresponseIndicator = psl.isDeferredMTLRResponseIndicator();
-                writeDeferredMTLRresponseIndicator(deferredMTLRresponseIndicator, pslJsonObject);
+            /*** deferredmt-lrResponseIndicator [3] NULL OPTIONAL ***/
+            if (psl.isDeferredMTLRResponseIndicator()) {
+                writeDeferredMTlrResponseIndicator(psl.isDeferredMTLRResponseIndicator(), pslJsonObject);
             }
 
-            if (psl.isMoLrShortCircuitIndicator() != null) {
-                molrShortCircuitIndicator = psl.isMoLrShortCircuitIndicator();
-                writeMoLrShortCircuitIndicator(molrShortCircuitIndicator, pslJsonObject);
+            /*** geranPositioningData [4] PositioningDataInformation OPTIONAL ***/
+            if (psl.getGeranPositioningDataInformation() != null) {
+                JsonObject pslGeranPosInfoDataSetJsonObject = new JsonObject();
+                JsonObject pslGeranPosInfoJsonObject = new JsonObject();
+                HashMap<String, Integer> methodsAndUsage = psl.getGeranPositioningDataInformation().getPositioningDataSet();
+                JsonObject[] pslGeranPosInfoMethodAndUsage = new JsonObject[methodsAndUsage.size()];
+                int itemIndex = 0;
+                for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
+                    String property = "Item-" + itemIndex;
+                    String method = item.getKey();
+                    Integer usage = item.getValue();
+                    pslGeranPosInfoMethodAndUsage[itemIndex] = new JsonObject();
+                    pslGeranPosInfoDataSetJsonObject.add(property, pslGeranPosInfoMethodAndUsage[itemIndex]);
+                    writeGeranPositioningMethod(method, pslGeranPosInfoMethodAndUsage[itemIndex]);
+                    writeGeranPositioningUsage(usage, pslGeranPosInfoMethodAndUsage[itemIndex]);
+                    itemIndex++;
+                }
+                pslGeranPosInfoJsonObject.add("PositioningDataSet", pslGeranPosInfoDataSetJsonObject);
+                // Write GERAN Positioning Info values from PSL
+                pslJsonObject.add("GeranPositioningData", pslGeranPosInfoJsonObject);
             }
 
-            if (psl.getSaiPresent() != null) {
-                if (psl.getSaiPresent() == true)
-                    saiPresent = true;
+            /*** utranPositioningData [5] UtranPositioningDataInfo OPTIONAL ***/
+            if (psl.getUtranPositioningDataInfo() != null) {
+                JsonObject pslUtranPosInfoDataSetJsonObject = new JsonObject();
+                JsonObject pslUtranPosInfoJsonObject = new JsonObject();
+                HashMap<String, Integer> methodsAndUsage = psl.getUtranPositioningDataInfo().getUtranPositioningDataSet();
+                JsonObject[] pslUtranPosInfoMethodAndUsage = new JsonObject[methodsAndUsage.size()];
+                int itemIndex = 0;
+                for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
+                    String property = "Item-" + itemIndex;
+                    String method = item.getKey();
+                    Integer usage = item.getValue();
+                    pslUtranPosInfoMethodAndUsage[itemIndex] = new JsonObject();
+                    pslUtranPosInfoDataSetJsonObject.add(property, pslUtranPosInfoMethodAndUsage[itemIndex]);
+                    writeUtranPositioningMethod(method, pslUtranPosInfoMethodAndUsage[itemIndex]);
+                    writeUtranPositioningUsage(usage, pslUtranPosInfoMethodAndUsage[itemIndex]);
+                    itemIndex++;
+                }
+                pslUtranPosInfoJsonObject.add("PositioningDataSet", pslUtranPosInfoDataSetJsonObject);
+                // Write GERAN Positioning Info values from PSL
+                pslJsonObject.add("UtranPositioningData", pslUtranPosInfoJsonObject);
             }
+
+            /*** cellIdOrSai [6] CellGlobalIdOrServiceAreaIdOrLAI OPTIONAL ***/
             if (psl.getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
+                JsonObject pslCgiOrSaiOrLaiJsonObject = new JsonObject();
                 CellGlobalIdOrServiceAreaIdOrLAI cgiOrSaiOrLai = psl.getCellGlobalIdOrServiceAreaIdOrLAI();
                 LAIFixedLength laiFixedLength = cgiOrSaiOrLai.getLAIFixedLength();
                 CellGlobalIdOrServiceAreaIdFixedLength cellGlobalIdOrServiceAreaIdFixedLength = cgiOrSaiOrLai.getCellGlobalIdOrServiceAreaIdFixedLength();
@@ -459,52 +571,35 @@ public class PslResponseJsonBuilder {
                 writeMcc(mcc, pslCgiOrSaiOrLaiJsonObject);
                 writeMnc(mnc, pslCgiOrSaiOrLaiJsonObject);
                 writeLac(lac, pslCgiOrSaiOrLaiJsonObject);
-                if (!saiPresent) {
-                    if (ciOrSac != null) {
+                /*** sai-Present [7] NULL OPTIONAL ***/
+                if (!psl.isSaiPresent()) {
+                    if (ciOrSac >= 0) {
                         writeCellId(ciOrSac, pslCgiOrSaiOrLaiJsonObject);
                         pslJsonObject.add("CGI", pslCgiOrSaiOrLaiJsonObject);
                     } else {
-                        if (lac != null)
+                        if (lac >= 0)
                             pslJsonObject.add("LAI", pslCgiOrSaiOrLaiJsonObject);
                     }
                 } else {
-                    if (ciOrSac != null) {
+                    if (ciOrSac >= 0) {
                         writeServiceAreaCode(ciOrSac, pslCgiOrSaiOrLaiJsonObject);
                         pslJsonObject.add("SAI", pslCgiOrSaiOrLaiJsonObject);
                     } else {
-                        if (lac != null)
+                        if (lac >= 0)
                             pslJsonObject.add("LAI", pslCgiOrSaiOrLaiJsonObject);
                     }
                 }
             }
 
-            if (psl.getGeranPositioningDataInformation() != null || psl.getGeranGANSSpositioningData() != null) {
-                if (psl.getGeranPositioningDataInformation() != null) {
-                    geranPositioningInfo = bytesToHexString(psl.getGeranPositioningDataInformation().getData());
-                    writeGeranPositioningData(geranPositioningInfo, pslGeranInfoJsonObject);
-                }
-                if (psl.getGeranGANSSpositioningData() != null) {
-                    geranGanssPositioningData = bytesToHexString(psl.getGeranGANSSpositioningData().getData());
-                    writeGeranGanssPositioningData(geranGanssPositioningData, pslGeranInfoJsonObject);
-                }
-                // Write GERAN Positioning Info values from PSL
-                pslJsonObject.add("GERANPositioningInfo", pslGeranInfoJsonObject);
+            /*** accuracyFulfilmentIndicator [8] AccuracyFulfilmentIndicator OPTIONAL ***/
+            if (psl.getAccuracyFulfilmentIndicator() != null) {
+                accuracyFulfilmentIndicator = psl.getAccuracyFulfilmentIndicator().getIndicator();
+                writeAccuracyFulfilmentIndicator(accuracyFulfilmentIndicator, pslJsonObject);
             }
 
-            if (psl.getUtranPositioningDataInfo() != null || psl.getUtranGANSSpositioningData() != null) {
-                if (psl.getUtranPositioningDataInfo() != null) {
-                    utranPositioningData = bytesToHexString(psl.getUtranPositioningDataInfo().getData());
-                    writeUtranPositioningData(utranPositioningData, pslUtranInfoJsonObject);
-                }
-                if (psl.getUtranGANSSpositioningData() != null) {
-                    utranGanssPositioningData = bytesToHexString(psl.getUtranGANSSpositioningData().getData());
-                    writeUtranGanssPositioningData(utranGanssPositioningData, pslUtranInfoJsonObject);
-                }
-                // Write UTRAN Positioning Info values from PSL
-                pslJsonObject.add("UTRANPositioningInfo", pslUtranInfoJsonObject);
-            }
-
+            /*** velocityEstimate [9] VelocityEstimate OPTIONAL ***/
             if (psl.getVelocityEstimate() != null) {
+                JsonObject pslVelocityEstimateJsonObject = new JsonObject();
                 if (psl.getVelocityEstimate().getHorizontalSpeed() > -1)
                     horizontalSpeed = psl.getVelocityEstimate().getHorizontalSpeed();
                 if (psl.getVelocityEstimate().getBearing() > -1)
@@ -515,6 +610,7 @@ public class PslResponseJsonBuilder {
                     uncertaintyHorizontalSpeed = psl.getVelocityEstimate().getUncertaintyHorizontalSpeed();
                 if (psl.getVelocityEstimate().getUncertaintyVerticalSpeed() > -1)
                     uncertaintyVerticalSpeed = psl.getVelocityEstimate().getUncertaintyVerticalSpeed();
+                String velocityType = null;
                 if (psl.getVelocityEstimate().getVelocityType() != null)
                     velocityType = psl.getVelocityEstimate().getVelocityType().name();
                 // Write Velocity Estimate values from PSL
@@ -526,15 +622,138 @@ public class PslResponseJsonBuilder {
                 writeVelocityType(velocityType, pslVelocityEstimateJsonObject);
                 pslJsonObject.add("VelocityEstimate", pslVelocityEstimateJsonObject);
             }
+
+            /*** mo-lrShortCircuitIndicator [10] NULL OPTIONAL ***/
+            if (psl.isMoLrShortCircuitIndicator()) {
+                writeMoLrShortCircuitIndicator(psl.isMoLrShortCircuitIndicator(), pslJsonObject);
+            }
+
+            /*** geranGANSSpositioningData [11] GeranGANSSpositioningData OPTIONAL ***/
+            if (psl.getGeranGANSSpositioningData() != null) {
+                JsonObject pslGeranGanssPosInfoDataSetJsonObject = new JsonObject();
+                JsonObject pslGeranGanssInfoJsonObject = new JsonObject();
+                Multimap<String, String> methodsAndGanssIds = psl.getGeranGANSSpositioningData().getGeranGANSSPositioningMethodsAndGANSSIds();
+                JsonObject[] pslGeranGanssPosInfoMethodIdUsage = new JsonObject[methodsAndGanssIds.size()];
+                String method, id;
+                int itemIndex = 0, usage;
+                for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
+                    method = item.getKey();
+                    id = item.getValue();
+                    usage = psl.getGeranGANSSpositioningData().getUsageCode(psl.getGeranGANSSpositioningData().getData(), itemIndex+1);
+                    String property = "Item-" + itemIndex;
+                    pslGeranGanssPosInfoMethodIdUsage[itemIndex] = new JsonObject();
+                    pslGeranGanssPosInfoDataSetJsonObject.add(property, pslGeranGanssPosInfoMethodIdUsage[itemIndex]);
+                    writeGeranGanssPositioningMethod(method, pslGeranGanssPosInfoMethodIdUsage[itemIndex]);
+                    writeGeranGanssPositioningGanssId(id, pslGeranGanssPosInfoMethodIdUsage[itemIndex]);
+                    writeGeranGanssPositioningUsage(usage, pslGeranGanssPosInfoMethodIdUsage[itemIndex]);
+                    itemIndex++;
+                }
+                pslGeranGanssInfoJsonObject.add("GanssPositioningDataSet", pslGeranGanssPosInfoDataSetJsonObject);
+                // Write GERAN GANSS Positioning Info values from PSL
+                pslJsonObject.add("GeranGANSSPositioningData", pslGeranGanssInfoJsonObject);
+            }
+
+            /*** utranGANSSpositioningData [12] UtranGANSSpositioningData OPTIONAL ***/
+            if (psl.getUtranGANSSpositioningData() != null) {
+                JsonObject pslUtranGanssPosInfoDataSetJsonObject = new JsonObject();
+                JsonObject pslUtranGanssInfoJsonObject = new JsonObject();
+                Multimap<String, String> methodsAndGanssIds = psl.getUtranGANSSpositioningData().getUtranGANSSPositioningMethodsAndGANSSIds();
+                JsonObject[] pslUtranGanssPosInfoMethodIdUsage  = new JsonObject[methodsAndGanssIds.size()];
+                String method, id;
+                int itemIndex = 0, usage;
+                for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
+                    method = item.getKey();
+                    id = item.getValue();
+                    usage = psl.getUtranGANSSpositioningData().getUsageCode(psl.getUtranGANSSpositioningData().getData(), itemIndex);
+                    String property = "Item-" + itemIndex;
+                    pslUtranGanssPosInfoMethodIdUsage[itemIndex] = new JsonObject();
+                    pslUtranGanssPosInfoDataSetJsonObject.add(property, pslUtranGanssPosInfoMethodIdUsage[itemIndex]);
+                    writeUtranGanssPositioningMethod(method, pslUtranGanssPosInfoMethodIdUsage[itemIndex]);
+                    writeUtranGanssPositioningGanssId(id, pslUtranGanssPosInfoMethodIdUsage[itemIndex]);
+                    writeUtranGanssPositioningUsage(usage, pslUtranGanssPosInfoMethodIdUsage[itemIndex]);
+                    itemIndex++;
+                }
+                pslUtranGanssInfoJsonObject.add("GanssPositioningDataSet", pslUtranGanssPosInfoDataSetJsonObject);
+                // Write UTRAN GANSS Positioning Info values from PSL
+                pslJsonObject.add("UtranGANSSPositioningData", pslUtranGanssInfoJsonObject);
+            }
+
+            /*** targetServingNodeForHandover [13] ServingNodeAddress OPTIONAL ***/
+            if (psl.getTargetServingNodeForHandover() != null) {
+                JsonObject pslServingNodeForHoJsonObject = new JsonObject();
+                if (psl.getTargetServingNodeForHandover().getMmeNumber() != null) {
+                    String mmeNumber = Arrays.toString(psl.getTargetServingNodeForHandover().getMmeNumber().getData());
+                    writeMmeNumber(mmeNumber, pslServingNodeForHoJsonObject);
+                }
+                if (psl.getTargetServingNodeForHandover().getMscNumber() != null) {
+                    String mscNumber = psl.getTargetServingNodeForHandover().getMscNumber().getAddress();
+                    writeMscNumber(mscNumber, pslServingNodeForHoJsonObject);
+                }
+                if (psl.getTargetServingNodeForHandover().getSgsnNumber() != null) {
+                    String sgsnNumber = psl.getTargetServingNodeForHandover().getSgsnNumber().getAddress();
+                    writeSgsnNumber(sgsnNumber, pslServingNodeForHoJsonObject);
+                }
+                // Write Target Serving Node for Handover address
+                pslJsonObject.add("TargetServingNodeForHandover", pslServingNodeForHoJsonObject);
+            }
+
+            /*** utranAdditionalPositioningData [14] UtranAdditionalPositioningData OPTIONAL ***/
+            if (psl.getUtranAdditionalPositioningData() != null) {
+                JsonObject pslUtranAddPosInfoDataSetJsonObject = new JsonObject();
+                JsonObject pslUtranAddInfoJsonObject = new JsonObject();
+                Multimap<String, String> methodsAndAddPosIds = psl.getUtranAdditionalPositioningData().getUtranAdditionalPositioningMethodsAndIds();
+                JsonObject[] pslUtranAddPosInfoMethodAndId = new JsonObject[methodsAndAddPosIds.size()];
+                String method, id;
+                int itemIndex = 0, usage;
+                for (Map.Entry<String, String> item : methodsAndAddPosIds.entries()) {
+                    method = item.getKey();
+                    id = item.getValue();
+                    usage = psl.getUtranAdditionalPositioningData().getUsageCode(psl.getUtranAdditionalPositioningData().getData(), itemIndex);
+                    String property = "Item-" + itemIndex;
+                    pslUtranAddPosInfoMethodAndId[itemIndex] = new JsonObject();
+                    pslUtranAddPosInfoDataSetJsonObject.add(property, pslUtranAddPosInfoMethodAndId[itemIndex]);
+                    writeUtranAddPositioningMethod(method, pslUtranAddPosInfoMethodAndId[itemIndex]);
+                    writeUtranAddPositioningPosId(id, pslUtranAddPosInfoMethodAndId[itemIndex]);
+                    writeUtranAddPositioningUsage(usage, pslUtranAddPosInfoMethodAndId[itemIndex]);
+                    itemIndex++;
+                }
+                pslUtranAddInfoJsonObject.add("AdditionalPositioningDataSet", pslUtranAddPosInfoDataSetJsonObject);
+                // Write UTRAN Positioning Info values from PSL
+                pslJsonObject.add("UtranAdditionalPositioningData", pslUtranAddInfoJsonObject);
+            }
+
+            /*** utranBaroPressureMeas [15] UtranBaroPressureMeas OPTIONAL ***/
+            if (psl.getUtranBaroPressureMeas() != null) {
+                Long utranBarometricPressureMeas = Long.valueOf(psl.getUtranBaroPressureMeas());
+                // Write UTRAN Barometric Pressure Measurement from PSL
+                JsonObject pslUtranBaroPressureMeasJsonObject = new JsonObject();
+                writeBarometricPressure(utranBarometricPressureMeas, pslUtranBaroPressureMeasJsonObject);
+                pslJsonObject.add("BarometricPressure", pslUtranBaroPressureMeasJsonObject);
+            }
+
+            /*** utranCivicAddress [16] UtranCivicAddress OPTIONAL ***/
+            if (psl.getUtranCivicAddress() != null) {
+                Charset charset = StandardCharsets.UTF_8;
+                String utranCivicAddressStr = new String(psl.getUtranCivicAddress().getData(), charset);
+                CivicAddressXmlReader reader = new CivicAddressXmlReader();
+                reader.civicAddressXMLReader(utranCivicAddressStr);
+                CivicAddressElements utranCivicAddress = reader.getCivicAddressElements();
+                // Write UTRAN Civic Address from PSL
+                JsonObject pslUtranCivicAddressJsonObject = new JsonObject();
+                writeCivicAddress(utranCivicAddress, pslUtranCivicAddressJsonObject);
+                pslJsonObject.add("CivicAddress", pslUtranCivicAddressJsonObject);
+            }
         }
 
         // Write values retrieved from SRILCS
-        sriPslJsonObject.add("SRILCS", sriForLcsJsonObject);
+        if (sriForLcsJsonObject != null)
+            sriPslJsonObject.add("SRILCS", sriForLcsJsonObject);
+
         // Write values retrieved from PSL
-        sriPslJsonObject.add("PSL", pslJsonObject);
+        if (pslJsonObject != null)
+            sriPslJsonObject.add("PSL", pslJsonObject);
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String sriPslResponseJson = gson.toJson(sriPslJsonObject);
-        return sriPslResponseJson;
+        return gson.toJson(sriPslJsonObject);
     }
 }

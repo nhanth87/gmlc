@@ -12,6 +12,9 @@ import org.restcomm.protocols.ss7.map.api.primitives.LAIFixedLength;
 
 import java.text.DecimalFormat;
 
+/**
+ * @author <a href="mailto:fernando.mendioroz@gmail.com"> Fernando Mendioroz </a>
+ */
 public class DiameterShUdrResponseHelperForMLP {
 
     protected static final DecimalFormat coordinatesFormat = new DecimalFormat("#0.000000");
@@ -427,7 +430,7 @@ public class DiameterShUdrResponseHelperForMLP {
             String formattedLatitude = coordinatesFormat.format(this.latitude);
             return Double.valueOf(formattedLatitude);
         }
-        return this.latitude;
+        return null;
     }
 
     public void setLatitude(Double latitude) {
@@ -439,7 +442,7 @@ public class DiameterShUdrResponseHelperForMLP {
             String formattedLongitude = coordinatesFormat.format(this.longitude);
             return Double.valueOf(formattedLongitude);
         }
-        return this.longitude;
+        return null;
     }
 
     public void setLongitude(Double longitude) {

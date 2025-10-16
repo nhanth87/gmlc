@@ -17,7 +17,7 @@ import java.io.Serializable;
  */
 public class SLgLraApvValues implements Serializable {
 
-  private static final long serialVersionUID = -6599639098331481777L;
+  private static final long serialVersionUID = 1L;
 
   private static final int DIAMETER_SLg_VENDOR_ID = 10415;
 
@@ -29,23 +29,24 @@ public class SLgLraApvValues implements Serializable {
 
     Message Format
 
-    < Location-Report-Answer > ::=	< Diameter Header: 8388621, PXY, 16777255>
-			                        < Session-Id >
-	                                [ Vendor-Specific-Application-Id ]
-	                                [ Result-Code ]
-	                                [ Experimental-Result ]
-	                                { Auth-Session-State }
-	                                { Origin-Host }
-	                                { Origin-Realm }
-	                                [ GMLC-Address ]
-	                                [ LRA-Flags ]
-	                                [ Reporting-PLMN-List ]
-                                    [ LCS-Reference-Number ]
-	                                *[ Supported-Features ]
-	                                *[ AVP ]
-	                                [ Failed-AVP ]
-	                                *[ Proxy-Info ]
-	                                *[ Route-Record ]
+    < Location-Report-Answer > ::= < Diameter Header: 8388621, PXY, 16777255>
+                                  < Session-Id >
+                                  [ DRMP ]
+                                  [ Vendor-Specific-Application-Id ]
+                                  [ Result-Code ]
+                                  [ Experimental-Result ]
+                                  { Auth-Session-State }
+                                  { Origin-Host }
+                                  { Origin-Realm }
+                                  [ GMLC-Address ]
+                                  [ LRA-Flags ]
+                                  [ Reporting-PLMN-List ]
+                                  [ LCS-Reference-Number ]
+                                  *[ Supported-Features ]
+                                  *[ AVP ]
+                                  [ Failed-AVP ]
+                                  *[ Proxy-Info ]
+                                  *[ Route-Record ]
   */
 
   private Long resultCode;
@@ -61,14 +62,6 @@ public class SLgLraApvValues implements Serializable {
 
   public SLgLraApvValues() {
     super();
-  }
-
-  public SLgLraApvValues(Address gmlcAddress, Long lraFlags, ReportingPLMNListAvp reportingPLMNList, byte[] lcsReferenceNumber) {
-    super();
-    this.gmlcAddress = gmlcAddress;
-    this.lraFlags = lraFlags;
-    this.reportingPLMNList = reportingPLMNList;
-    this.lcsReferenceNumber = lcsReferenceNumber;
   }
 
   public Long getResultCode() {

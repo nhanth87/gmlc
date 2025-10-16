@@ -28,7 +28,7 @@ public class SmppSender {
         return msgIdPool;
     }
     private static ArrayList<String> splitStr(String buf, int maxLen) {
-        ArrayList<String> res = new ArrayList<String>();
+        ArrayList<String> res = new ArrayList<>();
         String prevBuf = buf;
 
         while (true) {
@@ -61,7 +61,7 @@ public class SmppSender {
             String hexWapPushBody = ByteUtils.bytesToHex(wapPushBody);
             // SMS max legth is 140, so the Wap Push should be split up.
             if (hexWapPushBody.length() > 140) {
-                // Let's split the wap push with max legth 132
+                // Let's split the wap push with max length 132
                 // because we need to add UDH before the WAP Push fragment
                 List<String> splitWapPushList = splitStr(hexWapPushBody, 132);
                 byte[] udhBytes = new byte[6];

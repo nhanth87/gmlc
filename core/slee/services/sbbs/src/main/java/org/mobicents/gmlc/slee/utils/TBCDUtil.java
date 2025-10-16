@@ -3,6 +3,7 @@ package org.mobicents.gmlc.slee.utils;
 import org.joda.time.DateTime;
 import org.mobicents.gmlc.slee.diameter.AVPHandler;
 import org.mobicents.gmlc.slee.primitives.EUTRANCGIImpl;
+import org.mobicents.gmlc.slee.primitives.NRCellGlobalId;
 import org.mobicents.gmlc.slee.primitives.NRCellGlobalIdImpl;
 import org.mobicents.gmlc.slee.primitives.RoutingAreaIdImpl;
 import org.mobicents.gmlc.slee.primitives.TrackingAreaId5GSImpl;
@@ -18,6 +19,7 @@ import org.restcomm.protocols.ss7.map.primitives.PlmnIdImpl;
 import org.restcomm.protocols.ss7.map.service.lsm.AreaIdentificationImpl;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import static org.mobicents.gmlc.slee.utils.ByteUtils.bytesToHex;
 import static org.mobicents.gmlc.slee.utils.ByteUtils.dumpBytes;
@@ -42,9 +44,11 @@ public class TBCDUtil {
         //    return;
 
         String msisdn = "60193303030";
+        String gmlcNumber = "989350081360";
         String imsi = "502153207655206";
 
         byte[] msisdnTbcd = parseTBCD(msisdn);
+        byte[] gmlcNumberTbcd = parseTBCD(gmlcNumber);
         byte[] imsiTbcd = parseTBCD(imsi);
 
         //MCC+MNC+MSIN
@@ -65,6 +69,12 @@ public class TBCDUtil {
         System.out.println("MSISDN="+msisdn+" TBCD dump bytes to Hex: " + dumpBytesToHexString(msisdnTbcd)); // TBCD = ?0691333030f0
         ISDNAddressString isdnAddressString = AVPHandler.tbcd2IsdnAddressString(msisdnTbcd);
         System.out.println("MSISDN="+msisdn+" : tbcd2IsdnAddressString.getAddress : " + isdnAddressString.getAddress());
+
+        System.out.println("GMLC-Number="+gmlcNumber+" parsed as TBCD as octets: " + dumpBytes(gmlcNumberTbcd));
+        System.out.println("GMLC-Number="+gmlcNumber+" TBCD octets decoded to TBCD String: " + toTBCDString(gmlcNumberTbcd));
+        System.out.println("GMLC-Number="+gmlcNumber+" TBCD dump bytes to Hex: " + dumpBytesToHexString(gmlcNumberTbcd));
+        isdnAddressString = AVPHandler.tbcd2IsdnAddressString(msisdnTbcd);
+        System.out.println("GMLC-Number="+gmlcNumber+" : tbcd2IsdnAddressString.getAddress : " + isdnAddressString.getAddress());
 
         msisdn = "59899077937";
         msisdnTbcd = parseTBCD(msisdn);
@@ -331,12 +341,38 @@ public class TBCDUtil {
         System.out.println("NR-TAI (mcc+mnc+tac) bytesToHex: " + bytesToHex(tai5g.getData()));
         System.out.println("NR-TAI (mcc+mnc+tac) bytes size: " + tai5g.getData().length);
 
-        System.out.println("NRCGI (mcc+mnc+nci) toString: " + nrCGI);
-        System.out.println("NRCGI MCC=: "+nrCGI.getMCC()+", MNC=" +nrCGI.getMNC()+", NCI="+nrCGI.getNCI());
-        System.out.println("NRCGI (mcc+mnc+nci) packet bytes: " + dumpBytes(nrCGI.getData()));
-        System.out.println("NRCGI (mcc+mnc+nci) dumpBytesToHexString: " + dumpBytesToHexString(nrCGI.getData()));
-        System.out.println("NRCGI (mcc+mnc+nci) bytesToHex: " + bytesToHex(nrCGI.getData()));
-        System.out.println("NRCGI (mcc+mnc+nci) bytes size: " + nrCGI.getData().length);
+        System.out.println("NR CGI (mcc+mnc+nci) toString: " + nrCGI);
+        System.out.println("NR CGI MCC=: "+nrCGI.getMCC()+", MNC=" +nrCGI.getMNC()+", NCI="+nrCGI.getNCI());
+        System.out.println("NR CGI (mcc+mnc+nci) packet bytes: " + dumpBytes(nrCGI.getData()));
+        System.out.println("NR CGI (mcc+mnc+nci) dumpBytesToHexString: " + dumpBytesToHexString(nrCGI.getData()));
+        System.out.println("NR CGI (mcc+mnc+nci) bytesToHex: " + bytesToHex(nrCGI.getData()));
+        System.out.println("NR CGI (mcc+mnc+nci) bytes size: " + nrCGI.getData().length);
+
+        nrCgiStr = generateNrCgiValue();
+        try {
+            int mcc = Integer.parseInt(nrCgiStr.substring(0,3));
+            int mnc = 0;
+            long nci = 0;
+            String nciStr = null;
+            if (nrCgiStr.length() == 15) {
+                mnc = Integer.parseInt(nrCgiStr.substring(3,6));
+                nciStr = nrCgiStr.substring(6);
+                nci = Long.parseLong(nrCgiStr.substring(6), 16);
+            } else if (nrCgiStr.length() == 14) {
+                mnc = Integer.parseInt(nrCgiStr.substring(3,5));
+                nciStr = nrCgiStr.substring(5);
+                nci = Long.parseLong(nrCgiStr.substring(5), 16);
+            }
+            System.out.println("NR CGI (2nd value) from String MCC="+mcc+", MNC="+mnc+", NCI string="+nciStr+", value="+nci);
+            NRCellGlobalIdImpl nrCgi = new NRCellGlobalIdImpl();
+            nrCgi.setData(mcc, mnc, nci);
+            byte[] nrCgiBytes = nrCgi.getData();
+            NRCellGlobalId nrCellGlobalId = decodeNRCGIBytes(nrCgiBytes);
+            System.out.println("NR CGI (2nd value) from NRCellGlobalIdImpl: "+nrCellGlobalId);
+        } catch (MAPException e) {
+            e.printStackTrace();
+        }
+
 
         DateTime start = DateTime.now();
         System.out.println("START: " + start);
@@ -349,9 +385,6 @@ public class TBCDUtil {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-
-
     }
 
     /*
@@ -379,6 +412,27 @@ public class TBCDUtil {
         }
 
         return buffer.toString();
+    }
+
+    private static NRCellGlobalId decodeNRCGIBytes(byte[] nrCGIBytes) {
+        return new NRCellGlobalIdImpl(nrCGIBytes);
+    }
+
+    private static String generateNrCgiValue() {
+        Random rand = new Random();
+        String value;
+        switch(rand.nextInt(10) + 1) {
+            case 1:
+                value = "5021919F8F2136";
+                break;
+            case 2:
+                value = "5020219F8F2136";
+                break;
+            default:
+                value = "50215219F8F2136";
+                break;
+        }
+        return value;
     }
 
     /*

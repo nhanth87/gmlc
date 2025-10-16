@@ -55,13 +55,11 @@ public class ShRoutingAreaId {
   }
 
   public byte[] getRoutingAreaIdentityBytes(String routingAreaIdentity) {
-    byte[] bytes = Base64.getDecoder().decode(routingAreaIdentity);
-    return bytes;
+    return Base64.getDecoder().decode(routingAreaIdentity);
   }
 
   public RoutingAreaId decodeRoutingAreaIdentity(byte[] raIdBytes) {
-    RoutingAreaId routingAreaIdentity = new RoutingAreaIdImpl(raIdBytes);
-    return routingAreaIdentity;
+    return new RoutingAreaIdImpl(raIdBytes);
   }
 
   @Override

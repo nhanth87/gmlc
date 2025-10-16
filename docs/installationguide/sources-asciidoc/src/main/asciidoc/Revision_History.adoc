@@ -14,6 +14,9 @@
 | 3.3.0.0 | May 13th, 2020| Fernando Mendioroz fernando.mendioroz@gmail.com| Release 3.3.0 Installation Guide
 | 3.3.0.1 | July 20th, 2020| Fernando Mendioroz fernando.mendioroz@gmail.com| Release 3.3.0 Installation Guide, update 1
 | 4.0.0.0 | May 2nd, 2021| Fernando Mendioroz fernando.mendioroz@gmail.com| Release 4.0.0 Installation Guide
+| 5.0.0.0 | July 20th, 2021| Fernando Mendioroz fernando.mendioroz@gmail.com| Release 5.0.0 Admin Guide, SUPL inclusion
+| 6.0.0.0 | June 18th, 2025| Fernando Mendioroz fernando.mendioroz@gmail.com| Release 6.0.0 Admin Guide, upgrade to 3GPP release 18 for MAP and 19 for Diameter SLh/SLg
+|
 |=================================================================================================================================================================================================================================
 
 :sectnums:

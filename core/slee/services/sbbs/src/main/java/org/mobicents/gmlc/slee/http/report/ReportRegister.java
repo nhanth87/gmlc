@@ -1,5 +1,3 @@
-
-
 package org.mobicents.gmlc.slee.http.report;
 
 import java.util.concurrent.ConcurrentHashMap;

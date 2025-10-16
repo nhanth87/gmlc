@@ -10,7 +10,7 @@ import java.io.Serializable;
 @XmlRootElement(name = "Extension")
 public class CSLocationInformationExtension2 implements Serializable {
 
-    private static final long serialVersionUID = -8512129249275639458L;
+    private static final long serialVersionUID = 1L;
     private String eUTRANCellGlobalId;
     private String trackingAreaId;
     private CSLocationInformationExtension3 csLocationInformationExtension3;

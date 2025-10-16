@@ -80,6 +80,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "servingCell",
     "routingAreaCode",
     "trackingAreaCode",
+    "nrTrackingAreaCode",
     "transId",
     "addInfo"
 })
@@ -109,6 +110,8 @@ public class Pos {
     protected String routingAreaCode;
     @XmlElement(name = "tac")
     protected String trackingAreaCode;
+    @XmlElement(name = "nr_tac")
+    protected String nrTrackingAreaCode;
 
     /**
      * Gets the value of the msid property.
@@ -376,5 +379,29 @@ public class Pos {
      */
     public void setTrackingAreaCode(String value) {
         this.trackingAreaCode = value;
+    }
+
+    /**
+     * Gets the value of the nrTrackingAreaCode property.
+     *
+     * @return
+     *     possible object is
+     *     {@link String }
+     *
+     */
+    public String getNrTrackingAreaCode() {
+        return nrTrackingAreaCode;
+    }
+
+    /**
+     * Sets the value of the nrTrackingAreaCode property.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *
+     */
+    public void setNrTrackingAreaCode(String value) {
+        this.nrTrackingAreaCode = value;
     }
 }

@@ -12,7 +12,7 @@ import org.mobicents.gmlc.slee.diameter.slg.SLgLrrAvpValues;
 import org.mobicents.gmlc.slee.http.report.ReportParameters;
 import org.mobicents.gmlc.slee.http.report.ReportRegister;
 import org.mobicents.gmlc.slee.map.MapLsmResponseHelperForMLP;
-import org.mobicents.gmlc.slee.map.SlrRequestValues;
+import org.mobicents.gmlc.slee.map.SlrRequestParams;
 import org.mobicents.gmlc.slee.mlp.MLPResponse;
 import org.mobicents.gmlc.slee.primitives.Polygon;
 import org.mobicents.gmlc.slee.supl.SuplResponseHelperForMLP;
@@ -33,7 +33,7 @@ import java.util.List;
  */
 public class HttpReport {
 
-    private Logger logger = Logger.getLogger("main");
+    private final Logger logger = Logger.getLogger("main");
     private Tracer tracer;
 
     public enum HttpMethod { POST, GET }
@@ -59,7 +59,7 @@ public class HttpReport {
             MongoClient mongoClient = new MongoClient(mongoHost, mongoPort);
             mongoDB = mongoClient.getDB(mongoDatabase);
         } catch (Exception e) {
-            logger.error(String.format("Exception on HttpReport(String mongoHost, int mongoPort, String mongoDatabase) constructor : ", e));
+            logger.error("Exception on HttpReport(String mongoHost, int mongoPort, String mongoDatabase) constructor : ", e);
         }
     }
 
@@ -157,30 +157,27 @@ public class HttpReport {
             }
         } else {
             String lcsReportApi = GmlcPropertiesManagement.getInstance().getLcsNonTriggeredReportOption();
-            if (lcsReportApi.equalsIgnoreCase("MLP"))
-                mlp = true;
-            else
-                mlp = false;
+            mlp = lcsReportApi.equalsIgnoreCase("MLP");
         }
 
         try {
             switch(objectReportParameters.getClass().getSimpleName()) {
                 case "List<String>":
-                    reportCommandParameterString = SlrResponseJsonBuilder.buildJsonReportForSlrFromStringList((List<String>) objectReportParameters);
+                    reportCommandParameterString = SlrRequestJsonBuilder.buildJsonReportForSlrFromStringList((List<String>) objectReportParameters);
                     performJsonReportToCallbackUrl(httpMethod, transactionReportParameters, reportCommandParameterString, callbackUrl);
                     break;
-                case "SlrRequestValues":
+                case "SlrRequestParams":
                     if (!mlp) {
-                        reportCommandParameterString = SlrResponseJsonBuilder.buildJsonReportforSLR((SlrRequestValues) objectReportParameters, clientReferenceNumber);
+                        reportCommandParameterString = SlrRequestJsonBuilder.buildJsonReportForSLR((SlrRequestParams) objectReportParameters, clientReferenceNumber);
                         performJsonReportToCallbackUrl(httpMethod, transactionReportParameters, reportCommandParameterString, callbackUrl);
                     } else {
-                        performMLPReportToCallbackUrl((SlrRequestValues) objectReportParameters, null, null, clientReferenceNumber, lcsReferenceNumber,
+                        performMLPReportToCallbackUrl((SlrRequestParams) objectReportParameters, null, null, clientReferenceNumber, lcsReferenceNumber,
                             callbackUrl, httpMethod);
                     }
                     break;
                 case "SLgLrrAvpValues":
                     if (!mlp) {
-                        reportCommandParameterString = LrrResponseJsonBuilder.buildJsonReportForLRR((SLgLrrAvpValues) objectReportParameters, clientReferenceNumber);
+                        reportCommandParameterString = LrrRequestJsonBuilder.buildJsonReportForLRR((SLgLrrAvpValues) objectReportParameters, clientReferenceNumber);
                         performJsonReportToCallbackUrl(httpMethod, transactionReportParameters, reportCommandParameterString, callbackUrl);
                     } else {
                         performMLPReportToCallbackUrl(null, (SLgLrrAvpValues) objectReportParameters, null, clientReferenceNumber, lcsReferenceNumber,
@@ -234,15 +231,14 @@ public class HttpReport {
             // obtain HTTP response for log
             httpUrlConnection.getResponseCode();
         } catch (IOException ioe) {
-            logger.warn(String.format("Cannot perform report callback to provided URL, stack trace is '%s'",
-                ioe.getStackTrace()));
+            logger.warn(String.format("Cannot perform report callback to provided URL, stack trace is '%s'", ioe));
         }
     }
 
-    private void performMLPReportToCallbackUrl(SlrRequestValues slr, SLgLrrAvpValues lrr, SuplResponseHelperForMLP suplResponseHelperForMLP,
+    private void performMLPReportToCallbackUrl(SlrRequestParams slr, SLgLrrAvpValues lrr, SuplResponseHelperForMLP suplResponseHelperForMLP,
                                                Integer clientReferenceNumber, Integer lcsReferenceNumber,
                                                String callbackUrl, HttpMethod httpMethod) {
-        String svcResultXml = null, operation = null;
+        String svcResultXml, operation;
         MLPResponse mlpResponse = new MLPResponse(this.tracer);
 
         if (slr != null || lrr != null || suplResponseHelperForMLP != null) {
@@ -274,6 +270,7 @@ public class HttpReport {
                 mlpResponseParams.mlpEci = null;
                 mlpResponseParams.mlpTac = null;
                 mlpResponseParams.mlpNci = null;
+                mlpResponseParams.mlpNrTac = null;
                 mlpResponseParams.mlpMmeName = mapLsmHelper.getMmeName();
                 mlpResponseParams.mlpSgsnName = mapLsmHelper.getSgsnName();
                 mlpResponseParams.mlpMscNo = mapLsmHelper.getMscNumber();
@@ -314,6 +311,7 @@ public class HttpReport {
                 mlpResponseParams.mlpRac = null;
                 mlpResponseParams.mlpTac = null;
                 mlpResponseParams.mlpNci = null;
+                mlpResponseParams.mlpNrTac = null;
                 mlpResponseParams.mlpMmeName = diameterLcsHelper.getMmeName();
                 mlpResponseParams.mlpSgsnName = diameterLcsHelper.getSgsnName();
                 mlpResponseParams.mlpMscNo = diameterLcsHelper.getMscNumber();
@@ -327,7 +325,7 @@ public class HttpReport {
                 mlpResponseParams.mlpTransId = clientReferenceNumber;
                 mlpResponseParams.mlpLcsRefNumber = lcsReferenceNumber;
                 mlpResponseParams.mlpRatType = null;
-            } else if (suplResponseHelperForMLP != null) {
+            } else {
                 operation = "SUPL";
                 mlpResponseParams.mlpMsisdn = suplResponseHelperForMLP.getMsisdn();
                 mlpResponseParams.mlpImsi = suplResponseHelperForMLP.getImsi();
@@ -353,6 +351,7 @@ public class HttpReport {
                 mlpResponseParams.mlpRac = suplResponseHelperForMLP.getRac();
                 mlpResponseParams.mlpTac = suplResponseHelperForMLP.getTac();
                 mlpResponseParams.mlpNci = suplResponseHelperForMLP.getNrCi();
+                mlpResponseParams.mlpNrTac = null;
                 mlpResponseParams.mlpMmeName = null;
                 mlpResponseParams.mlpSgsnName = null;
                 mlpResponseParams.mlpMscNo = null;
@@ -373,15 +372,15 @@ public class HttpReport {
                 mlpResponseParams.mlpUncertaintySemiMinorAxis, mlpResponseParams.mlpAngleOfMajorAxis, mlpResponseParams.mlpOffsetAngle,
                 mlpResponseParams.mlpIncludedAngle, mlpResponseParams.mlpAltitude, mlpResponseParams.mlpPolygon, mlpResponseParams.mlpNumberOfPoints,
                 mlpResponseParams.mlpMcc, mlpResponseParams.mlpMnc, mlpResponseParams.mlpLac, mlpResponseParams.mlpCi, mlpResponseParams.mlpSac,
-                mlpResponseParams.mlpEci, mlpResponseParams.mlpRac, mlpResponseParams.mlpTac, mlpResponseParams.mlpNci, mlpResponseParams.mlpMmeName,
-                mlpResponseParams.mlpSgsnName, mlpResponseParams.mlpMscNo, mlpResponseParams.mlpVlrNo, mlpResponseParams.mlpMsisdn,
-                mlpResponseParams.mlpImei, mlpResponseParams.mlpImsi, mlpResponseParams.mlpAge,
+                mlpResponseParams.mlpEci, mlpResponseParams.mlpRac, mlpResponseParams.mlpTac, mlpResponseParams.mlpNci, mlpResponseParams.mlpNrTac,
+                mlpResponseParams.mlpMmeName, mlpResponseParams.mlpSgsnName, mlpResponseParams.mlpMscNo, mlpResponseParams.mlpVlrNo,
+                mlpResponseParams.mlpMsisdn, mlpResponseParams.mlpImei, mlpResponseParams.mlpImsi, mlpResponseParams.mlpAge,
                 mlpResponseParams.mlpLmsi, mlpResponseParams.mlpTransId, mlpResponseParams.mlpLcsRefNumber, mlpResponseParams.mlpRatType,
-                mlpResultType, lcsReferenceNumber != null ? true : false, true);
+                mlpResultType, lcsReferenceNumber != null, true);
 
         } else {
             svcResultXml = mlpResponse.getSystemErrorResponseXML(MLPResponse.MLPResultType.SYSTEM_FAILURE, "Location report is null",
-                lcsReferenceNumber != null ? true : false);
+                    lcsReferenceNumber != null);
         }
 
         try {
@@ -403,7 +402,7 @@ public class HttpReport {
             httpUrlConnection.getResponseCode();
         } catch (IOException ioe) {
             logger.warn(String.format("Cannot perform report callback to provided URL, stack trace is '%s'",
-                ioe.getStackTrace()));
+                    (Object) ioe.getStackTrace()));
         }
     }
 
@@ -418,13 +417,13 @@ public class HttpReport {
     /**
      * Inner class for MLP response parameters
      */
-    private class MLPResponseParams implements Serializable {
+    private static class MLPResponseParams implements Serializable {
 
         /*********************/
         /*** MLP Response ***/
         /*******************/
         String mlpMsisdn;
-        Integer mlpMcc, mlpMnc, mlpLac, mlpCi, mlpSac, mlpTac, mlpRac;
+        Integer mlpMcc, mlpMnc, mlpLac, mlpCi, mlpSac, mlpTac, mlpRac, mlpNrTac;
         Long mlpEci, mlpNci;
         String mlpVlrNo, mlpMscNo, mlpMmeName, mlpSgsnName;
         String mlpState;

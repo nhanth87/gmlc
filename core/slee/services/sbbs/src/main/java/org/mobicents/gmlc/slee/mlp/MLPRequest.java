@@ -1,7 +1,6 @@
 package org.mobicents.gmlc.slee.mlp;
 
 import net.java.slee.resource.diameter.slg.events.avp.LCSQoSClass;
-import org.mobicents.gmlc.GmlcPropertiesManagement;
 import org.mobicents.gmlc.slee.mlp.v3_4.AltAcc;
 import org.mobicents.gmlc.slee.mlp.v3_4.Applicationid;
 import org.mobicents.gmlc.slee.mlp.v3_4.ChangeArea;
@@ -53,12 +52,10 @@ import java.util.List;
  */
 public class MLPRequest {
 
-    private static final GmlcPropertiesManagement gmlcPropertiesManagement = GmlcPropertiesManagement.getInstance();
-
     /**
      * Logger from the calling SBB
      */
-    private Tracer logger;
+    private final Tracer logger;
 
     /**
      * Default constructor
@@ -74,12 +71,10 @@ public class MLPRequest {
      *
      * @param requestStream InputStream (likely directly from the HTTP POST) of the XML input data
      * @return MLPLocationRequest of the device to locate
-     * @throws MLPException
+     * @throws MLPException exception when parsing incoming MLP request
      */
     public MLPLocationRequest parse(InputStream requestStream) throws MLPException {
         MLPLocationRequest mlpLocationRequest = null;
-        String id = null, pwd = null, serviceId = null, sessionId = null, subClient = null;
-
         // Process the request
         try {
             // Create the JAXB unmarshalling object
@@ -111,6 +106,7 @@ public class MLPRequest {
                     mlpLocationRequest = retrieveLocationRequestQuality(mlpLocationRequest, svcInit);
 
                 if (slir.getPushaddr() != null) {
+                    assert mlpLocationRequest != null;
                     mlpLocationRequest.setLocationReportCallbackUrl(slir.getPushaddr().getUrl());
                 }
 
@@ -150,6 +146,7 @@ public class MLPRequest {
                 }
 
                 if (tlrr.getPushaddr() != null) {
+                    assert mlpLocationRequest != null;
                     mlpLocationRequest.setLocationReportCallbackUrl(tlrr.getPushaddr().getUrl());
                 }
             }
@@ -157,11 +154,13 @@ public class MLPRequest {
             // Emergency Location Immediate Request
             EmeLir elir = svcInit.getEmeLir();
             if (elir != null) {
+                // TODO ?
             }
 
             // Triggered Location Reporting Stop Request
             Tlrsr tlrsr = svcInit.getTlrsr();
             if (tlrsr != null) {
+                // TODO ?
             }
 
             return mlpLocationRequest;
@@ -258,17 +257,18 @@ public class MLPRequest {
                                 break;
                         }
                     }
-                    if (serviceId.equalsIgnoreCase("0105")) {
-                        lcsClientExternalId = ((Client) object).getLcsClientExternalId();
-                        mlpLocationRequest.setLcsClientExternalId(lcsClientExternalId);
-                        lcsClientInternalId = ((Client) object).getLcsClientInternalId();
-                        mlpLocationRequest.setLcsClientInternalId(lcsClientInternalId);
+                    if (serviceId != null) {
+                        if (serviceId.equalsIgnoreCase("0105")) {
+                            lcsClientExternalId = ((Client) object).getLcsClientExternalId();
+                            mlpLocationRequest.setLcsClientExternalId(lcsClientExternalId);
+                            lcsClientInternalId = ((Client) object).getLcsClientInternalId();
+                            mlpLocationRequest.setLcsClientInternalId(lcsClientInternalId);
+                        }
+                        if (serviceId.equalsIgnoreCase("0104") || serviceId.equalsIgnoreCase("0105")) {
+                            lcsServiceType = ((Client) object).getLcsServiceTypeId();
+                            mlpLocationRequest.setLcsServiceTypeId(lcsServiceType);
+                        }
                     }
-                    if (serviceId.equalsIgnoreCase("0104") || serviceId.equalsIgnoreCase("0105")) {
-                        lcsServiceType = ((Client) object).getLcsServiceTypeId();
-                        mlpLocationRequest.setLcsServiceTypeId(lcsServiceType);
-                    }
-
                     // Client RequestMode
                     Requestmode requestMode = ((Client) object).getRequestmode();
                     if (requestMode != null) {
@@ -302,23 +302,25 @@ public class MLPRequest {
                         String requestorType = ((Requestor) object).getType();
                         if (requestorId != null && requestorType != null) {
                             mlpLocationRequest.setLcsRequestorId(requestorId);
-                            if (serviceId.equalsIgnoreCase("0104") || serviceId.equalsIgnoreCase("0105")) {
-                                switch (requestorType) {
-                                    case "NAME":
-                                        mlpLocationRequest.setLcsRequestorFormatIndicator(0);
-                                        break;
-                                    case "E-MAIL":
-                                        mlpLocationRequest.setLcsRequestorFormatIndicator(1);
-                                        break;
-                                    case "MSISDN":
-                                        mlpLocationRequest.setLcsRequestorFormatIndicator(2);
-                                        break;
-                                    case "URL":
-                                        mlpLocationRequest.setLcsRequestorFormatIndicator(3);
-                                        break;
-                                    case "SIPURL":
-                                        mlpLocationRequest.setLcsRequestorFormatIndicator(4);
-                                        break;
+                            if (serviceId != null) {
+                                if (serviceId.equalsIgnoreCase("0104") || serviceId.equalsIgnoreCase("0105")) {
+                                    switch (requestorType) {
+                                        case "NAME":
+                                            mlpLocationRequest.setLcsRequestorFormatIndicator(0);
+                                            break;
+                                        case "E-MAIL":
+                                            mlpLocationRequest.setLcsRequestorFormatIndicator(1);
+                                            break;
+                                        case "MSISDN":
+                                            mlpLocationRequest.setLcsRequestorFormatIndicator(2);
+                                            break;
+                                        case "URL":
+                                            mlpLocationRequest.setLcsRequestorFormatIndicator(3);
+                                            break;
+                                        case "SIPURL":
+                                            mlpLocationRequest.setLcsRequestorFormatIndicator(4);
+                                            break;
+                                    }
                                 }
                             }
                         }
@@ -445,7 +447,7 @@ public class MLPRequest {
         RespReq respReq = null;
         LlAcc llAcc;
         Integer horizontalAccuracy = null, verticalAccuracy = null;
-        Boolean verticalCoordinateRequest = false;
+        boolean verticalCoordinateRequest = false;
         ResponseTimeCategory responseTimeCategory = null;
         LCSQoSClass lcsQoSClass = LCSQoSClass.BEST_EFFORT;
         if (svcInit.getSlir() != null) {
@@ -513,13 +515,13 @@ public class MLPRequest {
     private MLPLocationRequest retrieveDeferredLocationEventType(MLPLocationRequest mlpLocationRequest, SvcInit svcInit) {
         TlrrEvent tlrrEvent;
         String deferredLocationEventType = null;
-        Integer interval = null, duration = null;
+        int interval = -1, duration = -1;
         if (svcInit.getTlrr() != null) {
             Tlrr tlrr = svcInit.getTlrr();
             if (tlrr.getInterval() != null)
-                interval = Integer.valueOf(tlrr.getInterval());
+                interval = Integer.parseInt(tlrr.getInterval());
             if (tlrr.getDuration() != null)
-                duration = Integer.valueOf(tlrr.getDuration());
+                duration = Integer.parseInt(tlrr.getDuration());
             tlrrEvent = tlrr.getTlrrEvent();
             if (tlrrEvent != null) {
                 if (tlrrEvent.getMsAction() != null)
@@ -587,7 +589,7 @@ public class MLPRequest {
 
     private MLPLocationRequest retrieveEventParams(MLPLocationRequest mlpLocationRequest, SvcInit svcInit) {
         if (svcInit.getTlrr() != null) {
-            String interval, occurrence = null, duration, distance = null, minimumIntervalTime = null;
+            String interval, occurrence, duration, distance, minimumIntervalTime;
             Tlrr tlrr = svcInit.getTlrr();
             StartTime startTime = tlrr.getStartTime();
             if (startTime != null)
@@ -682,7 +684,7 @@ public class MLPRequest {
                             mlpLocationRequest.setSuplMaximumNumberOfReports(Integer.valueOf(area.getNoOfReports()));
                             // Interval for Area Event
                             minimumIntervalTime = area.getMinimumIntervalTime();
-                            if (Integer.valueOf(occurrence) <= 1) {
+                            if (Integer.parseInt(occurrence) <= 1) {
                                 mlpLocationRequest.setOccurrenceInfo(OccurrenceInfo.oneTimeEvent);
                                 mlpLocationRequest.setSuplAreaEventRepeatedReporting(false);
                                 if (minimumIntervalTime != null) {
@@ -714,7 +716,7 @@ public class MLPRequest {
                         mlpLocationRequest.setMotionEventDistance(Long.valueOf(distance));
                         occurrence = tlrrEvent.getEquidistanceEvent().getNoOfReports();
                         if (occurrence != null) {
-                            if (Integer.valueOf(occurrence) == 1)
+                            if (Integer.parseInt(occurrence) == 1)
                                 mlpLocationRequest.setOccurrenceInfo(OccurrenceInfo.oneTimeEvent);
                             else {
                                 mlpLocationRequest.setOccurrenceInfo(OccurrenceInfo.multipleTimeEvent);
@@ -736,7 +738,7 @@ public class MLPRequest {
                     // Periodic-LDR for PSL/PLR
                     if (duration != null && interval != null) {
                         mlpLocationRequest.setReportingInterval(Integer.valueOf(interval));
-                        mlpLocationRequest.setReportingAmount(Integer.valueOf(duration) / Integer.valueOf(interval));
+                        mlpLocationRequest.setReportingAmount(Integer.parseInt(duration) / Integer.parseInt(interval));
                     }
                 }
             }
@@ -762,7 +764,7 @@ public class MLPRequest {
                 mlpLocationRequest.suplTriggerType = SuplTriggerType.Periodic;
                 mlpLocationRequest.setReportingInterval(Integer.valueOf(interval));
                 if (duration != null) {
-                    mlpLocationRequest.setReportingAmount(Integer.valueOf(duration) / Integer.valueOf(interval));
+                    mlpLocationRequest.setReportingAmount(Integer.parseInt(duration) / Integer.parseInt(interval));
                 }
             }
         }

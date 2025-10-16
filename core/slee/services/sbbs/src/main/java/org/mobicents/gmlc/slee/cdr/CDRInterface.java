@@ -7,8 +7,8 @@ package org.mobicents.gmlc.slee.cdr;
  */
 public interface CDRInterface {
 
-  public static final String TRACER_NAME = "LocationRecord";
-  public static final String CRD_TRACER_NAME = "cdr";
+  String TRACER_NAME = "LocationRecord";
+  String CRD_TRACER_NAME = "cdr";
 
   /**
    * Initializes CDR storage.

@@ -56,13 +56,11 @@ public class ShServiceAreaId {
     }
 
     public byte[] getCellGlobalIdOrServiceAreaIdFixedLengthBytes(String saiInfo) {
-        byte[] bytes = Base64.getDecoder().decode(saiInfo);
-        return bytes;
+        return Base64.getDecoder().decode(saiInfo);
     }
 
     public CellGlobalIdOrServiceAreaIdFixedLength decodeCellGlobalIdOrServiceAreaIdFixedLengthBytes(byte[] cgiBytes) {
-        CellGlobalIdOrServiceAreaIdFixedLength cellGlobalIdOrServiceAreaIdFixedLength = new CellGlobalIdOrServiceAreaIdFixedLengthImpl(cgiBytes);
-        return cellGlobalIdOrServiceAreaIdFixedLength;
+        return new CellGlobalIdOrServiceAreaIdFixedLengthImpl(cgiBytes);
     }
 
     @Override

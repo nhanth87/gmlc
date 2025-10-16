@@ -491,7 +491,7 @@ public class MLPLocationRequest {
     ResponseTime responseTime = null;
     if (responseTimeCategory != null)
       responseTime = new ResponseTimeImpl(ResponseTimeCategory.getResponseTimeCategory(responseTimeCategory));
-    this.lcsQoS = new LCSQoSImpl(horizontalAccuracy, verticalAccuracy, verticalCoordinateRequest, responseTime, null);
+    this.lcsQoS = new LCSQoSImpl(horizontalAccuracy, verticalAccuracy, verticalCoordinateRequest, responseTime, null, false, null);
   }
 
   public void setLcsQoS(LCSQoS lcsQoS) {

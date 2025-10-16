@@ -38,6 +38,8 @@
 				<!-- Apache codec for Base64 -->
 				<include>commons-codec:commons-codec</include>
 
+				<!-- Google Guava for Multimap -->
+				<include>com.google.guava:guava</include>
 
 			</includes>
 		</dependencySet>

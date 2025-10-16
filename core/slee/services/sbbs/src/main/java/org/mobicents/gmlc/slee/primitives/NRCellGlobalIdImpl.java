@@ -2,13 +2,13 @@ package org.mobicents.gmlc.slee.primitives;
 
 import javolution.xml.XMLFormat;
 import javolution.xml.stream.XMLStreamException;
+
 import org.mobicents.protocols.asn.AsnInputStream;
 import org.mobicents.protocols.asn.AsnOutputStream;
 import org.restcomm.protocols.ss7.map.api.MAPException;
 import org.restcomm.protocols.ss7.map.primitives.OctetStringBase;
 import org.restcomm.protocols.ss7.map.primitives.TbcdString;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 
 /**
@@ -21,6 +21,7 @@ public class NRCellGlobalIdImpl extends OctetStringBase implements NRCellGlobalI
     private static final String NCI = "nci";
 
     private static final String DATA = "data";
+    private static final int DEFAULT_INT_VALUE = 0;
     private static final long DEFAULT_LONG_VALUE = 0;
 
     private static final String DEFAULT_VALUE = null;
@@ -189,16 +190,27 @@ public class NRCellGlobalIdImpl extends OctetStringBase implements NRCellGlobalI
 
         @Override
         public void read(javolution.xml.XMLFormat.InputElement xml, NRCellGlobalIdImpl nrCgi) throws XMLStreamException {
-            String s = xml.getAttribute(DATA, DEFAULT_VALUE);
-            if (s != null) {
-                nrCgi.data = DatatypeConverter.parseHexBinary(s);
+            int mcc = xml.getAttribute(MCC, DEFAULT_INT_VALUE);
+            int mnc = xml.getAttribute(MNC, DEFAULT_INT_VALUE);
+            int nci = xml.getAttribute(NCI, DEFAULT_INT_VALUE);
+
+            try {
+                nrCgi.setData(mcc, mnc, nci);
+            } catch (MAPException e) {
+                throw new XMLStreamException("MAPException when deserializing NRCellGlobalIdImpl", e);
             }
         }
 
         @Override
         public void write(NRCellGlobalIdImpl nrCgi, javolution.xml.XMLFormat.OutputElement xml) throws XMLStreamException {
-            if (nrCgi.data != null) {
-                xml.setAttribute(DATA, DatatypeConverter.printHexBinary(nrCgi.data));
+            try {
+                xml.setAttribute(MCC, nrCgi.getMCC());
+                xml.setAttribute(MNC, nrCgi.getMNC());
+                xml.setAttribute(NCI, nrCgi.getNCI());
+            } catch (MAPException e) {
+                throw new XMLStreamException("MAPException when serializing NRCellGlobalIdImpl", e);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
     };

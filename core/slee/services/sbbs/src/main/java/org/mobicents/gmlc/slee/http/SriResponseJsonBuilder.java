@@ -3,9 +3,9 @@ package org.mobicents.gmlc.slee.http;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import org.mobicents.gmlc.slee.map.SriForLcsResponseValues;
-import org.mobicents.gmlc.slee.map.SriForSmResponseValues;
+import org.mobicents.gmlc.slee.map.SriLcsResponseParams;
 import org.mobicents.gmlc.slee.map.SriResponseValues;
+import org.mobicents.gmlc.slee.map.SriSmResponseParams;
 import org.restcomm.protocols.ss7.map.api.MAPException;
 
 import javax.xml.bind.DatatypeConverter;
@@ -14,6 +14,8 @@ import java.net.UnknownHostException;
 
 import static org.mobicents.gmlc.slee.http.JsonWriter.bytesToHexString;
 import static org.mobicents.gmlc.slee.http.JsonWriter.write3gppAaaServerName;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeAdditionalNetworkNodeNumber;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeAdditionalVGmlcAddress;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeGprsNodeIndicator;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeHGmlcAddress;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeImsi;
@@ -28,6 +30,7 @@ import static org.mobicents.gmlc.slee.http.JsonWriter.writeOperationResult;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writePprAddress;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeProtocol;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeSgsnName;
+import static org.mobicents.gmlc.slee.http.JsonWriter.writeSgsnRealm;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeVGmlcAddress;
 import static org.mobicents.gmlc.slee.utils.ByteUtils.bytesToHex;
 
@@ -48,15 +51,14 @@ public class SriResponseJsonBuilder {
      * @param sriSm         Subscriber Information values gathered from SRISM response event
      * @param sriLcs        Subscriber Information values gathered from SRILCS response event
      */
-    public static String buildJsonResponseForSri(String imsi, String msisdn, String operation, 
-                                                 SriResponseValues sri, SriForSmResponseValues sriSm, 
-                                                 SriForLcsResponseValues sriLcs) throws MAPException {
+    public static String buildJsonResponseForSri(String imsi, String msisdn, String operation,
+                                                 SriResponseValues sri, SriSmResponseParams sriSm,
+                                                 SriLcsResponseParams sriLcs) throws MAPException {
 
-        Integer numberPortabilityStatusType;
-        numberPortabilityStatusType = null;
-        Boolean gprsNodeIndicator = null;
-        String networkNodeNumber, lmsi, mmeName, sgsnName, tgppAAAServerName, hGmlcAddress, vGmlcAddress, pprAddress;
-        networkNodeNumber = lmsi = mmeName = sgsnName = tgppAAAServerName = hGmlcAddress = vGmlcAddress = pprAddress = null;
+        int numberPortabilityStatusType = -1;
+        boolean gprsNodeIndicator = false;
+        String networkNodeNumber, additionalNumber, lmsi, mmeName, sgsnName, sgsnRealm, tgppAAAServerName, hGmlcAddress, vGmlcAddress, pprAddress, addVGmlcAddress;
+        networkNodeNumber = additionalNumber = lmsi = mmeName = sgsnName = sgsnRealm = tgppAAAServerName = hGmlcAddress = vGmlcAddress = pprAddress = addVGmlcAddress = null;
 
         /***************************/
         /*** SRI response values ***/
@@ -111,31 +113,41 @@ public class SriResponseJsonBuilder {
             if (sriLcs.isGprsNodeIndicator() != null)
                 gprsNodeIndicator = sriLcs.isGprsNodeIndicator();
 
+            if (sriLcs.getAdditionalNumber() != null) {
+                if (sriLcs.getAdditionalNumber().getMSCNumber() != null)
+                    additionalNumber = sriLcs.getAdditionalNumber().getMSCNumber().getAddress();
+                else if (sriLcs.getAdditionalNumber().getSGSNNumber() != null)
+                    additionalNumber = sriLcs.getAdditionalNumber().getSGSNNumber().getAddress();
+            }
+
             if (sriLcs.getMmeName() != null)
                 mmeName = new String(sriLcs.getMmeName().getData());
-
-            if (sriLcs.getSgsnName() != null)
-                sgsnName = new String(sriLcs.getSgsnName().getData());
 
             if (sriLcs.getAaaServerName() != null) {
                 tgppAAAServerName = new String(sriLcs.getAaaServerName().getData());
             }
 
-            if (sriLcs.gethGmlcAddress() != null) {
-                hGmlcAddress = bytesToHexString(sriLcs.gethGmlcAddress().getGSNAddressData());
+            if (sriLcs.getSgsnName() != null)
+                sgsnName = new String(sriLcs.getSgsnName().getData());
+
+            if (sriLcs.getSgsnRealm() != null)
+                sgsnRealm = new String(sriLcs.getSgsnRealm().getData());
+
+            if (sriLcs.getVGmlcAddress() != null) {
+                vGmlcAddress = bytesToHexString(sriLcs.getVGmlcAddress().getGSNAddressData());
                 try {
-                    InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(hGmlcAddress));
-                    hGmlcAddress = address.getHostAddress();
+                    InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(vGmlcAddress));
+                    vGmlcAddress = address.getHostAddress();
                 } catch (UnknownHostException e) {
                     e.printStackTrace();
                 }
             }
 
-            if (sriLcs.getvGmlcAddress() != null) {
-                vGmlcAddress = bytesToHexString(sriLcs.getvGmlcAddress().getGSNAddressData());
+            if (sriLcs.getHGmlcAddress() != null) {
+                hGmlcAddress = bytesToHexString(sriLcs.getHGmlcAddress().getGSNAddressData());
                 try {
-                    InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(vGmlcAddress));
-                    vGmlcAddress = address.getHostAddress();
+                    InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(hGmlcAddress));
+                    hGmlcAddress = address.getHostAddress();
                 } catch (UnknownHostException e) {
                     e.printStackTrace();
                 }
@@ -150,29 +162,40 @@ public class SriResponseJsonBuilder {
                     e.printStackTrace();
                 }
             }
+
+            if (sriLcs.getAddVGmlcAddress() != null) {
+                addVGmlcAddress = bytesToHexString(sriLcs.getAddVGmlcAddress().getGSNAddressData());
+                try {
+                    InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(addVGmlcAddress));
+                    addVGmlcAddress = address.getHostAddress();
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         JsonObject sriResponseJsonObject = new JsonObject();
         writeNetwork("GSM/UMTS", sriResponseJsonObject);
         writeProtocol("MAP", sriResponseJsonObject);
+        writeOperationResult("SUCCESS", sriResponseJsonObject);
         writeOperation(operation, sriResponseJsonObject);
         writeMsisdn(msisdn, sriResponseJsonObject);
         writeImsi(imsi, sriResponseJsonObject);
         writeLmsi(lmsi, sriResponseJsonObject);
         writeNetworkNodeNumber(networkNodeNumber, sriResponseJsonObject);
-        writeMmeName(mmeName, sriResponseJsonObject);
-        writeSgsnName(sgsnName, sriResponseJsonObject);
-        write3gppAaaServerName(tgppAAAServerName, sriResponseJsonObject);
-        writePprAddress(pprAddress, sriResponseJsonObject);
         writeGprsNodeIndicator(gprsNodeIndicator, sriResponseJsonObject);
-        writeHGmlcAddress(hGmlcAddress, sriResponseJsonObject);
+        writeAdditionalNetworkNodeNumber(additionalNumber, sriResponseJsonObject);
+        writeMmeName(mmeName, sriResponseJsonObject);
+        write3gppAaaServerName(tgppAAAServerName, sriResponseJsonObject);
+        writeSgsnName(sgsnName, sriResponseJsonObject);
+        writeSgsnRealm(sgsnRealm, sriResponseJsonObject);
         writeVGmlcAddress(vGmlcAddress, sriResponseJsonObject);
+        writeHGmlcAddress(hGmlcAddress, sriResponseJsonObject);
+        writePprAddress(pprAddress, sriResponseJsonObject);
+        writeAdditionalVGmlcAddress(addVGmlcAddress, sriResponseJsonObject);
         writeMnpStatus(numberPortabilityStatusType, sriResponseJsonObject);
-        writeOperationResult("SUCCESS", sriResponseJsonObject);
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String errorReportJson = gson.toJson(sriResponseJsonObject);
-        return errorReportJson;
+        return gson.toJson(sriResponseJsonObject);
     }
-
 }

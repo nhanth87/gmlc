@@ -68,8 +68,7 @@ public class ShLocationNumber {
   }
 
   public byte[] getLocationNumberBytes(String locationNumber) {
-    byte[] bytes = Base64.getDecoder().decode(locationNumber);
-    return bytes;
+    return Base64.getDecoder().decode(locationNumber);
   }
 
   public LocationNumber decodeLocationNumber(byte[] lnBytes) {

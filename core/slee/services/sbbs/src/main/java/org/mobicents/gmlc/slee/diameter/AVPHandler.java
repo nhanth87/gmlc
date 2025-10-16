@@ -5,11 +5,16 @@ import net.java.slee.resource.diameter.slg.events.avp.*;
 import org.mobicents.gmlc.slee.diameter.sh.ShUdaAvpValues;
 import org.mobicents.gmlc.slee.diameter.sh.elements.*;
 import org.mobicents.gmlc.slee.primitives.*;
+import org.mobicents.gmlc.slee.primitives.LocationInformation5GS;
+import org.mobicents.gmlc.slee.primitives.LocationInformation5GSImpl;
+import org.mobicents.gmlc.slee.primitives.NRCellGlobalId;
+import org.mobicents.gmlc.slee.primitives.NRCellGlobalIdImpl;
 import org.restcomm.protocols.ss7.isup.impl.message.parameter.LocationNumberImpl;
 import org.restcomm.protocols.ss7.isup.message.parameter.LocationNumber;
 import org.restcomm.protocols.ss7.map.api.MAPException;
 import org.restcomm.protocols.ss7.map.api.primitives.*;
 import org.restcomm.protocols.ss7.map.api.service.lsm.AccuracyFulfilmentIndicator;
+import org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoSClass;
 import org.restcomm.protocols.ss7.map.api.service.lsm.ResponseTime;
 import org.restcomm.protocols.ss7.map.api.service.lsm.*;
 import org.restcomm.protocols.ss7.map.api.service.mobility.locationManagement.SupportedLCSCapabilitySets;
@@ -179,6 +184,13 @@ public class AVPHandler {
         return utranGanssPositioningDataInfo;
     }
 
+    public static UtranAdditionalPositioningData lteUtranAddPosData2MapUtranAdditionalPositioningdata(byte[] utranAddPosData) {
+        UtranAdditionalPositioningData utranAdditionalPositioningData = null;
+        if (utranAddPosData != null)
+            utranAdditionalPositioningData = new UtranAdditionalPositioningDataImpl(utranAddPosData);
+        return utranAdditionalPositioningData;
+    }
+
     public static EUTRANCGI lteEcgi2MapEutranCgi(byte[] ecgi) {
         EUTRANCGI eUtranCGI = null;
         if (ecgi != null)
@@ -194,8 +206,7 @@ public class AVPHandler {
     }
 
     public static boolean ltePseudonymInd2Boolean(PseudonymIndicator pseudonymIndicator) {
-        boolean mapPseudonymInd = pseudonymIndicator != null && pseudonymIndicator.getValue() == 1;
-        return mapPseudonymInd;
+        return pseudonymIndicator != null && pseudonymIndicator.getValue() == 1;
     }
 
     public static LCSQoS lteLcsQos2MapLcsQoS(LCSQoSAvp lcsQoSAvp) {
@@ -206,8 +217,8 @@ public class AVPHandler {
             ResponseTimeCategory responseTimeCategory = ResponseTimeCategory.delaytolerant;
             net.java.slee.resource.diameter.slg.events.avp.ResponseTime lteResponseTime = lcsQoSAvp.getResponseTime();
             if (lteResponseTime != null) {
-                if (lteResponseTime.getValue() == 1)
-                    responseTimeCategory = ResponseTimeCategory.delaytolerant;
+                if (lteResponseTime.getValue() == 0)
+                    responseTimeCategory = ResponseTimeCategory.lowdelay;
             }
             boolean verticalRequested = false;
             VerticalRequested lteVerticalRequested = lcsQoSAvp.getVerticalRequested();
@@ -216,7 +227,14 @@ public class AVPHandler {
                     verticalRequested = true;
             }
             ResponseTime responseTime = new ResponseTimeImpl(responseTimeCategory);
-            lcsQoS = new LCSQoSImpl(horizontalAccuracy, verticalAccuracy, verticalRequested, responseTime, null);
+            boolean velocityRequest = false; // FIXME with newer version of LCSQoSAvp?
+            LCSQoSClass qoSClass = null;
+            if (lcsQoSAvp.getLCSQoSClass() != null) {
+                qoSClass = LCSQoSClass.bestEffort;
+                if (lcsQoSAvp.getLCSQoSClass().getValue() == net.java.slee.resource.diameter.slg.events.avp.LCSQoSClass._ASSURED)
+                    qoSClass = LCSQoSClass.assured;
+            }
+            lcsQoS = new LCSQoSImpl(horizontalAccuracy, verticalAccuracy, verticalRequested, responseTime, null, velocityRequest, qoSClass);
         }
         return lcsQoS;
     }
@@ -246,39 +264,56 @@ public class AVPHandler {
             deferredLocationEventType = new DeferredLocationEventTypeImpl(msAvailable, enteringIntoArea, leavingFromArea, beingInsideArea, periodicLDR);
             long lteTerminationCause = deferredMTLRDataAvp.getTerminationCause();
             TerminationCause terminationCause = TerminationCause.getTerminationCause((int) lteTerminationCause);
-            net.java.slee.resource.diameter.base.events.avp.DiameterIdentity sgsnName = deferredMTLRDataAvp.getServingNode().getSGSNName();
-            byte[] sgsnNumber = deferredMTLRDataAvp.getServingNode().getSGSNNumber();
-            net.java.slee.resource.diameter.base.events.avp.DiameterIdentity sgsnRealm = deferredMTLRDataAvp.getServingNode().getSGSNRealm();
-            net.java.slee.resource.diameter.base.events.avp.DiameterIdentity lteMmeName = deferredMTLRDataAvp.getServingNode().getMMEName();
-            DiameterIdentity mmeName = diameterIdToMapDiameterId(lteMmeName);
-            net.java.slee.resource.diameter.base.events.avp.DiameterIdentity mmeRealm = deferredMTLRDataAvp.getServingNode().getMMERealm();
-            byte[] mscNumber = deferredMTLRDataAvp.getServingNode().getMSCNumber();
-            net.java.slee.resource.diameter.base.events.avp.DiameterIdentity lte3gppAAAServerName = deferredMTLRDataAvp.getServingNode().get3GPPAAAServerName();
-            DiameterIdentity tgppAAAServerName = diameterIdToMapDiameterId(lte3gppAAAServerName);
-            Address gmlcAddress = deferredMTLRDataAvp.getServingNode().getGMLCAddress();
-            long lcsCapabilitiesSets = deferredMTLRDataAvp.getServingNode().getLcsCapabilitiesSets();
-            boolean lcsCapabilitySetRelease98_99, lcsCapabilitySetRelease4, lcsCapabilitySetRelease5, lcsCapabilitySetRelease6, lcsCapabilitySetRelease7;
-            lcsCapabilitySetRelease98_99 = lcsCapabilitySetRelease4 = lcsCapabilitySetRelease5 = lcsCapabilitySetRelease6 = lcsCapabilitySetRelease7 = false;
-            if (lcsCapabilitiesSets == 0)
-                lcsCapabilitySetRelease98_99 = true;
-            if (lcsCapabilitiesSets == 1)
-                lcsCapabilitySetRelease4 = true;
-            if (lcsCapabilitiesSets == 2)
-                lcsCapabilitySetRelease5 = true;
-            if (lcsCapabilitiesSets == 3)
-                lcsCapabilitySetRelease6 = true;
-            if (lcsCapabilitiesSets == 4)
-                lcsCapabilitySetRelease7 = true;
-            SupportedLCSCapabilitySets supportedLCSCapabilitySets = new SupportedLCSCapabilitySetsImpl(lcsCapabilitySetRelease98_99,
-                    lcsCapabilitySetRelease4, lcsCapabilitySetRelease5, lcsCapabilitySetRelease6, lcsCapabilitySetRelease7);
-            ISDNAddressString networkNodeNumber = null;
-            LMSI lmsi = null;
-            MAPExtensionContainer extensionContainer = null;
-            boolean gprsNodeIndicator = false;
-            AdditionalNumber additionalNumber = null;
-            SupportedLCSCapabilitySets additionalLCSCapabilitySets = null;
-            LCSLocationInfo lcsLocationInfo = new LCSLocationInfoImpl(networkNodeNumber, lmsi, extensionContainer, gprsNodeIndicator, additionalNumber,
-                    supportedLCSCapabilitySets, additionalLCSCapabilitySets, mmeName, tgppAAAServerName);
+            LCSLocationInfo lcsLocationInfo = null;
+            if (deferredMTLRDataAvp.getServingNode() != null) {
+                net.java.slee.resource.diameter.base.events.avp.DiameterIdentity lteSgsnName = deferredMTLRDataAvp.getServingNode().getSGSNName();
+                DiameterIdentity sgsnName = diameterIdToMapDiameterId(lteSgsnName);
+                byte[] sgsnNumber = deferredMTLRDataAvp.getServingNode().getSGSNNumber();
+                net.java.slee.resource.diameter.base.events.avp.DiameterIdentity lteSgsnRealm = deferredMTLRDataAvp.getServingNode().getSGSNRealm();
+                DiameterIdentity sgsnRealm = diameterIdToMapDiameterId(lteSgsnRealm);
+                net.java.slee.resource.diameter.base.events.avp.DiameterIdentity lteMmeName = deferredMTLRDataAvp.getServingNode().getMMEName();
+                DiameterIdentity mmeName = diameterIdToMapDiameterId(lteMmeName);
+                net.java.slee.resource.diameter.base.events.avp.DiameterIdentity mmeRealm = deferredMTLRDataAvp.getServingNode().getMMERealm();
+                byte[] mscNumber = deferredMTLRDataAvp.getServingNode().getMSCNumber();
+                net.java.slee.resource.diameter.base.events.avp.DiameterIdentity lte3gppAAAServerName = deferredMTLRDataAvp.getServingNode().get3GPPAAAServerName();
+                DiameterIdentity tgppAAAServerName = diameterIdToMapDiameterId(lte3gppAAAServerName);
+                Address gmlcAddress = deferredMTLRDataAvp.getServingNode().getGMLCAddress();
+                long lcsCapabilitiesSets = deferredMTLRDataAvp.getServingNode().getLcsCapabilitiesSets();
+                boolean lcsCapabilitySetRelease98_99, lcsCapabilitySetRelease4, lcsCapabilitySetRelease5, lcsCapabilitySetRelease6, lcsCapabilitySetRelease7;
+                lcsCapabilitySetRelease98_99 = lcsCapabilitySetRelease4 = lcsCapabilitySetRelease5 = lcsCapabilitySetRelease6 = lcsCapabilitySetRelease7 = false;
+                if (lcsCapabilitiesSets == 0)
+                    lcsCapabilitySetRelease98_99 = true;
+                if (lcsCapabilitiesSets == 1)
+                    lcsCapabilitySetRelease4 = true;
+                if (lcsCapabilitiesSets == 2)
+                    lcsCapabilitySetRelease5 = true;
+                if (lcsCapabilitiesSets == 3)
+                    lcsCapabilitySetRelease6 = true;
+                if (lcsCapabilitiesSets == 4)
+                    lcsCapabilitySetRelease7 = true;
+                SupportedLCSCapabilitySets supportedLCSCapabilitySets = new SupportedLCSCapabilitySetsImpl(lcsCapabilitySetRelease98_99,
+                        lcsCapabilitySetRelease4, lcsCapabilitySetRelease5, lcsCapabilitySetRelease6, lcsCapabilitySetRelease7);
+                ISDNAddressString networkNodeNumber = null;
+                boolean gprsNodeIndicator = false;
+                AdditionalNumber additionalNumber = null;
+                if (mscNumber != null) {
+                    String mscNumberAddress = toTBCDString(mscNumber);
+                    networkNodeNumber = new ISDNAddressStringImpl(AddressNature.international_number,
+                            org.restcomm.protocols.ss7.map.api.primitives.NumberingPlan.ISDN, mscNumberAddress);
+                    if (sgsnNumber != null) {
+                        String sgsnNumberAddress = toTBCDString(sgsnNumber);
+                        additionalNumber = new AdditionalNumberImpl(null, new ISDNAddressStringImpl(AddressNature.international_number,
+                                org.restcomm.protocols.ss7.map.api.primitives.NumberingPlan.ISDN, sgsnNumberAddress));
+                    }
+                } else if (sgsnNumber != null) {
+                    String sgsnNumberAddress = toTBCDString(sgsnNumber);
+                    networkNodeNumber =  new ISDNAddressStringImpl(AddressNature.international_number,
+                            org.restcomm.protocols.ss7.map.api.primitives.NumberingPlan.ISDN, sgsnNumberAddress);
+                    gprsNodeIndicator = true;
+                }
+                lcsLocationInfo = new LCSLocationInfoImpl(networkNodeNumber, null, null, gprsNodeIndicator, additionalNumber,
+                        supportedLCSCapabilitySets, null, mmeName, tgppAAAServerName, sgsnName, sgsnRealm);
+            }
             deferredmtlrData = new DeferredmtlrDataImpl(deferredLocationEventType, terminationCause, lcsLocationInfo);
         }
         return deferredmtlrData;
@@ -289,14 +324,15 @@ public class AVPHandler {
         if (periodicLDRInfoAvp != null) {
             int reportingAmount = (int) periodicLDRInfoAvp.getReportingAmount();
             int reportingInterval = (int) periodicLDRInfoAvp.getReportingInterval();
-            periodicLDRInfo = new PeriodicLDRInfoImpl(reportingAmount, reportingInterval);
+            ReportingOptionMilliseconds reportingOptionMilliseconds = null; // FIXME
+            periodicLDRInfo = new PeriodicLDRInfoImpl(reportingAmount, reportingInterval, reportingOptionMilliseconds);
         }
         return periodicLDRInfo;
     }
 
     public static LocationInformation shLocationInfo2MapLocationInformation(ShUdaAvpValues shUdaAvpValues) {
         LocationInformation locationInformation = null;
-        LocationInformationEPS locationInformationEPS = null;
+        LocationInformationEPS locationInformationEPS;
         LocationNumberMap locationNumberMap = null;
         CellGlobalIdOrServiceAreaIdOrLAI cellGlobalIdOrServiceAreaIdOrLAI = null;
         GeographicalInformation geographicalInformation = null;
@@ -304,28 +340,28 @@ public class AVPHandler {
         ISDNAddressString mscNumber, vlrNumber;
         mscNumber = vlrNumber = null;
         DiameterIdentity mmeName = null;
-        Boolean csCurrentLocationRetrieved = false;
+        boolean csCurrentLocationRetrieved = false;
         Integer csAgeOfLocationInformation;
         EUtranCgi eUtranCellGlobalIdentity = null;
         TAId trackingAreaIdentity = null;
         GeographicalInformation epsGeographicalInfo = null;
         GeodeticInformation epsGeodeticInfo = null;
-        Boolean epsCurrentLocationRetrieved = false;
-        Boolean saiPresent = false;
+        boolean epsCurrentLocationRetrieved = false;
+        boolean saiPresent = false;
         MAPExtensionContainer extensionContainer = null;
         LSAIdentity lsaIdentity = null;
         UserCSGInformation userCSGInformation = null;
         if (shUdaAvpValues != null) {
-            //Collecting from CSLocationInformation
+            // Collecting from CSLocationInformation
             // LocationNumber
             ShLocationNumber shLocationNumber = shUdaAvpValues.getLocationNumber();
             if (shLocationNumber != null) {
-                Integer natureOfAddressIndicator = shLocationNumber.getLocationNumber().getNatureOfAddressIndicator();
+                int natureOfAddressIndicator = shLocationNumber.getLocationNumber().getNatureOfAddressIndicator();
                 String locationNumberAddressDigits = shLocationNumber.getLocationNumber().getAddress();
-                Integer numberingPlanIndicator = shLocationNumber.getLocationNumber().getNumberingPlanIndicator();
-                Integer internalNetworkNumberIndicator = shLocationNumber.getLocationNumber().getInternalNetworkNumberIndicator();
-                Integer addressRepresentationRestrictedIndicator = shLocationNumber.getLocationNumber().getAddressRepresentationRestrictedIndicator();
-                Integer screeningIndicator = shLocationNumber.getLocationNumber().getScreeningIndicator();
+                int numberingPlanIndicator = shLocationNumber.getLocationNumber().getNumberingPlanIndicator();
+                int internalNetworkNumberIndicator = shLocationNumber.getLocationNumber().getInternalNetworkNumberIndicator();
+                int addressRepresentationRestrictedIndicator = shLocationNumber.getLocationNumber().getAddressRepresentationRestrictedIndicator();
+                int screeningIndicator = shLocationNumber.getLocationNumber().getScreeningIndicator();
                 LocationNumber locationNumber = new LocationNumberImpl(natureOfAddressIndicator, locationNumberAddressDigits, numberingPlanIndicator,
                         internalNetworkNumberIndicator, addressRepresentationRestrictedIndicator, screeningIndicator);
                 try {
@@ -430,10 +466,10 @@ public class AVPHandler {
         GeographicalInformation psGeographicalInfo = null;
         GeodeticInformation psGeodeticInfo = null;
         ISDNAddressString sgsnNumber = null;
-        Boolean psCurrentLocationRetrieved = false;
+        boolean psCurrentLocationRetrieved = false;
         LSAIdentity lsaIdentity = null;
         MAPExtensionContainer extensionContainer = null;
-        Boolean saiPresent = false;
+        boolean saiPresent = false;
         if (shUdaAvpValues != null) {
             // PS CellGlobalId
             ShCellGlobalId cellGlobalId = shUdaAvpValues.getPsCellGlobalId();
@@ -490,12 +526,13 @@ public class AVPHandler {
     public static LocationInformation5GS sh5GSLocationInfo2LocationInformation5GS(ShUdaAvpValues shUdaAvpValues) {
         LocationInformation5GS locationInformation5GS = null;
         NRCellGlobalId nrCellGlobalIdentity = null;
+        TrackingAreaId5GS trackingAreaId5GS = null;
         EUTRANCGI eUtranCellGlobalIdentity = null;
         TAId trackingAreaIdentity = null;
         GeographicalInformation sh5gsGeographicalInfo = null;
         String amfAddress;
         String smsfAddress;
-        Boolean sh5gsCurrentLocationRetrieved = false;
+        boolean sh5gsCurrentLocationRetrieved = false;
         Integer sh5gsAgeOfLocationInformation;
         PlmnId visitedPlmnId = null;
         String timeZone = null;
@@ -506,10 +543,13 @@ public class AVPHandler {
             ShNRCellGlobalId shNRCellGlobalId = shUdaAvpValues.getShNRCellGlobalId();
             if (shNRCellGlobalId != null)
                 nrCellGlobalIdentity = new NRCellGlobalIdImpl(shUdaAvpValues.getShNRCellGlobalId().getNRCellGlobalId().getData());
+            Sh5GSTrackingAreaId sh5GSTrackingAreaId = shUdaAvpValues.getSh5GSTrackingAreaId();
+            if (sh5GSTrackingAreaId != null)
+                trackingAreaId5GS = new TrackingAreaId5GSImpl(shUdaAvpValues.getSh5GSTrackingAreaId().get5GSTrackingAreaId().getData());
             // EUTRANCellGlobalId
-            ShEUTRANCellGlobalId eutranCellGlobalId = shUdaAvpValues.getEutrancgi();
-            if (eutranCellGlobalId != null)
-                eUtranCellGlobalIdentity = new EUTRANCGIImpl(eutranCellGlobalId.getEutranCgi().getData());
+            ShEUTRANCellGlobalId eUtranCellGlobalId = shUdaAvpValues.getEutrancgi();
+            if (eUtranCellGlobalId != null)
+                eUtranCellGlobalIdentity = new EUTRANCGIImpl(eUtranCellGlobalId.getEutranCgi().getData());
             // EPS TAI
             ShTrackingAreaId shTrackingAreaId = shUdaAvpValues.getTrackingAreaId();
             if (shTrackingAreaId != null)
@@ -544,7 +584,7 @@ public class AVPHandler {
             // RAT Type
             ratType = shUdaAvpValues.getSh5gsRatType();
 
-            locationInformation5GS = new LocationInformation5GSImpl(nrCellGlobalIdentity, eUtranCellGlobalIdentity, trackingAreaIdentity, sh5gsGeographicalInfo,
+            locationInformation5GS = new LocationInformation5GSImpl(nrCellGlobalIdentity, trackingAreaId5GS, eUtranCellGlobalIdentity, trackingAreaIdentity, sh5gsGeographicalInfo,
                     amfAddress, smsfAddress, sh5gsCurrentLocationRetrieved, sh5gsAgeOfLocationInformation, visitedPlmnId, timeZone, daylightSavingTime, ratType);
         }
         return locationInformation5GS;

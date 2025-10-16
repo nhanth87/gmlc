@@ -43,8 +43,7 @@ public class ShUserCSGInformation {
   public void setUserCSGInformationStr(String userCSGInformationStr) {
     if (userCSGInformationStr != null) {
       byte[] bytes = Base64.getDecoder().decode(userCSGInformationStr);
-      String userCSGInfoStr = new String(bytes, StandardCharsets.ISO_8859_1);
-      this.userCSGInformationStr = userCSGInfoStr;
+      this.userCSGInformationStr = new String(bytes, StandardCharsets.ISO_8859_1);
     }
   }
 

@@ -45,24 +45,24 @@ public class ByteUtils {
         return builder.toString();
     }
 
-    public static final String dumpBytes(byte[] buffer) {
+    public static String dumpBytes(byte[] buffer) {
         if ( buffer == null ) {
             return "";
         }
         StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < buffer.length; i++) {
-            sb.append("0x").append((char) ( HEX_CHAR[(buffer[i] & 0x00F0 ) >> 4])).append((char) (HEX_CHAR[buffer[i] & 0x000F])).append(" ");
+        for (byte b : buffer) {
+            sb.append("0x").append((char) (HEX_CHAR[(b & 0x00F0) >> 4])).append((char) (HEX_CHAR[b & 0x000F])).append(" ");
         }
         return sb.toString();
     }
 
-    public static final String dumpBytesToHexString(byte[] buffer) {
+    public static String dumpBytesToHexString(byte[] buffer) {
         if ( buffer == null ) {
             return "";
         }
         StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < buffer.length; i++) {
-            sb.append((char) (HEX_CHAR[(buffer[i] & 0x00F0 ) >> 4])).append((char) (HEX_CHAR[buffer[i] & 0x000F]));
+        for (byte b : buffer) {
+            sb.append((char) (HEX_CHAR[(b & 0x00F0) >> 4])).append((char) (HEX_CHAR[b & 0x000F]));
         }
         return sb.toString();
     }
@@ -119,8 +119,8 @@ public class ByteUtils {
 
     public static String encodeHexString(byte[] byteArray) {
         StringBuffer hexStringBuffer = new StringBuffer();
-        for (int i = 0; i < byteArray.length; i++) {
-            hexStringBuffer.append(byteToHex(byteArray[i]));
+        for (byte b : byteArray) {
+            hexStringBuffer.append(byteToHex(b));
         }
         return hexStringBuffer.toString();
     }
@@ -160,7 +160,7 @@ public class ByteUtils {
      * @return The new, populated byte array
      */
     public static byte[] subBytes(byte[] source, int srcBegin, int srcEnd) {
-        byte destination[];
+        byte[] destination;
 
         destination = new byte[srcEnd - srcBegin];
         getBytes(source, srcBegin, srcEnd, destination, 0);
@@ -196,9 +196,9 @@ public class ByteUtils {
         int a3 = (plmnId[1] & 0xF0) >> 4;
 
         if (a3 == 15)
-            return "" + a1 + a2;
+            return String.valueOf(a1) + a2;
         else
-            return "" + a1 + a2 + a3;
+            return String.valueOf(a1) + a2 + a3;
     }
 
     public static String generateRandomStringByLength(int length, boolean numericOnly) {
@@ -206,12 +206,11 @@ public class ByteUtils {
         int rightLimit = numericOnly ? 57 : 122 ; // 122 letter 'z', 57 number 9.
         Random random = new Random();
 
-        String generatedString = random.ints(leftLimit, rightLimit + 1)
+        return random.ints(leftLimit, rightLimit + 1)
                 .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
                 .limit(length)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
-        return generatedString;
     }
 
     public static byte[] encodeUlp(ULP_PDU message) {
@@ -222,8 +221,7 @@ public class ByteUtils {
             ByteBuffer buffer = ByteBuffer.wrap(outputStream.getBuffer());
             buffer.order(ByteOrder.BIG_ENDIAN);
             buffer.putShort((short) outputStream.getBuffer().length);
-            byte[] bytes = buffer.array();
-            return bytes;
+            return buffer.array();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -238,8 +236,7 @@ public class ByteUtils {
             ByteBuffer buffer = ByteBuffer.wrap(outputStream.getBuffer());
             buffer.order(ByteOrder.BIG_ENDIAN);
             buffer.putShort((short) outputStream.getBuffer().length);
-            byte[] bytes = buffer.array();
-            return bytes;
+            return buffer.array();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "VLRNumber")
 public class VLRNumber implements Serializable {
 
-  private static final long serialVersionUID = 6209066944849709975L;
+  private static final long serialVersionUID = 1L;
   private String address;
 
   public VLRNumber() {
@@ -31,8 +31,7 @@ public class VLRNumber implements Serializable {
   }
 
   public byte[] getVLRNumberBytes(String address) {
-    byte[] bytes = Base64.decodeBase64(address.getBytes());
-    return bytes;
+    return Base64.decodeBase64(address.getBytes());
   }
 
   @Override

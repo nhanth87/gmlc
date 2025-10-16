@@ -43,7 +43,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * This is a helper for generating MLP XML responses to send to a MLP client.
+ * This is a helper for generating MLP XML responses to send to an MLP client.
  * It uses the JAXB generated XML bound classes in org.oma.protocols.mlp
  * It exists to generate consistent XML output using the JAXB marshaller
  * It supports generating a result only for a single MSISDN that has a single Point (X/Y - lat/lon) result
@@ -101,7 +101,7 @@ public class MLPResponse {
   /**
    * Logger from the calling SBB
    */
-  private Tracer logger;
+  private final Tracer logger;
 
   protected static final DecimalFormat coordinatesFormat = new DecimalFormat("#0.000000");
   private String exceptionError = "";
@@ -110,9 +110,9 @@ public class MLPResponse {
     this.logger = logger;
   }
 
-  // If there's an internal exception or other error, we have to fallback to some "worst case scenario"
+  // If there's an internal exception or other error, we have to fall back to some "worst case scenario"
   // static XML return data
-  private String genericStandardLocationRequestErrorXML =
+  private final String genericStandardLocationRequestErrorXML =
       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
           "  <!DOCTYPE svc_result SYSTEM \"MLP_v3_4.dtd\">" +
           "  <svc_result xmlns=\"MLP_v3_4.dtd\" ver=\"3.4.0\">\n" +
@@ -122,7 +122,7 @@ public class MLPResponse {
           "  </slia>\n" +
           "</svc_result>";
 
-  private String genericTriggeredLocationRequestErrorXML =
+  private final String genericTriggeredLocationRequestErrorXML =
       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
           "  <!DOCTYPE svc_result SYSTEM \"MLP_v3_4.dtd\">" +
           "  <svc_result xmlns=\"MLP_v3_4.dtd\" ver=\"3.4.0\">\n" +
@@ -146,9 +146,9 @@ public class MLPResponse {
     1	SYSTEM FAILURE	            The request can not be handled because of a general problem in the location server.
     2	UNSPECIFIED ERROR	        An unspecified error used in case none of the other errors apply. This can also be used in case privacy issues prevent certain errors from being presented.
     3	UNAUTHORIZED APPLICATION	The requesting location-based application is not allowed to access the location server or a wrong password has been supplied.
-    4	UNKNOWN SUBSCRIBER	        Unknown subscriber. The user is unknown, i.e. no such subscription exists.
-    5	ABSENT SUBSCRIBER	        Absent subscriber. The user is currently not reachable.
-    6	POSITION METHOD FAILURE	    Position method failure. The location service fails to obtain the user's position.
+    4	UNKNOWN SUBSCRIBER	        The user is unknown, i.e. no such subscription exists.
+    5	ABSENT SUBSCRIBER	        The user is currently not reachable.
+    6	POSITION METHOD FAILURE	    The location service fails to obtain the user's position via the positioning method used.
                                     The exact cause may be indicated in ADD_INFO by the inclusion of an event code (A, B, C etc.)
                                     from the list below:
                                     A: Target does not support SUPL.
@@ -199,8 +199,6 @@ public class MLPResponse {
     switch (mlpResultType) {
       case OK:
         return "0";
-      case SYSTEM_FAILURE:
-        return "1";
       case UNSPECIFIED_ERROR:
         return "2";
       case UNAUTHORIZED_APPLICATION:
@@ -266,7 +264,7 @@ public class MLPResponse {
       case INVALID_SERVICE_ID_IN_STANDARD_LOCATION_REPORT_SERVICE:
         return "605";
       default:
-        return "1";
+        return "1"; // contains SYSTEM_FAILURE case
     }
   }
 
@@ -280,8 +278,6 @@ public class MLPResponse {
     switch (mlpResultType) {
       case OK:
         return "OK";
-      case SYSTEM_FAILURE:
-        return "SYSTEM FAILURE";
       case UNSPECIFIED_ERROR:
         return "UNSPECIFIED ERROR";
       case UNAUTHORIZED_APPLICATION:
@@ -347,7 +343,7 @@ public class MLPResponse {
       case INVALID_SERVICE_ID_IN_STANDARD_LOCATION_REPORT_SERVICE:
         return "INVALID SERVICE ID IN STANDARD LOCATION REPORT SERVICE";
       default:
-        return "SYSTEM FAILURE";
+        return "SYSTEM FAILURE"; // contains SYSTEM_FAILURE case
     }
   }
 
@@ -361,26 +357,6 @@ public class MLPResponse {
     switch (mlpResultType) {
       case SYSTEM_FAILURE:
       case UNSPECIFIED_ERROR:
-      case UNAUTHORIZED_APPLICATION:
-      case POSITION_METHOD_FAILURE:
-      case CONGESTION_IN_LOCATION_SERVER:
-      case UNSUPPORTED_VERSION:
-      case TOO_MANY_POSITION_ITEMS:
-      case FORMAT_ERROR:
-      case SYNTAX_ERROR:
-      case PROTOCOL_ELEMENT_NOT_SUPPORTED:
-      case SERVICE_NOT_SUPPORTED:
-      case PROTOCOL_ELEMENT_ATTRIBUTE_NOT_SUPPORTED:
-      case INVALID_PROTOCOL_ELEMENT_VALUE:
-      case INVALID_PROTOCOL_ELEMENT_ATTRIBUTE_VALUE:
-      case PROTOCOL_ELEMENT_VALUE_NOT_SUPPORTED:
-      case PROTOCOL_ELEMENT_ATTRIBUTE_VALUE_NOT_SUPPORTED:
-      case TLRSR_FOR_INDIVIDUAL_TARGET_NOT_SUPPORTED:
-      case QOP_NOT_ATTAINABLE:
-      case CONGESTION_IN_MOBILE_NETWORK:
-      case MISCONFIGURATION_OF_LOCATION_SERVER:
-      case STANDARD_LOCATION_REPORT_SERVICE_NOT_SUPPORTED:
-      case MLS_CLIENT_ERROR:
         return true;
       default:
         return false;
@@ -465,13 +441,13 @@ public class MLPResponse {
                                                 Double semMinor, Double angle, Double arcStartAngle, Double arcStopAngle, Integer altitude,
                                                 org.mobicents.gmlc.slee.primitives.Polygon polygon, Integer polygonPointsAmount,
                                                 Integer mcc, Integer mnc, Integer lac, Integer ci, Integer sac,
-                                                Long eci, Integer rac, Integer tac, Long nci, String mmeName, String sgsnName, String mscNumber,
+                                                Long eci, Integer rac, Integer tac, Long nci, Integer nrTac, String mmeName, String sgsnName, String mscNumber,
                                                 String vlrNumber, String msid, String imei, String imsi, Integer age, String lmsi,
                                                 Integer clientTransId, Integer lcsRefNumber, Integer ratType, MLPResultType mlpResultType,
                                                 Boolean mlpTriggeredReportingService, Boolean isReport) {
 
     // Generate XML response
-    String svcResultXml = "";
+    String svcResultXml;
 
     try {
       // Eventually this timestamp should be replaced by the actual network position time
@@ -481,7 +457,7 @@ public class MLPResponse {
 
       // Generate the response XML
       svcResultXml = this.generateSinglePositionSuccessXML(operation, typeOfShape, x, y, radius, semiMajor, semMinor, angle, arcStartAngle, arcStopAngle,
-          altitude, polygon, polygonPointsAmount, utcOffset, date, msid, mcc, mnc, lac, ci, sac, eci, rac, tac, nci, mmeName, sgsnName, mscNumber, vlrNumber,
+          altitude, polygon, polygonPointsAmount, utcOffset, date, msid, mcc, mnc, lac, ci, sac, eci, rac, tac, nci, nrTac, mmeName, sgsnName, mscNumber, vlrNumber,
           imei, imsi, age, lmsi, clientTransId, lcsRefNumber, ratType, mlpResultType, mlpTriggeredReportingService, isReport);
 
     } catch (IllegalArgumentException e) {
@@ -507,9 +483,9 @@ public class MLPResponse {
    * @param radius              Position radius in meters (e.g. 5000 for 5km of accuracy)
    * @param semiMajor           Length of semi-major axis, oriented at angle A (0 to 180º) measured clockwise from North
    * @param semiMinor           Length of semi-minor axis, oriented at angle A (0 to 180º) measured clockwise from North
-   * @param angle
-   * @param arcStartAngle
-   * @param arcStopAngle
+   * @param angle               Angle A (0 to 180°) measured clockwise from north and a semi-minor axis
+   * @param arcStartAngle       Angle (in angularUnit) between North and the first defined radius
+   * @param arcStopAngle        Angle (in angularUnit) between the first and second defined radius
    * @param altitude            Altitude of the location estimate
    * @param polygon             Array containing location estimate coordinates for each point of the polygon
    * @param polygonPointsAmount Amount of points of the polygon
@@ -522,7 +498,9 @@ public class MLPResponse {
    * @param ci                  Cell Id
    * @param sac                 Service Area Code
    * @param eci                 LTE Cell Id
-   * @param tac                 Tracking Area Code
+   * @param tac                 LTE Tracking Area Code
+   * @param nci                 5GS NR Cell Id
+   * @param nrTac               5GS NR Tracking Area Code
    * @param mmeName             Mobility Management Entity name
    * @param sgsnName            Serving GPRS Support Node name
    * @param mscNumber           Mobile Switching Center number (E.164 digits, Global Title)
@@ -531,22 +509,21 @@ public class MLPResponse {
    * @param imsi                International Mobile Subscriber Identity
    * @param age                 Age of Location
    * @param lmsi                Location Mobile Subscriber Identity
-   * @param clientTransId       Transaction Id of the GMLC client
+   * @param clientTransId       Transaction Identity of the GMLC client
    * @param lcsReferenceNumber  LCS Reference Number parameter of the PSL invoke
-   * @param mlpResultType
+   * @param mlpResultType       MLPResultType internal enum value for use in the MLP classes
    * @return                    String XML result to return to client
    * @throws IOException        IO error occurred while generating the XML result
-   * @throws JAXBException
+   * @throws JAXBException      JAXB error occurred while generating the XML result
    */
   private String generateSinglePositionSuccessXML(String operation, String typeOfShape , Double x, Double y, Double radius, Double semiMajor,
                                                   Double semiMinor, Double angle, Double arcStartAngle, Double arcStopAngle, Integer altitude,
                                                   org.mobicents.gmlc.slee.primitives.Polygon polygon, Integer polygonPointsAmount,
                                                   String utcOffSet, String date, String msid, Integer mcc, Integer mnc, Integer lac,
-                                                  Integer ci, Integer sac, Long eci, Integer rac, Integer tac, Long nci, String mmeName, String sgsnName,
+                                                  Integer ci, Integer sac, Long eci, Integer rac, Integer tac, Long nci, Integer nrTac, String mmeName, String sgsnName,
                                                   String mscNumber, String vlrNumber, String imei, String imsi, Integer age, String lmsi,
                                                   Integer clientTransId, Integer lcsReferenceNumber, Integer ratType,
-                                                  MLPResultType mlpResultType, Boolean mlpTriggeredReportingService, Boolean isReport) throws  IOException,
-      JAXBException {
+                                                  MLPResultType mlpResultType, Boolean mlpTriggeredReportingService, Boolean isReport) throws  IOException, JAXBException {
 
     String lXml;
     String ver = "3.4.0";
@@ -569,7 +546,7 @@ public class MLPResponse {
     CircularArcArea mlpCircularArcArea = new CircularArcArea();
     Polygon mlpPolygon = new Polygon();
     Coord mlpCoord = new Coord();
-    List<Pos> posList = new ArrayList();
+    List<Pos> posList = new ArrayList<>();
     List<TrlPos> trlPosList = new ArrayList<>();
     GsmNetParam mlpGsmNetParam = new GsmNetParam();
     Cgi mlpCgi = new Cgi();
@@ -648,7 +625,7 @@ public class MLPResponse {
         } else if (typeOfShape.equalsIgnoreCase("Polygon")) {
           LinearRing linearRing = new LinearRing();
           OuterBoundaryIs outerBoundaryIs = new OuterBoundaryIs();
-          Double lat, pointLatitude, lon, pointLongitude;
+          double lat, pointLatitude, lon, pointLongitude;
           String formattedLatitude, formattedLongitude;
           Double[][] polygonArray = new Double[polygonPointsAmount][polygonPointsAmount];
           if (polygonPointsAmount > 2 && polygonPointsAmount <= 15) {
@@ -713,6 +690,9 @@ public class MLPResponse {
         if (tac != null) {
           mlpPos.setTrackingAreaCode(String.valueOf(tac));
         }
+        if (nrTac != null) {
+          mlpPos.setNrTrackingAreaCode(String.valueOf(nrTac));
+        }
       }
       if (mscNumber != null || vlrNumber != null) {
         if (mscNumber != null) {
@@ -748,7 +728,7 @@ public class MLPResponse {
       } else {
         if (mlpTriggeredReportingService) {
             if (mlpServingCell.getSai() != null || mlpServingCell.getLteCi() != null || mlpServingCell.getNrCi() != null) {
-              // Add the ServingCell to to TrlPos for TLRA
+              // Add the ServingCell to TrlPos for TLRA
               mlpTrlPos.setServingCell(mlpServingCell);
             }
             if (mlpCgi.getLac() != null || mscNumber != null || vlrNumber != null || imsi != null || lmsi != null) {
@@ -907,7 +887,7 @@ public class MLPResponse {
    */
   public String getSystemErrorResponseXML(MLPResultType mlpClientErrorType, String mlpClientErrorMessage, boolean isTriggered) {
     // Generate XML response
-    String svcResultXml = "";
+    String svcResultXml;
     try {
       // Generate the error XML
       svcResultXml = this.generateSystemErrorXML(mlpClientErrorType, mlpClientErrorMessage, false);
@@ -940,7 +920,7 @@ public class MLPResponse {
    * @param mlpClientErrorMessage             Error message to send to client
    * @return                                  String XML result to return to client
    * @throws IOException                      IO error occurred while generating the XML result
-   * @throws JAXBException
+   * @throws JAXBException                    JAXB error occurred while generating the XML result
    */
   private String generateSystemErrorXML(MLPResultType mlpClientErrorType, String mlpClientErrorMessage, boolean isTriggered) throws  IOException, JAXBException {
 
@@ -985,7 +965,7 @@ public class MLPResponse {
       marshaller.marshal(mlpSvcResult,lOutputStream);
 
       // Convert the stream to a string
-      lXml = new String(lOutputStream.toByteArray(), "UTF-8");
+      lXml = lOutputStream.toString(StandardCharsets.UTF_8);
 
       // Return our XML string result
       return lXml;
@@ -999,16 +979,7 @@ public class MLPResponse {
         return genericTriggeredLocationRequestErrorXML;
       else
         return genericStandardLocationRequestErrorXML;
-    } catch (IOException ioException) {
-      // Return generic XML error response because we couldn't generate the correct response
-      ioException.printStackTrace();
-      this.logger.info("Exception while creating XML response data: " + ioException.getMessage());
-      this.exceptionError = "IOException while marshalling XML response data";
-      if (isTriggered)
-        return genericTriggeredLocationRequestErrorXML;
-      else
-        return genericStandardLocationRequestErrorXML;
-    }   catch (JAXBException jaxbException) {
+    } catch (JAXBException jaxbException) {
       // Return generic XML error response because we couldn't generate the correct response
       jaxbException.printStackTrace();
       this.logger.info("Exception while marshalling XML response data: " + jaxbException.getMessage());
@@ -1040,7 +1011,7 @@ public class MLPResponse {
   public String getPositionErrorResponseXML(String msid, String imsi, String mscNumber, String vlrNumber, MLPResultType mlpClientErrorType,
                                             String mlpClientErrorMessage, boolean isTriggered) {
     // Generate XML response
-    String svcResultXml = "";
+    String svcResultXml;
 
     try {
       // Eventually this timestamp should be replaced by the actual network position time
@@ -1101,7 +1072,7 @@ public class MLPResponse {
    * @param mlpClientErrorMessage Error message to send to client
    * @return                      String XML result to return to client
    * @throws IOException          IO error occurred while generating the XML result
-   * @throws JAXBException
+   * @throws JAXBException        JAXB error occurred while generating the XML result
    */
   private String generatePositionErrorXML(String utcOffSet, String time, String msid, String imsi, String mscNumber, String vlrNumber,
                                           MLPResultType mlpClientErrorType, String mlpClientErrorMessage, boolean isTriggered)
@@ -1119,7 +1090,7 @@ public class MLPResponse {
       Pos mlpPos = new Pos();
       Msid mlpMsid = new Msid();
       Time mlpTime = new Time();
-      List<Pos> posList = new ArrayList();
+      List<Pos> posList = new ArrayList<>();
       GsmNetParam mlpGsmNetParam = new GsmNetParam();
       Neid mlpNeid = new Neid();
       Vmscid mlpVmscId = new Vmscid();
@@ -1176,7 +1147,7 @@ public class MLPResponse {
         mlpTlra.setResult(mlpResult);
         mlpSvcResult.setTlra(mlpTlra);
         mlpSvcResult.setVer(ver);
-      } else{
+      } else {
         mlpSlia.setVer(ver);
         mlpSlia.setResult(mlpResult);
         mlpSvcResult.setSlia(mlpSlia);
@@ -1229,26 +1200,25 @@ public class MLPResponse {
   /**
    * Create the svc_result XML result for any type of result (error or success)
    *
-   * @param mlpSvcResult  Fully filled in SvcResult object to marshal (convert to XML)
-   * @return              String of XML result to send to client
-   * @throws IOException  IO error occurred while generating the XML result
-   * @throws JAXBException
+   * @param mlpSvcResult    Fully filled in SvcResult object to marshal (convert to XML)
+   * @return                String of XML result to send to client
+   * @throws IOException    IO error occurred while generating the XML result
+   * @throws JAXBException  JAXB error occurred while generating the XML result
    */
   private String marshalMlpResult(SvcResult mlpSvcResult, boolean isTriggered) throws IOException, JAXBException {
     String lXml;
 
     JAXBContext jc = JAXBContext.newInstance(SvcResult.class);
     Marshaller marshaller = jc.createMarshaller();
-    // ByteArrayOutputStream lOutputStream = new ByteArrayOutputStream();
-    OutputStream outputStream = new ByteArrayOutputStream();
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     DOMResult domResult = new DOMResult();
 
     // Generate the XML
-    // marshaller.marshal(mlpSvcResult, lOutputStream);
     marshaller.marshal(mlpSvcResult, domResult);
 
     try {
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
+      transformerFactory.setAttribute("indent-number", 4);
       Transformer transformer = transformerFactory.newTransformer();
       transformer.setOutputProperty(OutputKeys.METHOD, "xml");
       transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
@@ -1282,9 +1252,7 @@ public class MLPResponse {
     }
 
     // Convert the stream to a string
-    //lXml = new String(lOutputStream.toByteArray(), "UTF-8");
-    lXml = String.valueOf(outputStream);
-
+    lXml = outputStream.toString(StandardCharsets.UTF_8);
     // Return our XML string result
     return lXml;
   }

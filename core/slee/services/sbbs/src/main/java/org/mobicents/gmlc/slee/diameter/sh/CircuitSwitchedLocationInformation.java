@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "Sh-Data")
 public class CircuitSwitchedLocationInformation implements Serializable {
 
-  private static final long serialVersionUID = -4129049171579987581L;
+  private static final long serialVersionUID = 1L;
   private CSLocationInformation csLocationInformation;
 
   public CircuitSwitchedLocationInformation(CSLocationInformation csLocationInformation) {

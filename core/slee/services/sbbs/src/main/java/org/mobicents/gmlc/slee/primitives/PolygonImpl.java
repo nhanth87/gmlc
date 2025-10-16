@@ -1,12 +1,9 @@
 package org.mobicents.gmlc.slee.primitives;
 
-import javolution.xml.XMLFormat;
-import javolution.xml.stream.XMLStreamException;
 import org.restcomm.protocols.ss7.map.api.MAPException;
 import org.restcomm.protocols.ss7.map.primitives.OctetStringBase;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.GeographicalInformationImpl;
 
-import javax.xml.bind.DatatypeConverter;
 
 /**
  * @author <a href="mailto:fernando.mendioroz@gmail.com"> Fernando Mendioroz </a>
@@ -82,25 +79,4 @@ public class PolygonImpl extends OctetStringBase implements Polygon {
 
         return sb.toString();
     }
-
-    /**
-     * XML Serialization/Deserialization
-     */
-    protected static final XMLFormat<PolygonImpl> POLYGON_XML = new XMLFormat<PolygonImpl>(PolygonImpl.class) {
-
-        @Override
-        public void read(javolution.xml.XMLFormat.InputElement xml, PolygonImpl polygon) throws XMLStreamException {
-            String s = xml.getAttribute(DATA, DEFAULT_VALUE);
-            if (s != null) {
-                polygon.data = DatatypeConverter.parseHexBinary(s);
-            }
-        }
-
-        @Override
-        public void write(PolygonImpl polygon, javolution.xml.XMLFormat.OutputElement xml) throws XMLStreamException {
-            if (polygon.data != null) {
-                xml.setAttribute(DATA, DatatypeConverter.printHexBinary(polygon.data));
-            }
-        }
-    };
 }

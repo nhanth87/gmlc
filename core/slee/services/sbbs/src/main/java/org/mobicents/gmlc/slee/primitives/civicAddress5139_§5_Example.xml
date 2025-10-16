@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<civicAddress xml:lang="en-AU"
+              xmlns="urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr"
+              xmlns:cae="urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr:ext">
+    <country>AU</country>
+    <A1>NSW</A1>
+    <A3>Wollongong</A3>
+    <A4>North Wollongong</A4>
+    <RD>Flinders</RD>
+    <STS>Street</STS>
+    <RDBR>Campbell Street</RDBR>
+    <LMK>Gilligan's Island</LMK>
+    <LOC>Corner</LOC>
+    <NAM>Video Rental Store</NAM>
+    <PC>2500</PC>
+    <ROOM>Westerns and Classics</ROOM>
+    <PLC>store</PLC>
+    <POBOX>Private Box 15</POBOX>
+    <cae:MP>248</cae:MP>
+    <cae:PN>22-109-689</cae:PN>
+</civicAddress>

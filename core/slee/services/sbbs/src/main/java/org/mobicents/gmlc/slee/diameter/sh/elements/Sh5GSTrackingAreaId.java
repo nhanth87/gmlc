@@ -54,13 +54,11 @@ public class Sh5GSTrackingAreaId {
     }
 
     public byte[] get5GSTrackingAreaIdentityBytes(String trackingAreaIdentity5GS) {
-        byte[] bytes = Base64.getDecoder().decode(trackingAreaIdentity5GS);
-        return bytes;
+        return Base64.getDecoder().decode(trackingAreaIdentity5GS);
     }
 
     public TrackingAreaId5GS decode5GSTrackingAreaId(byte[] raIdBytes) {
-        TrackingAreaId5GS trackingAreaId5GSentity = new TrackingAreaId5GSImpl(raIdBytes);
-        return trackingAreaId5GSentity;
+        return new TrackingAreaId5GSImpl(raIdBytes);
     }
 
     @Override

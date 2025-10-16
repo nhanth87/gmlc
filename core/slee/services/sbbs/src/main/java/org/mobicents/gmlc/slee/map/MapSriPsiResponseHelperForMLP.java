@@ -1,12 +1,29 @@
 package org.mobicents.gmlc.slee.map;
 
 import org.mobicents.gmlc.slee.diameter.AVPHandler;
-import org.mobicents.gmlc.slee.primitives.EUTRANCGIImpl;
 import org.restcomm.protocols.ss7.map.api.MAPException;
+import org.restcomm.protocols.ss7.map.api.primitives.CellGlobalIdOrServiceAreaIdFixedLength;
+import org.restcomm.protocols.ss7.map.api.primitives.CellGlobalIdOrServiceAreaIdOrLAI;
+import org.restcomm.protocols.ss7.map.api.primitives.PlmnId;
+import org.restcomm.protocols.ss7.map.api.primitives.Time;
+import org.restcomm.protocols.ss7.map.api.service.mobility.locationManagement.UsedRATType;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.DaylightSavingTime;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.EUtranCgi;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.GeodeticInformation;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.GeographicalInformation;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformation;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformation5GS;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformationEPS;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformationGPRS;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.NRCellGlobalId;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.NRTAId;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.PSSubscriberState;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.TAId;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.TimeZone;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberManagement.FQDN;
 
-import javax.slee.facilities.Tracer;
 import java.text.DecimalFormat;
+import java.util.logging.Logger;
 
 /**
  * Helper class to handle a MAP PSI response value and populate an MLP SLIA
@@ -15,159 +32,316 @@ import java.text.DecimalFormat;
  */
 public class MapSriPsiResponseHelperForMLP {
 
-    private Tracer logger;
+    private final Logger logger = Logger.getLogger(MapSriPsiResponseHelperForMLP.class.getName());
     protected static final DecimalFormat coordinatesFormat = new DecimalFormat("#0.000000");
     protected static final DecimalFormat radiusFormat = new DecimalFormat("#0.00");
 
-    private Integer mcc, mnc, lac, ci, sac, tac, rac, ratType;
-    private Long eci;
+    private Integer mcc, mnc, lac, ci, sac, tac, rac, ratType, nrTac, confidence, screeningAndPresentationIndicators;
+    private Long eci, enbId, nci;
     private Integer ageOfLocationInfo;
     private String vlrNumber, mscNumber, sgsnNumber, nnn, mmeName, subscriberState, imsi, imei;
     private String typeOfShape;
     private Double latitude, longitude, uncertainty, radius;
     private Boolean saiPresent = false;
-    private Integer ciOrsac;
+    private Time lastUEActivityTime;
+    private UsedRATType lastRatType;
+    private PSSubscriberState epsSubscriberState;
+
+    private LocationInformation locationInformation;
+    private CellGlobalIdOrServiceAreaIdOrLAI cellGlobalIdOrServiceAreaIdOrLAI;
+    private CellGlobalIdOrServiceAreaIdFixedLength cellGlobalIdOrServiceAreaIdFixedLength;
+
+    private GeographicalInformation geographicalInformation;
+    private GeodeticInformation geodeticInformation;
+    private LocationInformationGPRS locationInformationGPRS;
+    private LocationInformationEPS locationInformationEPS;
+
+    private EUtranCgi eUtranCgi;
+
+    private TAId taId ;
+    private TimeZone timeZone;
+    private DaylightSavingTime daylightSavingTime;
+
+    private LocationInformation5GS locationInformation5GS;
+    private NRCellGlobalId nrCellGlobalId;
+    private FQDN amfAddress;
+    private PlmnId vPlmnId;
+    private TimeZone localTimeZone;
+    private UsedRATType usedRATType;
+    private NRTAId nrTrackingAreaIdentity;
 
     public MapSriPsiResponseHelperForMLP() {
     }
 
-    public void handlePsiResponseValues(PsiResponseValues psiResponseValues) {
+    public void handlePsiResponseValues(PsiResponseParams psiResponseParams) {
         try {
-            if (psiResponseValues != null) {
 
-                if (psiResponseValues.isSaiPresent()) {
-                    this.saiPresent = true;
+            if (psiResponseParams != null) {
+
+                if (psiResponseParams.getImsi() != null) {
+                    this.imsi = psiResponseParams.getImsi().getData();
                 }
 
-                if (psiResponseValues.getLocationInformation() != null) {
-                    if (psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
-                        if (psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
-                            this.mcc = psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC();
-                            this.mnc = psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC();
-                            this.lac = psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac();
-                        } else if (psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
-                            this.mcc = psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
-                            this.mnc = psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC();
-                            this.lac = psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
-                            ciOrsac = psiResponseValues.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
+                if (psiResponseParams.getLocationInformation() != null) {
+                    this.locationInformation = psiResponseParams.getLocationInformation();
+                    if (psiResponseParams.getLocationInformation().getSaiPresent())
+                        this.saiPresent = true;
+                    if (locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
+                        this.cellGlobalIdOrServiceAreaIdOrLAI = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI();
+                        if (cellGlobalIdOrServiceAreaIdOrLAI.getLAIFixedLength() != null) {
+                            this.mcc = cellGlobalIdOrServiceAreaIdOrLAI.getLAIFixedLength().getMCC();
+                            this.mnc = cellGlobalIdOrServiceAreaIdOrLAI.getLAIFixedLength().getMNC();
+                            this.lac = cellGlobalIdOrServiceAreaIdOrLAI.getLAIFixedLength().getLac();
+                        } else if (cellGlobalIdOrServiceAreaIdOrLAI.getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
+                            this.cellGlobalIdOrServiceAreaIdFixedLength = cellGlobalIdOrServiceAreaIdOrLAI.getCellGlobalIdOrServiceAreaIdFixedLength();
+                            this.mcc = cellGlobalIdOrServiceAreaIdFixedLength.getMCC();
+                            this.mnc = cellGlobalIdOrServiceAreaIdFixedLength.getMNC();
+                            this.lac = cellGlobalIdOrServiceAreaIdFixedLength.getLac();
                             if (this.saiPresent)
-                                this.sac = ciOrsac;
+                                this.sac = cellGlobalIdOrServiceAreaIdFixedLength.getCellIdOrServiceAreaCode();
                             else
-                                this.ci = ciOrsac;
+                                this.ci = cellGlobalIdOrServiceAreaIdFixedLength.getCellIdOrServiceAreaCode();
                         }
                     }
-                    if (psiResponseValues.getLocationInformation().getGeographicalInformation() != null) {
-                        if (psiResponseValues.getLocationInformation().getGeographicalInformation().getTypeOfShape() != null)
-                            this.typeOfShape = psiResponseValues.getLocationInformation().getGeographicalInformation().getTypeOfShape().name();
-                        this.latitude = psiResponseValues.getLocationInformation().getGeographicalInformation().getLatitude();
-                        this.longitude = psiResponseValues.getLocationInformation().getGeographicalInformation().getLongitude();
-                        this.uncertainty = psiResponseValues.getLocationInformation().getGeographicalInformation().getUncertainty();
-                    } else if (psiResponseValues.getLocationInformation().getGeodeticInformation() != null) {
-                        if (psiResponseValues.getLocationInformation().getGeodeticInformation().getTypeOfShape() != null)
-                            this.typeOfShape = psiResponseValues.getLocationInformation().getGeodeticInformation().getTypeOfShape().name();
-                        this.latitude = psiResponseValues.getLocationInformation().getGeodeticInformation().getLatitude();
-                        this.longitude = psiResponseValues.getLocationInformation().getGeodeticInformation().getLongitude();
-                        this.uncertainty = psiResponseValues.getLocationInformation().getGeodeticInformation().getUncertainty();
+                    if (locationInformation.getGeographicalInformation() != null) {
+                        this.geographicalInformation = locationInformation.getGeographicalInformation();
+                        if (geographicalInformation.getTypeOfShape() != null)
+                            this.typeOfShape = geographicalInformation.getTypeOfShape().name();
+                        this.latitude = geographicalInformation.getLatitude();
+                        this.longitude = geographicalInformation.getLongitude();
+                        this.uncertainty = geographicalInformation.getUncertainty();
+                    } else if (locationInformation.getGeodeticInformation() != null) {
+                        this.geodeticInformation = locationInformation.getGeodeticInformation();
+                        if (geodeticInformation.getTypeOfShape() != null)
+                            this.typeOfShape = geodeticInformation.getTypeOfShape().name();
+                        this.latitude = geodeticInformation.getLatitude();
+                        this.longitude = geodeticInformation.getLongitude();
+                        this.uncertainty = geodeticInformation.getUncertainty();
                     }
-                    if (psiResponseValues.getLocationInformation().getAgeOfLocationInformation() != null) {
-                        this.ageOfLocationInfo = psiResponseValues.getLocationInformation().getAgeOfLocationInformation().intValue();
+                    if (locationInformation.getAgeOfLocationInformation() != null) {
+                        this.ageOfLocationInfo = locationInformation.getAgeOfLocationInformation();
                     }
-                    if (psiResponseValues.getLocationInformation().getLocationInformationEPS() != null) {
-                        this.ageOfLocationInfo = psiResponseValues.getLocationInformation().getAgeOfLocationInformation();
-                        if (psiResponseValues.getLocationInformation().getLocationInformationEPS().getEUtranCellGlobalIdentity() != null) {
-                            EUtranCgi eUtranCgi = psiResponseValues.getLocationInformation().getLocationInformationEPS().getEUtranCellGlobalIdentity();
+                    if (locationInformation.getLocationInformationEPS() != null) {
+                        this.locationInformationEPS = locationInformation.getLocationInformationEPS();
+                        this.ageOfLocationInfo = locationInformationEPS.getAgeOfLocationInformation();
+                        if (locationInformationEPS.getEUtranCellGlobalIdentity() != null) {
+                            this.eUtranCgi = locationInformationEPS.getEUtranCellGlobalIdentity();
                             this.mcc = eUtranCgi.getMCC();
                             this.mnc = eUtranCgi.getMNC();
-                            long enbId = eUtranCgi.getENodeBId();
+                            this.eci = eUtranCgi.getEci();
+                            this.enbId = eUtranCgi.getENodeBId();
                             this.ci = eUtranCgi.getCi();
-                            EUTRANCGIImpl eutrancgi = new EUTRANCGIImpl(psiResponseValues.getLocationInformation().getLocationInformationEPS().getEUtranCellGlobalIdentity().getData());
-                            this.eci = eutrancgi.getEci();
                         }
-                        if (psiResponseValues.getLocationInformation().getLocationInformationEPS().getTrackingAreaIdentity() != null) {
-                            this.mcc = psiResponseValues.getLocationInformation().getLocationInformationEPS().getTrackingAreaIdentity().getMCC();
-                            this.mnc = psiResponseValues.getLocationInformation().getLocationInformationEPS().getTrackingAreaIdentity().getMNC();
-                            this.tac = psiResponseValues.getLocationInformation().getLocationInformationEPS().getTrackingAreaIdentity().getTAC();
+                        if (locationInformationEPS.getTrackingAreaIdentity() != null) {
+                            this.taId = locationInformationEPS.getTrackingAreaIdentity();
+                            this.mcc = taId.getMCC();
+                            this.mnc = taId.getMNC();
+                            this.tac = taId.getTAC();
                         }
-                        if (psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeographicalInformation() != null) {
-                            if (psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeographicalInformation().getTypeOfShape() != null)
-                                this.typeOfShape = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeographicalInformation().getTypeOfShape().name();
-                            this.latitude = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeographicalInformation().getLatitude();
-                            this.longitude = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeographicalInformation().getLongitude();
-                            this.uncertainty = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeographicalInformation().getUncertainty();
-                        } else if (psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeodeticInformation() != null) {
-                            if (psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getTypeOfShape() != null)
-                                this.typeOfShape = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getTypeOfShape().name();
-                            this.latitude = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getLatitude();
-                            this.longitude = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getLongitude();
-                            this.uncertainty = psiResponseValues.getLocationInformation().getLocationInformationEPS().getGeodeticInformation().getUncertainty();
+                        if (locationInformationEPS.getGeographicalInformation() != null) {
+                            this.geographicalInformation = locationInformationEPS.getGeographicalInformation();
+                            if (geographicalInformation.getTypeOfShape()  != null)
+                                this.typeOfShape = geographicalInformation.getTypeOfShape().name();
+                            this.latitude = geographicalInformation.getLatitude();
+                            this.longitude = geographicalInformation.getLongitude();
+                            this.uncertainty = geographicalInformation.getUncertainty();
+                        } else if (locationInformationEPS.getGeodeticInformation() != null) {
+                            this.geodeticInformation = locationInformationEPS.getGeodeticInformation();
+                            if (geodeticInformation.getTypeOfShape() != null)
+                                this.typeOfShape = geodeticInformation.getTypeOfShape().name();
+                            this.latitude = geodeticInformation.getLatitude();
+                            this.longitude = geodeticInformation.getLongitude();
+                            this.uncertainty = geodeticInformation.getUncertainty();
+                            this.confidence = geodeticInformation.getConfidence();
+                            this.screeningAndPresentationIndicators = geodeticInformation.getScreeningAndPresentationIndicators();
                         }
-                        if (psiResponseValues.getLocationInformation().getLocationInformationEPS().getMmeName() != null) {
-                            byte[] mmeNameData = psiResponseValues.getLocationInformation().getLocationInformationEPS().getMmeName().getData();
-                            this.mmeName = AVPHandler.byte2String(mmeNameData);
+                        if (locationInformationEPS.getMmeName() != null) {
+                            this.mmeName = AVPHandler.byte2String(locationInformationEPS.getMmeName().getData());
                         }
                     }
-                    if (psiResponseValues.getLocationInformation().getVlrNumber() != null) {
-                        this.nnn = this.vlrNumber = psiResponseValues.getLocationInformation().getVlrNumber().getAddress();
+                    if (locationInformation.getVlrNumber() != null) {
+                        this.nnn = this.vlrNumber = locationInformation.getVlrNumber().getAddress();
                     }
-                    if (psiResponseValues.getLocationInformation().getMscNumber() != null) {
-                        this.nnn = this.mscNumber = psiResponseValues.getLocationInformation().getMscNumber().getAddress();
+                    if (locationInformation.getMscNumber() != null) {
+                        this.nnn = this.mscNumber = locationInformation.getMscNumber().getAddress();
+                    }
+                }
+                if (psiResponseParams.getLocationInformationGPRS() != null) {
+                    this.locationInformationGPRS = psiResponseParams.getLocationInformationGPRS();
+                    if (locationInformationGPRS.isSaiPresent())
+                        this.saiPresent = true;
+                    if (locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
+                        this.cellGlobalIdOrServiceAreaIdOrLAI = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI();
+                        if (cellGlobalIdOrServiceAreaIdOrLAI.getLAIFixedLength() != null) {
+                            this.mcc = cellGlobalIdOrServiceAreaIdOrLAI.getLAIFixedLength().getMCC();
+                            this.mnc = cellGlobalIdOrServiceAreaIdOrLAI.getLAIFixedLength().getMNC();
+                            this.lac = cellGlobalIdOrServiceAreaIdOrLAI.getLAIFixedLength().getLac();
+                        } else if (cellGlobalIdOrServiceAreaIdOrLAI.getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
+                            this.cellGlobalIdOrServiceAreaIdFixedLength = cellGlobalIdOrServiceAreaIdOrLAI.getCellGlobalIdOrServiceAreaIdFixedLength();
+                            this.mcc = cellGlobalIdOrServiceAreaIdFixedLength.getMCC();
+                            this.mnc = cellGlobalIdOrServiceAreaIdFixedLength.getMNC();
+                            this.lac = cellGlobalIdOrServiceAreaIdFixedLength.getLac();
+                            if (this.saiPresent)
+                                this.sac = cellGlobalIdOrServiceAreaIdFixedLength.getCellIdOrServiceAreaCode();
+                            else
+                                this.ci = cellGlobalIdOrServiceAreaIdFixedLength.getCellIdOrServiceAreaCode();
+                        }
+                    }
+                    if (locationInformationGPRS.getGeographicalInformation() != null) {
+                        this.geographicalInformation = locationInformationGPRS.getGeographicalInformation();
+                        if (geographicalInformation.getTypeOfShape() != null)
+                            this.typeOfShape = geographicalInformation.getTypeOfShape().name();
+                        this.latitude = geographicalInformation.getLatitude();
+                        this.longitude = geographicalInformation.getLongitude();
+                        this.uncertainty = geographicalInformation.getUncertainty();
+                    } else if (locationInformationGPRS.getGeodeticInformation() != null) {
+                        this.geodeticInformation = locationInformationGPRS.getGeodeticInformation();
+                        if (geodeticInformation.getTypeOfShape() != null)
+                            this.typeOfShape = geodeticInformation.getTypeOfShape().name();
+                        this.latitude = geodeticInformation.getLatitude();
+                        this.longitude = geodeticInformation.getLongitude();
+                        this.uncertainty = geodeticInformation.getUncertainty();
+                        this.confidence = geodeticInformation.getConfidence();
+                        this.screeningAndPresentationIndicators = geodeticInformation.getScreeningAndPresentationIndicators();
+                    }
+                    if (locationInformationGPRS.getAgeOfLocationInformation() != null) {
+                        this.ageOfLocationInfo = locationInformationGPRS.getAgeOfLocationInformation();
+                    }
+                    if (locationInformationGPRS.getSGSNNumber() != null) {
+                        this.nnn = this.sgsnNumber = locationInformationGPRS.getSGSNNumber().getAddress();
+                    }
+                }
+                if (psiResponseParams.getSubscriberState() != null) {
+                    if (psiResponseParams.getSubscriberState().getSubscriberStateChoice() != null) {
+                        this.subscriberState = psiResponseParams.getSubscriberState().getSubscriberStateChoice().toString();
+                    }
+                }
+                if (psiResponseParams.getImei() != null) {
+                    this.imei = psiResponseParams.getImei().getIMEI();
+                }
+                if (psiResponseParams.getLastUEActivityTime() != null) {
+                    this.lastUEActivityTime = psiResponseParams.getLastUEActivityTime();
+                }
+                if (psiResponseParams.getLastRATType() != null) {
+                    this.lastRatType = psiResponseParams.getLastRATType();
+                }
+                if (psiResponseParams.getEpsSubscriberState() != null) {
+                    this.epsSubscriberState = psiResponseParams.getEpsSubscriberState();
+                }
+                if (psiResponseParams.getLocationInformationEPS() != null) {
+                    this.locationInformationEPS = psiResponseParams.getLocationInformationEPS();
+                    this.ageOfLocationInfo = locationInformationEPS.getAgeOfLocationInformation();
+                    if (locationInformationEPS.getTrackingAreaIdentity() != null) {
+                        this.taId = locationInformationEPS.getTrackingAreaIdentity();
+                        this.mcc = taId.getMCC();
+                        this.mnc = taId.getMNC();
+                        this.tac = taId.getTAC();
+                    }
+                    if (locationInformationEPS.getEUtranCellGlobalIdentity() != null) {
+                        this.eUtranCgi = locationInformationEPS.getEUtranCellGlobalIdentity();
+                        this.mcc = eUtranCgi.getMCC();
+                        this.mnc = eUtranCgi.getMNC();
+                        this.eci = eUtranCgi.getEci();
+                        this.enbId = eUtranCgi.getENodeBId();
+                        this.ci = eUtranCgi.getCi();
+                    }
+                    if (locationInformationEPS.getGeographicalInformation() != null) {
+                        this.geographicalInformation = locationInformationEPS.getGeographicalInformation();
+                        if (geographicalInformation.getTypeOfShape() != null)
+                            this.typeOfShape = geographicalInformation.getTypeOfShape().name();
+                        this.latitude = geographicalInformation.getLatitude();
+                        this.longitude = geographicalInformation.getLongitude();
+                        this.uncertainty = geographicalInformation.getUncertainty();
+                    } else if (locationInformationEPS.getGeodeticInformation() != null) {
+                        this.geodeticInformation = locationInformationEPS.getGeodeticInformation();
+                        if (geodeticInformation.getTypeOfShape() != null)
+                            this.typeOfShape = geodeticInformation.getTypeOfShape().name();
+                        this.latitude = geodeticInformation.getLatitude();
+                        this.longitude = geodeticInformation.getLongitude();
+                        this.uncertainty = geodeticInformation.getUncertainty();
+                        this.confidence = geodeticInformation.getConfidence();
+                        this.screeningAndPresentationIndicators = geodeticInformation.getScreeningAndPresentationIndicators();
+                    }
+                    if (locationInformationEPS.getMmeName() != null) {
+                        this.mmeName = AVPHandler.byte2String(locationInformationEPS.getMmeName().getData());
+                    }
+                }
+                if (psiResponseParams.getTimeZone() != null) {
+                    this.timeZone = psiResponseParams.getTimeZone();
+                }
+                if (psiResponseParams.getDaylightSavingTime() != null) {
+                    this.daylightSavingTime = psiResponseParams.getDaylightSavingTime();
+                }
+                if (psiResponseParams.getLocationInformation5GS() != null) {
+                    this.locationInformation5GS = psiResponseParams.getLocationInformation5GS();
+                    if (locationInformation5GS.getTAId() != null) {
+                        this.taId = locationInformation5GS.getTAId();
+                        this.mcc = taId.getMCC();
+                        this.mnc = taId.getMCC();
+                        this.tac = taId.getTAC();
+                    }
+                    if (locationInformation5GS.getEUtranCgi() != null) {
+                        this.eUtranCgi = locationInformation5GS.getEUtranCgi();
+                        this.mcc = eUtranCgi.getMCC();
+                        this.mnc = eUtranCgi.getMNC();
+                        this.eci = eUtranCgi.getEci();
+                        this.enbId = eUtranCgi.getENodeBId();
+                        this.ci = eUtranCgi.getCi();
+                    }
+                    if (locationInformation5GS.getNRCellGlobalId() != null) {
+                        this.nrCellGlobalId = locationInformation5GS.getNRCellGlobalId();
+                        if (this.mcc != null && this.mnc != null) {
+                            this.mcc = this.nrCellGlobalId.getMCC();
+                            this.mnc = this.nrCellGlobalId.getMNC();
+                        }
+                        this.nci = this.nrCellGlobalId.getNCI();
+                    }
+                    if (locationInformation5GS.getNRTAId() != null) {
+                        this.nrTrackingAreaIdentity = locationInformation5GS.getNRTAId();
+                        if (this.mcc != null && this.mnc != null) {
+                            this.mcc = this.nrTrackingAreaIdentity.getMCC();
+                            this.mnc = this.nrTrackingAreaIdentity.getMNC();
+                        }
+                        this.nrTac = this.nrTrackingAreaIdentity.getNrTAC();
+                    }
+                    if (locationInformation5GS.getGeographicalInformation() != null) {
+                        this.geographicalInformation = locationInformation5GS.getGeographicalInformation();
+                        if (geographicalInformation.getTypeOfShape()  != null)
+                            this.typeOfShape = geographicalInformation.getTypeOfShape().name();
+                        this.latitude = geographicalInformation.getLatitude();
+                        this.longitude = geographicalInformation.getLongitude();
+                        this.uncertainty = geographicalInformation.getUncertainty();
+                    } else if (locationInformation5GS.getGeodeticInformation() != null) {
+                        this.geodeticInformation = locationInformation5GS.getGeodeticInformation();
+                        if (geodeticInformation.getTypeOfShape() != null)
+                            this.typeOfShape = geodeticInformation.getTypeOfShape().name();
+                        this.latitude = geodeticInformation.getLatitude();
+                        this.longitude = geodeticInformation.getLongitude();
+                        this.uncertainty = geodeticInformation.getUncertainty();
+                        this.confidence = geodeticInformation.getConfidence();
+                        this.screeningAndPresentationIndicators = geodeticInformation.getScreeningAndPresentationIndicators();
+                    }
+                    if (locationInformation5GS.getAMFAddress() != null) {
+                        this.amfAddress = locationInformation5GS.getAMFAddress();
+                    }
+                    if (locationInformation5GS.getLocalTimeZone() != null) {
+                        this.timeZone = locationInformation5GS.getLocalTimeZone();
+                    }
+                    if (locationInformation5GS.getUsedRATType() != null) {
+                        this.usedRATType = locationInformation5GS.getUsedRATType();
+                    }
+                    if (locationInformation5GS.getVPlmnId() != null) {
+                        this.vPlmnId = locationInformation5GS.getVPlmnId();
                     }
 
                 }
-                if (psiResponseValues.getLocationInformationGPRS() != null) {
-                    if (psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
-                        if (psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
-                            this.mcc = psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC();
-                            this.mnc = psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC();
-                            this.lac = psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac();
-                        } else if (psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
-                            this.mcc = psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
-                            this.mnc = psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC();
-                            this.lac = psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
-                            ciOrsac = psiResponseValues.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
-                            if (this.saiPresent)
-                                this.sac = ciOrsac;
-                            else
-                                this.ci = ciOrsac;
-                        }
-                    }
-                    if (psiResponseValues.getLocationInformationGPRS().getGeographicalInformation() != null) {
-                        if (psiResponseValues.getLocationInformationGPRS().getGeographicalInformation().getTypeOfShape() != null)
-                            this.typeOfShape = psiResponseValues.getLocationInformationGPRS().getGeographicalInformation().getTypeOfShape().name();
-                        this.latitude = psiResponseValues.getLocationInformationGPRS().getGeographicalInformation().getLatitude();
-                        this.longitude = psiResponseValues.getLocationInformationGPRS().getGeographicalInformation().getLongitude();
-                        this.uncertainty = psiResponseValues.getLocationInformationGPRS().getGeographicalInformation().getUncertainty();
-                    } else if (psiResponseValues.getLocationInformationGPRS().getGeodeticInformation() != null) {
-                        if (psiResponseValues.getLocationInformationGPRS().getGeodeticInformation().getTypeOfShape() != null)
-                            this.typeOfShape = psiResponseValues.getLocationInformationGPRS().getGeodeticInformation().getTypeOfShape().name();
-                        this.latitude = psiResponseValues.getLocationInformationGPRS().getGeodeticInformation().getLatitude();
-                        this.longitude = psiResponseValues.getLocationInformationGPRS().getGeodeticInformation().getLongitude();
-                        this.uncertainty = psiResponseValues.getLocationInformationGPRS().getGeodeticInformation().getUncertainty();
-                    }
-                    if (psiResponseValues.getLocationInformationGPRS().getAgeOfLocationInformation() != null) {
-                        this.ageOfLocationInfo = psiResponseValues.getLocationInformationGPRS().getAgeOfLocationInformation().intValue();
-                    }
-                    if (psiResponseValues.getLocationInformationGPRS().getSGSNNumber() != null) {
-                        this.nnn = this.sgsnNumber = psiResponseValues.getLocationInformationGPRS().getSGSNNumber().getAddress();
-                    }
-                }
-                if (psiResponseValues.getSubscriberState() != null) {
-                    if (psiResponseValues.getSubscriberState().getSubscriberStateChoice() != null) {
-                        this.subscriberState = psiResponseValues.getSubscriberState().getSubscriberStateChoice().toString();
-                    }
-                }
-                if (psiResponseValues.getImei() != null) {
-                    this.imei = psiResponseValues.getImei().getIMEI();
-                }
-                if (psiResponseValues.getImsi() != null) {
-                    this.imsi = psiResponseValues.getImsi().getData();
-                }
+
             }
 
         } catch (MAPException me) {
-            logger.severe("Map exception while retrieving ATI response values: " + me);
+            logger.severe("MAP exception while processing PSI response values: " + me);
         } catch (Exception e) {
-            logger.severe("Exception while retrieving ATI response values: " + e);
+            logger.severe("Exception while processing PSI response values: " + e);
         }
     }
 
@@ -225,6 +399,54 @@ public class MapSriPsiResponseHelperForMLP {
         this.saiPresent = saiPresent;
     }
 
+    public LocationInformation getLocationInformation() {
+        return locationInformation;
+    }
+
+    public void setLocationInformation(LocationInformation locationInformation) {
+        this.locationInformation = locationInformation;
+    }
+
+    public CellGlobalIdOrServiceAreaIdOrLAI getCellGlobalIdOrServiceAreaIdOrLAI() {
+        return cellGlobalIdOrServiceAreaIdOrLAI;
+    }
+
+    public void setCellGlobalIdOrServiceAreaIdOrLAI(CellGlobalIdOrServiceAreaIdOrLAI cellGlobalIdOrServiceAreaIdOrLAI) {
+        this.cellGlobalIdOrServiceAreaIdOrLAI = cellGlobalIdOrServiceAreaIdOrLAI;
+    }
+
+    public CellGlobalIdOrServiceAreaIdFixedLength getCellGlobalIdOrServiceAreaIdFixedLength() {
+        return cellGlobalIdOrServiceAreaIdFixedLength;
+    }
+
+    public void setCellGlobalIdOrServiceAreaIdFixedLength(CellGlobalIdOrServiceAreaIdFixedLength cellGlobalIdOrServiceAreaIdFixedLength) {
+        this.cellGlobalIdOrServiceAreaIdFixedLength = cellGlobalIdOrServiceAreaIdFixedLength;
+    }
+
+    public GeographicalInformation getGeographicalInformation() {
+        return geographicalInformation;
+    }
+
+    public void setGeographicalInformation(GeographicalInformation geographicalInformation) {
+        this.geographicalInformation = geographicalInformation;
+    }
+
+    public GeodeticInformation getGeodeticInformation() {
+        return geodeticInformation;
+    }
+
+    public void setGeodeticInformation(GeodeticInformation geodeticInformation) {
+        this.geodeticInformation = geodeticInformation;
+    }
+
+    public LocationInformationGPRS getLocationInformationGPRS() {
+        return locationInformationGPRS;
+    }
+
+    public void setLocationInformationGPRS(LocationInformationGPRS locationInformationGPRS) {
+        this.locationInformationGPRS = locationInformationGPRS;
+    }
+
     public Integer getTac() {
         return tac;
     }
@@ -247,6 +469,14 @@ public class MapSriPsiResponseHelperForMLP {
 
     public void setRatType(Integer ratType) {
         this.ratType = ratType;
+    }
+
+    public Long getEnbId() {
+        return enbId;
+    }
+
+    public void setEnbId(Long enbId) {
+        this.enbId = enbId;
     }
 
     public Long getEci() {
@@ -326,7 +556,7 @@ public class MapSriPsiResponseHelperForMLP {
             String formattedLatitude = coordinatesFormat.format(this.latitude);
             return Double.valueOf(formattedLatitude);
         }
-        return this.latitude;
+        return null;
     }
 
     public void setLatitude(Double latitude) {
@@ -338,7 +568,7 @@ public class MapSriPsiResponseHelperForMLP {
             String formattedLongitude = coordinatesFormat.format(this.longitude);
             return Double.valueOf(formattedLongitude);
         }
-        return this.longitude;
+        return null;
     }
 
     public void setLongitude(Double longitude) {
@@ -351,6 +581,22 @@ public class MapSriPsiResponseHelperForMLP {
 
     public void setUncertainty(Double uncertainty) {
         this.uncertainty = uncertainty;
+    }
+
+    public Integer getConfidence() {
+        return confidence;
+    }
+
+    public void setConfidence(Integer confidence) {
+        this.confidence = confidence;
+    }
+
+    public Integer getScreeningAndPresentationIndicators() {
+        return screeningAndPresentationIndicators;
+    }
+
+    public void setScreeningAndPresentationIndicators(Integer screeningAndPresentationIndicators) {
+        this.screeningAndPresentationIndicators = screeningAndPresentationIndicators;
     }
 
     public Double getRadius() {
@@ -373,6 +619,147 @@ public class MapSriPsiResponseHelperForMLP {
 
     public void setImei(String imei) {
         this.imei = imei;
+    }
+
+    public Long getNci() {
+        return nci;
+    }
+
+    public void setNci(Long nci) {
+        this.nci = nci;
+    }
+
+    public Time getLastUEActivityTime() {
+        return lastUEActivityTime;
+    }
+
+    public void setLastUEActivityTime(Time lastUEActivityTime) {
+        this.lastUEActivityTime = lastUEActivityTime;
+    }
+
+    public UsedRATType getLastRatType() {
+        return lastRatType;
+    }
+
+    public void setLastRatType(UsedRATType lastRatType) {
+        this.lastRatType = lastRatType;
+    }
+
+    public PSSubscriberState getEpsSubscriberState() {
+        return epsSubscriberState;
+    }
+
+    public void setEpsSubscriberState(PSSubscriberState epsSubscriberState) {
+        this.epsSubscriberState = epsSubscriberState;
+    }
+
+    public LocationInformationEPS getLocationInformationEPS() {
+        return locationInformationEPS;
+    }
+
+    public void setLocationInformationEPS(LocationInformationEPS locationInformationEPS) {
+        this.locationInformationEPS = locationInformationEPS;
+    }
+
+    public EUtranCgi geteUtranCgi() {
+        return eUtranCgi;
+    }
+
+    public void seteUtranCgi(EUtranCgi eUtranCgi) {
+        this.eUtranCgi = eUtranCgi;
+    }
+
+    public TAId getTaId() {
+        return taId;
+    }
+
+    public void setTaId(TAId taId) {
+        this.taId = taId;
+    }
+
+    public TimeZone getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(TimeZone timeZone) {
+        this.timeZone = timeZone;
+    }
+
+    public DaylightSavingTime getDaylightSavingTime() {
+        return daylightSavingTime;
+    }
+
+    public void setDaylightSavingTime(DaylightSavingTime daylightSavingTime) {
+        this.daylightSavingTime = daylightSavingTime;
+    }
+
+    public LocationInformation5GS getLocationInformation5GS() {
+        return locationInformation5GS;
+    }
+
+    public void setLocationInformation5GS(LocationInformation5GS locationInformation5GS) {
+        this.locationInformation5GS = locationInformation5GS;
+    }
+
+    public NRCellGlobalId getNrCellGlobalId() {
+        return nrCellGlobalId;
+    }
+
+    public void setNrCellGlobalId(NRCellGlobalId nrCellGlobalId) {
+        this.nrCellGlobalId = nrCellGlobalId;
+    }
+
+    public FQDN getAmfAddress() {
+        return amfAddress;
+    }
+
+    public void setAmfAddress(FQDN amfAddress) {
+        this.amfAddress = amfAddress;
+    }
+
+    public PlmnId getvPlmnId() {
+        return vPlmnId;
+    }
+
+    public void setvPlmnId(PlmnId vPlmnId) {
+        this.vPlmnId = vPlmnId;
+    }
+
+    public TimeZone getLocalTimeZone() {
+        return localTimeZone;
+    }
+
+    public void setLocalTimeZone(TimeZone localTimeZone) {
+        this.localTimeZone = localTimeZone;
+    }
+
+    public UsedRATType getUsedRATType() {
+        return usedRATType;
+    }
+
+    public void setUsedRATType(UsedRATType usedRATType) {
+        this.usedRATType = usedRATType;
+    }
+
+    public NRTAId getNrTrackingAreaIdentity() {
+        return nrTrackingAreaIdentity;
+    }
+
+    public void setNrTrackingAreaIdentity(NRTAId nrTrackingAreaIdentity) {
+        this.nrTrackingAreaIdentity = nrTrackingAreaIdentity;
+        try {
+            setNrTac(nrTrackingAreaIdentity.getNrTAC());
+        } catch (MAPException e) {
+            logger.severe("Map exception while setting NR-TAC: " + e);
+        }
+    }
+
+    public Integer getNrTac() {
+        return nrTac;
+    }
+
+    public void setNrTac(Integer nrTac) {
+        this.nrTac = nrTac;
     }
 
     public String getImsi() {

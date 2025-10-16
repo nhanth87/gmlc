@@ -61,7 +61,7 @@ public class MapLsmResponseHelperForMLP {
     public MapLsmResponseHelperForMLP() {
     }
 
-    public void handleSriLcsResponseValue(SriForLcsResponseValues sriLcs, String txMsisdn, String txIMSI) {
+    public void handleSriLcsResponseValue(SriLcsResponseParams sriLcs, String txMsisdn, String txIMSI) {
 
         if (sriLcs.getMsisdn() != null) {
             this.msisdn = sriLcs.getMsisdn().getAddress();
@@ -99,8 +99,8 @@ public class MapLsmResponseHelperForMLP {
             this.tgppAAAServerName = new String(sriLcs.getAaaServerName().getData());
         }
 
-        if (sriLcs.gethGmlcAddress() != null) {
-            this.hGmlcAddress = bytesToHexString(sriLcs.gethGmlcAddress().getGSNAddressData());
+        if (sriLcs.getHGmlcAddress() != null) {
+            this.hGmlcAddress = bytesToHexString(sriLcs.getHGmlcAddress().getGSNAddressData());
             try {
                 InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(hGmlcAddress));
                 this.hGmlcAddress = address.getHostAddress();
@@ -109,8 +109,8 @@ public class MapLsmResponseHelperForMLP {
             }
         }
 
-        if (sriLcs.getvGmlcAddress() != null) {
-            this.vGmlcAddress = bytesToHexString(sriLcs.getvGmlcAddress().getGSNAddressData());
+        if (sriLcs.getVGmlcAddress() != null) {
+            this.vGmlcAddress = bytesToHexString(sriLcs.getVGmlcAddress().getGSNAddressData());
             try {
                 InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(this.vGmlcAddress));
                 this.vGmlcAddress = address.getHostAddress();
@@ -130,7 +130,7 @@ public class MapLsmResponseHelperForMLP {
         }
     }
 
-    public void handlePslResponseValues(PslResponseValues psl) {
+    public void handlePslResponseValues(PslResponseParams psl) {
         if (psl != null) {
             // Location Estimate
             if (psl.getLocationEstimate() != null) {
@@ -197,17 +197,16 @@ public class MapLsmResponseHelperForMLP {
                 this.accuracyFulfilmentIndicator = psl.getAccuracyFulfilmentIndicator().getIndicator();
             }
 
-            if (psl.isDeferredMTLRResponseIndicator() != null) {
+            if (psl.isDeferredMTLRResponseIndicator()) {
                 this.deferredMTLRresponseIndicator = psl.isDeferredMTLRResponseIndicator();
             }
 
-            if (psl.isMoLrShortCircuitIndicator() != null) {
+            if (psl.isMoLrShortCircuitIndicator()) {
                 this.molrShortCircuitIndicator = psl.isMoLrShortCircuitIndicator();
             }
 
-            if (psl.getSaiPresent() != null) {
-                if (psl.getSaiPresent() == true)
-                    this.saiPresent = true;
+            if (psl.isSaiPresent()) {
+                this.saiPresent = true;
             }
 
             if (psl.getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
@@ -274,7 +273,7 @@ public class MapLsmResponseHelperForMLP {
         }
     }
 
-    public void handleSlrRequestValues(SlrRequestValues slr, Integer clientReferenceNumber) {
+    public void handleSlrRequestValues(SlrRequestParams slr, Integer clientReferenceNumber) {
 
         if (slr != null) {
 

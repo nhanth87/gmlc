@@ -2,7 +2,7 @@ package org.mobicents.gmlc.slee.diameter.sh.elements;
 
 import org.mobicents.gmlc.slee.primitives.NRCellGlobalId;
 import org.mobicents.gmlc.slee.primitives.NRCellGlobalIdImpl;
-import static org.mobicents.gmlc.slee.utils.ByteUtils.decodeHexString;
+import org.restcomm.protocols.ss7.map.api.MAPException;
 
 /**
  * @author <a href="mailto:fernando.mendioroz@gmail.com"> Fernando Mendioroz </a>
@@ -45,28 +45,29 @@ public class ShNRCellGlobalId {
     }
 
     public void setNRCellGlobalIdStr(String nrCellGlobalIdStr) {
-        if (nrCellGlobalIdStr != null) {
-            StringBuilder sb = new StringBuilder();
-            if (nrCellGlobalIdStr.length() == 15)
-                sb.append(nrCellGlobalIdStr).append("0");
-            else if (nrCellGlobalIdStr.length() == 14)
-                sb.append(nrCellGlobalIdStr).append("00");
-            byte[] nrCgiBytes = getNRCGIBytes(sb.toString());
+        try {
+            int mcc = Integer.parseInt(nrCellGlobalIdStr.substring(0,3));
+            int mnc = 0;
+            long nci = 0;
+            if (nrCellGlobalIdStr.length() == 15) {
+                mnc = Integer.parseInt(nrCellGlobalIdStr.substring(3,6));
+                nci = Long.parseLong(nrCellGlobalIdStr.substring(6), 16);
+            } else if (nrCellGlobalIdStr.length() == 14) {
+                mnc = Integer.parseInt(nrCellGlobalIdStr.substring(3,5));
+                nci = Long.parseLong(nrCellGlobalIdStr.substring(5), 16);
+            }
+            NRCellGlobalIdImpl nrCgi = new NRCellGlobalIdImpl();
+            nrCgi.setData(mcc, mnc, nci);
+            byte[] nrCgiBytes = nrCgi.getData();
             this.nrCellGlobalId = decodeNRCGIBytes(nrCgiBytes);
-            this.nrCellGlobalIdStr = this.nrCellGlobalId.toString();
+            this.nrCellGlobalIdStr = getNRCellGlobalIdStr();
+        } catch (MAPException e) {
+            e.printStackTrace();
         }
     }
 
-    public byte[] getNRCGIBytes(String nrCGIStr) {
-        byte[] bytes = null;
-        if (nrCGIStr != null)
-            bytes = decodeHexString(nrCGIStr);
-        return bytes;
-    }
-
     public NRCellGlobalId decodeNRCGIBytes(byte[] nrCGIBytes) {
-        NRCellGlobalId nrCellGlobalId = new NRCellGlobalIdImpl(nrCGIBytes);
-        return nrCellGlobalId;
+        return new NRCellGlobalIdImpl(nrCGIBytes);
     }
 
     @Override

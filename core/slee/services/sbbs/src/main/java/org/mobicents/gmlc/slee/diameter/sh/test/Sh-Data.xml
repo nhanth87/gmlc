@@ -167,17 +167,17 @@
                         <Extension>
                             <Extension>
                                 <Sh-5GSLocationInformation>
-                                    <NRCellGlobalId>95180077395570</NRCellGlobalId>
+                                    <NRCellGlobalId>50215219F8F2136</NRCellGlobalId>
                                     <E-UTRANCellGlobalId>BfKRAk4nFQ==</E-UTRANCellGlobalId>
                                     <TrackingAreaId>BfKRAwY=</TrackingAreaId>
                                     <GeographicalInformation>EKEgAU402RI=</GeographicalInformation>
-                                    <AMFAddress>amf1.cluster1.net2.amf.5gc.mnc012.mcc345.3gppnetwork.org</AMFAddress>
-                                    <SMSFAddress>set12. smfset.5gc.mnc012.mcc345.3gppnetwork.org</SMSFAddress>
+                                    <AMFAddress>https://20.129.4.1:80/namf-comm/v1/nudm-uecm/imsi-502193917406503;guami=50219010041</AMFAddress>
+                                    <SMSFAddress>set12.smfset.5gc.mnc012.mcc345.3gppnetwork.org</SMSFAddress>
                                     <CurrentLocationRetrieved>0</CurrentLocationRetrieved>
                                     <AgeOfLocationInformation>0</AgeOfLocationInformation>
-                                    <VisitedPLMNID>951800</VisitedPLMNID>
+                                    <VisitedPLMNID>502152</VisitedPLMNID>
                                     <LocalTimeZone>
-                                        <TimeZone>-3</TimeZone>
+                                        <TimeZone>+8</TimeZone>
                                         <DaylightSavingTime>0</DaylightSavingTime>
                                     </LocalTimeZone>
                                     <RATtype>1006</RATtype>

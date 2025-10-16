@@ -36,8 +36,8 @@
     <DpaTimeOut value="5000" />
     <RecTimeOut value="10000" />
 
-	<!-- Peer FSM Thread Count Configuration -->
-	<PeerFSMThreadCount value="3" />
+    <!-- Peer FSM Thread Count Configuration -->
+    <PeerFSMThreadCount value="3" />
 
     <!-- Statistics Configuration -->
     <Statistics pause="30000" delay="30000" enabled="false" active_records="Concurrent,ScheduledExecService,Network,ScheduledExecService,AppGenRequestPerSecond,NetGenRequestPerSecond,Peer,Peer.local,PeerFSM"/>
@@ -61,12 +61,12 @@
 
   <Network>
     <Peers>
-      <Peer name="aaa://dra.simulator:23868" portRange="35000-40000" attempt_connect="true" rating="1" />
-      <Peer name="aaa://hss.simulator:13868" portRange="40001-45000" attempt_connect="true" rating="1" />
+      <Peer name="aaa://dra:3868" portRange="35000-40000" attempt_connect="true" rating="1" />
+      <!--Peer name="aaa://hss.simulator:13868" portRange="40001-45000" attempt_connect="true" rating="1" /-->
     </Peers>
 
     <Realms>
-      <Realm name="epc.mnc000.mcc000.3gppnetwork.org" peers="dra.simulator" local_action="LOCAL" dynamic="true" exp_time="1">
+      <Realm name="epc.mnc000.mcc000.3gppnetwork.org" peers="dra" local_action="LOCAL" dynamic="true" exp_time="1">
         <ApplicationID>
           <VendorId value="10415" />
           <AuthApplId value="16777255" />
@@ -81,14 +81,14 @@
         </ApplicationID>
       </Realm-->
 
-      <Realm name="epc.mnc000.mcc000.3gppnetwork.org" peers="dra.simulator" local_action="LOCAL" dynamic="true" exp_time="1">
+      <Realm name="epc.mnc000.mcc000.3gppnetwork.org" peers="dra" local_action="LOCAL" dynamic="true" exp_time="1">
         <ApplicationID>
           <VendorId value="10415" />
           <AuthApplId value="16777291" />
           <AcctApplId value="0" />
         </ApplicationID>
       </Realm>
-      <Realm name="mnc000.mcc000.3gppnetwork.org" peers="hss.simulator" local_action="LOCAL" dynamic="true" exp_time="1">
+      <Realm name="mnc000.mcc000.3gppnetwork.org" peers="dra" local_action="LOCAL" dynamic="true" exp_time="1">
         <ApplicationID>
           <VendorId value="10415" />
           <AuthApplId value="16777291" />
@@ -96,14 +96,14 @@
         </ApplicationID>
       </Realm>
 
-      <Realm name="epc.mnc000.mcc000.3gppnetwork.org" peers="dra.simulator" local_action="LOCAL" dynamic="true" exp_time="1">
+      <Realm name="epc.mnc000.mcc000.3gppnetwork.org" peers="dra" local_action="LOCAL" dynamic="true" exp_time="1">
         <ApplicationID>
           <VendorId value="10415" />
           <AuthApplId value="16777217" />
           <AcctApplId value="0" />
         </ApplicationID>
       </Realm>
-      <Realm name="mnc000.mcc000.3gppnetwork.org" peers="hss.simulator" local_action="LOCAL" dynamic="true" exp_time="1">
+      <Realm name="mnc000.mcc000.3gppnetwork.org" peers="dra" local_action="LOCAL" dynamic="true" exp_time="1">
         <ApplicationID>
           <VendorId value="10415" />
           <AuthApplId value="16777217" />

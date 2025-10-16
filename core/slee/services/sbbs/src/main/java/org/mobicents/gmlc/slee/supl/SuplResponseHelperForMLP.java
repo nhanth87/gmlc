@@ -52,7 +52,6 @@ public class SuplResponseHelperForMLP implements Serializable {
     // Getters and Setters //
     ////////////////////////
 
-
     public String getMsisdn() {
         return msisdn;
     }
@@ -329,8 +328,6 @@ public class SuplResponseHelperForMLP implements Serializable {
             this.mcc = nrCellGlobalId.getMCC();
             this.mnc = nrCellGlobalId.getMNC();
             this.nrCi = nrCellGlobalId.getNCI();
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }

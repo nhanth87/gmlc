@@ -54,13 +54,11 @@ public class ShTrackingAreaId {
   }
 
   public byte[] getTrackingAreaIdentityBytes(String trackingAreaIdentity) {
-    byte[] bytes = Base64.getDecoder().decode(trackingAreaIdentity);
-    return bytes;
+    return Base64.getDecoder().decode(trackingAreaIdentity);
   }
 
   public TrackingAreaId decodeTrackingAreaIdentity(byte[] raIdBytes) {
-    TrackingAreaId trackingAreaIdentity = new TrackingAreaIdImpl(raIdBytes);
-    return trackingAreaIdentity;
+    return new TrackingAreaIdImpl(raIdBytes);
   }
 
   @Override

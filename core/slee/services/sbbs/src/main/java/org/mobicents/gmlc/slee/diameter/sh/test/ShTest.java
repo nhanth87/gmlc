@@ -19,7 +19,6 @@ import org.mobicents.gmlc.slee.diameter.sh.Sh5GSLocationInformation;
 import org.mobicents.gmlc.slee.diameter.sh.ShDataReader;
 import org.mobicents.gmlc.slee.diameter.sh.ShUdaAvpValues;
 import org.mobicents.gmlc.slee.diameter.sh.UserCSGInformation;
-import org.mobicents.gmlc.slee.diameter.sh.elements.Sh5GSTrackingAreaId;
 import org.mobicents.gmlc.slee.diameter.sh.elements.ShCellGlobalId;
 import org.mobicents.gmlc.slee.diameter.sh.elements.ShEUTRANCellGlobalId;
 import org.mobicents.gmlc.slee.diameter.sh.elements.ShGeodeticInformation;
@@ -182,7 +181,8 @@ public class ShTest {
       shPsVisitedPLMNId.setVisitedPlmnIdStr(psVisitedPlmnId);
       shUdaAvpValues.setPsVisitedPLMNId(shPsVisitedPLMNId);
       shUdaAvpValues.setPsLocalTimeZone(psLocalTimeZone);
-      shUdaAvpValues.setPsRatType(Integer.valueOf(psRatType));
+      if (psRatType != null)
+        shUdaAvpValues.setPsRatType(Integer.valueOf(psRatType));
 
       System.out.println("\n**************************\n");
       System.out.println("PSLocationInformation: \n");
@@ -242,7 +242,8 @@ public class ShTest {
       shEpsVisitedPLMNId.setVisitedPlmnIdStr(epsVisitedPlmnId);
       shUdaAvpValues.setEpsVisitedPLMNId(shEpsVisitedPLMNId);
       shUdaAvpValues.setEpsLocalTimeZone(epsLocalTimeZone);
-      shUdaAvpValues.setEpsRatType(Integer.valueOf(epsRatType));
+      if (epsRatType != null)
+        shUdaAvpValues.setEpsRatType(Integer.valueOf(epsRatType));
 
       System.out.println("\n**************************\n");
       System.out.println("EPSLocationInformation: \n");
@@ -272,7 +273,7 @@ public class ShTest {
       LocalTimeZone sh5GSlocalTimeZone = sh5GSLocationInfo.getLocalTimeZone();
       String ratType = sh5GSLocationInfo.getRatType();
       ShNRCellGlobalId shNRCellGlobalId = new ShNRCellGlobalId();
-      //Sh5GSTrackingAreaId sh5GSTrackingAreaId = new Sh5GSTrackingAreaId();
+      // Sh5GSTrackingAreaId sh5GSTrackingAreaId = new Sh5GSTrackingAreaId();
       ShVisitedPLMNId shVisitedPLMNId = new ShVisitedPLMNId();
       ShGeographicalInformation sh5GSGeographicalInformation = new ShGeographicalInformation();
       shNRCellGlobalId.setNRCellGlobalIdStr(nrCellGlobalId);

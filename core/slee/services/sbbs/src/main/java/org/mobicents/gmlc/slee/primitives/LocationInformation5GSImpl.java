@@ -37,6 +37,7 @@ public class LocationInformation5GSImpl extends SequenceBase implements Location
     public static final int _ID_timeZone = 9;
     public static final int _ID_daylightSavingTime = 10;
     public static final int _ID_ratType = 11;
+    public static final int _ID_trackingAreaIdentity5GS = 12;
 
     private static final String NR_CELL_GLOBAL_IDENTITY = "eUtranCellGlobalIdentity";
     private static final String E_UTRAN_CELL_GLOBAL_IDENTITY = "eUtranCellGlobalIdentity";
@@ -50,6 +51,7 @@ public class LocationInformation5GSImpl extends SequenceBase implements Location
     private static final String TIME_ZONE = "timeZone";
     private static final String DAYLIGHT_SAVING_TIME = "daylightSavingTime";
     private static final String RAT_TYPE = "ratType";
+    private static final String TRACKING_AREA_IDENTITY_5GS = "trackingAreaIdentity5GS";
 
     private NRCellGlobalId nrCellGlobalIdentity = null;
     private EUTRANCGI eUtranCellGlobalIdentity = null;
@@ -63,33 +65,34 @@ public class LocationInformation5GSImpl extends SequenceBase implements Location
     private String timeZone = null;
     private Integer daylightSavingTime = null;
     private Integer ratType = null;
+    private TrackingAreaId5GS trackingAreaIdentity5GS = null;
 
-    /**
-     *
-     */
     public LocationInformation5GSImpl() {
         super("LocationInformation5GS");
     }
 
     /**
-     * @param nrCellGlobalIdentity
-     * @param eUtranCellGlobalIdentity
-     * @param trackingAreaIdentity
-     * @param amfAddress
-     * @param smsfAddress
-     * @param geographicalInformation
-     * @param currentLocationRetrieved
-     * @param ageOfLocationInformation
-     * @param visitedPlmnId
-     * @param timeZone
-     * @param daylightSavingTime
-     * @param ratType
+     * @param nrCellGlobalIdentity 5GS Cell Global Id
+     * @param trackingAreaIdentity5GS 5GS Tracking Area Identity
+     * @param eUtranCellGlobalIdentity 4G LTE Cell Global Identity
+     * @param trackingAreaIdentity 4G LTE Tracking Area Identity
+     * @param amfAddress AMF address
+     * @param smsfAddress SMSF address
+     * @param geographicalInformation geographical coordinates of the current CGI
+     * @param currentLocationRetrieved geodetic coordinates of the current CGI
+     * @param ageOfLocationInformation age of the location information retrieved
+     * @param visitedPlmnId MCC-MNC of the roaming network
+     * @param timeZone time zone of the roaming network
+     * @param daylightSavingTime daylight shift of the time zone
+     * @param ratType radio access technology type
      */
-    public LocationInformation5GSImpl(NRCellGlobalId nrCellGlobalIdentity, EUTRANCGI eUtranCellGlobalIdentity, TAId trackingAreaIdentity,
-                                      GeographicalInformation geographicalInformation, String amfAddress, String smsfAddress, boolean currentLocationRetrieved,
-                                      Integer ageOfLocationInformation, PlmnId visitedPlmnId, String timeZone, Integer daylightSavingTime, Integer ratType) {
+    public LocationInformation5GSImpl(NRCellGlobalId nrCellGlobalIdentity, TrackingAreaId5GS trackingAreaIdentity5GS, EUTRANCGI eUtranCellGlobalIdentity,
+                                      TAId trackingAreaIdentity, GeographicalInformation geographicalInformation, String amfAddress, String smsfAddress,
+                                      boolean currentLocationRetrieved, Integer ageOfLocationInformation, PlmnId visitedPlmnId, String timeZone,
+                                      Integer daylightSavingTime, Integer ratType) {
         super("LocationInformation5GS");
         this.nrCellGlobalIdentity = nrCellGlobalIdentity;
+        this.trackingAreaIdentity5GS = trackingAreaIdentity5GS;
         this.eUtranCellGlobalIdentity = eUtranCellGlobalIdentity;
         this.trackingAreaIdentity = trackingAreaIdentity;
         this.geographicalInformation = geographicalInformation;
@@ -110,6 +113,15 @@ public class LocationInformation5GSImpl extends SequenceBase implements Location
      */
     public NRCellGlobalId getNRCellGlobalIdentity() {
         return this.nrCellGlobalIdentity;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.mobicents.gmlc.slee.primitives.LocationInformation5GS#getTrackingAreaIdentity5GS()
+     */
+    public TrackingAreaId5GS getTrackingAreaIdentity5GS() {
+        return trackingAreaIdentity5GS;
     }
 
     /*
@@ -214,6 +226,7 @@ public class LocationInformation5GSImpl extends SequenceBase implements Location
     protected void _decode(AsnInputStream ansIS, int length) throws MAPParsingComponentException, IOException, AsnException {
 
         this.nrCellGlobalIdentity = null;
+        this.trackingAreaIdentity5GS = null;
         this.eUtranCellGlobalIdentity = null;
         this.trackingAreaIdentity = null;
         this.geographicalInformation = null;
@@ -250,7 +263,7 @@ public class LocationInformation5GSImpl extends SequenceBase implements Location
                                 + " eUtranCellGlobalIdentity: Parameter is not primitive",
                                 MAPParsingComponentExceptionReason.MistypedParameter);
                         this.eUtranCellGlobalIdentity = new EUTRANCGIImpl();
-                        ((EUtranCgiImpl) this.eUtranCellGlobalIdentity).decodeAll(ais);
+                        ((EUTRANCGIImpl) this.eUtranCellGlobalIdentity).decodeAll(ais);
                         break;
                     case _ID_trackingAreaIdentity:
                         if (!ais.isTagPrimitive())
@@ -337,6 +350,14 @@ public class LocationInformation5GSImpl extends SequenceBase implements Location
                         }
                         this.ratType = (int) ais.readInteger();
                         break;
+                    case _ID_trackingAreaIdentity5GS:
+                        if (!ais.isTagPrimitive())
+                            throw new MAPParsingComponentException("Error while decoding " + _PrimitiveName
+                                    + " trackingAreaIdentity5GS: Parameter is not primitive",
+                                    MAPParsingComponentExceptionReason.MistypedParameter);
+                        this.trackingAreaIdentity5GS = new TrackingAreaId5GSImpl();
+                        ((TrackingAreaId5GSImpl) this.trackingAreaIdentity5GS).decodeAll(ais);
+                        break;
                     default:
                         ais.advanceElement();
                         break;
@@ -379,11 +400,11 @@ public class LocationInformation5GSImpl extends SequenceBase implements Location
                     asnOs.writeNull(Tag.CLASS_CONTEXT_SPECIFIC, _ID_currentLocationRetrieved);
                 } catch (IOException e) {
                     throw new MAPException(
-                        "Error while encoding LocationInformation the optional parameter currentLocationRetrieved encoding failed ",
+                        "IOException while encoding LocationInformation the optional parameter currentLocationRetrieved encoding failed ",
                         e);
                 } catch (AsnException e) {
                     throw new MAPException(
-                        "Error while encoding LocationInformation the optional parameter currentLocationRetrieved encoding failed ",
+                        "AsnException while encoding LocationInformation the optional parameter currentLocationRetrieved encoding failed ",
                         e);
                 }
             }
@@ -404,6 +425,10 @@ public class LocationInformation5GSImpl extends SequenceBase implements Location
             if (this.ratType != null)
                 asnOs.writeInteger(Tag.CLASS_CONTEXT_SPECIFIC, _ID_ratType, this.ratType);
 
+            if (this.trackingAreaIdentity5GS != null) {
+                ((TrackingAreaId5GSImpl) this.trackingAreaIdentity5GS).encodeAll(asnOs, Tag.CLASS_CONTEXT_SPECIFIC, _ID_trackingAreaIdentity5GS);
+            }
+
         } catch (IOException e) {
             throw new MAPException("IOException when encoding " + _PrimitiveName + ": " + e.getMessage(), e);
         } catch (AsnException e) {
@@ -419,6 +444,11 @@ public class LocationInformation5GSImpl extends SequenceBase implements Location
         if (this.nrCellGlobalIdentity != null) {
             sb.append("nrCellGlobalIdentity=");
             sb.append(this.nrCellGlobalIdentity);
+        }
+
+        if (this.trackingAreaIdentity5GS != null) {
+            sb.append(", trackingAreaIdentity5GS=");
+            sb.append(this.trackingAreaIdentity5GS);
         }
 
         if (this.eUtranCellGlobalIdentity != null) {
@@ -482,7 +512,7 @@ public class LocationInformation5GSImpl extends SequenceBase implements Location
     /**
      * XML Serialization/Deserialization
      */
-    protected static final XMLFormat<LocationInformation5GSImpl> LOCATION_INFORMATION_5GS_XML = new XMLFormat<LocationInformation5GSImpl>(
+    protected static final XMLFormat<LocationInformation5GSImpl> LOCATION_INFORMATION_5GS_XML = new XMLFormat<>(
         LocationInformation5GSImpl.class) {
 
         @Override
@@ -494,14 +524,15 @@ public class LocationInformation5GSImpl extends SequenceBase implements Location
             locationInformation5GS.geographicalInformation = xml.get(GEOGRAPHICAL_INFORMATION, GeographicalInformationImpl.class);
             locationInformation5GS.amfAddress = xml.get(AMF_ADDRESS, String.class);
             locationInformation5GS.smsfAddress = xml.get(SMSF_ADDRESS, String.class);
-            Boolean bval = xml.get(CURRENT_LOCATION_RETRIEVED, Boolean.class);
-            if (bval != null)
-                locationInformation5GS.currentLocationRetrieved = bval;
+            Boolean booleanValue = xml.get(CURRENT_LOCATION_RETRIEVED, Boolean.class);
+            if (booleanValue != null)
+                locationInformation5GS.currentLocationRetrieved = booleanValue;
             locationInformation5GS.ageOfLocationInformation = xml.get(AGE_OF_LOCATION_INFORMATION, Integer.class);
             locationInformation5GS.visitedPlmnId = xml.get(VISITED_PLMN_ID, PlmnIdImpl.class);
             locationInformation5GS.timeZone = xml.get(TIME_ZONE, String.class);
             locationInformation5GS.daylightSavingTime = xml.get(DAYLIGHT_SAVING_TIME, Integer.class);
             locationInformation5GS.ratType = xml.get(RAT_TYPE, Integer.class);
+            locationInformation5GS.trackingAreaIdentity5GS = xml.get(TRACKING_AREA_IDENTITY_5GS, TrackingAreaId5GSImpl.class);
         }
 
         @Override
@@ -526,7 +557,7 @@ public class LocationInformation5GSImpl extends SequenceBase implements Location
                 xml.add(locationInformation5GS.smsfAddress, SMSF_ADDRESS, String.class);
             }
             if (locationInformation5GS.currentLocationRetrieved) {
-                xml.add(locationInformation5GS.currentLocationRetrieved, CURRENT_LOCATION_RETRIEVED, Boolean.class);
+                xml.add(true, CURRENT_LOCATION_RETRIEVED, Boolean.class);
             }
             if (locationInformation5GS.ageOfLocationInformation != null) {
                 xml.add(locationInformation5GS.ageOfLocationInformation, AGE_OF_LOCATION_INFORMATION, Integer.class);
@@ -542,6 +573,9 @@ public class LocationInformation5GSImpl extends SequenceBase implements Location
             }
             if (locationInformation5GS.ratType != null) {
                 xml.add(locationInformation5GS.ratType, RAT_TYPE, Integer.class);
+            }
+            if (locationInformation5GS.trackingAreaIdentity5GS != null) {
+                xml.add((TrackingAreaId5GSImpl) locationInformation5GS.trackingAreaIdentity5GS, TRACKING_AREA_IDENTITY_5GS, TrackingAreaId5GSImpl.class);
             }
         }
     };

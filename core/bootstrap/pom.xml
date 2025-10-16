@@ -7,7 +7,7 @@
 	<parent>
 		<artifactId>core</artifactId>
 		<groupId>org.mobicents.gmlc</groupId>
-		<version>5.0.0-SNAPSHOT</version>
+		<version>6.0.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>bootstrap</artifactId>
@@ -33,11 +33,25 @@
 		</dependency>
 
 		<!-- javolution -->
-		<dependency>
-			<groupId>javolution</groupId>
+		<!-- https://mvnrepository.com/artifact/org.javolution/javolution -->
+		<!--dependency>
+			<groupId>org.javolution</groupId>
 			<artifactId>javolution</artifactId>
 			<version>${javolution.version}</version>
-		</dependency>
+			<type>pom</type>
+		</dependency-->
+		<!-- https://mvnrepository.com/artifact/org.javolution/javolution-core-java -->
+		<!--dependency>
+			<groupId>org.javolution</groupId>
+			<artifactId>javolution-core-java</artifactId>
+			<version>${javolution.version}</version>
+			<scope>runtime</scope>
+		</dependency-->
+		<dependency>
+            <groupId>javolution</groupId>
+            <artifactId>javolution</artifactId>
+            <version>${javolution.version}</version>
+        </dependency>
 		<!-- jodatime -->
 		<dependency>
 			<groupId>joda-time</groupId>
@@ -290,7 +304,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.6</version>
+				<version>${maven-assembly-plugin.version}</version>
 				<configuration>
 					<descriptors>
 						<descriptor>src/main/assembly/descriptor.xml</descriptor>
@@ -310,7 +324,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>${maven-antrun-plugin.version}</version>
 				<executions>
 					<execution>
 						<id>deploy</id>

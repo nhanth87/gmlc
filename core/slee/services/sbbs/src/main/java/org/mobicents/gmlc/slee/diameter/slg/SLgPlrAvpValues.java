@@ -36,55 +36,54 @@ import java.io.Serializable;
  */
 public class SLgPlrAvpValues implements Serializable {
 
-  private static final long serialVersionUID = -2817059216865900677L;
+  private static final long serialVersionUID = 1L;
 
   private static final int DIAMETER_SLg_VENDOR_ID = 10415;
 
   /*
-    3GPP TS 29.172 v15.0.0 reference
+    3GPP TS 29.172 v18.1.0
       7.3.1	Provide-Location-Request (PLR) Command
       The Provide-Location-Request (PLR) command, indicated by the Command-Code field set to 8388620 and the 'R' bit set in the Command Flags field,
       is sent by the GMLC in order to request subscriber location to the MME or SGSN.
 
       Message Format:
 
-      < Provide-Location-Request> ::=	< Diameter Header: 8388620, REQ, PXY, 16777255 >
-	                                  < Session-Id >
-	                                  [ Vendor-Specific-Application-Id ]
-	                                  { Auth-Session-State }
-	                                  { Origin-Host }
-	                                  { Origin-Realm }
-	                                  [ Destination-Host ]
-	                                  { Destination-Realm }
-	                                  { SLg-Location-Type }
-                                      [ User-Name ]
-                                      [ MSISDN]
-                                      [ IMEI ]
-                                      { LCS-EPS-Client-Name }
-                                      { LCS-Client-Type }
-                                      [ LCS-Requestor-Name ]
-                                      [ LCS-Priority ]
-                                      [ LCS-QoS ]
-                                      [ Velocity-Requested ]
-                                      [ LCS-Supported-GAD-Shapes ]
-                                      [ LCS-Service-Type-ID ]
-                                      [ LCS-Codeword ]
-                                      [ LCS-Privacy-Check-Non-Session ]
-                                      [ LCS-Privacy-Check-Session ]
-                                      [ Service-Selection ]
-                                      [ Deferred-Location-Type ]
-                                      [ PLR-Flags ]
-	                                  *[ Supported-Features ]
-	                                  *[ AVP ]
-	                                  *[ Proxy-Info ]
-	                                  *[ Route-Record ]
-	                                  Note: plus all extra AVPs defined in Table 6.2.2-1: Provide Subscriber Location Request, i.e.
-	                                  [ LCS-Reference-Number ]
-	                                  [ Area-Event-Info ]
-	                                  [ GMLC-Address ]
-	                                  [ Periodic-LDR-Information ]
-	                                  [ Reporting-PLMN-List ]
-	                                  [ Motion-Event-Info ]
+      < Provide-Location-Request> ::=    < Diameter Header: 8388620, REQ, PXY, 16777255 >
+                                    < Session-Id >
+                                    [ DRMP ]
+                                    [ Vendor-Specific-Application-Id ]
+                                    { Auth-Session-State }
+                                    { Origin-Host }
+                                    { Origin-Realm }
+                                    { Destination-Host }
+                                    { Destination-Realm }
+                                    { SLg-Location-Type }
+                                    [ User-Name ]
+                                    [ MSISDN ]
+                                    [ IMEI ]
+                                    { LCS-EPS-Client-Name }
+                                    { LCS-Client-Type }
+                                    [ LCS-Requestor-Name ]
+                                    [ LCS-Priority ]
+                                    [ LCS-QoS ]
+                                    [ Velocity-Requested ]
+                                    [ LCS-Supported-GAD-Shapes ]
+                                    [ LCS-Service-Type-ID ]
+                                    [ LCS-Codeword ]
+                                    [ LCS-Privacy-Check-Non-Session ]
+                                    [ LCS-Privacy-Check-Session ]
+                                    [ Service-Selection ]
+                                    [ Deferred-Location-Type ]
+                                    [ LCS-Reference-Number ]
+                                    [ Area-Event-Info ]
+                                    [ GMLC-Address ]
+                                    [ PLR-Flags ]
+                                    [ Periodic-LDR-Information ]
+                                    [ Reporting-PLMN-List ]
+                                    [ Motion-Event-Info ]
+                                    *[ Supported-Features ]
+                                    *[ AVP ]
+                                    *[ Proxy-Info ]
   */
 
   private SLgLocationType sLgLocationType;
@@ -149,113 +148,6 @@ public class SLgPlrAvpValues implements Serializable {
 
   public SLgPlrAvpValues() {
     super();
-  }
-
-  public SLgPlrAvpValues(SLgLocationType sLgLocationType, String userName, byte[] msisdn, String imei, LCSEPSClientNameAvp lcsEPSClientName,
-                         LCSClientType lcsClientType, LCSRequestorNameAvp lcsRequestorName, Long lcsPriority, LCSQoSAvp lcsQoS, VelocityRequested velocityRequested,
-                         Long lcsSupportedGADShapes, Long lcsServiceTypeId, String lcsCodeword, String serviceSelection, LCSPrivacyCheckNonSessionAvp lcsPrivacyCheckNonSession,
-                         LCSPrivacyCheckSessionAvp lcsPrivacyCheckSession, Long deferredLocationType, Long plrFLags, byte[] lcsReferenceNumber,
-                         AreaEventInfoAvp areaEventInfo, PeriodicLDRInfoAvp periodicLDRInfoAvp, ReportingPLMNListAvp reportingPLMNListAvp,
-                         MotionEventInfoAvp motionEventInfoAvp) {
-    super();
-    this.sLgLocationType = sLgLocationType;
-    this.userName = userName;
-    this.msisdn = msisdn;
-    this.imei = imei;
-    this.lcsEPSClientName = lcsEPSClientName;
-    this.lcsClientType = lcsClientType;
-    this.lcsRequestorName = lcsRequestorName;
-    this.lcsPriority = lcsPriority;
-    this.lcsQoS = lcsQoS;
-    this.velocityRequested = velocityRequested;
-    this.lcsSupportedGADShapes = lcsSupportedGADShapes;
-    this.lcsServiceTypeId = lcsServiceTypeId;
-    this.lcsCodeword = lcsCodeword;
-    this.serviceSelection = serviceSelection;
-    this.lcsPrivacyCheckSession = lcsPrivacyCheckSession;
-    this.lcsPrivacyCheckNonSession = lcsPrivacyCheckNonSession;
-    this.deferredLocationType = deferredLocationType;
-    this.plrFLags = plrFLags;
-    this.lcsReferenceNumber = lcsReferenceNumber;
-    this.areaEventInfo = areaEventInfo;
-    this.periodicLDRInformation = periodicLDRInfoAvp;
-    this.reportingPLMNList = reportingPLMNListAvp;
-    this.motionEventInfoAvp = motionEventInfoAvp;
-  }
-
-  public SLgPlrAvpValues(SLgLocationType sLgLocationType, String userName, byte[] msisdn, String imei, LCSEPSClientNameAvp lcsEPSClientName,
-                         String lcsNameString, LCSFormatIndicator lcsFormatIndicator, LCSClientType lcsClientType, LCSRequestorNameAvp lcsRequestorName,
-                         String lcsRequestorIdString, Integer  reqLcsFormatIndicator, Long lcsPriority, LCSQoSAvp lcsQoS, LCSQoSClass lcsQoSClass,
-                         Long horizontalAccuracy, Long verticalAccuracy, VerticalRequested verticalRequested, ResponseTime responseTime,
-                         VelocityRequested velocityRequested, Long lcsSupportedGADShapes, Long lcsServiceTypeId, String lcsCodeword,
-                         String serviceSelection, LCSPrivacyCheckSessionAvp lcsPrivacyCheckSession, LCSPrivacyCheckNonSessionAvp lcsPrivacyCheckNonSession,
-                         LCSPrivacyCheck lcsPrivacyCheck, Long deferredLocationType, Long plrFLags, byte[] lcsReferenceNumber, AreaEventInfoAvp areaEventInfo,
-                         OccurrenceInfo areaEventOccurrenceInfo, Long areaEventIntervalTime, Long areaEventMaximumInterval, Long areaEventSamplingInterval, Long areaEventReportingDuration,
-                         Long areaEventReportingLocationRequirements, AreaDefinitionAvp areaDefinition, AreaAvp areaAvp, AdditionalAreaAvp additionalAreaAvp,
-                         Long areaType, byte[] areaIdentification, Address gmlcAddress, PeriodicLDRInfoAvp periodicLDRInformation, Long reportingAmount,
-                         Long reportingInterval, ReportingPLMNListAvp reportingPLMNList, PrioritizedListIndicator prioritizedListIndicator, PLMNIDListAvp plmnIdList,
-                         byte[] visitedPLMNId, PeriodicLocationSupportIndicator periodicLocationSupportIndicator, MotionEventInfoAvp motionEventInfoAvp,
-                         Long linearDistance, OccurrenceInfo motionEventOccurrenceInfo, Long motionEventIntervalTime, Long motionEventMaximumInterval,
-                         Long motionEventSamplingInterval, Long motionEventReportingDuration, Long motionEventReportingLocationRequirements) {
-
-    this.sLgLocationType = sLgLocationType;
-    this.userName = userName;
-    this.msisdn = msisdn;
-    this.imei = imei;
-    this.lcsEPSClientName = lcsEPSClientName;
-    this.lcsNameString = lcsNameString;
-    this.lcsFormatIndicator = lcsFormatIndicator;
-    this.lcsClientType = lcsClientType;
-    this.lcsRequestorName = lcsRequestorName;
-    this.lcsRequestorIdString = lcsRequestorIdString;
-    this.reqLcsFormatIndicator = reqLcsFormatIndicator;
-    this.lcsPriority = lcsPriority;
-    this.lcsQoS = lcsQoS;
-    this.lcsQoSClass = lcsQoSClass;
-    this.horizontalAccuracy = horizontalAccuracy;
-    this.verticalAccuracy = verticalAccuracy;
-    this.verticalRequested = verticalRequested;
-    this.responseTime = responseTime;
-    this.velocityRequested = velocityRequested;
-    this.lcsSupportedGADShapes = lcsSupportedGADShapes;
-    this.lcsServiceTypeId = lcsServiceTypeId;
-    this.lcsCodeword = lcsCodeword;
-    this.serviceSelection = serviceSelection;
-    this.lcsPrivacyCheckSession = lcsPrivacyCheckSession;
-    this.lcsPrivacyCheckNonSession = lcsPrivacyCheckNonSession;
-    this.lcsPrivacyCheck = lcsPrivacyCheck;
-    this.deferredLocationType = deferredLocationType;
-    this.plrFLags = plrFLags;
-    this.lcsReferenceNumber = lcsReferenceNumber;
-    this.areaEventInfo = areaEventInfo;
-    this.areaEventOccurrenceInfo = areaEventOccurrenceInfo;
-    this.areaEventIntervalTime = areaEventIntervalTime;
-    this.areaEventMaximumInterval = areaEventMaximumInterval;
-    this.areaEventSamplingInterval = areaEventSamplingInterval;
-    this.areaEventReportingDuration = areaEventReportingDuration;
-    this.areaEventReportingLocationRequirements = areaEventReportingLocationRequirements;
-    this.areaDefinition = areaDefinition;
-    this.areaAvp = areaAvp;
-    this.additionalAreaAvp = additionalAreaAvp;
-    this.areaType = areaType;
-    this.areaIdentification = areaIdentification;
-    this.gmlcAddress = gmlcAddress;
-    this.periodicLDRInformation = periodicLDRInformation;
-    this.reportingAmount = reportingAmount;
-    this.reportingInterval = reportingInterval;
-    this.reportingPLMNList = reportingPLMNList;
-    this.prioritizedListIndicator = prioritizedListIndicator;
-    this.plmnIdList = plmnIdList;
-    this.visitedPLMNId = visitedPLMNId;
-    this.periodicLocationSupportIndicator = periodicLocationSupportIndicator;
-    this.motionEventInfoAvp = motionEventInfoAvp;
-    this.linearDistance = linearDistance;
-    this.motionEventOccurrenceInfo = motionEventOccurrenceInfo;
-    this.motionEventIntervalTime = motionEventIntervalTime;
-    this.motionEventMaximumInterval = motionEventMaximumInterval;
-    this.motionEventSamplingInterval = motionEventSamplingInterval;
-    this.motionEventReportingDuration = motionEventReportingDuration;
-    this.motionEventReportingLocationRequirements = motionEventReportingLocationRequirements;
   }
 
   public SLgLocationType getsLgLocationType() {
@@ -723,7 +615,7 @@ public class SLgPlrAvpValues implements Serializable {
   }
 
   /** PLR AVPs building method **/
-  public void createPLRAvps(SLgAVPFactory slgAVPFactory) throws Exception {
+  public void createPLRAvps(SLgAVPFactory slgAVPFactory) {
 
     try {
 

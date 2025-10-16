@@ -12,7 +12,7 @@ import java.io.Serializable;
  */
 public class SLhRirAvpValues implements Serializable {
 
-  private static final long serialVersionUID = -7123584559770017489L;
+  private static final long serialVersionUID = 1L;
 
   private static final int DIAMETER_SLh_VENDOR_ID = 10415;
 
@@ -83,7 +83,7 @@ public class SLhRirAvpValues implements Serializable {
   }
 
   /** RIR AVPs building method **/
-  public void createRIRAvps(SLhAVPFactory slhAVPFactory) throws Exception {
+  public void createRIRAvps(SLhAVPFactory slhAVPFactory) {
 
     try {
 
@@ -112,7 +112,7 @@ public class SLhRirAvpValues implements Serializable {
   public Long plrLcsPriority, plrHorizontalAccuracy, plrVerticalAccuracy, plrLcsSupportedGadShapes, plrLcsServiceTypeId, plrDeferredLocationType,
       plrFlags, plrAreaType, plrAdditionalAreaType, plrAreaEventIntervalTime, plrAreaEventSamplingInterval, plrAreaEventMaxInterval,
       plrAreaEventReportingDuration, plrAreaEventRepLocRequirements, plrPeriodicLDRReportingAmount, plrPeriodicLDRReportingInterval,
-      plrMotionEventlinearDistance, plrMotionEventIntervalTime, plrMotionEventMaximumInterval, plrMotionEventSamplingInterval,
+      plrMotionEventLinearDistance, plrMotionEventIntervalTime, plrMotionEventMaximumInterval, plrMotionEventSamplingInterval,
       plrMotionEvenReportingDuration, plrMotionEvenReportingLocationRequirements;
 
   public Integer plrSlgLocationType, plrLcsFormatInd, plrLcsClientType, plrLcsRequestorFormatIndicator, plrLcsReferenceNumber, plrQoSClass,

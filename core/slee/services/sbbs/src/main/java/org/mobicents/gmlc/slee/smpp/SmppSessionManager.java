@@ -33,7 +33,7 @@ public class SmppSessionManager {
      * @return an SmppSession object
      */
     public static SmppSession getInstance() {
-        if (smppSession == null || (smppSession != null && !smppSession.isBound())) {
+        if (smppSession == null || !smppSession.isBound()) {
             return initSmppSession();
         }
         return smppSession;

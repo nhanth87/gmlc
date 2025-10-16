@@ -10,7 +10,7 @@ import java.io.Serializable;
 @XmlRootElement(name = "LocalTimeZone")
 public class LocalTimeZone implements Serializable {
 
-    private static final long serialVersionUID = 3667031620668381392L;
+    private static final long serialVersionUID = 1L;
     private String timeZone;
     private Integer daylightSavingTime;
 

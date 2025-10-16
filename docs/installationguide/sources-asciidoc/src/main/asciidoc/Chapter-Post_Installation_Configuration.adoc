@@ -26,7 +26,7 @@ This chapter will explain how to manage {this-platform} {this-application} effec
 === Memory Settings
 
 You should fine tune the JVM memory settings based on your needs, but we recommend you allocate a minimum of 4 GB and an ideal 8GB for initial and maximum heap size.
-These settings are specified in the file[path]_{this-folder}-gmlc-/wildfly-10.1.0.Final/bin/standalone.conf for Wildfly 10.
+These settings are specified in the file[path]_{this-folder}-gmlc-/wildfly-24.0.1.Final/bin/standalone.conf for Wildfly 24.
 
 -Xms8192m::
   Initial heap size, set in megabytes
@@ -37,7 +37,38 @@ These settings are specified in the file[path]_{this-folder}-gmlc-/wildfly-10.1.
 [[_gmlc_configuring_java]]
 === Supported Java Version
 
-{this-platform} {this-application} can run only with Java 8 JRE or JDK.
+{this-platform} {this-application} can run only with Java 11 JRE or JDK.
+
+=== Database Settings
+
+Every transaction in the {this-platform} {this-application} is logged in a Database.
+By default, transactions are logged in the HSQLDB that comes bundled with WildFly. However, this is only made available to allow the platform to run "out of the box". You must configure a production ready Database prior to using the Gateway in a production environment.
+
+WARNING: HSQLDB must not be used in a production environment.
+You must ensure that you delete this datasource and configure a production-friendly Database like PostgreSQL or MySQL.
+
+For WildFly 24.0.1.Final, datasource is configured in [path]_{this-folder}-gmlc-version>/wildfly-24.0.1.Final/standalone/configuration/standalone.xml file, "datasources" subsystem
+
+[source,xml]
+----
+<subsystem xmlns="urn:jboss:domain:datasources:4.0">
+            <datasources>
+                <datasource jndi-name="java:jboss/datasources/ExampleDS" pool-name="ExampleDS" enabled="true" use-java-context="true">
+                    <connection-url>jdbc:h2:~/test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</connection-url>
+                    <driver>h2</driver>
+                    <security>
+                        <user-name>sa</user-name>
+                        <password>sa</password>
+                    </security>
+                </datasource>
+                <drivers>
+                    <driver name="h2" module="com.h2database.h2">
+                        <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
+                    </driver>
+                </drivers>
+            </datasources>
+        </subsystem>
+----
 
 [[_gmlc_configuring_jslee_http]]
 === Configuring JSLEE http-servlet RA
@@ -56,15 +87,14 @@ Please refer to the SLEE RA HTTP Client User Guide available in [path]_{this-fol
 [[_gmlc_configuring_log4j]]
 === Configuring log4j Logging Service (Wildfly)
 
-{this-platform} {this-application} uses `Apache log4j` for logging.
-If you are not familiar with the `log4j` package, you can read more about it at the Jakarta http://jakarta.apache.org/log4j/[website].
+{this-platform} {this-application} uses _Apache log4j_ for logging.
+If you are not familiar with the _log4j_ package, you can read more about it at the Jakarta http://jakarta.apache.org/log4j/[website].
 
-Logging is controlled from a central configuration file located at [path]_{this-folder}-gmlc/wildfly-10.1.0.Final/standalone/configuration/standalone.xml_.
+Logging is controlled from a central configuration file located at [path]_{this-folder}-gmlc/wildfly-24.0.1.Final/standalone/configuration/standalone.xml_.
 This file defines a set of appenders specifying the log files, what categories of messages should go there, the message format and the level of filtering.
-For more details, please refer to _Logging Configuration_ section in the Wildfly 10 documentation available  https://docs.jboss.org/author/display/WFLY10/Logging+Configuration[here].
+For more details, please refer to _Logging Configuration_ section in the Wildfly documentation available  https://www.wildfly.org/guides/application-logging[here].
 
-You must make sure `log4j` is fine tuned for optimal performance in production.
-We recommend that you set logging threshold to `WARN` or `INFO` in a first phase, while letting the CDR appender be `DEBUG`.
+You must make sure log4j is fine-tuned for optimal performance in production. We recommend that you set logging threshold to `WARN` or `INFO` in a first phase, while letting the CDR appender be set to `DEBUG`.
 
 
 [[_gmlc_configuring_ss7]]
@@ -91,7 +121,8 @@ You should install latest MongoDB and set it up as a system service.
 Refer to the following link for a guide on how to proceed with MongoDB installation and service setup: https://docs.mongodb.com/manual/administration/install-on-linux/.
 
 Then, run *mongo* in a system terminal to entering the MongoDB shell:
-....
+[source,shell]
+----
 fernando@ubuntu:~$ mongo
 MongoDB shell version v3.6.3
 connecting to: mongodb://127.0.0.1:27017
@@ -104,11 +135,12 @@ Server has startup warnings:
 2019-05-06T00:12:18.506-0300 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
 2019-05-06T00:12:18.506-0300 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
 2019-05-06T00:12:18.506-0300 I CONTROL  [initandlisten]
-....
+----
 
 Once inside the MongoDB shell, proceed like the following to create the collections needed for HTTP reports for Radio Access Networks reports with location services reference numbers linking to a previous location request, as well as creating token for identifying users for each HTTP request:
 
-....
+[source,shell]
+----
 > show dbs
 admin  0.000GB
 local  0.000GB
@@ -127,24 +159,27 @@ WriteResult({ "nInserted" : 1 })
 > db.getCollection("curl-account").insert({token: "RmVybmFuZG9NZW5kaW9yb3o", username: "paicbd" })
 WriteResult({ "nInserted" : 1 })
 >
-....
+----
 
-The configuration in `GmlcManagement_gmlcproperties.xml` file should be consistent with MongoDB running host IP:port and database, for example:
-....
+The configuration at the _GmlcManagement_gmlcproperties.xml_ file should be consistent with MongoDB running host IP:port and database, for example:
+[source,shell]
+----
 <mongohost value="localhost"/>
 <mongoport value="27017"/>
 <mongodatabase value="gmlc"/>
-....
+----
 
 It is also important to follow the recommendations here: https://docs.mongodb.com/manual/reference/ulimit/ for process and file handling.
 
 For instance, you could proceed like this. First setup the Unix limit for open files by executing *ulimit -n 64000* in a Linux console terminal, for example:
-....
+[source,shell]
+----
 [gmlcuser@localhost ~]# sudo ulimit -n 64000
-....
+----
 
 You can then check the Unix limits by issuing the following: *ulimit -a*. for example:
-....
+[source,shell]
+----
 [gmlcuser@localhost ~]# ulimit -a
 core file size          (blocks, -c) 0
 data seg size           (kbytes, -d) unlimited
@@ -162,10 +197,11 @@ cpu time               (seconds, -t) unlimited
 max user processes              (-u) 64000
 virtual memory          (kbytes, -v) unlimited
 file locks                      (-x) unlimited
-....
+----
 
-Configure the security limits by adding the soft and hard values to the GMLC user in the systems's *limits.conf* file. For example
-....
+Configure the security limits by adding the soft and hard values to the GMLC user in the system's *limits.conf* file. For example
+[source,shell]
+----
 [fernando@localhost ~] sudo vim /etc/security/limits.conf
 
 #<domain>      	<type>  <item>  <value>
@@ -173,18 +209,19 @@ gmlcuser		hard 	nofile  64000
 gmlcuser 		soft 	nofile	64000
 *   		    hard 	nproc	64000
 *				soft    nproc   64000
-....
+----
 
 Finally, as Red Hat Enterprise Linux and CentOS 6 place a max process limitation of 1024 which overrides ulimit settings, create a file named /etc/security/limits.d/*99-mongodb-nproc.conf* with new soft nproc and hard nproc values to increase the process limit. For example:
 
-....
+[source,shell]
+----
 [gmlcuser@localhost ~] sudo vim /etc/security/limits.d/99-mongodb-nproc.conf
 #<domain>      	<type>  <item>	<value>
 gmlcuser		hard 	nproc	64000
 gmlcuser 		soft 	nproc	64000
 *   		    hard 	nproc	64000
 *				soft    nproc   64000
-....
+----
 
 == SS7 Configuration
 
@@ -214,7 +251,7 @@ image::images/GMLC-SS7_config_diagram_template.jpg[]
 
 An STP comprises a signaling hub which only routes incoming messages towards the appropriate destination based on the embedded information. It does not offer service termination, as it typically does not deploy a user part. The STP is the only network entity providing GTT (Global Title Translation), which allows originating network entities being unaware of target nodes? SSN/DPC (Subsystem Numbers/Destination Point Codes) for the ongoing service. Only the STPs need to keep SPC/SSN databases associated to specific services and recipient destinations.
 
-Once the SS7 configuration is set up according to the data provided by the MNO, SS7 configuration files reside at $GMLC_HOME/wildfly-10.1.0.Final/standalone/data. Let's assume the configuration provided is as follows:
+Once the SS7 configuration is set up according to the data provided by the MNO, SS7 configuration files reside at $GMLC_HOME/wildfly-24.0.1.Final/standalone/data. Let's assume the configuration provided is as follows:
 
 [width="100%",cols="50%,50%"]
 |=======================================================================
@@ -238,13 +275,15 @@ The following would be the resulting configuration files for these values:
 
 *GmlcManagement_gmlcproperties.xml*
 
-....
+[source,xml]
+----
 <?xml version="1.0" encoding="UTF-8" ?>
 <gmlcgt value="60132499947"/>
 <gmlcssn value="145"/>
 <hlrssn value="6"/>
 <mscssn value="8"/>
 <vlrssn value="7"/>
+<sgsnssn value="149"/>
 <maxmapv value="3"/>
 <maxactivitycount value="5000"/>
 <dialogtimeout value="60000"/>
@@ -253,7 +292,10 @@ The following would be the resulting configuration files for these values:
 <diameteroriginhost value="fer.gmlc.net"/>
 <diameterdestrealm value="epc.mnc019.mcc732.3gppnetwork"/>
 <diameterdesthost value="dra01.epc.mnc019.mcc732.3gppnetwork"/>
-<diametergmlcnumber value="775599"/>
+<diametergmlcnumber value="60132499947"/>
+<diametergmlcaddress value="192.168.87.100"/>
+<diametergmlcaddresstype value="4"/>
+<riagmlcaddress value="false"/>
 <lcsnontriggeredreportoption value="MLP"/>
 <lcsurlcallback value="http://localhost:8081/api/report"/>
 <mongohost value="localhost"/>
@@ -266,11 +308,25 @@ The following would be the resulting configuration files for these values:
 <suplnosslport value="7276" />
 <supltlscertpath value="serverkeystore.jks" />
 <supltlscertpwd value="password" />
-....
+<supl_session_expired value="2880" />
+<supl_periodic_session_expired value="7200" />
+<redis_host value="localhost" />
+<redis_port value="6379" />
+<glaasenabled value="false"/>
+<glaascdrendpoint value="http://localhost:9090/api/cdr" />
+<glaasapptoken value="eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnbWxjIiwiaWF0IjoxNjQ2MzIyOTc2fQ.Tnewo_3u2Zbe_wO7YAo7VJRXFEN7yCUgvJE8MiKU-kCClsakl5MZXHhlwst7JYBXtOkxobGbG-HRFs7ITDPqRw" />
+<glassthreadpoll value="5"/>
+<suplenabled value="true"/>
+<smpphost value="localhost"/>
+<smppport value="2776"/>
+<smppsid value="gmlc_ulp_smpp"/>
+<smpppwd value="gmlc_ulp_smpp"/>
+<fqdn value="127.0.0.1"/>
+----
 
 *SCTPManagement_sctp.xml*
-
-....
+[source,xml]
+----
 <?xml version="1.0" encoding="UTF-8" ?>
 <connectdelay value="5000"/>
 <congControl_DelayThreshold_1 value="2.5"/>
@@ -286,10 +342,11 @@ The following would be the resulting configuration files for these values:
 	<name value="SCTPASSOC2"/>
 	<association name="SCTPASSOC2" associationType="CLIENT" hostAddress="10.221.32.19" hostPort="2906" peerAddress="10.223.49.205" peerPort="4278" ipChannelType="0" extraHostAddressesSize="0"/>
 </associations>
-....
+----
 
 *Mtp3UserPart_m3ua1.xml*
-....
+[source,xml]
+----
 <?xml version="1.0" encoding="UTF-8" ?>
 <statisticsenabled value="false"/>
 <statisticsdelay value="5000"/>
@@ -325,10 +382,11 @@ The following would be the resulting configuration files for these values:
 	<key value="12201:12227:3"/>
 	<routeAs trafficModeType="2" as="AS1,AS2"/>
 </route>
-....
+----
 
 *SccpStack_sccprouter3.xml*
-....
+[source,xml]
+----
 <?xml version="1.0" encoding="UTF-8" ?>
 <longMessageRule>
     <id value="1"/>
@@ -343,10 +401,11 @@ The following would be the resulting configuration files for these values:
 		</mtp3DestinationMap>
 	</value>
 </sap>
-....
+----
 
 *SccpStack_sccprouter3_ext.xml*
-....
+[source,xml]
+----
 <rule>
 	<id value="1"/>
 	<value ruleType="Solitary" loadSharingAlgo="Undefined" originatingType="RemoteOriginated" mask="K" paddress="1" saddress="-1" networkId="0">
@@ -375,10 +434,11 @@ The following would be the resulting configuration files for these values:
 		<gt type="GT0100" tt="0" es="1" np="1" nai="4" digits="-"/>
 	</sccpAddress>
 </routingAddress>
-....
+----
 
 *SccpStack_sccpresource2.xml*
-....
+[source,xml]
+----
 <?xml version="1.0" encoding="UTF-8" ?>
 <remoteSsns>
 	<id value="1"/>
@@ -393,10 +453,11 @@ The following would be the resulting configuration files for these values:
 	<value remoteSpc="12201" remoteSpcFlag="0" mask="0"/>
 </remoteSpcs>
 <concernedSpcs/>
-....
+----
 
 *SccpStack_management2.xml*
-....
+[source,xml]
+----
 <?xml version="1.0" encoding="UTF-8" ?>
 <zmarginxudtmessage value="240"/>
 <connesttimerdelay value="15000"/>
@@ -423,10 +484,11 @@ The following would be the resulting configuration files for these values:
 <ssttimerduration_min value="10000"/>
 <ssttimerduration_max value="600000"/>
 <ssttimerduration_increasefactor value="1.5"/>
-....
+----
 
 *TcapStack_management.xml*
-....
+[source,xml]
+----
 <?xml version="1.0" encoding="UTF-8" ?>
 <dialogidletimeout value="45000"/>
 <invoketimeout value="45000"/>
@@ -451,15 +513,16 @@ The following would be the resulting configuration files for these values:
 <slsrange value="All"/>
 <statisticsenabled value="false"/>
 <swaptcapidbytes value="true"/>
-....
+----
 
 *MapStack_management.xml*
-....
+[source,xml]
+----
 <?xml version="1.0" encoding="UTF-8" ?>
 <shorttimervalue value="10000"/>
 <mediumtimervalue value="30000"/>
 <longtimervalue value="600000"/>
-....
+----
 
 == Diameter Configuration
 
@@ -485,7 +548,7 @@ image::images/GMLC-Diameter_config_diagram_template.jpg[]
 DSC (Diameter Signaling Controller) is an industry term which assembles multiple roles of the signaling or control plane in LTE networks.  These roles include the ones of the DRA (Diameter Routing Agent), DEA (Diameter Edge Agent) and IWF (Diameter Interworking Function), defined by 3GPP and GSMA. DSC is used for providing the same carrier-grade infrastructure in the EPC as the STP in SS7 networks. DRA provides traffic management, load balancing and session binding while reducing the ?mesh? of signaling connections across multiple network elements. Some operators prefer the stand-alone DRA, typically Tier 1 ones with multiple instances of network elements like the HSS, PCRF, PCEF and OCS. The Diameter Interworking Function (IWF) allows 4G networks to interoperate with 3G network elements. The DEA provides an interworking capability for Diameter and SS7 and acts as an edge device for LTE roaming. The functions of the DSC, as a pure software system, lend themselves well to the SDN and NFV (Software Defined Network and Network Functions Virtualization), which provide better ways to monetize infrastructure by having their control plane managed in the cloud and thus better CAPEX ROI, lowering OPEX.
 
 
-Once the Diameter configuration is setup according to the data provided by the MNO, Diameter configuration files reside at $GMLC_HOME/wildfly-10.1.0.Final/standalone/data/*GmlcManagement_gmlcproperties.xml* and at $GMLC_HOME/wildfly-10.1.0.Final/modules/system/layers/base/org/restcomm/diameter/lib/main/config/*jdiameter-config.xml*.
+Once the Diameter configuration is setup according to the data provided by the MNO, Diameter configuration files reside at $GMLC_HOME/wildfly-24.0.1.Final/standalone/data/*GmlcManagement_gmlcproperties.xml* and at $GMLC_HOME/wildfly-24.0.1.Final/modules/system/layers/base/org/restcomm/diameter/lib/main/config/*jdiameter-config.xml*.
 
 {this-platform} {this-application} comes with a simulation mode configuration in both files, for which the following values are assumed:
 
@@ -507,7 +570,8 @@ Once the Diameter configuration is setup according to the data provided by the M
 Then, these are the resulting configuration files:
 
 *jdiameter-config.xml*
-....
+[source,xml]
+----
 <?xml version="1.0"?>
 <Configuration xmlns="http://www.jdiameter.org/jdiameter-server">
 
@@ -612,16 +676,16 @@ Then, these are the resulting configuration files:
   </Extensions>
 
 </Configuration>
-....
+----
 
 Host and Peer IP addresses/users names must be configured at the *hosts* local file, i.e.:
-
-....
+[source,shell]
+----
 [fernando@localhost ~] sudo vim /etc/hosts
 127.0.0.1   localhost
 
 10.1.30.19  fer.gmlc.net
 10.1.30.19  dra01.epc.mnc019.mcc732.3gppnetwork
-....
+----
 
 *GmlcManagement_gmlcproperties.xml* is as shown in the previous section.

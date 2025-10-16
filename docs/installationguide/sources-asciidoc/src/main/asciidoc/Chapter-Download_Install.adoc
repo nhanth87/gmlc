@@ -10,7 +10,7 @@ You can either download the binary release or download the source code and set u
 The binary release is available for download at {this-release-binary-url} 
 
 .Procedure: Binary Download and Installation
-. Download the zip file `<filename>` to any folder of your choice. 
+. Download the zip file to any folder of your choice.
 . Extract the contents of the zip file. 
 +
 ----
@@ -18,26 +18,25 @@ Downloads]$ unzip <filename>
 ----						
 . Verify the newly created directory and ensure the contents are as explained below.
 
-== Directory Structure (WildFly 10)
+== Directory Structure (WildFly 24)
 
-When you download the binary release, you will notice that the top level directory is named `restcomm-gmlc-<version>` and immediately below this are five sub-directories as explained below:
+When you download the binary release, you will notice that the top level directory is named `Extended-GMLC-<version>` and immediately below this are five subdirectories as explained below:
 
-* docs: Contains all relevant documentation in respective subfolders for JSLEE, jSS7, jDiameter, Management-HQ and GMLC.
-* wildfly-10.1.0.Final: The core server with two profiles "standalone" and "simulator". The "standalone" profile is a clean profile where you will have to start from scratch and configure the entire SS7 and Diameter stacks and {this-platform} {this-application}.
+* docs: Contains all relevant documentation in respective sub-folders for JSLEE, jSS7, jDiameter, Management-HQ and GMLC.
+* wildfly-20.0.01Final: The core server with two profiles "standalone" and "simulator". The "standalone" profile is a clean profile where you will have to start from scratch and configure the entire SS7 and Diameter stacks and {this-platform} {this-application}.
   The "simulator" profile is a pre-configured profile to work with jss7-simulator and diameter location simulator.
   Refer to the Admin Guide for instructions on how to start the server in either of the profiles.
 * resources: contains SLEE MAP, SLEE Diameter, JDBC, http-client, http-servlet and SIP RA jars.
 * tools: contains SLEE tools, a simple REST API for SLR/LRR, jdiameter location simulator and jss7-simulator.
 
 ----
-
 |- restcomm-gmlc-<version>
 		|- docs
 				| jss7
 				| slee
 				| GMLC
 				| management-hq
-		|- wildfly-10.1.0.Final
+		|- wildfly-24.0.1.Final
 				| bin    //contains start up and shutdown scripts for the Server and the start up script for Shell.
 				| appclient
 				| client
@@ -71,9 +70,9 @@ When you download the binary release, you will notice that the top level directo
 {this-platform} {this-application} works with JDK 11.
 In addition, you must have the following tools installed.
 
-* `Git Client` : Instructions for using GIT, including install, can be found at http://git-scm.com/book
-* `Maven 3.2.X` : Instructions for using Maven, including install, can be found at http://maven.apache.org/
-* `Ant 1.9.X` : Instructions for using Ant, including install, can be found at http://ant.apache.org
+* _Git Client_: Instructions for using GIT, including install, can be found at http://git-scm.com/book
+* _Maven 3.9.9_`: Instructions for using Maven, including install, can be found at http://maven.apache.org/
+* Ant 1.10.X: Instructions for using Ant, including install, can be found at http://ant.apache.org
 
 
 [[_source_building]]
@@ -82,12 +81,11 @@ In addition, you must have the following tools installed.
 
 . Downloading the source code
 +
-Use GIT to check out a specific release source, the base URL is &THIS.TRUNK_SOURCE_CODE_URL;, then add the specific release version.
+Use GIT to check out a specific release source, the base URL is https://github.com; then add the specific release version.
 +
-[source]
+[source,shell]
 ----
-
-[usr]$ git clone https://userid@bitbucket.org/paicbd/restcomm-gmlc.git
+[usr]$ git clone https://github.com/paicbd/gmlc.git
 [usr]$ cd extended-gmlc
 [usr]$ git checkout <version>
 ----
@@ -96,11 +94,10 @@ Use GIT to check out a specific release source, the base URL is &THIS.TRUNK_SOUR
 +
 Now that we have the source the next step is to build and install the source.
  {this-platform} {this-application} uses Maven 2 to build the system.
-You must ensure that `JAVA_HOME` environment variable is set properly prior to building the source.
+You must ensure that JAVA_HOME environment variable is set properly prior to building the source.
 +
-[source]
+[source,shell]
 ----
-
 [usr]$ mvn clean install
 ----
 

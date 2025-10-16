@@ -14,7 +14,10 @@
 <diameterdestrealm value="epc.mnc000.mcc000.3gppnetwork.org"/>
 <diameterdesthost value="dra.simulator"/>
 <diametergmlcnumber value="598970755909"/>
-<lcsnontriggeredreportoption value="MLP"/>
+<diametergmlcaddress value="192.168.87.100"/>
+<diametergmlcaddresstype value="4"/>
+<riagmlcaddress value="false"/>
+<lcsnontriggeredreportoption value="JSON"/>
 <lcsurlcallback value="http://localhost:8081/api/report"/>
 <mongohost value="localhost"/>
 <mongoport value="27017"/>

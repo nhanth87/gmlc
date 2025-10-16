@@ -1,10 +1,9 @@
 package org.mobicents.gmlc.slee.cdr.model;
 
-import java.sql.Date;
-import java.sql.Time;
-
+/**
+ * @author <a href="mailto:fernando.mendioroz@gmail.com"> Fernando Mendioroz </a>
+ */
 public class CDRModel {
-
 
     private String timeStamp  = "";
     private String cdrDate;
@@ -178,7 +177,7 @@ public class CDRModel {
     private String tai5GsTAC  = "";
 
     /*
-     * GEOGRAPHICAL INFORMATION from 5GS location information from Sh
+     * GEOGRAPHICAL INFORMATION from 5GS location information
      */
     private String geographicalInfo5GsTypeOfShape  = "";
     private String geographicalInfo5GsLatitude  = "";
@@ -194,6 +193,16 @@ public class CDRModel {
     private String epsLocationInfoGeodeticUncertainty = "";
     private String epsLocationInfoGeodeticConfidence = "";
     private String epsLocationInfoGeodeticScreeningAndPresentationInd = "";
+
+    /*
+     * 5GS GEODETIC INFORMATION
+     */
+    private String nrLocationInfoGeodeticTypeOfShape = "";
+    private String nrLocationInfoGeodeticLatitude = "";
+    private String nrLocationInfoGeodeticLongitude = "";
+    private String nrLocationInfoGeodeticUncertainty = "";
+    private String nrLocationInfoGeodeticConfidence = "";
+    private String nrLocationInfoGeodeticScreeningAndPresentationInd = "";
 
     /*
      * MME NAME
@@ -265,7 +274,7 @@ public class CDRModel {
     /*
      * CS and PS Subscriber STATE
      */
-    private String subscirberState  = "";
+    private String subscriberState  = "";
     private String notReachableReasonState  = "";
 
     // MS CLASSMARK 2
@@ -393,6 +402,16 @@ public class CDRModel {
     private String pprAddressType  = "";
     private String pprAddressData  = "";
 
+    /*
+     * LCS Capability Sets
+     */
+    private String lcsCapabilitySets = "";
+
+    /*
+     + 3GPP AAA Server Name
+     */
+    private String tgppAAAServerName = "";
+
 
     /*
      * LOCATION ESTIMATE
@@ -418,8 +437,8 @@ public class CDRModel {
     private String additionalLocationEstimateTypeOfShape  = "";
     private String additionalLocationEstimatePolygonNumberOfPoint  = "";
     private String additionalLocationEstPolyListLatLongPoints = "";
-    private String polygonCentroIdLatitude  = "";
-    private String polygonCentroIdLongitude  = "";
+    private String polygonCentroidLatitude  = "";
+    private String polygonCentroidLongitude  = "";
 
     // ADDITIONAL LOCATION ESTIMATE LATITUDE
     private String additionalLocationEstimateLatitude  = "";
@@ -459,7 +478,7 @@ public class CDRModel {
     /*
      * UTRAN GANSS POSITIONING DATA
      */
-    private String utranGANSSpositioningData  = "";
+    private String utranGANSSPositioningData  = "";
 
     /*
      * UTRAN ADDITIONAL POSITIONING DATA
@@ -689,6 +708,36 @@ public class CDRModel {
      * 1xRTT-RCID
      */
     private String oneXRTTRCID  = "";
+
+    /*
+     * na-ESRK Request
+     */
+    private String naEsrkRequest = "";
+
+    /*
+     * na-ESRD
+     */
+    private String naESRD = "";
+
+    /*
+     * na-ESRK
+     */
+    private String naESRK = "";
+
+    /*
+     * AMF-Instance-Id
+     */
+    private String amfInstanceId = "";
+
+    /*
+     * SLh & SLg Flags
+     */
+    protected Long riaFlags;
+    protected Long plrFlags;
+    protected Long plaFlags;
+    protected Long lrrFlags;
+    protected Long lraFlags;
+
 
     public String getTimeStamp() {
         return timeStamp;
@@ -1242,6 +1291,54 @@ public class CDRModel {
         this.epsLocationInfoGeographicalUncertainty = epsLocationInfoGeographicalUncertainty;
     }
 
+    public String getNrLocationInfoGeodeticTypeOfShape() {
+        return nrLocationInfoGeodeticTypeOfShape;
+    }
+
+    public void setNrLocationInfoGeodeticTypeOfShape(String nrLocationInfoGeodeticTypeOfShape) {
+        this.nrLocationInfoGeodeticTypeOfShape = nrLocationInfoGeodeticTypeOfShape;
+    }
+
+    public String getNrLocationInfoGeodeticLatitude() {
+        return nrLocationInfoGeodeticLatitude;
+    }
+
+    public void setNrLocationInfoGeodeticLatitude(String nrLocationInfoGeodeticLatitude) {
+        this.nrLocationInfoGeodeticLatitude = nrLocationInfoGeodeticLatitude;
+    }
+
+    public String getNrLocationInfoGeodeticLongitude() {
+        return nrLocationInfoGeodeticLongitude;
+    }
+
+    public void setNrLocationInfoGeodeticLongitude(String nrLocationInfoGeodeticLongitude) {
+        this.nrLocationInfoGeodeticLongitude = nrLocationInfoGeodeticLongitude;
+    }
+
+    public String getNrLocationInfoGeodeticUncertainty() {
+        return nrLocationInfoGeodeticUncertainty;
+    }
+
+    public void setNrLocationInfoGeodeticUncertainty(String nrLocationInfoGeodeticUncertainty) {
+        this.nrLocationInfoGeodeticUncertainty = nrLocationInfoGeodeticUncertainty;
+    }
+
+    public String getNrLocationInfoGeodeticConfidence() {
+        return nrLocationInfoGeodeticConfidence;
+    }
+
+    public void setNrLocationInfoGeodeticConfidence(String nrLocationInfoGeodeticConfidence) {
+        this.nrLocationInfoGeodeticConfidence = nrLocationInfoGeodeticConfidence;
+    }
+
+    public String getNrLocationInfoGeodeticScreeningAndPresentationInd() {
+        return nrLocationInfoGeodeticScreeningAndPresentationInd;
+    }
+
+    public void setNrLocationInfoGeodeticScreeningAndPresentationInd(String nrLocationInfoGeodeticScreeningAndPresentationInd) {
+        this.nrLocationInfoGeodeticScreeningAndPresentationInd = nrLocationInfoGeodeticScreeningAndPresentationInd;
+    }
+
     public String getEutranCellGlobalId5GsMCC() {
         return eutranCellGlobalId5GsMCC;
     }
@@ -1586,12 +1683,12 @@ public class CDRModel {
         this.saiPresent = saiPresent;
     }
 
-    public String getSubscirberState() {
-        return subscirberState;
+    public String getSubscriberState() {
+        return subscriberState;
     }
 
-    public void setSubscirberState(String subscirberState) {
-        this.subscirberState = subscirberState;
+    public void setSubscriberState(String subscriberState) {
+        this.subscriberState = subscriberState;
     }
 
     public String getNotReachableReasonState() {
@@ -1870,6 +1967,22 @@ public class CDRModel {
         return pprAddressData;
     }
 
+    public String getLcsCapabilitySets() {
+        return lcsCapabilitySets;
+    }
+
+    public void setLcsCapabilitySets(String lcsCapabilitySets) {
+        this.lcsCapabilitySets = lcsCapabilitySets;
+    }
+
+    public String getTgppAAAServerName() {
+        return tgppAAAServerName;
+    }
+
+    public void setTgppAAAServerName(String tgppAAAServerName) {
+        this.tgppAAAServerName = tgppAAAServerName;
+    }
+
     public void setPprAddressData(String pprAddressData) {
         this.pprAddressData = pprAddressData;
     }
@@ -2010,22 +2123,20 @@ public class CDRModel {
         this.additionalLocationEstPolyListLatLongPoints = additionalLocationEstPolyListLatLongPoints;
     }
 
-
-
-    public String getPolygonCentroIdLatitude() {
-        return polygonCentroIdLatitude;
+    public String getPolygonCentroidLatitude() {
+        return polygonCentroidLatitude;
     }
 
-    public void setPolygonCentroIdLatitude(String polygonCentroIdLatitude) {
-        this.polygonCentroIdLatitude = polygonCentroIdLatitude;
+    public void setPolygonCentroidLatitude(String polygonCentroidLatitude) {
+        this.polygonCentroidLatitude = polygonCentroidLatitude;
     }
 
-    public String getPolygonCentroIdLongitude() {
-        return polygonCentroIdLongitude;
+    public String getPolygonCentroidLongitude() {
+        return polygonCentroidLongitude;
     }
 
-    public void setPolygonCentroIdLongitude(String polygonCentroIdLongitude) {
-        this.polygonCentroIdLongitude = polygonCentroIdLongitude;
+    public void setPolygonCentroidLongitude(String polygonCentroidLongitude) {
+        this.polygonCentroidLongitude = polygonCentroidLongitude;
     }
 
     public String getAdditionalLocationEstimateLatitude() {
@@ -2164,12 +2275,12 @@ public class CDRModel {
         this.utranPositioningDataInfo = utranPositioningDataInfo;
     }
 
-    public String getUtranGANSSpositioningData() {
-        return utranGANSSpositioningData;
+    public String getUtranGANSSPositioningData() {
+        return utranGANSSPositioningData;
     }
 
-    public void setUtranGANSSpositioningData(String utranGANSSpositioningData) {
-        this.utranGANSSpositioningData = utranGANSSpositioningData;
+    public void setUtranGANSSPositioningData(String utranGANSSPositioningData) {
+        this.utranGANSSPositioningData = utranGANSSPositioningData;
     }
 
     public String getUtranAdditionalPositioningDataInfo() {
@@ -2746,5 +2857,77 @@ public class CDRModel {
 
     public void setOneXRTTRCID(String oneXRTTRCID) {
         this.oneXRTTRCID = oneXRTTRCID;
+    }
+
+    public String getNaEsrkRequest() {
+        return naEsrkRequest;
+    }
+
+    public void setNaEsrkRequest(String naEsrkRequest) {
+        this.naEsrkRequest = naEsrkRequest;
+    }
+
+    public String getNaESRD() {
+        return naESRD;
+    }
+
+    public void setNaESRD(String naESRD) {
+        this.naESRD = naESRD;
+    }
+
+    public String getNaESRK() {
+        return naESRK;
+    }
+
+    public void setNaESRK(String naESRK) {
+        this.naESRK = naESRK;
+    }
+
+    public String getAmfInstanceId() {
+        return amfInstanceId;
+    }
+
+    public void setAmfInstanceId(String amfInstanceId) {
+        this.amfInstanceId = amfInstanceId;
+    }
+
+    public Long getRiaFlags() {
+        return riaFlags;
+    }
+
+    public void setRiaFlags(Long riaFlags) {
+        this.riaFlags = riaFlags;
+    }
+
+    public Long getPlrFlags() {
+        return plrFlags;
+    }
+
+    public void setPlrFlags(Long plrFlags) {
+        this.plrFlags = plrFlags;
+    }
+
+    public Long getPlaFlags() {
+        return plaFlags;
+    }
+
+    public void setPlaFlags(Long plaFlags) {
+        this.plaFlags = plaFlags;
+    }
+
+    public Long getLrrFlags() {
+        return lrrFlags;
+    }
+
+    public void setLrrFlags(Long lrrFlags) {
+        this.lrrFlags = lrrFlags;
+    }
+
+    public Long getLraFlags() {
+        return lraFlags;
+    }
+
+    public void setLraFlags(Long lraFlags) {
+        this.lraFlags = lraFlags;
     }
 }

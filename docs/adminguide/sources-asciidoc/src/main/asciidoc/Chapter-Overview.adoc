@@ -18,9 +18,9 @@ such as SS7 or Diameter. Hence, its application may be used not only by mobile p
 No integration with the MNO’s core network is required as SUPL runs in the user plane. Rather, the MNO acts as a bit pipe between the devices and the SUPL Location Platform (GMLC). Hence, the value chain for LBSs turns from a network-centric to a device-centric one, where positioning is controlled by the mobile devices and assisted by independent location providers that are interconnected with the devices via IP.
 
 As SUPL Enabled Terminals (SETs) make use of the Global Navigation Satellite System to assist them in gathering its geolocation, the accuracy of the location
-information retrieved is almost always greater than other positioning techniques if available in Radio Access Networks such as OTDOA, UTDOA, E-OTD, ECID, etc.
+information retrieved is almost always greater than other positioning techniques if available in Radio Access Networks such as OTDOA, U-TDOA, E-OTD, ECID, etc.
 
-The SLP address is made available to the SET (SUPL Enabled Terminal) by the provisioning of it in the UICC (SIM), resident applications on the SET or a default SLP address is derived. This address must be in the form of a FQDN and should be securely provisioned by the Home Network of the SET or the UICC manufacturer.
+The SLP address is made available to the SET (SUPL Enabled Terminal) by the provisioning of it in the Universal Integrated Circuit Card (UICC, also known as SIM), resident applications on the SET or a default SLP address is derived. This address must be in the form of a FQDN and should be securely provisioned by the Home Network of the SET or the UICC manufacturer.
 
 TLS 1.1 or higher shall be used to provide confidentiality and data integrity between a SET and the SLP. All SUPL messages except SUPL INIT must be delivered within a TLS session between the SET and the SLP. If these conditions are met, a TLS socket can be established between the SLP and the SET in the user-plane.
 
@@ -52,7 +52,7 @@ Cloud Ready:::
   {this-platform} {this-application} is cloud-ready.
   It can be deployed on dedicated hardware, private cloud infrastructure or public IaaS such as AWS.
 
-SIGTRAN (M3UA):::
+SIGTRAN (SS7 over IP):::
  {this-platform} {this-application} has in-built support for SIGTRAN (M3UA using SCTP).
 
 Diameter-based Sh, SLh and SLg (ELP):::
@@ -63,19 +63,18 @@ HTTP/JSON interface:::
 
 MLP:::
   Location requests can be sent to the {this-platform} {this-application} using plain XML over HTTP(S), with the requests encoded in OMA MLP (Mobile Location
-Protocol) version 3.4. See the full OMA MLP technical specification here: http://www.openmobilealliance.org/release/MLS/V1_3-20150512-A/OMA-TS-MLP-V3_4-20150512-A.pdf
+Protocol) version 3.4.
 
 SUPL:::
-SUPL (Secure User Plane Location) employs user plane data bearers for transferring location information (e.g GPS assistance) and for carrying positioning
+SUPL (Secure User Plane Location) employs user plane data bearers for transferring location information (e.g., GPS assistance) and for carrying positioning
 technology-related protocols between a SUPL Enabled Terminal (SET) and the network. SUPL needs only an IP capable network and requires minimum modification
-to the network, and this is an efficient solution that can be deployed rapidly. See the OMA ULP (User Location Protocol) used to carry SUPL messages here:
-http://member.openmobilealliance.org/ftp/Public_documents/loc/Permanent_documents/OMA-TS-ULP-V2_0_6-20200720-D.zip
+to the network, and this is an efficient solution that can be deployed rapidly.
 
 JAIN SLEE:::
  JAIN SLEE (Java API for Integrated Networks Service Logic Execution Environment) specification constitutes the JAVA community framework for the high standards in terms of performance, availability, portability, scalability, robustness, event oriented execution logic, etc., suitable for services/applications inter-working within telecommunication networks.
-  JAIN SLEE architecture, through its Resource Adaptors (RA), adjusts information from peripheral agents of the SLEE, namely: Mobile Switching Centre Servers (MSC/MSCS), Media Gateways (MGW, MGC/MGCF), Signaling Gateways (SGW), Mobility Management Entities (MME), SIP servers/proxies like Serving/Interrogating/Proxy-Call Session Control Functions (S-CSCF, I-CSCF, P-CSCF), Media Resource Function Control, mobile subscribers data base query to HSS/HLR through Diameter/MAP respectively, Signaling Control Points (SCP) through CAP/INAP, and other service protocols like SOAP (Simple Object Access Protocol), OSA/Parlay, LDAP (Lightweight Directory Access Protocol), JDBC (Java Data Base Connectivity), JPA (Java Persistence API), etc.
+  JAIN SLEE architecture, through its Resource Adaptors (RA), adjusts information from peripheral agents of the SLEE, namely: Mobile Switching Centre Servers (MSC/MSCS), Media Gateways (MGW, MGC/MGCF), Signaling Gateways (SGW), Mobility Management Entities (MME), SIP servers/proxies like Serving/Interrogating/Proxy-Call Session Control Functions (S-CSCF, I-CSCF, P-CSCF), Media Resource Function Control, mobile subscribers database query to HSS/HLR through Diameter/MAP respectively, Signaling Control Points (SCP) through CAP/INAP, and other service protocols like SOAP (Simple Object Access Protocol), OSA/Parlay, LDAP (Lightweight Directory Access Protocol), JDBC (Java Data Base Connectivity), JPA (Java Persistence API), etc.
   The components that carry out logic implementation of services/applications according to JAIN SLEE are named Service Building Blocks or SBB. The SBB are executed within a «components container», which controls their life cycle and eases their composition. An SBB may comprise multiple child SBBs, which are also reusable for other services, encompassing Java code usually generated in a dynamic Service Creation Environment (SCE) or middleware platforms containing JAIN SLEE SBBs.
-  JAIN SLEE service developer undergoes SBB construction by gathering logic items which represent events during the process of a service. As JAIN SLEE has been specially designed for event oriented logic execution, services are initiated by events like Diameter Requests/Answers. The generated SBBs then act together with the RAs under the JAIN SLEE framework so as to provide service to diverse external entities.  Every arriving event at the SLEE through the RAs is distributed among the SBBs in order to process them. This functionality is carried out by the «event router» as it is named within the functional structure of the JAIN SLEE framework.
+  JAIN SLEE service developer undergoes SBB construction by gathering logic items which represent events during the process of a service. As JAIN SLEE has been specially designed for event oriented logic execution, services are initiated by events like Diameter Requests/Answers. The generated SBBs then act together with the RAs under the JAIN SLEE framework to provide service to diverse external entities.  Every arriving event at the SLEE through the RAs is distributed among the SBBs in order to process them. This functionality is carried out by the «event router» as it is named within the functional structure of the JAIN SLEE framework.
 
 MongoDB:::
   MongoDB is a cross-platform document-oriented NoSQL database program. {this-platform} {this-application} uses it for correlating MT-LR and EPC-MT-LR location reports LCS Reference Numbers with previous GMLC Clients reference numbers and their corresponding callback URL. Please check the Installation and Configuration Guide for setting MongoDB for the {this-platform} {this-application}.
@@ -93,10 +92,19 @@ Location Data Records (CDR):::
 {this-platform} {this-application} is not restricted by Transaction Per Second model. The only restricting factor is memory + CPU capacity of the host
 servers, third-party applications or the underlying database service.
 
-* {this-platform} {this-application} supports as many as 1073741823 incoming and 1073741823 outgoing concurrent sessions/dialogs.
-* {this-platform} {this-application} SCTP supports as many associations as supported by the underlying Operating System. Can be setup for multi-homing.
-* {this-platform} {this-application} M3UA can be configured to have as many ASPs/IPSPs as needed by the system.
-* {this-platform} {this-application} SCCP can be configured to have virtually unlimited Global Title Translation rules and also supports wild characters for partial matching of Global Title digits.
+* {this-platform} {this-application} supports as many SCTP associations as supported by the underlying Operating System. Can be setup for multi-homing either for SS7 over IP or Diameter. {this-platform} {this-application} fully supports SCTP as specified by https://datatracker.ietf.org/doc/html/rfc4960[IETF RFC 4960].
+* {this-platform} {this-application} fully supports MTP3 User Adaptation Layer (M3UA) as specified by https://datatracker.ietf.org/doc/html/rfc4666[IETF RFC 4666]. IT can be configured to have as many ASPs/IPSPs as needed by the system.
+* {this-platform} {this-application} supports the whole SS7 stack layers over SIGTRAN (M3UA) such as SCCP, TCAP and MAP. SCCP can be configured to have virtually unlimited Global Title Translation rules and also supports wild characters for partial matching of Global Title digits. Technical specifications for these SS7 layers are:
+** Signaling Connection Control Part (SCCP): International Telecommunication Union Telecommunication Standardization Sector (ITU-T) recommendations https://www.itu.int/rec/T-REC-Q.711/en/[Q.711], https://www.itu.int/rec/T-REC-Q.712/en/[Q.712], https://www.itu.int/rec/T-REC-Q.713/en/[Q.713], https://www.itu.int/rec/T-REC-Q.714/en/[Q.714], https://www.itu.int/rec/T-REC-Q.715/en/[Q.715], and https://www.itu.int/rec/T-REC-Q.715/en[Q.716]. The European Telecommunications Standards Institute (ETSI) documents its modifications to ITU-T SCCP recommendations in ETSI document number https://www.etsi.org/deliver/etsi_en/300001_300099/30000901/01.04.03_60/en_30000901v010403p.pdf[EN 300 009-1].
+** Transaction Capabilities Application Part (TCAP): International Telecommunication Union Telecommunication Standardization Sector (ITU-T) recommendations https://www.itu.int/rec/T-REC-Q.771/en/[Q.771], https://www.itu.int/rec/T-REC-Q.772/en/[Q.772], https://www.itu.int/rec/T-REC-Q.773/en/[Q.773], https://www.itu.int/rec/T-REC-Q.774/en/[Q.774] and https://www.itu.int/rec/T-REC-Q.775/en/[Q.775]. Third Generation Partnership Project (3GPP) and ETSI documents its modifications to ITU-T TCAP recommendations in https://www.3gpp.org/ftp/Specs/archive/33_series/33.204/33204-i00.zip[3GPP TS 33.204] or ETSI https://www.etsi.org/deliver/etsi_ts/133200_133299/133204/18.00.00_60/ts_133204v180000p.pdf[TS 133 204].
+** Mobile Application Part (MAP): https://www.3gpp.org/ftp/Specs/archive/29_series/29.002/29002-i00.zip[3GPP TS 29.002] (version 18.0.0, latest released for MAP by 3GPP on 2023-09-20).
+
+* {this-platform} {this-application} supports the Diameter base protocol as specified by https://datatracker.ietf.org/doc/html/rfc6733[IETF RFC 6733].
+* {this-platform} {this-application} supports Diameter-based SLh interface for Control Plane LCS as specified by https://www.3gpp.org/ftp/Specs/archive/29_series/29.173/29173-i00.zip[3GPP TS 29.173] (version 18.0.0, latest released for SLh by 3GPP on 2024-04-08).
+* {this-platform} {this-application} supports the Evolved Packet Core (EPC) LCS Protocol (ELP) between the Gateway Mobile Location Centre (GMLC) and the Mobile Management Entity (MME) or SLg interface as specified by https://www.3gpp.org/ftp/Specs/archive/29_series/29.172/29172-i10.zip[3GPP TS 29.172] (version 18.1.0, latest released for SLh by 3GPP on 2024-04-08).
+* {this-platform} {this-application} supports the Sh interface based on the Diameter protocol, as per https://www.3gpp.org/ftp//Specs/archive/29_series/29.329/29329-f00.zip[3GPP TS 29.329] (version 15.0.0).
+* {this-platform} {this-application} supports OMA MLP version 3.4 as per http://www.openmobilealliance.org/release/MLS/V1_3-20150512-A/OMA-TS-MLP-V3_4-20150512-A.pdf[OMA-TS-MLP-V3_4-20150512-A].
+* {this-platform} {this-application} supports OMA ULP (User Location Protocol) used to carry SUPL messages as per http://member.openmobilealliance.org/ftp/Public_documents/loc/Permanent_documents/OMA-TS-ULP-V2_0_6-20200720-D.zip[OMA-TS-ULP-V2_0_6-20200720-D].
 
 [[_restcomm_gmlc_overview_http]]
 === HTTP Transfer Mechanism
@@ -117,15 +125,15 @@ The third-party application can be either of the following technologies on any O
 Following figure illustrates {this-platform} {this-application} software architecture and network topology diagram interfaces for interconnection with GSM/UMTS/LTE core networks and GMLC clients and external APIs in the Internet.
 
 .{this-platform} {this-application} Architecture and Interfaces.
-image::images/GMLC_Arch_Interfaces.png[]
+image::images/GMLC_Arch_Interfaces.jpg[]
 
 {this-platform} {this-application} supports the following MAP and Diameter-based operations for Location Services (LCS) within Mobile Network Operators
 control plane:
 
-* *MAP ATI*: Any-Time-Interrogation, to gather subscriber information from the HLR including Cell Global Identification, age of location information and potentially other location and subscriber information parameters such as the IMEI, IMSI, MNP information, location number, VLR/MSC/SGSN SCCP addresses, MME name, base station geographic/geodetic coordinates, E-UTRAN's CGI (LTE Cell ID), LTE tracking area identity, subscriber's state, GPRS routeing area identity, LSA identity, etc.
+* *MAP ATI*: Any-Time-Interrogation, to gather subscriber information from the HLR including Cell Global Identification, age of location information and potentially other location and subscriber information parameters such as the IMEI, IMSI, MNP information, location number, VLR/MSC/SGSN SCCP addresses, MME name, base station geographic/geodetic coordinates, E-UTRAN CGI (LTE Cell ID), LTE tracking area identity, subscriber's state, GPRS routeing area identity, LSA identity, 5GS Location Information including NR-CGI (5G Cell ID), NR tracking area identity, last Radio Access Technology (RAT) type, AMF address, etc.
 * *MAP PSI*: Provide-Subscriber-Information, to gather subscriber information as with MAP ATI but from the MSC/VLR or SGSN is currently attached to. This MAP operation is preceded by *MAP SRISM* or *SRI* for routing it to the appropriate MSC/VLR or SGSN, thus the subscriber information gathered from PSI also contains the IMSI.
 * *MAP SRILCS*: Send Routing Information for Location Services, to gather IMSI and core network entity address (MSC or SGSN) to which send further location request.
-* *MAP PSL*: Provide Subscriber Location, to gather location information from the UTRAN (UMTS Terrestrial Radio Access Network), which should include, besides Cell Global Identity, location estimates in geographic coordinates of the target User Equipment, depending on available positioning methods (e.g. E-OTD, OTDOA, UTDOA, A-GPS, etc.).
+* *MAP PSL*: Provide Subscriber Location, to gather location information from the UTRAN (UMTS Terrestrial Radio Access Network), which should include, besides Cell Global Identity, location estimates in geographic coordinates of the target User Equipment, depending on available positioning methods (e.g. E-OTD, OTDOA, U-TDOA, A-GPS, etc.).
 * *MAP SLR*: Subscriber Location Report, to gather location of a target User Equipment from the MSC or SGSN when a request for location is either implicitly administered or made at some earlier time in MAP PSL for event based deferred type of location.
 * Diameter Routing Information Request/Answer (*RIR/RIA*): analogous to MAP SRILCS but over Diameter based SLh interface between GMLC and HSS.
 * ELP Provide Location Request/Answer (*PLR/PLA*): analogous to MAP PSL but over Diameter-based Evolved Packet Core Location Protocol (ELP) SLg interface between GMLC and MME.
@@ -156,7 +164,7 @@ Initiated SUPL Services.
 [[_restcomm_location_information]]
 == Location Information
 
-The simplest location information a GMLC can retrieve is by issuing a MAP ATI (Any Time Interrogation) request to the HLR (Home Location register). MAP ATI is part of CAMEL phase 1. If the GMLC is allowed to proceed with the operation at the HLR, the latter will respond with subscriber information including the Cell Global Identification (CGI) as for the latest MAP Update Location operation carried out between the HLR and VLR at which the target mobile equipment is attached too for basic ATI. If active location retrieval (ALR) is requested within the ATI (an enhancement available in later CAMEL versions), then the location information as currently stored in the VLR can be gathered by a PSI command between sent to the MSC from the HLR, and consequent mobile station paging. CGI represents the location information with greatest error margin retrievable by a GMLC in GSM based core networks.
+The simplest location information a GMLC can retrieve is by issuing a MAP ATI (Any Time Interrogation) request to the HLR (Home Location register). MAP ATI is part of CAMEL phase 1. If the GMLC is allowed to proceed with the operation at the HLR, the latter will respond with subscriber information including the Cell Global Identification (CGI) as for the latest MAP Update Location operation carried out between the HLR and VLR at which the target mobile equipment is attached too for basic ATI. If active location retrieval (ALR) is requested within the ATI (an enhancement available in later CAMEL versions), then the location information as currently stored in the VLR can be gathered by a PSI command between sent to the MSC from the HLR, and consequent mobile station paging. CGI represents the location information with the greatest error margin retrievable by a GMLC in GSM based core networks.
 
 As shown in the figure below taken from 3GPP TS 23.003, CGI is made up of multiple components, namely, MCC (Mobile Country Code), MNC (Mobile Network Code), LAC (Location Area Code) and CI (Cell Identity). The combination of MCC and MNC equals the PLMN-ID, which represents the PLMN at which the cell is located, i.e. the country and Home-PLMN it belongs to.  LAC represents a geographic location area in which a cluster of Base Transceiver Stations (BTS) are located for radio access. the combination of PLMN-ID and LAC becomes the Location Area Identification or LAI. The CI (Cell ID) uniquely identifies the BTS providing service to the target subscriber in that area (more commonly known as cell). Finally, the combination of LAI and CI composes the CGI.
 The following figure shows the composition of the CGI. Notice that LAC and CI can be represented by 2 hexadecimal bytes each (eventually BCD converted) or by 5 decimal digits.
@@ -194,9 +202,10 @@ Besides *CGI* or *ECGI*, other location information parameters/identifications a
      - address digits
 * *RAI* (Routing Area Identification): composed by the LAI (MCC, MNC, LAC) and RAC (Routing Area Code), which is a fixed 1 octet length code identifying a routing area within a location area (available from PS core networks like GPRS).
 * *LSA ID* (Localised Service Area ID): also available from PS core networks, it can either be a PLMN significant number or a universal identity. This shall be known both in the networks and in the SIM. The LSA ID consists of 24 bits. Bit 0 indicates whether the LSA is a PLMN significant number or a universal LSA. If the bit is set to 0 the LSA is a PLMN significant number; if bit 0 is set to 1, then it is a universal LSA.
-* *TAI* (Tracking Area Identification): composed by the PLMN-ID (MCC and MNC) and the Tracking Area Code (TAC), which is a fixed length code of 2 octets identifying a Tracking Area within a PLMN. The TAI is gathered from the Evolved Packet System (EPS). The RAN in 4G networks is called LTE or E-UTRAN, while the core network is called EPC (Evolved Packet Core). Together they compose the EPS.
+* *TAI* (Tracking Area Identification): composed by the PLMN-ID (MCC and MNC) and the Tracking Area Code (TAC), which is a fixed length code of 2 octets identifying a Tracking Area within a PLMN under EUTRAN coverage. The TAI is gathered from the Evolved Packet System (EPS). The RAN in 4G networks is called LTE or E-UTRAN, while the core network is called EPC (Evolved Packet Core). Together they compose the EPS.
+* *NR-TAI* (New Radio Tracking Area Identification): composed by the PLMN-ID (MCC and MNC) and the Tracking Area Code (TAC), which is a fixed length code of 3 octets identifying a Tracking Area within a PLMN under 5G NR coverage. The TAI is gathered from the 5G System (EPS). The RAN in 5G networks is called New Radio or NR, while the core network is called 5GC (5G Core). Together they compose the 5GS.
 * *Geographical Information*: Shall be present if the VLR can derive it from the stored service area identity, cell global identity or location area identity; otherwise shall be absent. If present, it shall provide the following parameters:
-    - Type of shape: described in 3GPP TS 23.032 (Geographical Area Description), it can only be `EllipsoidPointWithUncertaintyCircle` for MAP ATI or MAP PSI Geographical or Geodetic Information.
+    - Type of shape: described in 3GPP TS 23.032 (Geographical Area Description), it can only be _EllipsoidPointWithUncertaintyCircle_ for MAP ATI or MAP PSI Geographical or Geodetic Information.
     - Latitude: the angle between the equatorial plane and the perpendicular straight line from the Earth's center and the point expressed in the range -90°, +90°. As for WGS84 -World Geodetic System 1984-, Negative decimal values refer to South degrees of latitude, while positive to North degrees of latitude.
     - Longitude: the angle between the half-plane determined by the Greenwich meridian and the half-plane defined by the point and the polar axis, measured Eastward, expressed in the range -180°, +180°. As for WGS84, negative decimal values refer to West degrees of longitude, while positive to East degrees of longitude.
     - Uncertainty: method of describing the uncertainty for latitude and longitude indicating a radius, thus the subscriber is located within the circle defined by an ellipsoid and the radius. The uncertainty r, expressed in metres, is mapped to a number K, with the following formula: r = C((1+x)^k -1), with C = 10 and x = 0,1. With 0 * K * 127, a suitably useful range between 0 and 1800 kilometres is achieved for the uncertainty, while still being able to code down to values as small as 1 metre. The uncertainty can then be coded on 7 bits, as the binary encoding of K.
@@ -205,26 +214,28 @@ Besides *CGI* or *ECGI*, other location information parameters/identifications a
 image::images/geographical_coordinates.png[Geographical Coordinates, {half-size}, align="center"]
 
 * *Geodetic Information*: corresponds to the Calling Geodetic Location defined in ITU-T Recommendation Q.763. Shall be present if the VLR can derive it from the stored service area identity, cell global identity or location area identity; otherwise shall be absent.
-It adds the parameters `confidence` and `screening and presentation indicators, considering always that geodetic latitude is determined by the angle between the equatorial plane and the normal to the ellipsoid, whereas geocentric latitude is determined by the angle between the equatorial plane and line crossing the point to the centre of the ellipsoid.
-The confidence by which the position of a target entity is known to be within the shape description, (expressed as a percentage) is directly mapped from the 7 bit binary number K, except for K=0 which is used to indicate _no information_, and 100 < K < 128 which should not be used but may be interpreted as _no information_ if received.
+It adds the parameters _confidence_ and _screening and presentation indicators_, considering always that geodetic latitude is determined by the angle between the equatorial plane and the normal to the ellipsoid, whereas geocentric latitude is determined by the angle between the equatorial plane and line crossing the point to the centre of the ellipsoid. If present, it shall provide the following parameters:
     - Type of shape: as described previously for _Geographical Information_.
     - Latitude: the angle between the equatorial plane and the perpendicular to the plane tangent to the ellipsoid surface at the point expressed in the range -90°, +90°. As for WGS84 -World Geodetic System 1984-, Negative decimal values refer to South degrees of latitude, while positive to North degrees of latitude.
     - Longitude: as described previously for _Geographical Information_.
     - Uncertainty: as described previously for _Geographical Information_.
-    - Confidence:
+    - Confidence: the confidence by which the position of a target entity is known to be within the shape (expressed as a percentage).
+    - Screening and presentation indicators: as specified in ITU-T Q.763.
+
 
 .Geodetic coordinates.
 image::images/geodetic_coordinates.png[Geographical Coordinates, {half-size}, align="center"]
 
 * *VLR Number*: E.164 number which identifies the VLR (VLR Global Title address digits).
-* *MSC Number*: E.164 number which identifies the MSC (MSC Global Title address digits).
-* *SGSN Number*: E.164 number which identifies the SGSN (SGSN Global Title address digits).
+* *MSC Number*: E.164 number which identifies the MSC (i.e., the MSC Global Title address digits).
+* *SGSN Number*: E.164 number which identifies the SGSN (i.e., the SGSN Global Title address digits).
 * *MME Name*: string which contains the MME Diameter identity User-Name in a format consistent with the NAI specification.
+* *AMF Address*: the Fully Qualified Domain Name (FQDN) identifying the 5GS Access and Mobility Management Function (AMF).
 * *Age of Location Information*: indication in minutes of how old is the gathered location information.
 * *Subscriber State*: indication of whether the subscriber is idle or busy, attached or detached, not provide by VLR (CS domain), not provided by SGSN or MME, PDP active reachable or not for paging (PS domain), or determined not reachable by the network.
 * *Not Reachable Reason*: whenever the Subscriber State is determined not reachable by the network, the reason may vary from IMSI detached, restricted area, MS purged or not registered.
-* *MS Classmark*: descriptor of radio network-related capabilities of the MS or UE in use by the served subscriber (e.g MT-SMS, voice broadcast or group call services, etc.).
-* *GRPS MS Class*: includes two elements: MS network capabilities (e.g. SMS) and MS radio access capabilities (e.g. radio access technologies support).
+* *MS Classmark*: descriptor of radio network-related capabilities of the MS or UE in use by the served subscriber (e.g., MT-SMS, voice broadcast or group call services, etc.).
+* *GPRS MS Class*: includes two elements: MS network capabilities (e.g. SMS) and MS radio access capabilities (e.g. radio access technologies support).
 * *IMEI*: International Mobile Equipment Identity as for 3GPP TS 22.016/23.003.
 
 More advanced location procedures like MAP PSL/SLR or analogous Diameter based PLR/PLA and LRR/LRA, as well as those involving SUPL sessions in the user plane,
@@ -236,7 +247,7 @@ namely:
         ... `EllipsoidPoint`
         ... `EllipsoidPointWithUncertaintyCircle`
         ... `EllipsoidPointWithUncertaintyEllipse`
-        ... `Polygon` (encoding be filled in in the *Additional Location Estimate* parameter).
+        ... `Polygon` (encoding shall be filled  in the *Additional Location Estimate* parameter).
         ... `EllipsoidPointWithAltitude` (encoding shall be filled in the *Additional Location Estimate* parameter.
         ... `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid`
         ... `EllipsoidArc`.
@@ -251,7 +262,7 @@ namely:
     - *Uncertainty Inner Radius*: Inner radius uncertainty (in meters) only applicable to type of shape `EllipsoidArc` (see its description for better understanding of this parameter).
     - *Offset Angle*: applicable only applies to type of shape `EllipsoidArc` (see its description for better understanding of this parameter).
     - *Included Angle*: applicable only applies to type of shape `EllipsoidArc` (see its description for better understanding of this parameter).
-    - *Confidence*: the confidence (in percentaje) by which the position of a target entity is known to be within the shape description (expressed as a percentage). Only applies to types of shapes `EllipsoidPointWithUncertaintyEllipse`, `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid` and `EllipsoidArc` (see their description for better understanding of this parameter).
+    - *Confidence*: the confidence (in percentage) by which the position of a target entity is known to be within the shape description (expressed as a percentage). Only applies to types of shapes `EllipsoidPointWithUncertaintyEllipse`, `EllipsoidPointWithAltitudeAndUncertaintyEllipsoid` and `EllipsoidArc` (see their description for better understanding of this parameter).
 * *Age of Location Estimate*: indication in minutes of how old is the gathered location estimate.
 * *Velocity Estimate*:
     - *Horizontal Speed*: the horizontal speed gives the magnitude of the horizontal component of the velocity of the target entity.
@@ -261,23 +272,23 @@ namely:
     - *Uncertainty Vertical Speed*: uncertainty of the vertical speed.
     - *Velocity Type*: type of velocity which could be:
         ... `HorizontalVelocity`: characterized by the horizontal speed and bearing. The horizontal speed gives the magnitude of the horizontal component of the velocity of a target entity. The bearing provides the direction of the horizontal component of velocity taken clockwise from North.
-        ... `HorizontalWithVerticalVelocity`: characterized by horizontal speed, bearing, vertical speed and direction. The horizontal speed and bearing characterise the horizontal component of velocity. The vertical speed and direction provides the component of velocity of a target entity in a vertical direction.
+        ... `HorizontalWithVerticalVelocity`: characterized by horizontal speed, bearing, vertical speed and direction. The horizontal speed and bearing characterize the horizontal component of velocity. The vertical speed and direction provides the component of velocity of a target entity in a vertical direction.
         ... `HorizontalVelocityWithUncertainty`: Horizontal velocity with uncertainty is characterized by a horizontal speed and bearing, giving a horizontal velocity vector V, and an uncertainty speed s.
         ... `HorizontalWithVerticalVelocityAndUncertainty`: Horizontal and vertical velocity with uncertainty is characterized by a horizontal speed and bearing, giving a horizontal velocity vector Vx,y, a vertical speed and direction giving a vertical velocity component Vz,and uncertainty speeds s1 and s2.
 * *Periodic LDR Info*: Reporting-Interval x Reporting-Amount shall not exceed 8639999 (99 days, 23 hours, 59 minutes and 59 seconds) for compatibility with OMA MLP and RLP
     - *Reporting Amount*: reporting frequency (vales between 1 and 8639999)
     - *Reporting Interval*: reporting interval in seconds (1 and 8639999).
 * *Deferred MT-LR Data*:
-    - *Deferred Location Event Type*: type of event that triggered the location report: area event information (UE/MS available, entering, leaving or being inside an area), a motion event, periodic location reports or maximum interval expiration.
+    - *Deferred Location Event Type*: type of event that triggered the location report: _area event information_ (`UE/MS available`, `entering`, `leaving` or `being inside` an area), a `motion event`, `periodic location reports` or `maximum interval expiration`.
     - *Termination Cause*: `Normal`, `Error Undefined`, `Internal timeout`, `Congestion`, `MT_LR_Restart`, `Privacy Violation`, `Shape of Location Estimate Not Supported`, `Subscriber Termination`, `UE Termination`, `Network Termination`.
     - *Serving Node*: in case the Termination Cause equals _MT_LR_Restart_, the serving node values, i.e. `MME Name`, `MME Realm`, `SGSN Name`, `SGSN Realm`, `SGSN Number`, `MSC Number`, `AAA Server Name`, `LCS Capabilities set`.
 * *Delayed Location Reporting Data*:
     - *Termination Cause*: as explained for _Deferred MT-LR Data_.
     - *Serving Node*: as explained for _Deferred MT-LR Data_.
-* *Civic Address*: indicates the civic address at which the UE is located.
+* *Civic Address*: indicates the civic address at which the UE is located, formatted as per https://datatracker.ietf.org/doc/html/rfc5139[IETF RFC 5139] and https://www.rfc-editor.org/rfc/rfc6848.html[IETF RFC 6848].
 * *Barometric Pressure*: indicates the barometric pressure of the geographical area at which the UE is located
 
-Either SS7 MAP LSM operations (MAP SRIforLCS, PSL and SLR) or Diameter-based operations over SLh/SLg interfaces are procedures which rely on the existence of an SMLC/E-SMLC for the `Location-Estimate` gathering. Also, positioning technologies must rely on the RAN as will be described in the chapter describing SMLC and E-SMLC further in this document.
+Either SS7 MAP LSM operations (MAP SRILCS, PSL and SLR) or Diameter-based operations over SLh/SLg interfaces are procedures which rely on the existence of an SMLC/E-SMLC for the `Location-Estimate` gathering. Also, positioning technologies must rely on the RAN as will be described in the chapter describing SMLC and E-SMLC further in this document.
 
 === Geographical Type Of Shapes
 
@@ -287,7 +298,7 @@ An _ellipsoid point_ can be considered as a point on the surface of the ellipsoi
 
 ==== EllipsoidPointWithUncertaintyCircle
 
-The _ellipsoid point with uncertainty circle_ is characterized by the coordinates of an ellipsoid point (the origin) and a distance r. It describes formally the set of points on the ellipsoid which are at a distance from the origin less than or equal to r, the distance being the geodesic distance over the ellipsoid, i.e., the minimum length of a path staying on the ellipsoid and joining the two points.
+The _ellipsoid point with uncertainty circle_ is characterized by the coordinates of an ellipsoid point (the origin) and a distance _r_. It describes formally the set of points on the ellipsoid which are at a distance from the origin less than or equal to _r_, the distance being the geodesic distance over the ellipsoid, i.e., the minimum length of a path staying on the ellipsoid and joining the two points.
 
 As for the ellipsoid point, this can be used to indicate points on the Earth surface, or near the Earth surface, of same latitude and longitude.
 
@@ -296,9 +307,9 @@ The typical use of this shape is to indicate a point when its position is known 
 
 ==== EllipsoidPointWithUncertaintyEllipse
 
-The _ellipsoid point with uncertainty ellipse_ is characterized by the coordinates of an ellipsoid point (the origin), distances r1 and r2 and an angle of orientation A.
+The _ellipsoid point with uncertainty ellipse_ is characterized by the coordinates of an ellipsoid point (the origin), distances _r1_ and _r2_ and an angle of orientation A.
 
-It describes formally the set of points on the ellipsoid which fall within or on the boundary of an ellipse with semi-major axis of length r1 oriented at angle A (0 to 180º) measure clockwise from north and semi-minor axis of length r2, the distances being the geodesic distance over the ellipsoid, i.e., the minimum length of a path staying on the ellipsoid and joining the two points, as show in next figure.
+It describes formally the set of points on the ellipsoid which fall within or on the boundary of an ellipse with semi-major axis of length _r1_ oriented at angle A (0 to 180º) measure clockwise from north and semi-minor axis of length _r2_, the distances being the geodesic distance over the ellipsoid, i.e., the minimum length of a path staying on the ellipsoid and joining the two points, as show in next figure.
 
 .Description of an uncertainty Ellipse.
 image::images/UncertaintyEllipse.png[UncertaintyEllipse, align="center"]
@@ -325,9 +336,9 @@ image::images/Polygon.png[Polygon, align="center"]
 
 ==== EllipsoidPointWithAltitudeAndUncertaintyEllipsoid
 
-The _ellipsoid point with altitude and uncertainty ellipsoid_ is characterized by the coordinates of an ellipsoid point with altitude, distances r1 (the `semi-minor uncertainty`), r2 (the `semi-minor uncertainty`) and r3 (the `vertical uncertainty`) and an angle of orientation A (the `vertical uncertainty`).
+The _ellipsoid point with altitude and uncertainty ellipsoid_ is characterized by the coordinates of an ellipsoid point with altitude, distances _r1_ (the `semi-minor uncertainty`), _r2_ (the `semi-minor uncertainty`) and _r3_ (the `vertical uncertainty`) and an angle of orientation A (the `vertical uncertainty`).
 
-It describes formally the set of points which fall within or on the surface of a general (three dimensional) ellipsoid centered on an ellipsoid point with altitude whose real semi-major, semi-mean and semi-minor axis are some permutation of r1, r2, r3 with r1 ≥ r2. The r3 axis is aligned vertically, while the r1 axis, which is the semi-major axis of the ellipse in a horizontal plane that bisects the ellipsoid, is oriented at an angle A (0 to 180 degrees) measured clockwise from North, as illustrated in next figure.
+It describes formally the set of points which fall within or on the surface of a general (three-dimensional) ellipsoid centered on an ellipsoid point with altitude whose real semi-major, semi-mean and semi-minor axis are some permutation of _r1_, _r2_, _r3_ with _r1_ ≥ _r2_. The _r3_ axis is aligned vertically, while the _r1_ axis, which is the semi-major axis of the ellipse in a horizontal plane that bisects the ellipsoid, is oriented at an angle A (0 to 180 degrees) measured clockwise from North, as illustrated in next figure.
 
 .Description of an Ellipsoid Point with Altitude and Uncertainty Ellipsoid.
 image::images/EllipsoidPointWithAltitudeAndUncertaintyEllipsoid.png[EllipsoidPointWithAltitudeAndUncertaintyEllipsoid, align="center"]
@@ -341,7 +352,7 @@ image::images/EllipsoidPointWithAltitude.png[EllipsoidPointWithAltitude, align="
 
 ==== EllipsoidArc
 
-An ellipsoid arc is a shape characterized by the co-ordinates of an ellipsoid point o (the origin), inner radius r1, uncertainty radius r2, both radii being geodesic distances over the surface of the ellipsoid, the offset angle (&#952;) between the first defining radius of the ellipsoid arc and North, and the included angle (&#946;) being the angle between the first and second defining radii. The offset angle is within the range of 0 to 359,999 degrees while the included angle is within the range from 0,000…1 to 360 degrees. This is to be able to describe a full circle, 0 to 360 degrees.
+An ellipsoid arc is a shape characterized by the co-ordinates of an ellipsoid point o (the origin), inner radius _r1_, uncertainty radius _r2_, both radii being geodesic distances over the surface of the ellipsoid, the offset angle (&#952;) between the first defining radius of the ellipsoid arc and North, and the included angle (&#946;) being the angle between the first and second defining radii. The offset angle is within the range of 0 to 359,999 degrees while the included angle is within the range from 0,000…1 to 360 degrees. This is to be able to describe a full circle, 0 to 360 degrees.
 
 This shape-definition can also be used to describe a sector (inner radius equal to zero), a circle (included angle equal to 360 degrees) and other circular shaped areas. The confidence level with which the position of a target entity is included within the shape is also included.
 
@@ -351,31 +362,31 @@ image::images/EllipsoidArc.png[EllipsoidArc, align="center"]
 [[_ss7_operations]]
 == SS7 MAP Operations
 
-Both MAP ATI and MAP PSI could be conveyed to Visited-PLMN (offnet) rather than H-PLMN (on-net), but either would demand roaming agreements and allowed SS7 credentials.
-SS7 *MAP ATI* (`Any-Time-Interrogation`), is used to gather subscriber information from the HLR including Cell Global Identification, age of location information and potentially other location and subscriber information parameters such as the IMEI, IMSI, MNP information, location number, VLR/MSC/SGSN SCCP addresses, MME name, base station geographic/geodetic coordinates, E-UTRAN’s CGI (LTE Cell ID), LTE tracking area identity, subscriber’s state (idle or busy), GPRS routeing area identity, LSA identity, etc.
+Specified by Both MAP ATI and MAP PSI could be conveyed to Visited-PLMN (offnet) rather than H-PLMN (on-net), but either would demand roaming agreements and allowed SS7 credentials.
+SS7 *MAP ATI* (`Any-Time-Interrogation`), is used to gather subscriber information from the HLR including Cell Global Identification, age of location information and potentially other location and subscriber information parameters such as the IMEI, IMSI, MNP information, location number, VLR/MSC/SGSN SCCP addresses, MME name, base station geographic/geodetic coordinates, E-UTRAN CGI (LTE Cell ID), LTE tracking area identity, subscriber's state, GPRS routeing area identity, LSA identity, 5GS Location Information including NR-CGI (5G Cell ID), NR tracking area identity, last Radio Access Technology (RAT) type, AMF address, etc.
 
-SS7 *MAP PSI* (`Provide Subscriber Information`), is used to gather subscriber information as with MAP ATI but from the MSC/VLR or SGSN is currently attached to. This MAP operation is preceded by MAP SRIforSM or SRI for routing it to the appropriate MSC/VLR or SGSN, thus the subscriber information gathered from PSI also contains the IMSI.
+SS7 *MAP PSI* (`Provide Subscriber Information`), is used to gather subscriber information as with MAP ATI but from the MSC/VLR or SGSN is currently attached to. This MAP operation is preceded by MAP SRISM or SRI for routing it to the appropriate MSC/VLR or SGSN, thus the subscriber information gathered from PSI also contains the IMSI.
 
 UMTS Location Services under SS7 MAP Location Services Management (LSM) set of operations are currently under final stages of implementation and deployment.
 Always as for 3GPP specs, a Stand-Alone SMLC can be placed within the BSC for triggering more precise location procedures. For 3G cellular networks (UMTS/HDSPA, HSPA+) the SMLC interfaces the MSC and/or the SGSN instead of being placed within the BSC (which in the UTRAN is now denominated as Radio Network Controller -RNC-). Naturally, accuracy comes with a price. When these dearer location capabilities are available, the GMLC may request routing information from the HLR via the Lh interface or HSS (Home Subscriber Server) via the SLh/Lh interface.
 
-SS7 *MAP SRIforLCS* (`Send Routing Information for Location Services`), to gather IMSI and core network entity address (MSC or SGSN) to which send further location request.
+SS7 *MAP SRILCS* (`Send Routing Information for Location Services`), to gather IMSI and core network entity address (MSC or SGSN) to which send further location request.
 
-SS7 *MAP PSL* (`Provide Subscriber Location`), to gather location information from the UTRAN (UMTS Terrestrial Radio Access Network), which should include, besides Cell Global Identity, location estimates in geographic coordinates of the target User Equipment, depending on available positioning methods (e.g. E-OTD, OTDOA, UTDOA, A-GPS, etc.).
+SS7 *MAP PSL* (`Provide Subscriber Location`), to gather location information from the UTRAN (UMTS Terrestrial Radio Access Network), which should include, besides Cell Global Identity, location estimates in geographic coordinates of the target User Equipment, depending on available positioning methods (e.g. E-OTD, OTDOA, U-TDOA, A-GPS, etc.).
 
 SS7 *MAP SLR* (`Subscriber Location Report`), to gather location of a target User Equipment from the MSC or SGSN when a request for location is either implicitly administered or made at some earlier time in MAP PSL for event based deferred type of location.
 
 [[_diameter_operations]]
-== Diameter LTE/IMS Location Services Operatioons
+== Diameter LTE/IMS Location Services Operations
 
 While Lh interface resides in a Circuit-Switched Core Network and therefore demands SS7 MAP operations, SLh is placed in the Evolved Packet Core (EPC) and is a Diameter-based interface for LTE location services, as specified by 3GPP TS 29.173.
-After performing registration authorization, it may send positioning requests to either VMSC (Visited Mobile Switching Centre), SGSN (Serving GPRS Support Node), MSCS (Mobile Switching Centre Server) or MME (Mobility Management Entity) and receives final location estimates from the corresponding entity via the Lg, Lgd or SLg interface. Again, Lg/Lgd interfaces demand SS7 MAP operations while SLg is a Diameter-based interface for LTE location occupying ELP procedures, where ELP stands for EPC Location Protocol as specified by 3GPP TS 29.172.
+After performing registration authorization, it may send positioning requests to either a Mobile Switching Centre (MSC), Serving GPRS Support Node (SGSN), or Mobility Management Entity (MME) and receives final location estimates from the corresponding entity via the Lg, Lgd or SLg interface. While Lg interface demand SS7 MAP operations while SLg/Lgd is a Diameter-based interface for LTE location occupying ELP procedures, where ELP stands for EPC Location Protocol as specified by 3GPP TS 29.172.
 
-Diameter `Routing-Information-Request/Answer` (*RIR/RIA*): analogous to MAP SRIforLCS but over Diameter based SLh interface between GMLC and HSS.
+Diameter `Routing-Information-Request/Answer` (*RIR/RIA*): analogous to MAP SRILCS but over Diameter based SLh interface between the GMLC and the HSS.
 
-ELP `Provide-Location-Request/Answer` (*PLR/PLA*): analogous to MAP PSL but over Diameter-based Evolved Packet Core Location Protocol (ELP) SLg interface between GMLC and MME.
+ELP `Provide-Location-Request/Answer` (*PLR/PLA*): analogous to MAP PSL but over Diameter-based Evolved Packet Core Location Protocol (ELP) SLg interface between the GMLC and the MME or Lgd interface between the GMLC and the SGSN.
 
-ELP `Location-Report-Request/Answer` (*LRR/LRA*): analogous to MAP SLR, but over Diameter-based Evolved Packet Core Location Protocol (ELP) SLg interface between GMLC and MME.
+ELP `Location-Report-Request/Answer` (*LRR/LRA*): analogous to MAP SLR, but over Diameter-based Evolved Packet Core Location Protocol (ELP) SLg interface between the MME and the GMLC or Lgd interface between the SGSN and GMLC.
 
 A similar way to obtain location information, such as via SS7 MAP ATI or PSI, but from the IP Multimedia Subsystem (IMS) is through Diameter-based Sh interface (as defined by 3GPP TS 29.328/29.329), between a SIP-AS (SIP Application Server) and the HSS. Hence, by providing Sh Diameter resource adaptor, the GMLC can act as a SIP-AS and execute a User-Data-Request command to the HSS, from which the following can be retrieved:
 
@@ -390,19 +401,19 @@ Diameter `User-Data-Request/Answer` (*UDR/UDA*): similar to MAP ATI and/or MAP P
     - VLR Number
     - Age of location information
     - Current location information retrieved boolean value
-    - User Closed Subscriber Group Id (CSG-Id)
+    - Closed Subscriber Group Identity (CSG-Id)
     - E-UTRAN Cell Global Id
     - Tracking Area Id
     - Local Time Zone
 * PS Location Information:
-    - Cell Global Id
-    - Routing Area Id
+    - Cell Global Identification
+    - Routing Area Identification
     - Geographical Information
     - Geodetic Information
     - SGSN Number
     - Age of location information
     - Current location information retrieved boolean value
-    - User Closed Subscriber Group Id (CSG-Id)
+    - Closed Subscriber Group Identity (CSG-Id)
     - Visited PLMN ID
     - Local Time Zone
     - Radio Access Technology (RAT) Type
@@ -414,7 +425,7 @@ Diameter `User-Data-Request/Answer` (*UDR/UDA*): similar to MAP ATI and/or MAP P
     - MME Name
     - Age of location information
     - Current location information retrieved boolean value
-    - User Closed Subscriber Group Id (CSG-Id)
+    - Closed Subscriber Group Identity (CSG-Id)
     - Visited PLMN ID
     - Local Time Zone
     - Radio Access Technology (RAT) Type
@@ -431,8 +442,8 @@ Diameter `User-Data-Request/Answer` (*UDR/UDA*): similar to MAP ATI and/or MAP P
     - Local Time Zone
     - Radio Access Technology (RAT) Type
 
-In summary, location information retrieval within the control plane of a Mobile Core Network is done through the GMLC and its core network counterparts, which might include just the HLR/HSS and MSC/VLR, SGSN or MME, as well as the Stand-Alone Serving Mobile Location Centre (SAS) for location within the UTRAN (UMTS Terrestrial Radio Access Network) or Enhanced-SMLC (E-SMLC) for location within the E-UTRAN (Enhanced-UTRAN or LTE), along with the positioning methods available in the RAN (OTDOA, UTDOA, E-OTD, etc.). If available and up to this version of Extended-GMLC, 5GS location information can be retrieved indirectly from the Sh interface.
+In summary, location information retrieval within the control plane of a Mobile Core Network is done through the GMLC and its core network counterparts, which might include just the HLR/HSS and MSC/VLR, SGSN or MME, as well as the Stand-Alone Serving Mobile Location Centre (SAS) for location within the UTRAN (UMTS Terrestrial Radio Access Network) or Enhanced-SMLC (E-SMLC) for location within the E-UTRAN (Enhanced-UTRAN or LTE), along with the positioning methods available in the RAN (OTDOA, U-TDOA, E-OTD, etc.). If available and up to this version of Extended-GMLC, 5GS location information can be retrieved indirectly from the Sh interface.
 
 Location information retrieval in the user plane is performed through a positioning system using OMA's Secure User Plane Location (SUPL) protocol, also known as SLP (SUPL Location Platform). Although it's not part of {this-platform} {this-application} yet, user plane positioning via SUPL is currently being developed. As mentioned in numerous white papers, a combination of procedures in either planes is considered the ideal solution by the industry for location services in Next Generation Networks.
 
-Up to this point, what is known as _Immediate Location Request_ has been covered. {this-platform} {this-application} can also handle _Deferred Location Requests_, which represents retrieving of location contingent on some current or future events where the response from the LCS Server to the LCS Client may occur after the request was sent, as described in 3GPP TS 23.271. When a deferred location request is triggered by the GMLC, event-based _Subscriber Location Reports_, either conveyed through MAP or ELP are sent back to the GMLC by the entity at which the target mobile equipment is attached to (VMSC, MSCS, SGSN or MME).
+Up to this point, what is known as _Immediate Location Request_ has been covered. {this-platform} {this-application} can also handle _Deferred Location Requests_, which represents retrieving of location contingent on some current or future events where the response from the LCS Server to the LCS Client may occur after the request was sent, as described in 3GPP TS 23.271. When a deferred location request is triggered by the GMLC, event-based _Subscriber Location Reports_, either conveyed through MAP or ELP are sent back to the GMLC by the entity at which the target mobile equipment is attached to (MSC/VLR, SGSN or MME).

@@ -54,40 +54,40 @@ public class SLgAreaEventInfoHelper {
         return areaTypeString;
     }
 
-    public static byte[] setAreaIdtoTbcd(String[] areaId, String areaType) {
-        Integer mcc = null, mnc = null, lac = null, ci = null, sac = null, uci = null, rac = null, tac = null, enbid = null;
-        Long eci = null;
-        byte[] areaIdTbcd = null;
+    public static byte[] setAreaIdToTbcd(String[] areaId, String areaType) {
+        int mcc = -1, mnc = -1, lac = -1, ci = -1, uci = -1, rac = -1, tac = -1, enbid = -1;
+        long eci = -1;
+        byte[] areaIdTbcd;
         for (int i=0; i < areaId.length; i++) {
             if (i==0)
-                mcc = Integer.valueOf(areaId[i]);
+                mcc = Integer.parseInt(areaId[i]);
             if (i==1)
-                mnc = Integer.valueOf(areaId[i]);
+                mnc = Integer.parseInt(areaId[i]);
             if (i==2) {
                 if (areaType.equalsIgnoreCase("locationAreaId") || areaType.equalsIgnoreCase("cellGlobalId") ||
                     areaType.equalsIgnoreCase("routingAreaId"))
-                    lac = Integer.valueOf(areaId[i]);
+                    lac = Integer.parseInt(areaId[i]);
                 else if (areaType.equalsIgnoreCase("trackingAreaId"))
-                    tac = Integer.valueOf(areaId[i]);
+                    tac = Integer.parseInt(areaId[i]);
                 else if (areaType.equalsIgnoreCase("utranCellId"))
-                    uci = Integer.valueOf(areaId[i]);
+                    uci = Integer.parseInt(areaId[i]);
                 else if (areaType.equalsIgnoreCase("eUtranCellId")) {
-                    enbid = Integer.valueOf(areaId[i]);
-                    eci = Long.valueOf(areaId[i]);
+                    enbid = Integer.parseInt(areaId[i]);
+                    eci = Long.parseLong(areaId[i]);
                 }
             }
             if (i==3) {
                 if (areaType.equalsIgnoreCase("cellGlobalId") || areaType.equalsIgnoreCase("routingAreaId"))
-                    ci = sac = rac = Integer.valueOf(areaId[i]);
+                    ci = rac = Integer.parseInt(areaId[i]);
                 else if (areaType.equalsIgnoreCase("eUtranCellId"))
-                    ci = Integer.valueOf(areaId[i]);
+                    ci = Integer.parseInt(areaId[i]);
             }
         }
         if (areaType.equalsIgnoreCase("countryCode")) {
             if (mcc < 1 || mcc > 999)
                 return null;
             else
-                return areaIdTbcd = parseTBCD(String.valueOf(mcc));
+                return parseTBCD(String.valueOf(mcc));
         } else if (areaType.equalsIgnoreCase("plmnId")) {
             try {
                 PlmnId plmnId = new PlmnIdImpl(mcc, mnc);
@@ -142,7 +142,7 @@ public class SLgAreaEventInfoHelper {
         } else if (areaType.equalsIgnoreCase("eUtranCellId")) {
             EUTRANCGIImpl ecgi = new EUTRANCGIImpl();
             try {
-                if (ci != null)
+                if (ci > -1)
                     ecgi.setData(mcc, mnc, enbid, ci);
                 else
                     ecgi.setData(mcc, mnc, eci);
@@ -152,6 +152,6 @@ public class SLgAreaEventInfoHelper {
                 return null;
             }
         }
-        return areaIdTbcd;
+        return null;
     }
 }

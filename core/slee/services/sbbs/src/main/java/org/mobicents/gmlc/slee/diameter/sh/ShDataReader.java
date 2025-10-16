@@ -1,7 +1,6 @@
 package org.mobicents.gmlc.slee.diameter.sh;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import java.io.StringReader;
@@ -100,8 +99,6 @@ public class ShDataReader {
             Extension shData5gsLocation = (Extension) jaxbUnmarshaller5GSLocationInfo.unmarshal(xmlShData5GSLocationInfo);
             this.sh5GSLocationInfo = shData5gsLocation.getExtension();
 
-        } catch (JAXBException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }

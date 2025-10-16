@@ -86,7 +86,7 @@ public class RoutingAreaIdImpl extends OctetStringBase implements RoutingAreaId 
       throw new MAPException("Data length must equal 6");
 
     AsnInputStream ansIS = new AsnInputStream(data);
-    String res = null;
+    String res;
     try {
       res = TbcdString.decodeString(ansIS, 3);
     } catch (IOException e) {
@@ -111,7 +111,7 @@ public class RoutingAreaIdImpl extends OctetStringBase implements RoutingAreaId 
       throw new MAPException("Data length must equal 6");
 
     AsnInputStream ansIS = new AsnInputStream(data);
-    String res = null;
+    String res;
     try {
       res = TbcdString.decodeString(ansIS, 3);
     } catch (IOException e) {
@@ -127,7 +127,7 @@ public class RoutingAreaIdImpl extends OctetStringBase implements RoutingAreaId 
     if (res.length() == 5) {
       sMnc = res.substring(3);
     } else {
-      sMnc = res.substring(4) + res.substring(3, 4);
+      sMnc = res.substring(4) + res.charAt(3);
     }
 
     return Integer.parseInt(sMnc);
@@ -140,8 +140,7 @@ public class RoutingAreaIdImpl extends OctetStringBase implements RoutingAreaId 
     if (data.length != 6)
       throw new MAPException("Data length must equal 6");
 
-    int lac = (data[3] & 0xFF) * 256 + (data[4] & 0xFF);
-    return lac;
+    return (data[3] & 0xFF) * 256 + (data[4] & 0xFF);
   }
 
   public int getRAC() throws MAPException {
@@ -151,8 +150,7 @@ public class RoutingAreaIdImpl extends OctetStringBase implements RoutingAreaId 
     if (data.length != 6)
       throw new MAPException("Data length must equal 6");
 
-    int rac = (data[5] & 0xFF) /** 256 + (data[6] & 0xFF)*/;
-    return rac;
+    return (data[5] & 0xFF); /** 256 + (data[6] & 0xFF)*/
   }
 
   @Override
@@ -171,6 +169,7 @@ public class RoutingAreaIdImpl extends OctetStringBase implements RoutingAreaId 
       rac = this.getRAC();
       correctData = true;
     } catch (MAPException e) {
+      e.printStackTrace();
     }
 
     StringBuilder sb = new StringBuilder();
@@ -196,7 +195,7 @@ public class RoutingAreaIdImpl extends OctetStringBase implements RoutingAreaId 
   /**
    * XML Serialization/Deserialization
    */
-  protected static final XMLFormat<RoutingAreaIdImpl> ROUTING_AREA_ID_XML = new XMLFormat<RoutingAreaIdImpl>(
+  protected static final XMLFormat<RoutingAreaIdImpl> ROUTING_AREA_ID_XML = new XMLFormat<>(
       RoutingAreaIdImpl.class) {
 
     @Override

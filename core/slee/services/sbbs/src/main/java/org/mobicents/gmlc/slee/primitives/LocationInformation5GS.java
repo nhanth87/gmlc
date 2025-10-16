@@ -17,7 +17,7 @@ public interface LocationInformation5GS extends Serializable {
 
     TAId getTrackingAreaIdentity();
 
-    //TrackingAreaId5GS getTrackingAreaIdentity5GS();
+    TrackingAreaId5GS getTrackingAreaIdentity5GS();
 
     GeographicalInformation getGeographicalInformation();
 

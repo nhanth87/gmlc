@@ -29,8 +29,7 @@ public class SGSNNumber implements Serializable {
   }
 
   public byte[] getSGSNNumberBytes(String address) {
-    byte[] bytes = Base64.decodeBase64(address.getBytes());
-    return bytes;
+    return Base64.decodeBase64(address.getBytes());
   }
 
   @Override

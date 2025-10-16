@@ -1,5 +1,7 @@
 package org.mobicents.gmlc.slee.cdr.plain;
 
+import com.google.common.collect.Multimap;
+import net.java.slee.resource.diameter.slg.events.avp.LCSFormatIndicator;
 import net.java.slee.resource.diameter.slg.events.avp.LCSQoSClass;
 import net.java.slee.resource.diameter.slg.events.avp.LocationEvent;
 import org.apache.log4j.Logger;
@@ -15,12 +17,15 @@ import org.mobicents.gmlc.slee.cdr.tasks.TaskManager;
 import org.mobicents.gmlc.slee.diameter.sh.LocalTimeZone;
 import org.mobicents.gmlc.slee.primitives.EUTRANCGI;
 import org.mobicents.gmlc.slee.primitives.EUTRANCGIImpl;
+import org.mobicents.gmlc.slee.primitives.EUTRANPositioningData;
 import org.mobicents.gmlc.slee.primitives.LocationInformation5GS;
 import org.mobicents.gmlc.slee.primitives.Polygon;
 import org.mobicents.gmlc.slee.primitives.RoutingAreaId;
 import org.mobicents.gmlc.slee.primitives.RoutingAreaIdImpl;
 import org.mobicents.gmlc.slee.primitives.TrackingAreaId;
 import org.mobicents.gmlc.slee.primitives.TrackingAreaIdImpl;
+import org.mobicents.gmlc.slee.primitives.CivicAddressElements;
+import org.mobicents.gmlc.slee.primitives.CivicAddressXmlReader;
 import org.restcomm.protocols.ss7.indicator.AddressIndicator;
 
 import org.restcomm.protocols.ss7.map.api.MAPException;
@@ -38,6 +43,8 @@ import org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoS;
 import org.restcomm.protocols.ss7.map.api.service.lsm.DeferredmtlrData;
 import org.restcomm.protocols.ss7.map.api.service.lsm.PeriodicLDRInfo;
 import org.restcomm.protocols.ss7.map.api.service.lsm.ServingNodeAddress;
+import org.restcomm.protocols.ss7.map.api.service.lsm.UtranAdditionalPositioningData;
+import org.restcomm.protocols.ss7.map.api.service.lsm.UtranCivicAddress;
 import org.restcomm.protocols.ss7.map.api.service.lsm.VelocityEstimate;
 import org.restcomm.protocols.ss7.map.api.service.lsm.AccuracyFulfilmentIndicator;
 import org.restcomm.protocols.ss7.map.api.service.lsm.AddGeographicalInformation;
@@ -50,6 +57,8 @@ import org.restcomm.protocols.ss7.map.api.service.lsm.AdditionalNumber;
 import org.restcomm.protocols.ss7.map.api.service.lsm.LCSClientID;
 import org.restcomm.protocols.ss7.map.api.service.lsm.ReportingPLMNList;
 
+import org.restcomm.protocols.ss7.map.api.service.mobility.locationManagement.SupportedLCSCapabilitySets;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.EUtranCgi;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.GPRSMSClass;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformation;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformationEPS;
@@ -59,7 +68,11 @@ import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.PSSubscriberState;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.SubscriberInfo;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.SubscriberState;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.TAId;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.TypeOfShape;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberManagement.FQDN;
+import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.EUtranCgiImpl;
+import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.TAIdImpl;
 import org.restcomm.protocols.ss7.sccp.parameter.GlobalTitle;
 import org.restcomm.protocols.ss7.sccp.parameter.SccpAddress;
 
@@ -71,6 +84,7 @@ import javax.xml.bind.DatatypeConverter;
 import java.awt.geom.Point2D;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.Time;
@@ -78,8 +92,9 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.mobicents.gmlc.slee.gis.GeographicHelper.polygonCentroid;
 import static org.mobicents.gmlc.slee.utils.ByteUtils.bytesToHex;
@@ -147,7 +162,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
             if (this.logger.isFineEnabled()) {
                 this.logger.fine(data);
             } else {
-                this.cdrTracer.debug(data);
+                cdrTracer.debug(data);
             }
         }
     }
@@ -218,8 +233,8 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
     private static final String SEPARATOR = "|";
 
     /**
-     * @param gmlcCdrState
-     * @return
+     * @param gmlcCdrState GMLCCDRState object
+     * @return String
      */
     protected String toString(GMLCCDRState gmlcCdrState) {
 
@@ -232,7 +247,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date(time_stamp.getTime()));
         String time = new SimpleDateFormat("HH:mm:ss").format(new Time(time_stamp.getTime()));
 
-        if(sendCdrToGlass)
+        if (sendCdrToGlass)
             taskManager.start();
 
         // TIMESTAMP
@@ -310,7 +325,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
 
             // LOCAL SPC
             if (addressIndicator.isPCPresent()) {
-                cdrModel.setLocalSPC(localAddress.getSignalingPointCode() + "");
+                cdrModel.setLocalSPC(String.valueOf(localAddress.getSignalingPointCode()));
                 stringBuilder.append(localAddress.getSignalingPointCode()).append(SEPARATOR);
             } else {
                 cdrModel.setLocalSPC("");
@@ -319,7 +334,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
 
             // LOCAL SSN
             if (addressIndicator.isSSNPresent()) {
-                cdrModel.setLocalSSN(localAddress.getSubsystemNumber() + "");
+                cdrModel.setLocalSSN(String.valueOf(localAddress.getSubsystemNumber()));
                 stringBuilder.append(localAddress.getSubsystemNumber()).append(SEPARATOR);
             } else {
                 cdrModel.setLocalSSN("");
@@ -327,7 +342,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
             }
             // LOCAL ROUTING INDICATOR
             if (addressIndicator.getRoutingIndicator() != null) {
-                cdrModel.setLocalRoutingIndicator((byte) addressIndicator.getRoutingIndicator().getValue() + "");
+                cdrModel.setLocalRoutingIndicator(String.valueOf((byte) addressIndicator.getRoutingIndicator().getValue()));
                 stringBuilder.append((byte) addressIndicator.getRoutingIndicator().getValue()).append(SEPARATOR);
             } else {
                 stringBuilder.append(SEPARATOR);
@@ -338,7 +353,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
             GlobalTitle localAddressGlobalTitle = localAddress.getGlobalTitle();
             // Local GLOBAL TITLE INDICATOR
             if (localAddressGlobalTitle != null && localAddressGlobalTitle.getGlobalTitleIndicator() != null) {
-                cdrModel.setLocalGlobalTitleIndicator((byte) localAddressGlobalTitle.getGlobalTitleIndicator().getValue() + "");
+                cdrModel.setLocalGlobalTitleIndicator(String.valueOf((byte) localAddressGlobalTitle.getGlobalTitleIndicator().getValue()));
                 stringBuilder.append((byte) localAddressGlobalTitle.getGlobalTitleIndicator().getValue()).append(SEPARATOR);
             } else {
                 cdrModel.setLocalGlobalTitleIndicator("");
@@ -369,7 +384,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
 
             // REMOTE SPC
             if (addressIndicator.isPCPresent()) {
-                cdrModel.setRemoteSPC(remoteAddress.getSignalingPointCode() + "");
+                cdrModel.setRemoteSPC(String.valueOf(remoteAddress.getSignalingPointCode()));
                 stringBuilder.append(remoteAddress.getSignalingPointCode()).append(SEPARATOR);
             } else {
                 cdrModel.setRemoteSPC("");
@@ -378,7 +393,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
 
             // REMOTE SSN
             if (addressIndicator.isSSNPresent()) {
-                cdrModel.setRemoteSSN(remoteAddress.getSubsystemNumber() + "");
+                cdrModel.setRemoteSSN(String.valueOf(remoteAddress.getSubsystemNumber()));
                 stringBuilder.append(remoteAddress.getSubsystemNumber()).append(SEPARATOR);
             } else {
                 cdrModel.setRemoteSSN("");
@@ -387,7 +402,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
 
             // REMOTE ROUTING INDICATOR
             if (addressIndicator.getRoutingIndicator() != null) {
-                cdrModel.setRemoteRoutingIndicator((byte) addressIndicator.getRoutingIndicator().getValue() + "");
+                cdrModel.setRemoteRoutingIndicator(String.valueOf((byte) addressIndicator.getRoutingIndicator().getValue()));
                 stringBuilder.append((byte) addressIndicator.getRoutingIndicator().getValue()).append(SEPARATOR);
             } else {
                 cdrModel.setRemoteRoutingIndicator("");
@@ -398,7 +413,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
             GlobalTitle remoteAddressGlobalTitle = remoteAddress.getGlobalTitle();
             if (remoteAddressGlobalTitle != null && remoteAddressGlobalTitle.getGlobalTitleIndicator() != null) {
                 // REMOTE GLOBAL TITLE INDICATOR
-                cdrModel.setRemoteGlobalTitleIndicator((byte) remoteAddressGlobalTitle.getGlobalTitleIndicator().getValue() + "");
+                cdrModel.setRemoteGlobalTitleIndicator(String.valueOf((byte) remoteAddressGlobalTitle.getGlobalTitleIndicator().getValue()));
                 stringBuilder.append((byte) remoteAddressGlobalTitle.getGlobalTitleIndicator().getValue()).append(SEPARATOR);
             } else {
                 cdrModel.setRemoteGlobalTitleIndicator("");
@@ -426,10 +441,10 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         ISDNAddressString isdnAddressString = gmlcCdrState.getISDNAddressString();
         if (isdnAddressString != null) {
             // ISDN ADDRESS NATURE
-            cdrModel.setIsdnAddressNature((byte) isdnAddressString.getAddressNature().getIndicator() + "");
+            cdrModel.setIsdnAddressNature(String.valueOf((byte) isdnAddressString.getAddressNature().getIndicator()));
             stringBuilder.append((byte) isdnAddressString.getAddressNature().getIndicator()).append(SEPARATOR);
             // ISDN NUMBERING PLAN INDICATOR
-            cdrModel.setIsdnNumberingPlanIndicator((byte) isdnAddressString.getNumberingPlan().getIndicator() + "");
+            cdrModel.setIsdnNumberingPlanIndicator(String.valueOf((byte) isdnAddressString.getNumberingPlan().getIndicator()));
             stringBuilder.append((byte) isdnAddressString.getNumberingPlan().getIndicator()).append(SEPARATOR);
             // ISDN ADDRESS DIGITS
             cdrModel.setIsdnAddressDigits(isdnAddressString.getAddress());
@@ -458,7 +473,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         net.java.slee.resource.diameter.base.events.avp.DiameterIdentity diameterOriginHost = gmlcCdrState.getDiameterOriginHost();
         if (diameterOriginHost != null) {
             cdrModel.setDiameterOriginHost(diameterOriginHost.toString());
-            stringBuilder.append(diameterOriginHost.toString()).append(SEPARATOR); // DIAMETER COMMAND ORIGIN HOST
+            stringBuilder.append(diameterOriginHost).append(SEPARATOR); // DIAMETER COMMAND ORIGIN HOST
         } else {
             cdrModel.setDiameterOriginHost("");
             stringBuilder.append(SEPARATOR);
@@ -466,7 +481,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         net.java.slee.resource.diameter.base.events.avp.DiameterIdentity diameterOriginRealm = gmlcCdrState.getDiameterOriginRealm();
         if (diameterOriginRealm != null) {
             cdrModel.setDiameterOriginRealm(diameterOriginRealm.toString());
-            stringBuilder.append(diameterOriginRealm.toString()).append(SEPARATOR); // DIAMETER COMMAND ORIGIN REALM
+            stringBuilder.append(diameterOriginRealm).append(SEPARATOR); // DIAMETER COMMAND ORIGIN REALM
         } else {
             cdrModel.setDiameterOriginRealm("");
             stringBuilder.append(SEPARATOR);
@@ -478,7 +493,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         net.java.slee.resource.diameter.base.events.avp.DiameterIdentity diameterDestinationHost = gmlcCdrState.getDiameterDestHost();
         if (diameterDestinationHost != null) {
             cdrModel.setDiameterDestinationHost(diameterDestinationHost.toString());
-            stringBuilder.append(diameterDestinationHost.toString()).append(SEPARATOR); // DIAMETER COMMAND DESTINATION HOST
+            stringBuilder.append(diameterDestinationHost).append(SEPARATOR); // DIAMETER COMMAND DESTINATION HOST
         } else {
             cdrModel.setDiameterDestinationHost("");
             stringBuilder.append(SEPARATOR);
@@ -486,7 +501,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         net.java.slee.resource.diameter.base.events.avp.DiameterIdentity diameterDestinationRealm = gmlcCdrState.getDiameterDestRealm();
         if (diameterDestinationRealm != null) {
             cdrModel.setDiameterDestinationRealm(diameterDestinationRealm.toString());
-            stringBuilder.append(diameterDestinationRealm.toString()).append(SEPARATOR); // DIAMETER COMMAND DESTINATION REALM
+            stringBuilder.append(diameterDestinationRealm).append(SEPARATOR); // DIAMETER COMMAND DESTINATION REALM
         } else {
             cdrModel.setDiameterDestinationRealm("");
             stringBuilder.append(SEPARATOR);
@@ -505,7 +520,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         }
         int slpSocketPort = gmlcCdrState.getSlpSocketPort();
         if (slpSocketPort > -1) {
-            cdrModel.setSlpSocketPort(slpSocketPort + "");
+            cdrModel.setSlpSocketPort(String.valueOf(slpSocketPort));
             stringBuilder.append(slpSocketPort).append(SEPARATOR);
         } else {
             cdrModel.setSlpSocketPort("");
@@ -516,7 +531,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
          */
         InetAddress setSocketAddress = gmlcCdrState.getSetSocketAddress();
         if (setSocketAddress != null) {
-            cdrModel.setSetSocketAddress(setSocketAddress.getHostAddress().toString());
+            cdrModel.setSetSocketAddress(setSocketAddress.getHostAddress());
             stringBuilder.append(setSocketAddress.getHostAddress()).append(SEPARATOR);
         } else {
             cdrModel.setSetSocketAddress("");
@@ -524,12 +539,43 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         }
         int setSocketPort = gmlcCdrState.getSlpSocketPort();
         if (setSocketPort > -1) {
-            cdrModel.setSetSocketPort(setSocketPort + "");
+            cdrModel.setSetSocketPort(String.valueOf(setSocketPort));
             stringBuilder.append(setSocketPort).append(SEPARATOR);
         } else {
             cdrModel.setSetSocketPort("");
             stringBuilder.append(SEPARATOR);
         }
+
+        ISDNAddressString vlrNumber, mscNumber, sgsnNumber;
+        vlrNumber = mscNumber = sgsnNumber = null;
+        DiameterIdentity sgsnName, sgsnRealm, mmeName, mmeRealm, aaaServerName, servingNodeAddressMmeNumber;
+        sgsnName = sgsnRealm = mmeName = mmeRealm = aaaServerName = servingNodeAddressMmeNumber = null;
+        String typeOfShape, lsaIdPLMNSig, amfAddress, smsfAddress, state, notReachableReasonState, locationNumberAddress;
+        typeOfShape = lsaIdPLMNSig = amfAddress = smsfAddress = state = notReachableReasonState = locationNumberAddress = null;
+        Double latitude, longitude, uncertainty, uncertaintySemiMajorAxis, uncertaintySemiMinorAxis, uncertaintyAltitude, uncertaintyRadius,
+            angleOfMajorAxis, offsetAngle, includedAngle;
+        latitude = longitude = uncertainty = uncertaintySemiMajorAxis = uncertaintySemiMinorAxis = uncertaintyAltitude = uncertaintyRadius =
+            angleOfMajorAxis = offsetAngle = includedAngle = null;
+        int cgiMcc, cgiMnc, cgiLac, cgiCiorSac, raiMcc, raiMnc, raiLac, raiRac, lsaId, ecgiMcc, ecgiMnc, ecgiCi, taiMcc, taiMnc, taiTac,
+            nrCgiMcc, nrCgiMnc, nrTaiMcc, nrTaiMnc, nrTaiTac, geodeticConfidence, geodeticScreeningAndPresentationInd, innerRadius, estimateConfidence, altitude,
+            polygonNumberOfPoints, locationNumberNAI, locationNumberNNI, locationNumberNPI, locationNumberAddressRepresentationRestrictedIndicator,
+            locationNumberScreeningIndicator;
+        cgiMcc = cgiMnc = cgiLac = cgiCiorSac = raiMcc = raiMnc = raiLac = raiRac = lsaId = ecgiMcc = ecgiMnc = ecgiCi = taiMcc = taiMnc = taiTac =
+            nrCgiMcc = nrCgiMnc = nrTaiMcc = nrTaiMnc = nrTaiTac = geodeticConfidence = geodeticScreeningAndPresentationInd = innerRadius = estimateConfidence = altitude =
+                polygonNumberOfPoints = locationNumberNAI = locationNumberNNI = locationNumberNPI =
+                    locationNumberAddressRepresentationRestrictedIndicator = locationNumberScreeningIndicator = -1;
+        Integer ratTypeCode = null;
+        Long eci, eNBId, nci;
+        eci = eNBId = nci = null;
+        boolean saiPresent, geoInfo, locationNumber, locationNumberOddFlag;
+        saiPresent = geoInfo = locationNumber = locationNumberOddFlag = false;
+        Boolean deferredMTLRResponseIndicator;
+        PlmnId visitedPlmnId = null;
+        Polygon estimatePolygon = null;
+        LocalTimeZone localTimeZone = null;
+        MNPInfoRes mnpInfoResult = null;
+        MSClassmark2 msClassmark = null;
+        GPRSMSClass gprsMsClass = null;
 
         /**
          * CS Location Information (from Sh)
@@ -551,23 +597,30 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         /**
          * Sh 5GS Location Information (from Sh)
          */
-        LocationInformation5GS locationInformation5GS = gmlcCdrState.getLocationInformation5GS();
+        LocationInformation5GS shlocationInformation5GS = gmlcCdrState.getLocationInformation5GS();
         /**
-         * Subscriber Information (from ATI or PSI)
+         * Sh 5GS Location Information (from MAP)
+         */
+        org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformation5GS locationInformation5GS =
+                gmlcCdrState.getLocationInformation5GSFromMap();
+
+        /**
+         * Subscriber Information (from ATI or PSI or Sh UDR)
          */
         SubscriberInfo subscriberInfo = gmlcCdrState.getSubscriberInfo();
-        if (subscriberInfo != null || shLocationInformation != null || shLocationInformationEPS != null || shLocationInformationPS != null || locationInformation5GS != null) {
-            Boolean saiPresent = null;
+        if (subscriberInfo != null || shLocationInformation != null || shLocationInformationEPS != null
+                || shLocationInformationPS != null || shlocationInformation5GS != null) {
             /**
              * CS Location Information
              */
             LocationInformation locationInformation = null;
             if (subscriberInfo != null) {
                 locationInformation = subscriberInfo.getLocationInformation();
-            } else if (shLocationInformation != null || shLocationInformation != null || shLocationInformationEPS != null || locationInformation5GS != null) {
+            } else if (shLocationInformation != null || shLocationInformationEPS != null || shlocationInformation5GS != null) {
                 locationInformation = shLocationInformation;
             }
-            if (locationInformation != null || shLocationInformationEPS != null || locationInformation5GS != null) {
+            if (locationInformation != null || shLocationInformationEPS != null || shlocationInformation5GS != null
+                    || locationInformation5GS != null) {
                 if (locationInformation != null) {
                     /**
                      * LOCATION NUMBER
@@ -575,40 +628,33 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                     if (locationInformation.getLocationNumber() != null) {
                         try {
                             if (locationInformation.getLocationNumber().getLocationNumber() != null) {
-                                cdrModel.setLocationNumberOddFlag(locationInformation.getLocationNumber().getLocationNumber().isOddFlag() + "");
-                                stringBuilder.append(locationInformation.getLocationNumber().getLocationNumber().isOddFlag()).append(SEPARATOR);
-
-                                cdrModel.setLocationNumberNAI(locationInformation.getLocationNumber().getLocationNumber().getNatureOfAddressIndicator() + "");
-                                stringBuilder.append(locationInformation.getLocationNumber().getLocationNumber().getNatureOfAddressIndicator()).append(SEPARATOR);
-
-                                cdrModel.setLocationNumberINNI(locationInformation.getLocationNumber().getLocationNumber().getInternalNetworkNumberIndicator() + "");
-                                stringBuilder.append(locationInformation.getLocationNumber().getLocationNumber().getInternalNetworkNumberIndicator()).append(SEPARATOR);
-
-                                cdrModel.setLocationNumberNPI(locationInformation.getLocationNumber().getLocationNumber().getNumberingPlanIndicator() + "");
-                                stringBuilder.append(locationInformation.getLocationNumber().getLocationNumber().getNumberingPlanIndicator()).append(SEPARATOR);
-
-                                cdrModel.setLocationNumberAPRI(locationInformation.getLocationNumber().getLocationNumber().getAddressRepresentationRestrictedIndicator() + "");
-                                stringBuilder.append(locationInformation.getLocationNumber().getLocationNumber().getAddressRepresentationRestrictedIndicator()).append(SEPARATOR);
-
-                                cdrModel.setLocationNumberSI(locationInformation.getLocationNumber().getLocationNumber().getScreeningIndicator() + "");
-                                stringBuilder.append(locationInformation.getLocationNumber().getLocationNumber().getScreeningIndicator()).append(SEPARATOR);
-
-                                cdrModel.setLocationNumberAddress(locationInformation.getLocationNumber().getLocationNumber().getAddress());
-                                stringBuilder.append(locationInformation.getLocationNumber().getLocationNumber().getAddress()).append(SEPARATOR);
+                                locationNumber = true;
+                                // LOCATION NUMBER ODD FLAG
+                                locationNumberOddFlag = locationInformation.getLocationNumber().getLocationNumber().isOddFlag();
+                                cdrModel.setLocationNumberOddFlag(String.valueOf(locationNumberOddFlag));
+                                // LOCATION NUMBER NAI
+                                locationNumberNAI = locationInformation.getLocationNumber().getLocationNumber().getNatureOfAddressIndicator();
+                                cdrModel.setLocationNumberNAI(String.valueOf(locationNumberNAI));
+                                // LOCATION NUMBER NNI
+                                locationNumberNNI = locationInformation.getLocationNumber().getLocationNumber().getInternalNetworkNumberIndicator();
+                                cdrModel.setLocationNumberINNI(String.valueOf(locationNumberNNI));
+                                // LOCATION NUMBER NPI
+                                locationNumberNPI = locationInformation.getLocationNumber().getLocationNumber().getNumberingPlanIndicator();
+                                cdrModel.setLocationNumberNPI(String.valueOf(locationNumberNPI));
+                                // LOCATION NUMBER REPRESENTATION RESTRICTED INDICATOR
+                                locationNumberAddressRepresentationRestrictedIndicator = locationInformation.getLocationNumber().getLocationNumber().getAddressRepresentationRestrictedIndicator();
+                                cdrModel.setLocationNumberAPRI(String.valueOf(locationNumberAddressRepresentationRestrictedIndicator));
+                                // LOCATION NUMBER SCREENING INDICATOR
+                                locationNumberScreeningIndicator = locationInformation.getLocationNumber().getLocationNumber().getScreeningIndicator();
+                                cdrModel.setLocationNumberSI(String.valueOf(locationNumberScreeningIndicator));
+                                // LOCATION NUMBER ADDRESS
+                                locationNumberAddress = locationInformation.getLocationNumber().getLocationNumber().getAddress();
+                                cdrModel.setLocationNumberAddress(locationNumberAddress);
                             }
 
                         } catch (MAPException e) {
                             e.printStackTrace();
                         }
-                    } else {
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-
                     }
                     if (locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
                         /**
@@ -616,45 +662,39 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                          */
                         if (locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
                             try {
-                                cdrModel.setCellGlobalIdServiceAreaIdMCC(locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC() + "");
-                                stringBuilder.append(locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC()).append(SEPARATOR);
-
-                                cdrModel.setCellGlobalIdServiceAreaIdMNC(locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC() + "");
-                                stringBuilder.append(locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC()).append(SEPARATOR);
-
-                                cdrModel.setCellGlobalIdServiceAreaIdLac(locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac() + "");
-                                stringBuilder.append(locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac()).append(SEPARATOR);
-
-                                cdrModel.setCellGlobalIdServiceAreaIdCI(locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode() + "");
-                                stringBuilder.append(locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode()).append(SEPARATOR);
+                                // CGI MCC
+                                cgiMcc = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
+                                cdrModel.setCellGlobalIdServiceAreaIdMCC(String.valueOf(cgiMcc));
+                                // CGI MNC
+                                cgiMnc = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC();
+                                cdrModel.setCellGlobalIdServiceAreaIdMNC(String.valueOf(cgiMnc));
+                                // CGI LAC
+                                cgiLac = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
+                                cdrModel.setCellGlobalIdServiceAreaIdLac(String.valueOf(cgiLac));
+                                // CGI CI
+                                cgiCiorSac = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
+                                cdrModel.setCellGlobalIdServiceAreaIdCI(String.valueOf(cgiCiorSac));
                             } catch (MAPException e) {
                                 e.printStackTrace();
                             }
                         }
                         if (locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
                             try {
-
-                                cdrModel.setCellGlobalIdServiceAreaIdMCC(locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC() + "");
-                                stringBuilder.append(locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC()).append(SEPARATOR);
-
-                                cdrModel.setCellGlobalIdServiceAreaIdMNC(locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC() + "");
-                                stringBuilder.append(locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC()).append(SEPARATOR);
-
-                                cdrModel.setCellGlobalIdServiceAreaIdLac(locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac() + "");
-                                stringBuilder.append(locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac()).append(SEPARATOR);
-
+                                // CGI MCC
+                                cgiMcc = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC();
+                                cdrModel.setCellGlobalIdServiceAreaIdMCC(String.valueOf(cgiMcc));
+                                // CGI MNC
+                                cgiMnc = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC();
+                                cdrModel.setCellGlobalIdServiceAreaIdMNC(String.valueOf(cgiMnc));
+                                // CGI LAC
+                                cgiCiorSac = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac();
+                                cdrModel.setCellGlobalIdServiceAreaIdLac(String.valueOf(cgiCiorSac));
+                                // CGI CI
                                 cdrModel.setCellGlobalIdServiceAreaIdCI("");
-                                stringBuilder.append(SEPARATOR);
                             } catch (MAPException e) {
                                 e.printStackTrace();
                             }
                         }
-                    } else {
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-
                     }
                     /**
                      * SAI Present
@@ -665,141 +705,117 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                      * VLR NUMBER
                      */
                     if (locationInformation.getVlrNumber() != null) {
+                        vlrNumber = locationInformation.getVlrNumber();
                         cdrModel.setVlrNumber(locationInformation.getVlrNumber().getAddress());
-                        stringBuilder.append(locationInformation.getVlrNumber().getAddress()).append(SEPARATOR);
                     } else {
                         cdrModel.setVlrNumber("");
-                        stringBuilder.append(SEPARATOR);
                     }
                     /**
                      * MSC NUMBER
                      */
                     if (locationInformation.getMscNumber() != null) {
+                        mscNumber = locationInformation.getMscNumber();
                         cdrModel.setMscNumber(locationInformation.getMscNumber().getAddress());
-                        stringBuilder.append(locationInformation.getMscNumber().getAddress()).append(SEPARATOR);
                     } else {
                         cdrModel.setMscNumber("");
-                        stringBuilder.append(SEPARATOR);
                     }
                     /**
                      * AGE OF LOCATION INFORMATION
                      */
                     if (locationInformation.getAgeOfLocationInformation() != null) {
                         cdrModel.setAgeOfLocationInformation(locationInformation.getAgeOfLocationInformation().toString());
-                        stringBuilder.append(locationInformation.getAgeOfLocationInformation().intValue()).append(SEPARATOR);
                     } else {
                         cdrModel.setAgeOfLocationInformation("");
-                        stringBuilder.append(SEPARATOR);
                     }
                     /**
                      * GEOGRAPHICAL INFO
                      */
                     if (locationInformation.getGeographicalInformation() != null) {
+                        geoInfo = true;
                         // GEOGRAPHICAL INFO TYPE OF SHAPE
+                        typeOfShape = locationInformation.getGeographicalInformation().getTypeOfShape().toString();
                         cdrModel.setGeographicalInfoTypeOfShape(locationInformation.getGeographicalInformation().getTypeOfShape().toString());
-                        stringBuilder.append(locationInformation.getGeographicalInformation().getTypeOfShape()).append(SEPARATOR);
                         // GEOGRAPHICAL INFO LATITUDE
                         if (locationInformation.getGeographicalInformation().getLatitude() != 0.0) {
                             String formattedGeographicalInformationLatitude;
                             formattedGeographicalInformationLatitude = coordinatesFormat.format(locationInformation.getGeographicalInformation().getLatitude());
+                            latitude = Double.valueOf(formattedGeographicalInformationLatitude);
                             cdrModel.setGeographicalInfoLatitude(formattedGeographicalInformationLatitude);
-                            stringBuilder.append(formattedGeographicalInformationLatitude).append(SEPARATOR);
                         } else {
                             cdrModel.setGeographicalInfoLatitude("");
-                            stringBuilder.append(SEPARATOR);
                         }
                         // GEOGRAPHICAL INFO LONGITUDE
                         if (locationInformation.getGeographicalInformation().getLongitude() != 0.0) {
                             String formattedGeographicalInformationLongitude;
                             formattedGeographicalInformationLongitude = coordinatesFormat.format(locationInformation.getGeographicalInformation().getLongitude());
+                            longitude = Double.valueOf(formattedGeographicalInformationLongitude);
                             cdrModel.setGeographicalInfoLongitude(formattedGeographicalInformationLongitude);
-                            stringBuilder.append(formattedGeographicalInformationLongitude).append(SEPARATOR);
                         } else {
                             cdrModel.setGeographicalInfoLongitude("");
-                            stringBuilder.append(SEPARATOR);
                         }
 
                         // GEOGRAPHICAL INFO UNCERTAINTY
-                        if (Double.valueOf(locationInformation.getGeographicalInformation().getUncertainty()) != null
-                                && locationInformation.getGeographicalInformation().getLatitude() != 0.0
+                        if (locationInformation.getGeographicalInformation().getLatitude() != 0.0
                                 && locationInformation.getGeographicalInformation().getLongitude() != 0.0) {
+                            uncertainty = Double.valueOf(uncertaintyFormat.format(locationInformation.getGeographicalInformation().getUncertainty()));
                             cdrModel.setGeographicalInfoUncertainty(uncertaintyFormat.format(locationInformation.getGeographicalInformation().getUncertainty()));
-                            stringBuilder.append(uncertaintyFormat.format(locationInformation.getGeographicalInformation().getUncertainty())).append(SEPARATOR);
                         } else {
                             cdrModel.setGeographicalInfoUncertainty("");
-                            stringBuilder.append(SEPARATOR);
                         }
-                    } else {
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-
                     }
                     /**
                      * GEODETIC INFO
                      */
                     if (locationInformation.getGeodeticInformation() != null) {
+                        geoInfo = true;
                         // GEODETIC INFO TYPE OF SHAPE
-                        cdrModel.setGeodeticInfoTypeOfShape(locationInformation.getGeodeticInformation().getTypeOfShape().toString());
-                        stringBuilder.append(locationInformation.getGeodeticInformation().getTypeOfShape()).append(SEPARATOR);
+                        if (locationInformation.getGeodeticInformation().getTypeOfShape() != null) {
+                            typeOfShape = locationInformation.getGeodeticInformation().getTypeOfShape().toString();
+                            cdrModel.setGeodeticInfoTypeOfShape(locationInformation.getGeodeticInformation().getTypeOfShape().toString());
+                        }
                         // GEODETIC INFO LATITUDE
                         if (locationInformation.getGeodeticInformation().getLatitude() != 0.0) {
                             String formattedGeodeticInformationLatitude;
                             formattedGeodeticInformationLatitude = coordinatesFormat.format(locationInformation.getGeodeticInformation().getLatitude());
+                            latitude = Double.valueOf(formattedGeodeticInformationLatitude);
                             cdrModel.setGeodeticInfoLatitude(formattedGeodeticInformationLatitude);
-                            stringBuilder.append(formattedGeodeticInformationLatitude).append(SEPARATOR);
                         } else {
                             cdrModel.setGeodeticInfoLatitude("");
-                            stringBuilder.append(SEPARATOR);
                         }
 
                         // GEODETIC INFO LONGITUDE
                         if (locationInformation.getGeodeticInformation().getLongitude() != 0.0) {
                             String formattedGeodeticInformationLongitude;
                             formattedGeodeticInformationLongitude = coordinatesFormat.format(locationInformation.getGeodeticInformation().getLongitude());
+                            longitude = Double.valueOf(formattedGeodeticInformationLongitude);
                             cdrModel.setGeodeticInfoLongitude(formattedGeodeticInformationLongitude);
-                            stringBuilder.append(formattedGeodeticInformationLongitude).append(SEPARATOR);
                         } else {
                             cdrModel.setGeodeticInfoLongitude("");
-                            stringBuilder.append(SEPARATOR);
                         }
                         // GEODETIC INFO UNCERTAINTY
-                        if (Double.valueOf(locationInformation.getGeodeticInformation().getUncertainty()) != null &&
-                                locationInformation.getGeodeticInformation().getLatitude() != 0.0 &&
-                                locationInformation.getGeodeticInformation().getLongitude() != 0.0) {
+                        if (locationInformation.getGeodeticInformation().getLatitude() != 0.0 
+                                && locationInformation.getGeodeticInformation().getLongitude() != 0.0) {
+                            uncertainty = Double.valueOf(uncertaintyFormat.format(locationInformation.getGeodeticInformation().getUncertainty()));
                             cdrModel.setGeodeticInfoUncertainty(uncertaintyFormat.format(locationInformation.getGeodeticInformation().getUncertainty()));
-                            stringBuilder.append(uncertaintyFormat.format(locationInformation.getGeodeticInformation().getUncertainty())).append(SEPARATOR);
                         } else {
                             cdrModel.setGeodeticInfoUncertainty("");
-                            stringBuilder.append(SEPARATOR);
                         }
                         // GEODETIC INFO CONFIDENCE
                         if (locationInformation.getGeodeticInformation().getLatitude() != 0.0 &&
                                 locationInformation.getGeodeticInformation().getLongitude() != 0.0) {
-                            cdrModel.setGeodeticInfoConfidence(locationInformation.getGeodeticInformation().getConfidence() + "");
-                            stringBuilder.append(locationInformation.getGeodeticInformation().getConfidence()).append(SEPARATOR);
+                            geodeticConfidence = locationInformation.getGeodeticInformation().getConfidence();
+                            cdrModel.setGeodeticInfoConfidence(String.valueOf(locationInformation.getGeodeticInformation().getConfidence()));
                         } else {
                             cdrModel.setGeodeticInfoConfidence("");
-                            stringBuilder.append(SEPARATOR);
                         }
                         // GEODETIC INFO SCREENING AND PRESENTATION INDICATORS
                         if (locationInformation.getGeodeticInformation().getLatitude() != 0.0 &&
                                 locationInformation.getGeodeticInformation().getLongitude() != 0.0) {
-                            cdrModel.setGeodeticInfoScreeningAndPresentationIndicators(locationInformation.getGeodeticInformation().getScreeningAndPresentationIndicators() + "");
-                            stringBuilder.append(locationInformation.getGeodeticInformation().getScreeningAndPresentationIndicators()).append(SEPARATOR);
+                            geodeticScreeningAndPresentationInd = locationInformation.getGeodeticInformation().getScreeningAndPresentationIndicators();
+                            cdrModel.setGeodeticInfoScreeningAndPresentationIndicators(String.valueOf(locationInformation.getGeodeticInformation().getScreeningAndPresentationIndicators()));
                         } else {
                             cdrModel.setGeodeticInfoScreeningAndPresentationIndicators("");
-                            stringBuilder.append(SEPARATOR);
                         }
-                    } else {
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-
                     }
                 }
                 /**
@@ -809,56 +825,44 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                 if (subscriberInfo != null) {
                     if (subscriberInfo.getLocationInformation() != null)
                         locationInformationEPS = subscriberInfo.getLocationInformation().getLocationInformationEPS();
+                    else if (subscriberInfo.getLocationInformationEPS() != null)
+                        locationInformationEPS = subscriberInfo.getLocationInformationEPS();
                 } else if (shLocationInformationEPS != null) {
                     locationInformationEPS = shLocationInformationEPS;
                 }
 
-                if (locationInformationEPS != null || locationInformation5GS != null) {
+                if (locationInformationEPS != null || shlocationInformation5GS != null || locationInformation5GS != null) {
 
                     if (locationInformationEPS != null) {
                         /**
                          * E-UTRAN CGI from EPS location information from ATI, PSI or Sh
                          */
                         if (locationInformationEPS.getEUtranCellGlobalIdentity() != null) {
-                            EUTRANCGI eutrancgi = new EUTRANCGIImpl(locationInformationEPS.getEUtranCellGlobalIdentity().getData());
+                            EUtranCgi eutrancgi = new EUtranCgiImpl(locationInformationEPS.getEUtranCellGlobalIdentity().getData());
                             try {
                                 // ECGI MCC
-                                int ecgiMcc = eutrancgi.getMCC();
+                                ecgiMcc = eutrancgi.getMCC();
                                 cdrModel.setEutranCellGlobalIdMCC(String.valueOf(ecgiMcc));
-                                stringBuilder.append(ecgiMcc).append(SEPARATOR);
                                 // ECGI MNC
-                                int ecgiMnc = eutrancgi.getMNC();
+                                ecgiMnc = eutrancgi.getMNC();
                                 cdrModel.setEutranCellGlobalIdMNC(String.valueOf(ecgiMnc));
-                                stringBuilder.append(ecgiMnc).append(SEPARATOR);
                                 // ECGI ECI
-                                long eci = eutrancgi.getEci();
+                                eci = eutrancgi.getEci();
                                 cdrModel.setEutranCellGlobalIdECI(String.valueOf(eci));
-                                stringBuilder.append(eci).append(SEPARATOR);
                                 // ECGI ENBID
-                                long ecgiENBId = eutrancgi.getENodeBId();
-                                cdrModel.setEutranCellGlobalIdENBID(String.valueOf(ecgiENBId));
-                                stringBuilder.append(ecgiENBId).append(SEPARATOR);
+                                eNBId = eutrancgi.getENodeBId();
+                                cdrModel.setEutranCellGlobalIdENBID(String.valueOf(eNBId));
                                 // ECGI CI
-                                int ecgiCi = eutrancgi.getCi();
+                                ecgiCi = eutrancgi.getCi();
                                 cdrModel.setEutranCellGlobalIdCI(String.valueOf(ecgiCi));
-                                stringBuilder.append(ecgiCi).append(SEPARATOR);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                        } else {
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-
                         }
                         if (cellPortionId != null) {
                             cdrModel.setCellPortionId(String.valueOf(cellPortionId));
-                            stringBuilder.append(cellPortionId).append(SEPARATOR);
                         } else {
                             cdrModel.setCellPortionId("");
-                            stringBuilder.append(SEPARATOR);
                         }
                         /*
                          * TRACKING AREA IDENTITY from EPS location information from ATI, PSI or Sh
@@ -867,338 +871,352 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                             TrackingAreaId tai = new TrackingAreaIdImpl(locationInformationEPS.getTrackingAreaIdentity().getData());
                             try {
                                 // TAI MCC
-                                int taiMcc = tai.getMCC();
+                                taiMcc = tai.getMCC();
                                 cdrModel.setTaiMCC(String.valueOf(taiMcc));
-                                stringBuilder.append(taiMcc).append(SEPARATOR);
                                 // TAI MNC
-                                int taiMnc = tai.getMNC();
+                                taiMnc = tai.getMNC();
                                 cdrModel.setTaiMNC(String.valueOf(taiMnc));
-                                stringBuilder.append(taiMnc).append(SEPARATOR);
                                 // TAI TAC
-                                int taiTac = tai.getTAC();
+                                taiTac = tai.getTAC();
                                 cdrModel.setTaiTAC(String.valueOf(taiTac));
-                                stringBuilder.append(taiTac).append(SEPARATOR);
                             } catch (MAPException e) {
                                 e.printStackTrace();
                             }
-                        } else {
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-
                         }
                         /**
                          * EPS GEOGRAPHICAL INFORMATION from EPS location information from ATI, PSI or Sh
                          */
                         if (locationInformationEPS.getGeographicalInformation() != null) {
+                            geoInfo = true;
                             // EPS LOCATION INFO GEOGRAPHICAL TYPE OF SHAPE
+                            typeOfShape = locationInformationEPS.getGeographicalInformation().getTypeOfShape().toString();
                             cdrModel.setEpsLocationInfoGeographicalTypeOfShape(locationInformationEPS.getGeographicalInformation().getTypeOfShape().toString());
-                            stringBuilder.append(locationInformationEPS.getGeographicalInformation().getTypeOfShape()).append(SEPARATOR);
                             // EPS LOCATION INFO GEOGRAPHICAL LATITUDE
                             if (locationInformationEPS.getGeographicalInformation().getLatitude() != 0.0) {
                                 String formattedEPSGeographicalInformationLatitude;
                                 formattedEPSGeographicalInformationLatitude = coordinatesFormat.format(locationInformationEPS.getGeographicalInformation().getLatitude());
+                                latitude = Double.valueOf(formattedEPSGeographicalInformationLatitude);
                                 cdrModel.setEpsLocationInfoGeographicalLatitude(formattedEPSGeographicalInformationLatitude);
-                                stringBuilder.append(formattedEPSGeographicalInformationLatitude).append(SEPARATOR);
                             } else {
                                 cdrModel.setEpsLocationInfoGeographicalLatitude("");
-                                stringBuilder.append(SEPARATOR);
                             }
                             // EPS LOCATION INFO GEOGRAPHICAL LONGITUDE
                             if (locationInformationEPS.getGeographicalInformation().getLongitude() != 0.0) {
                                 String formattedEPSGeographicalInformationLongitude;
                                 formattedEPSGeographicalInformationLongitude = coordinatesFormat.format(locationInformationEPS.getGeographicalInformation().getLongitude());
+                                longitude = Double.valueOf(formattedEPSGeographicalInformationLongitude);
                                 cdrModel.setEpsLocationInfoGeographicalLongitude(formattedEPSGeographicalInformationLongitude);
-                                stringBuilder.append(formattedEPSGeographicalInformationLongitude).append(SEPARATOR);
                             } else {
                                 cdrModel.setEpsLocationInfoGeographicalLongitude("");
-                                stringBuilder.append(SEPARATOR);
                             }
                             // EPS LOCATION INFO GEOGRAPHICAL UNCERTAINTY
-                            if (Double.valueOf(locationInformationEPS.getGeographicalInformation().getUncertainty()) != null &&
-                                    locationInformationEPS.getGeographicalInformation().getLatitude() != 0.0 &&
-                                    locationInformationEPS.getGeographicalInformation().getLongitude() != 0.0) {
+                            if (locationInformationEPS.getGeographicalInformation().getLatitude() != 0.0 &&
+                                locationInformationEPS.getGeographicalInformation().getLongitude() != 0.0) {
+                                uncertainty = Double.valueOf(uncertaintyFormat.format(locationInformationEPS.getGeographicalInformation().getUncertainty()));
                                 cdrModel.setEpsLocationInfoGeographicalUncertainty(uncertaintyFormat.format(locationInformationEPS.getGeographicalInformation().getUncertainty()));
-                                stringBuilder.append(uncertaintyFormat.format(locationInformationEPS.getGeographicalInformation().getUncertainty())).append(SEPARATOR);
                             } else {
                                 cdrModel.setEpsLocationInfoGeographicalUncertainty("");
-                                stringBuilder.append(SEPARATOR);
                             }
                         }
 
-                    } else if (locationInformation5GS != null) {
+                    } else if (shlocationInformation5GS != null) {
                         /**
                          * E-UTRAN CGI from 5GS location information from Sh
                          */
-                        if (locationInformation5GS.getEUtranCellGlobalIdentity() != null) {
-                            EUTRANCGI eutrancgi = new EUTRANCGIImpl(locationInformation5GS.getEUtranCellGlobalIdentity().getData());
+                        if (shlocationInformation5GS.getEUtranCellGlobalIdentity() != null) {
+                            EUTRANCGI eutrancgi = new EUTRANCGIImpl(shlocationInformation5GS.getEUtranCellGlobalIdentity().getData());
                             try {
                                 // ECGI MCC
-                                int ecgiMcc = eutrancgi.getMCC();
+                                ecgiMcc = eutrancgi.getMCC();
                                 cdrModel.setEutranCellGlobalId5GsMCC(String.valueOf(ecgiMcc));
-                                stringBuilder.append(ecgiMcc).append(SEPARATOR);
                                 // ECGI MNC
-                                int ecgiMnc = eutrancgi.getMNC();
+                                ecgiMnc = eutrancgi.getMNC();
                                 cdrModel.setEutranCellGlobalId5GsMNC(String.valueOf(ecgiMnc));
-                                stringBuilder.append(ecgiMnc).append(SEPARATOR);
                                 // ECGI ECI
-                                long eci = eutrancgi.getEci();
+                                eci = eutrancgi.getEci();
                                 cdrModel.setEutranCellGlobalId5GsECI(String.valueOf(eci));
-                                stringBuilder.append(eci).append(SEPARATOR);
                                 // ECGI ENBID
-                                long ecgiENBId = eutrancgi.getENodeBId();
-                                cdrModel.setEutranCellGlobalId5GsENBID(String.valueOf(ecgiENBId));
-                                stringBuilder.append(ecgiENBId).append(SEPARATOR);
+                                eNBId = eutrancgi.getENodeBId();
+                                cdrModel.setEutranCellGlobalId5GsENBID(String.valueOf(eNBId));
                                 // ECGI CI
-                                int ecgiCi = eutrancgi.getCi();
+                                ecgiCi = eutrancgi.getCi();
                                 cdrModel.setEutranCellGlobalId5GsCI(String.valueOf(ecgiCi));
-                                stringBuilder.append(ecgiCi).append(SEPARATOR);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                        } else {
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
                         }
                         if (cellPortionId != null) {
                             cdrModel.setCellPortionId5Gs(String.valueOf(cellPortionId));
-                            stringBuilder.append(cellPortionId).append(SEPARATOR);
                         } else {
                             cdrModel.setCellPortionId5Gs("");
-                            stringBuilder.append(SEPARATOR);
                         }
                         /**
                          * TRACKING AREA IDENTITY from 5GS location information from Sh
                          */
-                        if (locationInformation5GS.getTrackingAreaIdentity() != null) {
-                            TrackingAreaId trackingAreaId = new TrackingAreaIdImpl(locationInformation5GS.getTrackingAreaIdentity().getData());
+                        if (shlocationInformation5GS.getTrackingAreaIdentity() != null) {
+                            TrackingAreaId trackingAreaId = new TrackingAreaIdImpl(shlocationInformation5GS.getTrackingAreaIdentity().getData());
                             try {
                                 // TAI MCC
+                                taiMcc = trackingAreaId.getMCC();
                                 cdrModel.setTai5GsMCC(String.valueOf(trackingAreaId.getMCC()));
-                                stringBuilder.append(trackingAreaId.getMCC()).append(SEPARATOR);
                                 // TAI MNC
+                                taiMnc = trackingAreaId.getMNC();
                                 cdrModel.setTai5GsMNC(String.valueOf(trackingAreaId.getMNC()));
-                                stringBuilder.append(trackingAreaId.getMNC()).append(SEPARATOR);
                                 // TAI TAC
+                                taiTac = trackingAreaId.getTAC();
                                 cdrModel.setTai5GsTAC(String.valueOf(trackingAreaId.getTAC()));
-                                stringBuilder.append(trackingAreaId.getTAC()).append(SEPARATOR);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                        } else {
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-
                         }
                         /**
                          * GEOGRAPHICAL INFORMATION from 5GS location information from Sh
                          */
-                        if (locationInformation5GS.getGeographicalInformation() != null) {
+                        if (shlocationInformation5GS.getGeographicalInformation() != null) {
+                            geoInfo = true;
                             // 5GS GEOGRAPHICAL INFO TYPE OF SHAPE
-                            cdrModel.setGeographicalInfo5GsTypeOfShape(gmlcCdrState.getTypeOfShape().toString());
-                            stringBuilder.append(gmlcCdrState.getTypeOfShape()).append(SEPARATOR);
+                            if (shlocationInformation5GS.getGeographicalInformation().getTypeOfShape() != null) {
+                                typeOfShape = shlocationInformation5GS.getGeographicalInformation().getTypeOfShape().toString();
+                                cdrModel.setGeographicalInfo5GsTypeOfShape(gmlcCdrState.getTypeOfShape().toString());
+                            }
                             // 5GS GEOGRAPHICAL INFO LATITUDE
-                            Double latitude = locationInformation5GS.getGeographicalInformation().getLatitude();
-                            if (latitude != 0.0) {
+                            if (shlocationInformation5GS.getGeographicalInformation().getLatitude() != 0.0) {
                                 String formatted5GSGeographicalInformationLatitude;
-                                formatted5GSGeographicalInformationLatitude = coordinatesFormat.format(latitude);
+                                formatted5GSGeographicalInformationLatitude = coordinatesFormat.format(shlocationInformation5GS.getGeographicalInformation().getLatitude());
+                                latitude = Double.valueOf(formatted5GSGeographicalInformationLatitude);
                                 cdrModel.setGeographicalInfo5GsLatitude(formatted5GSGeographicalInformationLatitude);
-                                stringBuilder.append(formatted5GSGeographicalInformationLatitude).append(SEPARATOR);
                             } else {
                                 cdrModel.setGeographicalInfo5GsLatitude("");
-                                stringBuilder.append(SEPARATOR);
                             }
                             // 5GS GEOGRAPHICAL INFO LONGITUDE
-                            Double longitude = locationInformation5GS.getGeographicalInformation().getLongitude();
-                            if (longitude != 0.0) {
+                            if (shlocationInformation5GS.getGeographicalInformation().getLongitude() != 0.0) {
                                 String formatted5GSGeographicalInformationLongitude;
-                                formatted5GSGeographicalInformationLongitude = coordinatesFormat.format(longitude);
+                                formatted5GSGeographicalInformationLongitude = coordinatesFormat.format(shlocationInformation5GS.getGeographicalInformation().getLongitude());
+                                longitude = Double.valueOf(formatted5GSGeographicalInformationLongitude);
                                 cdrModel.setGeographicalInfo5GsLongitude(formatted5GSGeographicalInformationLongitude);
-                                stringBuilder.append(formatted5GSGeographicalInformationLongitude).append(SEPARATOR);
                             } else {
                                 cdrModel.setGeographicalInfo5GsLongitude("");
-                                stringBuilder.append(SEPARATOR);
                             }
                             // 5GS GEOGRAPHICAL INFO UNCERTAINTY
-                            Double uncertainty = locationInformation5GS.getGeographicalInformation().getUncertainty();
-                            if (uncertainty != null && latitude != 0.0 && longitude != 0.0) {
+                            if (shlocationInformation5GS.getGeographicalInformation().getLatitude() != 0.0
+                                && shlocationInformation5GS.getGeographicalInformation().getLongitude() != 0.0) {
+                                uncertainty = Double.valueOf(uncertaintyFormat.format(shlocationInformation5GS.getGeographicalInformation().getUncertainty()));
                                 cdrModel.setGeographicalInfo5GsUncertainty(uncertaintyFormat.format(uncertainty));
-                                stringBuilder.append(uncertaintyFormat.format(uncertainty)).append(SEPARATOR);
                             } else {
                                 cdrModel.setGeographicalInfo5GsUncertainty("");
-                                stringBuilder.append(SEPARATOR);
                             }
-                        } else {
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-
                         }
                     } else {
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-
-                    }
-
-                    if (locationInformationEPS != null) {
                         /**
-                         * EPS GEODETIC INFORMATION
+                         * E-UTRAN CGI from 5GS location information from MAP ATI or PSI
                          */
-                        if (locationInformationEPS.getGeodeticInformation() != null) {
-                            // EPS LOCATION INFO GEODETIC TYPE OF SHAPE
-                            cdrModel.setEpsLocationInfoGeodeticTypeOfShape(locationInformationEPS.getGeodeticInformation().getTypeOfShape().toString());
-                            stringBuilder.append(locationInformationEPS.getGeodeticInformation().getTypeOfShape()).append(SEPARATOR);
-                            // EPS LOCATION INFO GEODETIC LATITUDE
-                            if (locationInformationEPS.getGeodeticInformation().getLatitude() != 0.0) {
-                                String formattedEPSGeodeticInformationLatitude;
-                                formattedEPSGeodeticInformationLatitude = coordinatesFormat.format(locationInformationEPS.getGeodeticInformation().getLatitude());
-                                cdrModel.setEpsLocationInfoGeodeticLatitude(formattedEPSGeodeticInformationLatitude);
-                                stringBuilder.append(formattedEPSGeodeticInformationLatitude).append(SEPARATOR);
-                            } else {
-                                cdrModel.setEpsLocationInfoGeodeticLatitude("");
-                                stringBuilder.append(SEPARATOR);
+                        if (locationInformation5GS.getEUtranCgi() != null) {
+                            EUtranCgi eUtranCgi = new EUtranCgiImpl(locationInformation5GS.getEUtranCgi().getData());
+                            try {
+                                // ECGI MCC
+                                ecgiMcc = eUtranCgi.getMCC();
+                                cdrModel.setEutranCellGlobalId5GsMCC(String.valueOf(ecgiMcc));
+                                // ECGI MNC
+                                ecgiMnc = eUtranCgi.getMNC();
+                                cdrModel.setEutranCellGlobalId5GsMNC(String.valueOf(ecgiMnc));
+                                // ECGI ECI
+                                eci = eUtranCgi.getEci();
+                                cdrModel.setEutranCellGlobalId5GsECI(String.valueOf(eci));
+                                // ECGI ENBID
+                                eNBId = eUtranCgi.getENodeBId();
+                                cdrModel.setEutranCellGlobalId5GsENBID(String.valueOf(eNBId));
+                                // ECGI CI
+                                ecgiCi = eUtranCgi.getCi();
+                                cdrModel.setEutranCellGlobalId5GsCI(String.valueOf(ecgiCi));
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
-                            // EPS LOCATION INFO GEODETIC LONGITUDE
-                            if (locationInformationEPS.getGeodeticInformation().getLongitude() != 0.0) {
-                                String formattedEPSGeodeticInformationLongitude;
-                                formattedEPSGeodeticInformationLongitude = coordinatesFormat.format(locationInformationEPS.getGeodeticInformation().getLongitude());
-                                cdrModel.setEpsLocationInfoGeodeticLongitude(formattedEPSGeodeticInformationLongitude);
-                                stringBuilder.append(formattedEPSGeodeticInformationLongitude).append(SEPARATOR);
-                            } else {
-                                cdrModel.setEpsLocationInfoGeodeticLongitude("");
-                                stringBuilder.append(SEPARATOR);
-                            }
-                            // EPS LOCATION INFO GEODETIC UNCERTAINTY
-                            if (Double.valueOf(locationInformationEPS.getGeodeticInformation().getUncertainty()) != null &&
-                                    locationInformationEPS.getGeodeticInformation().getLatitude() != 0.0 &&
-                                    locationInformationEPS.getGeodeticInformation().getLongitude() != 0.0) {
-                                cdrModel.setEpsLocationInfoGeodeticUncertainty(uncertaintyFormat.format(locationInformationEPS.getGeodeticInformation().getUncertainty()));
-                                stringBuilder.append(uncertaintyFormat.format(locationInformationEPS.getGeodeticInformation().getUncertainty())).append(SEPARATOR);
-                            } else {
-                                cdrModel.setEpsLocationInfoGeodeticUncertainty("");
-                                stringBuilder.append(SEPARATOR);
-                            }
-                            // EPS LOCATION INFO GEODETIC CONFIDENCE
-                            if (locationInformationEPS.getGeodeticInformation().getLatitude() != 0.0 &&
-                                    locationInformationEPS.getGeodeticInformation().getLongitude() != 0.0) {
-                                stringBuilder.append(locationInformationEPS.getGeodeticInformation().getConfidence()).append(SEPARATOR);
-                                cdrModel.setEpsLocationInfoGeodeticConfidence(locationInformationEPS.getGeodeticInformation().getConfidence() + "");
-                            } else {
-                                cdrModel.setEpsLocationInfoGeodeticConfidence("");
-                                stringBuilder.append(SEPARATOR);
-                            }
-                            // EPS LOCATION INFO GEODETIC SCREENING AND PRESENTATION INDICATORS
-                            if (locationInformationEPS.getGeodeticInformation().getLatitude() != 0.0 &&
-                                    locationInformationEPS.getGeodeticInformation().getLongitude() != 0.0) {
-                                cdrModel.setEpsLocationInfoGeodeticScreeningAndPresentationInd(locationInformationEPS.getGeodeticInformation().getScreeningAndPresentationIndicators() + "");
-                                stringBuilder.append(locationInformationEPS.getGeodeticInformation().getScreeningAndPresentationIndicators()).append(SEPARATOR);
-                            } else {
-                                cdrModel.setEpsLocationInfoGeodeticScreeningAndPresentationInd("");
-                                stringBuilder.append(SEPARATOR);
-                            }
+                        }
+                        if (cellPortionId != null) {
+                            cdrModel.setCellPortionId5Gs(String.valueOf(cellPortionId));
                         } else {
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-                            stringBuilder.append(SEPARATOR);
-
+                            cdrModel.setCellPortionId5Gs("");
                         }
                         /**
-                         * MME NAME
+                         * TRACKING AREA IDENTITY from 5GS location information from MAP ATI or PSI
                          */
-                        if (locationInformationEPS.getMmeName() != null) {
-                            cdrModel.setEpsLocationInfoGeodeticMMEName(new String(locationInformationEPS.getMmeName().getData()));
-                            stringBuilder.append(new String(locationInformationEPS.getMmeName().getData())).append(SEPARATOR);
-                        } else {
-                            cdrModel.setEpsLocationInfoGeodeticMMEName("");
-                            stringBuilder.append(SEPARATOR);
+                        if (locationInformation5GS.getTAId() != null) {
+                            TAId taId = new TAIdImpl(locationInformation5GS.getTAId().getData());
+                            try {
+                                // TAI MCC
+                                taiMcc = taId.getMCC();
+                                cdrModel.setTai5GsMCC(String.valueOf(taId.getMCC()));
+                                // TAI MNC
+                                taiMnc = taId.getMNC();
+                                cdrModel.setTai5GsMNC(String.valueOf(taId.getMNC()));
+                                // TAI TAC
+                                taiTac = taId.getTAC();
+                                cdrModel.setTai5GsTAC(String.valueOf(taId.getTAC()));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        /**
+                         * GEOGRAPHICAL INFORMATION from 5GS location information from MAP ATI or PSI
+                         */
+                        if (locationInformation5GS.getGeographicalInformation() != null) {
+                            geoInfo = true;
+                            // 5GS GEOGRAPHICAL INFO TYPE OF SHAPE
+                            if (locationInformation5GS.getGeographicalInformation().getTypeOfShape() != null) {
+                                typeOfShape = locationInformation5GS.getGeographicalInformation().getTypeOfShape().toString();
+                                cdrModel.setGeographicalInfo5GsTypeOfShape(gmlcCdrState.getTypeOfShape().toString());
+                            }
+                            // 5GS GEOGRAPHICAL INFO LATITUDE
+                            if (locationInformation5GS.getGeographicalInformation().getLatitude() != 0.0) {
+                                String formatted5GSGeographicalInformationLatitude;
+                                formatted5GSGeographicalInformationLatitude = coordinatesFormat.format(locationInformation5GS.getGeographicalInformation().getLatitude());
+                                latitude = Double.valueOf(formatted5GSGeographicalInformationLatitude);
+                                cdrModel.setGeographicalInfo5GsLatitude(formatted5GSGeographicalInformationLatitude);
+                            } else {
+                                cdrModel.setGeographicalInfo5GsLatitude("");
+                            }
+                            // 5GS GEOGRAPHICAL INFO LONGITUDE
+                            if (locationInformation5GS.getGeographicalInformation().getLongitude() != 0.0) {
+                                String formatted5GSGeographicalInformationLongitude;
+                                formatted5GSGeographicalInformationLongitude = coordinatesFormat.format(locationInformation5GS.getGeographicalInformation().getLongitude());
+                                longitude = Double.valueOf(formatted5GSGeographicalInformationLongitude);
+                                cdrModel.setGeographicalInfo5GsLongitude(formatted5GSGeographicalInformationLongitude);
+                            } else {
+                                cdrModel.setGeographicalInfo5GsLongitude("");
+                            }
+                            // 5GS GEOGRAPHICAL INFO UNCERTAINTY
+                            if (locationInformation5GS.getGeographicalInformation().getLatitude() != 0.0 &&
+                                locationInformation5GS.getGeographicalInformation().getLongitude() != 0.0) {
+                                uncertainty = Double.valueOf(uncertaintyFormat.format(locationInformation5GS.getGeographicalInformation().getUncertainty()));
+                                cdrModel.setGeographicalInfo5GsUncertainty(uncertaintyFormat.format(uncertainty));
+                            } else {
+                                cdrModel.setGeographicalInfo5GsUncertainty("");
+                            }
                         }
                     }
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
+
+                    if (locationInformationEPS != null || locationInformation5GS != null) {
+
+                        if (locationInformationEPS != null) {
+                            /**
+                             * EPS GEODETIC INFORMATION
+                             */
+                            if (locationInformationEPS.getGeodeticInformation() != null) {
+                                geoInfo = true;
+                                // EPS LOCATION INFO GEODETIC TYPE OF SHAPE
+                                if (locationInformationEPS.getGeodeticInformation().getTypeOfShape() != null) {
+                                    typeOfShape = locationInformationEPS.getGeodeticInformation().getTypeOfShape().toString();
+                                    cdrModel.setEpsLocationInfoGeodeticTypeOfShape(locationInformationEPS.getGeodeticInformation().getTypeOfShape().toString());
+                                }
+                                // EPS LOCATION INFO GEODETIC LATITUDE
+                                if (locationInformationEPS.getGeodeticInformation().getLatitude() != 0.0) {
+                                    String formattedEPSGeodeticInformationLatitude;
+                                    formattedEPSGeodeticInformationLatitude = coordinatesFormat.format(locationInformationEPS.getGeodeticInformation().getLatitude());
+                                    latitude = Double.valueOf(formattedEPSGeodeticInformationLatitude);
+                                    cdrModel.setEpsLocationInfoGeodeticLatitude(formattedEPSGeodeticInformationLatitude);
+                                } else {
+                                    cdrModel.setEpsLocationInfoGeodeticLatitude("");
+                                }
+                                // EPS LOCATION INFO GEODETIC LONGITUDE
+                                if (locationInformationEPS.getGeodeticInformation().getLongitude() != 0.0) {
+                                    String formattedEPSGeodeticInformationLongitude;
+                                    formattedEPSGeodeticInformationLongitude = coordinatesFormat.format(locationInformationEPS.getGeodeticInformation().getLongitude());
+                                    longitude = Double.valueOf(formattedEPSGeodeticInformationLongitude);
+                                    cdrModel.setEpsLocationInfoGeodeticLongitude(formattedEPSGeodeticInformationLongitude);
+                                } else {
+                                    cdrModel.setEpsLocationInfoGeodeticLongitude("");
+                                }
+                                // EPS LOCATION INFO GEODETIC UNCERTAINTY
+                                if (locationInformationEPS.getGeodeticInformation().getLatitude() != 0.0 &&
+                                    locationInformationEPS.getGeodeticInformation().getLongitude() != 0.0) {
+                                    uncertainty = Double.valueOf(uncertaintyFormat.format(locationInformationEPS.getGeodeticInformation().getUncertainty()));
+                                    cdrModel.setEpsLocationInfoGeodeticUncertainty(uncertaintyFormat.format(locationInformationEPS.getGeodeticInformation().getUncertainty()));
+                                } else {
+                                    cdrModel.setEpsLocationInfoGeodeticUncertainty("");
+                                }
+                                // EPS LOCATION INFO GEODETIC CONFIDENCE
+                                if (locationInformationEPS.getGeodeticInformation().getLatitude() != 0.0 &&
+                                        locationInformationEPS.getGeodeticInformation().getLongitude() != 0.0) {
+                                    geodeticConfidence = locationInformationEPS.getGeodeticInformation().getConfidence();
+                                    cdrModel.setEpsLocationInfoGeodeticConfidence(String.valueOf(locationInformationEPS.getGeodeticInformation().getConfidence()));
+                                } else {
+                                    cdrModel.setEpsLocationInfoGeodeticConfidence("");
+                                }
+                                // EPS LOCATION INFO GEODETIC SCREENING AND PRESENTATION INDICATORS
+                                if (locationInformationEPS.getGeodeticInformation().getLatitude() != 0.0 &&
+                                        locationInformationEPS.getGeodeticInformation().getLongitude() != 0.0) {
+                                    geodeticScreeningAndPresentationInd = locationInformationEPS.getGeodeticInformation().getScreeningAndPresentationIndicators();
+                                    cdrModel.setEpsLocationInfoGeodeticScreeningAndPresentationInd(String.valueOf(locationInformationEPS.getGeodeticInformation().getScreeningAndPresentationIndicators()));
+                                } else {
+                                    cdrModel.setEpsLocationInfoGeodeticScreeningAndPresentationInd("");
+                                }
+                            }
+                            /**
+                             * MME NAME
+                             */
+                            if (locationInformationEPS.getMmeName() != null) {
+                                mmeName = locationInformationEPS.getMmeName();
+                                cdrModel.setEpsLocationInfoGeodeticMMEName(new String(locationInformationEPS.getMmeName().getData()));
+                            } else {
+                                cdrModel.setEpsLocationInfoGeodeticMMEName("");
+                            }
+                        } else {
+                            /**
+                             * 5GS GEODETIC INFORMATION
+                             */
+                            if (locationInformation5GS.getGeodeticInformation() != null) {
+                                geoInfo = true;
+                                // 5GS LOCATION INFO GEODETIC TYPE OF SHAPE
+                                if (locationInformation5GS.getGeodeticInformation().getTypeOfShape() != null) {
+                                    typeOfShape = locationInformation5GS.getGeodeticInformation().getTypeOfShape().toString();
+                                    cdrModel.setNrLocationInfoGeodeticTypeOfShape(locationInformation5GS.getGeodeticInformation().getTypeOfShape().toString());
+                                }
+                                // 5GS LOCATION INFO GEODETIC LATITUDE
+                                if (locationInformation5GS.getGeodeticInformation().getLatitude() != 0.0) {
+                                    String formatted5GSGeodeticInformationLatitude;
+                                    formatted5GSGeodeticInformationLatitude = coordinatesFormat.format(locationInformation5GS.getGeodeticInformation().getLatitude());
+                                    latitude = Double.valueOf(formatted5GSGeodeticInformationLatitude);
+                                    cdrModel.setNrLocationInfoGeodeticLatitude(formatted5GSGeodeticInformationLatitude);
+                                } else {
+                                    cdrModel.setEpsLocationInfoGeodeticLatitude("");
+                                }
+                                // 5GS LOCATION INFO GEODETIC LONGITUDE
+                                if (locationInformation5GS.getGeodeticInformation().getLongitude() != 0.0) {
+                                    String formatted5GSGeodeticInformationLongitude;
+                                    formatted5GSGeodeticInformationLongitude = coordinatesFormat.format(locationInformation5GS.getGeodeticInformation().getLongitude());
+                                    longitude = Double.valueOf(formatted5GSGeodeticInformationLongitude);
+                                    cdrModel.setNrLocationInfoGeodeticLongitude(formatted5GSGeodeticInformationLongitude);
+                                } else {
+                                    cdrModel.setEpsLocationInfoGeodeticLongitude("");
+                                }
+                                // 5GS LOCATION INFO GEODETIC UNCERTAINTY
+                                if (locationInformation5GS.getGeodeticInformation().getLatitude() != 0.0 &&
+                                    locationInformation5GS.getGeodeticInformation().getLongitude() != 0.0) {
+                                    uncertainty = Double.valueOf(uncertaintyFormat.format(locationInformation5GS.getGeodeticInformation().getUncertainty()));
+                                    cdrModel.setNrLocationInfoGeodeticUncertainty(uncertaintyFormat.format(locationInformation5GS.getGeodeticInformation().getUncertainty()));
+                                } else {
+                                    cdrModel.setNrLocationInfoGeodeticUncertainty("");
+                                }
+                                // 5GS LOCATION INFO GEODETIC CONFIDENCE
+                                if (locationInformation5GS.getGeodeticInformation().getLatitude() != 0.0 &&
+                                        locationInformation5GS.getGeodeticInformation().getLongitude() != 0.0) {
+                                    geodeticConfidence = locationInformation5GS.getGeodeticInformation().getConfidence();
+                                    cdrModel.setNrLocationInfoGeodeticConfidence(String.valueOf(locationInformation5GS.getGeodeticInformation().getConfidence()));
+                                } else {
+                                    cdrModel.setNrLocationInfoGeodeticConfidence("");
+                                }
+                                // 5GS LOCATION INFO GEODETIC SCREENING AND PRESENTATION INDICATORS
+                                if (locationInformation5GS.getGeodeticInformation().getLatitude() != 0.0 &&
+                                        locationInformation5GS.getGeodeticInformation().getLongitude() != 0.0) {
+                                    geodeticScreeningAndPresentationInd = locationInformation5GS.getGeodeticInformation().getScreeningAndPresentationIndicators();
+                                    cdrModel.setNrLocationInfoGeodeticScreeningAndPresentationInd(String.valueOf(locationInformation5GS.getGeodeticInformation().getScreeningAndPresentationIndicators()));
+                                } else {
+                                    cdrModel.setNrLocationInfoGeodeticScreeningAndPresentationInd("");
+                                }
+                            }
+                        }
+                    }
                 }
-            } else {
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
             }
             /**
              * Location Information GPRS
@@ -1218,9 +1236,13 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                     if (locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
                         try {
                             cdrModel.setPsCellGlobalIdServiceAreaIdOrLAIMCC(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC()));
+                            cgiMcc = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
                             cdrModel.setPsCellGlobalIdServiceAreaIdOrLAIMNC(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC()));
+                            cgiMnc = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC();
                             cdrModel.setPsCellGlobalIdServiceAreaIdOrLAILac(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac()));
+                            cgiLac = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
                             cdrModel.setPsCellGlobalIdServiceAreaIdOrLAICI(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode()));
+                            cgiCiorSac = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
                         } catch (MAPException e) {
                             e.printStackTrace();
                         }
@@ -1228,22 +1250,16 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                     if (locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
                         try {
                             cdrModel.setPsCellGlobalIdServiceAreaIdOrLAIMCC(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC()));
+                            cgiMcc = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC();
                             cdrModel.setPsCellGlobalIdServiceAreaIdOrLAIMNC(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC()));
+                            cgiMnc = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC();
                             cdrModel.setPsCellGlobalIdServiceAreaIdOrLAILac(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac()));
+                            cgiLac = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac();
                             cdrModel.setPsCellGlobalIdServiceAreaIdOrLAICI("");
                         } catch (MAPException e) {
                             e.printStackTrace();
                         }
                     }
-                    stringBuilder.append(cdrModel.getPsCellGlobalIdServiceAreaIdOrLAIMCC()).append(SEPARATOR);
-                    stringBuilder.append(cdrModel.getPsCellGlobalIdServiceAreaIdOrLAIMNC()).append(SEPARATOR);
-                    stringBuilder.append(cdrModel.getPsCellGlobalIdServiceAreaIdOrLAILac()).append(SEPARATOR);
-                    stringBuilder.append(cdrModel.getPsCellGlobalIdServiceAreaIdOrLAICI()).append(SEPARATOR);
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
                 }
                 /**
                  * GPRS SAI PRESENT
@@ -1257,128 +1273,100 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                     RoutingAreaId rai = new RoutingAreaIdImpl(locationInformationGPRS.getRouteingAreaIdentity().getData());
                     try {
                         // RAI MCC
-                        int raiMcc = rai.getMCC();
+                        raiMcc = rai.getMCC();
                         cdrModel.setRaiMCC(String.valueOf(raiMcc));
-                        stringBuilder.append(cdrModel.getRaiMCC()).append(SEPARATOR);
                         // RAI MNC
-                        int raiMnc = rai.getMNC();
+                        raiMnc = rai.getMNC();
                         cdrModel.setRaiMNC(String.valueOf(raiMnc));
-                        stringBuilder.append(cdrModel.getRaiMNC()).append(SEPARATOR);
                         // RAI LAC
-                        int raiLac = rai.getLAC();
+                        raiLac = rai.getLAC();
                         cdrModel.setRaiLAC(String.valueOf(raiLac));
-                        stringBuilder.append(cdrModel.getRaiLAC()).append(SEPARATOR);
                         // RAI RAC
-                        int raiRac = rai.getRAC();
+                        raiRac = rai.getRAC();
                         cdrModel.setRaiRAC(String.valueOf(raiRac));
-                        stringBuilder.append(cdrModel.getRaiRAC()).append(SEPARATOR);
                     } catch (MAPException e) {
                         e.printStackTrace();
                     }
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
                 }
                 /**
                  * PS AGE OF LOCATION INFORMATION
                  */
                 if (locationInformationGPRS.getAgeOfLocationInformation() != null) {
                     cdrModel.setPsAgeOfLocationInformation(String.valueOf(locationInformationGPRS.getAgeOfLocationInformation().intValue()));
-                    stringBuilder.append(cdrModel.getPsAgeOfLocationInformation()).append(SEPARATOR);
-                } else {
-                    stringBuilder.append(SEPARATOR);
                 }
                 /**
                  * GPRS GEOGRAPHICAL INFORMATION
                  */
                 if (locationInformationGPRS.getGeographicalInformation() != null) {
+                    geoInfo = true;
                     // GPRS GEOGRAPHICAL INFO TYPE OF SHAPE
-                    cdrModel.setPsGeographicalInfoTypeOfShape(String.valueOf(locationInformationGPRS.getGeographicalInformation().getTypeOfShape()));
-                    stringBuilder.append(cdrModel.getPsGeographicalInfoTypeOfShape()).append(SEPARATOR);
+                    if (locationInformationGPRS.getGeographicalInformation().getTypeOfShape() != null) {
+                        typeOfShape = locationInformationGPRS.getGeographicalInformation().getTypeOfShape().toString();
+                        cdrModel.setPsGeographicalInfoTypeOfShape(String.valueOf(locationInformationGPRS.getGeographicalInformation().getTypeOfShape()));
+                    }
                     // GPRS GEOGRAPHICAL INFO LATITUDE
                     if (locationInformationGPRS.getGeographicalInformation().getLatitude() != 0.0) {
                         String formattedPSGeographicalInformationLatitude;
                         formattedPSGeographicalInformationLatitude = coordinatesFormat.format(locationInformationGPRS.getGeographicalInformation().getLatitude());
+                        latitude = Double.valueOf(formattedPSGeographicalInformationLatitude);
                         cdrModel.setPsGeographicalInfoLatitude(formattedPSGeographicalInformationLatitude);
-                        stringBuilder.append(cdrModel.getPsGeographicalInfoLatitude()).append(SEPARATOR);
-                    } else
-                        stringBuilder.append(SEPARATOR);
+                    }
                     // GPRS GEOGRAPHICAL INFO LONGITUDE
                     if (locationInformationGPRS.getGeographicalInformation().getLongitude() != 0.0) {
                         String formattedPSGeographicalInformationLongitude;
                         formattedPSGeographicalInformationLongitude = coordinatesFormat.format(locationInformationGPRS.getGeographicalInformation().getLongitude());
+                        longitude = Double.valueOf(formattedPSGeographicalInformationLongitude);
                         cdrModel.setPsGeographicalInfoLongitude(formattedPSGeographicalInformationLongitude);
-                        stringBuilder.append(cdrModel.getPsGeographicalInfoLongitude()).append(SEPARATOR);
-                    } else
-                        stringBuilder.append(SEPARATOR);
+                    }
                     // GPRS GEOGRAPHICAL INFO UNCERTAINTY
-                    if (Double.valueOf(locationInformationGPRS.getGeographicalInformation().getUncertainty()) != null &&
-                            locationInformationGPRS.getGeographicalInformation().getLatitude() != 0.0 &&
-                            locationInformationGPRS.getGeographicalInformation().getLongitude() != 0.0) {
+                    if (locationInformationGPRS.getGeographicalInformation().getLatitude() != 0.0
+                        && locationInformationGPRS.getGeographicalInformation().getLongitude() != 0.0) {
+                        uncertainty = Double.valueOf(uncertaintyFormat.format(locationInformationGPRS.getGeographicalInformation().getUncertainty()));
                         cdrModel.setPsGeographicalInfoUncertainty(uncertaintyFormat.format(locationInformationGPRS.getGeographicalInformation().getUncertainty()));
-                        stringBuilder.append(cdrModel.getPsGeographicalInfoUncertainty()).append(SEPARATOR);
-                    } else
-                        stringBuilder.append(SEPARATOR);
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
+                    }
                 }
                 /**
                  * GPRS GEODETIC INFORMATION
                  */
                 if (locationInformationGPRS.getGeodeticInformation() != null) {
+                    geoInfo = true;
                     // GPRS GEODETIC INFO TYPE OF SHAPE
-                    cdrModel.setPsGeodeticInfoTypeOfShape(String.valueOf(locationInformationGPRS.getGeodeticInformation().getTypeOfShape()));
-                    stringBuilder.append(cdrModel.getPsGeodeticInfoTypeOfShape()).append(SEPARATOR);
+                    if (locationInformationGPRS.getGeodeticInformation().getTypeOfShape() != null) {
+                        typeOfShape = locationInformationGPRS.getGeodeticInformation().getTypeOfShape().toString();
+                        cdrModel.setPsGeodeticInfoTypeOfShape(String.valueOf(locationInformationGPRS.getGeodeticInformation().getTypeOfShape()));
+                    }
                     // GPRS GEODETIC INFO LATITUDE
                     if (locationInformationGPRS.getGeodeticInformation().getLatitude() != 0.0) {
                         String formattedPSGeodeticInformationLatitude;
                         formattedPSGeodeticInformationLatitude = coordinatesFormat.format(locationInformationGPRS.getGeodeticInformation().getLatitude());
+                        latitude = Double.valueOf(formattedPSGeodeticInformationLatitude);
                         cdrModel.setPsGeodeticInfoLatitude(formattedPSGeodeticInformationLatitude);
-                        stringBuilder.append(cdrModel.getPsGeodeticInfoLatitude()).append(SEPARATOR);
-                    } else
-                        stringBuilder.append(SEPARATOR);
+                    }
                     // GPRS GEODETIC INFO LONGITUDE
                     if (locationInformationGPRS.getGeodeticInformation().getLongitude() != 0.0) {
                         String formattedPSGeodeticInformationLongitude;
                         formattedPSGeodeticInformationLongitude = coordinatesFormat.format(locationInformationGPRS.getGeodeticInformation().getLongitude());
+                        longitude = Double.valueOf(formattedPSGeodeticInformationLongitude);
                         cdrModel.setPsGeodeticInfoLongitude(formattedPSGeodeticInformationLongitude);
-                        stringBuilder.append(cdrModel.getPsGeodeticInfoLongitude()).append(SEPARATOR);
-                    } else
-                        stringBuilder.append(SEPARATOR);
+                    }
                     // GPRS GEODETIC INFO UNCERTAINTY
-                    if (Double.valueOf(locationInformationGPRS.getGeodeticInformation().getUncertainty()) != null &&
-                            locationInformationGPRS.getGeodeticInformation().getLatitude() != 0.0 &&
-                            locationInformationGPRS.getGeodeticInformation().getLongitude() != 0.0) {
+                    if (locationInformationGPRS.getGeodeticInformation().getLatitude() != 0.0 &&
+                        locationInformationGPRS.getGeodeticInformation().getLongitude() != 0.0) {
+                        uncertainty = Double.valueOf(uncertaintyFormat.format(locationInformationGPRS.getGeodeticInformation().getUncertainty()));
                         cdrModel.setPsGeodeticInfoUncertainty(uncertaintyFormat.format(locationInformationGPRS.getGeodeticInformation().getUncertainty()));
-                        stringBuilder.append(cdrModel.getPsGeodeticInfoUncertainty()).append(SEPARATOR);
-                    } else
-                        stringBuilder.append(SEPARATOR);
+                    }
                     // GPRS GEODETIC INFO CONFIDENCE
                     if (locationInformationGPRS.getGeodeticInformation().getLatitude() != 0.0 &&
                             locationInformationGPRS.getGeodeticInformation().getLongitude() != 0.0) {
+                        geodeticConfidence = locationInformationGPRS.getGeodeticInformation().getConfidence();
                         cdrModel.setPsGeodeticInfoConfidence(String.valueOf(locationInformationGPRS.getGeodeticInformation().getConfidence()));
-                        stringBuilder.append(cdrModel.getPsGeodeticInfoConfidence()).append(SEPARATOR);
-                    } else
-                        stringBuilder.append(SEPARATOR);
+                    }
                     // GPRS GEODETIC INFO SCREENING AND PRESENTATION INDICATORS
                     if (locationInformationGPRS.getGeodeticInformation().getLatitude() != 0.0 &&
                             locationInformationGPRS.getGeodeticInformation().getLongitude() != 0.0) {
+                        geodeticScreeningAndPresentationInd = locationInformationGPRS.getGeodeticInformation().getScreeningAndPresentationIndicators();
                         cdrModel.setPsGeodeticInfoScreeningAndPresentationIndicators(String.valueOf(locationInformationGPRS.getGeodeticInformation().getScreeningAndPresentationIndicators()));
-                        stringBuilder.append(cdrModel.getPsGeodeticInfoScreeningAndPresentationIndicators()).append(SEPARATOR);
-                    } else
-                        stringBuilder.append(SEPARATOR);
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
+                    }
                 }
                 /**
                  * LSA ID
@@ -1386,60 +1374,27 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                 if (locationInformationGPRS.getLSAIdentity() != null) {
                     // LSA ID
                     cdrModel.setLsaId(new String(locationInformationGPRS.getLSAIdentity().getData()));
-                    stringBuilder.append(cdrModel.getLsaId()).append(SEPARATOR);
                     // LSA ID PLMN SIGNIFICANT
                     if (locationInformationGPRS.getLSAIdentity().isPlmnSignificantLSA()) { // isPlmnSignificantLSA means the opposite in jSS7 implementation
                         cdrModel.setLsaIdPLMNSignificant("Universal");
-                        stringBuilder.append(cdrModel.getLsaIdPLMNSignificant()).append(SEPARATOR);
+                        lsaIdPLMNSig = "Universal";
                     } else {
                         cdrModel.setLsaIdPLMNSignificant("PLMN");
-                        stringBuilder.append(cdrModel.getLsaIdPLMNSignificant()).append(SEPARATOR);
+                        lsaIdPLMNSig = "PLMN";
                     }
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
                 }
                 /**
                  * SGSN NUMBER
                  */
                 if (locationInformationGPRS.getSGSNNumber() != null) {
                     cdrModel.setSgsnNumber(locationInformationGPRS.getSGSNNumber().getAddress());
-                    stringBuilder.append(cdrModel.getSgsnNumber()).append(SEPARATOR);
-                } else {
-                    stringBuilder.append(SEPARATOR);
                 }
-            } else {
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
             }
             /**
              * SAI Present
              */
-            if (saiPresent != null) {
+            if (saiPresent) {
                 cdrModel.setSaiPresent(String.valueOf(saiPresent));
-                stringBuilder.append(cdrModel.getSaiPresent()).append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
             }
 
             if (subscriberInfo != null) {
@@ -1451,56 +1406,47 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                 if (subscriberState != null || psSubscriberState != null) {
                     if (subscriberState != null) {
                         if (subscriberState.getSubscriberStateChoice() != null)
-                            cdrModel.setSubscirberState(subscriberState.getSubscriberStateChoice().toString());
+                            cdrModel.setSubscriberState(subscriberState.getSubscriberStateChoice().toString());
                         if (subscriberState.getNotReachableReason() != null)
-                            cdrModel.setNotReachableReasonState(subscriberState.getSubscriberStateChoice().toString());
+                            cdrModel.setNotReachableReasonState(subscriberState.getNotReachableReason().name());
                     }
                     if (psSubscriberState != null) {
                         if (psSubscriberState.getChoice() != null)
-                            cdrModel.setSubscirberState(psSubscriberState.getChoice().toString());
+                            cdrModel.setSubscriberState(psSubscriberState.getChoice().toString());
                         if (psSubscriberState.getNetDetNotReachable() != null)
                             cdrModel.setNotReachableReasonState(psSubscriberState.getNetDetNotReachable().name());
                     }
-                    stringBuilder.append(cdrModel.getSubscirberState()).append(SEPARATOR);
-                    stringBuilder.append(cdrModel.getNotReachableReasonState()).append(SEPARATOR);
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
+                    state = cdrModel.getSubscriberState();
+                    notReachableReasonState = cdrModel.getNotReachableReasonState();
                 }
 
-                // MS CLASSMARK 2
-                MSClassmark2 msClassmark = subscriberInfo.getMSClassmark2();
+                /**
+                 * MS CLASSMARK 2
+                 */
+                msClassmark = subscriberInfo.getMSClassmark2();
                 if (msClassmark != null) {
                     cdrModel.setMsClassmark(bytesToHexString(msClassmark.getData()));
-                    stringBuilder.append(cdrModel.getMsClassmark()).append(SEPARATOR);
-                } else {
-                    stringBuilder.append(SEPARATOR);
                 }
 
-                // GPRS MS CLASS
-                GPRSMSClass gprsMsClass = subscriberInfo.getGPRSMSClass();
+                /**
+                 * GPRS MS CLASS
+                 */
+                gprsMsClass = subscriberInfo.getGPRSMSClass();
                 if (gprsMsClass != null) {
                     // GPRS MS CLASS MS RADIO ACCESS CAPABILITY
                     if (gprsMsClass.getMSRadioAccessCapability() != null) {
                         cdrModel.setGprsMSRadioAccessCapability(bytesToHexString(gprsMsClass.getMSRadioAccessCapability().getData()));
-                        stringBuilder.append(cdrModel.getGprsMSRadioAccessCapability()).append(SEPARATOR);
-                    } else
-                        stringBuilder.append(SEPARATOR);
+                    }
                     // GPRS MS CLASS MS NETWORK CAPABILITY
                     if (gprsMsClass.getMSNetworkCapability() != null) {
                         cdrModel.setGprsMSNetworkCapability(bytesToHexString(gprsMsClass.getMSNetworkCapability().getData()));
-                        stringBuilder.append(cdrModel.getGprsMSNetworkCapability()).append(SEPARATOR);
-                    } else
-                        stringBuilder.append(SEPARATOR);
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
+                    }
                 }
 
                 /**
                  * MNP INFO RESULT (from ATI or PSI)
                  */
-                MNPInfoRes mnpInfoResult = subscriberInfo.getMNPInfoRes();
+                mnpInfoResult = subscriberInfo.getMNPInfoRes();
                 if (mnpInfoResult != null) {
                     // MNP NUMBER PORTABILITY STATUS
                     if (mnpInfoResult.getNumberPortabilityStatus() != null)
@@ -1514,234 +1460,537 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                     // MNP ROUTEING NUMBER
                     if (mnpInfoResult.getRouteingNumber() != null)
                         cdrModel.setMnpRouteingNumber(mnpInfoResult.getRouteingNumber().getRouteingNumber());
-
-                    stringBuilder.append(cdrModel.getMnpNumberPortabilityStatus()).append(SEPARATOR);
-                    stringBuilder.append(cdrModel.getMnpIMSI()).append(SEPARATOR);
-                    stringBuilder.append(cdrModel.getMnpMSISDN()).append(SEPARATOR);
-                    stringBuilder.append(cdrModel.getMnpRouteingNumber()).append(SEPARATOR);
-
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
                 }
-            } else {
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
             }
 
             /**
              * Sh 5GS Location Information only parameters
              */
-            if (locationInformation5GS != null) {
-                /*
-                 * NR Cell Global Id
-                 */
-                if (locationInformation5GS.getNRCellGlobalIdentity() != null) {
-                    try {
-                        // NRCGI MCC
-                        cdrModel.setNrCellGlobalId5GsMCC(String.valueOf(locationInformation5GS.getNRCellGlobalIdentity().getMCC()));
-                        stringBuilder.append(cdrModel.getNrCellGlobalId5GsMCC()).append(SEPARATOR);
-
-                        // NRCGI MNC
-                        cdrModel.setNrCellGlobalId5GsMNC(String.valueOf(locationInformation5GS.getNRCellGlobalIdentity().getMNC()));
-                        stringBuilder.append(cdrModel.getNrCellGlobalId5GsMNC()).append(SEPARATOR);
-
-                        // NRCGI NCI
-                        cdrModel.setNrCellGlobalId5GsNCI(String.valueOf(locationInformation5GS.getNRCellGlobalIdentity().getNCI()));
-                        stringBuilder.append(cdrModel.getNrCellGlobalId5GsNCI()).append(SEPARATOR);
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
+            if (shlocationInformation5GS != null || locationInformation5GS != null) {
+                if (shlocationInformation5GS != null) {
+                    if (shlocationInformation5GS.getNRCellGlobalIdentity() != null) {
+                        try {
+                            // NRCGI MCC
+                            nrCgiMcc = shlocationInformation5GS.getNRCellGlobalIdentity().getMCC();
+                            cdrModel.setNrCellGlobalId5GsMCC(String.valueOf(shlocationInformation5GS.getNRCellGlobalIdentity().getMCC()));
+                            // NRCGI MNC
+                            nrCgiMcc = shlocationInformation5GS.getNRCellGlobalIdentity().getMNC();
+                            cdrModel.setNrCellGlobalId5GsMNC(String.valueOf(shlocationInformation5GS.getNRCellGlobalIdentity().getMNC()));
+                            // NRCGI NCI
+                            nci = shlocationInformation5GS.getNRCellGlobalIdentity().getNCI();
+                            cdrModel.setNrCellGlobalId5GsNCI(String.valueOf(shlocationInformation5GS.getNRCellGlobalIdentity().getNCI()));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    /*
+                     * 5GS AMF Address
+                     */
+                    if (shlocationInformation5GS.getAMFAddress() != null) {
+                        amfAddress = shlocationInformation5GS.getAMFAddress();
+                        cdrModel.setAmfAddress5Gs(shlocationInformation5GS.getAMFAddress());
+                    }
+                    /*
+                     * 5GS SMSF Address
+                     */
+                    if (shlocationInformation5GS.getSMSFAddress() != null) {
+                        smsfAddress = shlocationInformation5GS.getSMSFAddress();
+                        cdrModel.setSmsfAddress5gs(shlocationInformation5GS.getSMSFAddress());
                     }
                 } else {
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
+                    if (locationInformation5GS.getEUtranCgi() != null) {
+                        try {
+                            // NRCGI MCC
+                            nrCgiMcc = locationInformation5GS.getNRCellGlobalId().getMCC();
+                            cdrModel.setNrCellGlobalId5GsMCC(String.valueOf(locationInformation5GS.getNRCellGlobalId().getMCC()));
+                            // NRCGI MNC
+                            nrCgiMnc = locationInformation5GS.getNRCellGlobalId().getMNC();
+                            cdrModel.setNrCellGlobalId5GsMNC(String.valueOf(locationInformation5GS.getNRCellGlobalId().getMNC()));
+                            // NRCGI NCI
+                            nci = locationInformation5GS.getNRCellGlobalId().getNCI();
+                            cdrModel.setNrCellGlobalId5GsNCI(String.valueOf(locationInformation5GS.getNRCellGlobalId().getNCI()));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    /*
+                     * 5GS AMF Address
+                     */
+                    if (locationInformation5GS.getAMFAddress() != null) {
+                        FQDN amfAddressFqdn = locationInformation5GS.getAMFAddress();
+                        amfAddress = new String(amfAddressFqdn.getData(), StandardCharsets.UTF_8);
+                        cdrModel.setAmfAddress5Gs(amfAddress);
+                    }
+                    /*
+                     * NR Tracking Area Identity
+                     */
+                    if (locationInformation5GS.getNRTAId() != null) {
+                        try {
+                            // NR-TAI MCC
+                            nrTaiMcc = locationInformation5GS.getNRTAId().getMCC();
+                            cdrModel.setTai5GsMCC(String.valueOf(locationInformation5GS.getNRTAId().getMCC()));
+                            // NR-TAI MNC
+                            nrTaiMnc = locationInformation5GS.getNRTAId().getMNC();
+                            cdrModel.setTai5GsMNC(String.valueOf(locationInformation5GS.getNRTAId().getMNC()));
+                            // NR-TAI TAC
+                            nrTaiTac = locationInformation5GS.getNRTAId().getNrTAC();
+                            cdrModel.setTai5GsTAC(String.valueOf(locationInformation5GS.getNRTAId().getNrTAC()));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
-                /*
-                 * 5GS AMF Address
-                 */
-                if (locationInformation5GS.getAMFAddress() != null) {
-                    cdrModel.setAmfAddress5Gs(locationInformation5GS.getAMFAddress());
-                    stringBuilder.append(cdrModel.getAmfAddress5Gs()).append(SEPARATOR);
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                }
-                /*
-                 * 5GS SMSF Address
-                 */
-                if (locationInformation5GS.getSMSFAddress() != null) {
-                    cdrModel.setSmsfAddress5gs(locationInformation5GS.getSMSFAddress());
-                    stringBuilder.append(cdrModel.getSmsfAddress5gs()).append(SEPARATOR);
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                }
-            } else {
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
             }
 
             /*
-             * Visited PLMN ID from Sh UDR/UDA
+             * Visited PLMN ID from Sh UDR/UDA or ATI or PSI
              */
-            PlmnId visitedPlmnId = gmlcCdrState.getVisitedPlmnId();
-            if (visitedPlmnId != null) {
+            if (gmlcCdrState.getVisitedPlmnId() != null) {
+                visitedPlmnId = gmlcCdrState.getVisitedPlmnId();
                 try {
                     cdrModel.setVisitedPlmnIdMCC(String.valueOf(visitedPlmnId.getMcc()));
                     cdrModel.setVisitedPlmnIdMNC(String.valueOf(visitedPlmnId.getMnc()));
-                    stringBuilder.append(cdrModel.getVisitedPlmnIdMCC()).append(SEPARATOR);
-                    stringBuilder.append(cdrModel.getVisitedPlmnIdMNC()).append(SEPARATOR);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else {
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
             }
             /*
              * Local Time Zone from Sh UDR/UDA
              */
-            LocalTimeZone localTimeZone = gmlcCdrState.getLocalTimeZone();
+            localTimeZone = gmlcCdrState.getLocalTimeZone();
             if (localTimeZone != null) {
                 if (localTimeZone.getTimeZone() != null)
                     cdrModel.setLocalTimeZone(localTimeZone.getTimeZone());
                 if (localTimeZone.getDaylightSavingTime() != null)
                     cdrModel.setDaylightSavingTime(String.valueOf(localTimeZone.getDaylightSavingTime()));
-
-                stringBuilder.append(cdrModel.getLocalTimeZone()).append(SEPARATOR);
-                stringBuilder.append(cdrModel.getDaylightSavingTime()).append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-                stringBuilder.append(SEPARATOR);
             }
+
             /*
-             * RAT type from Sh UDR/UDA
+             * RAT type from Sh UDR/UDA or ATI or PSI
              */
-            Integer ratTypeCode = gmlcCdrState.getRatType();
+            ratTypeCode = gmlcCdrState.getRatType();
             if (ratTypeCode != null) {
                 String ratType = getRatType(ratTypeCode);
                 cdrModel.setRatType(ratType);
-                stringBuilder.append(cdrModel.getRatType()).append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
             }
-
-        } else {
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
         }
 
         /**
-         * Current Location Retrieved
+         * MAP LSM (SRILCS, PSL & SLR) and LTE LCS (RIR, PLR, LRR) gathered parameters
          */
-        Boolean currentLocationRetrieved = gmlcCdrState.isCurrentLocationRetrieved();
-        if (currentLocationRetrieved != null) {
-            cdrModel.setCurrentLocationRetrieved(String.valueOf(currentLocationRetrieved));
-            stringBuilder.append(cdrModel.getCurrentLocationRetrieved()).append(SEPARATOR);
+
+        /**
+         * ADDITIONAL NUMBER
+         */
+        AdditionalNumber additionalNumber = gmlcCdrState.getAdditionalNumber();
+        if (additionalNumber != null) {
+            if (additionalNumber.getMSCNumber() != null) {
+                // MAP LSM ADDITIONAL NUMBER (MSC)
+                mscNumber = additionalNumber.getMSCNumber();
+                cdrModel.setMapMSCNumber(additionalNumber.getMSCNumber().getAddress());
+            }
+            if (additionalNumber.getSGSNNumber() != null) {
+                // MAP LSM ADDITIONAL NUMBER (SGSN)
+                sgsnNumber = additionalNumber.getSGSNNumber();
+                cdrModel.setMapSGSNNumber(additionalNumber.getSGSNNumber().getAddress());
+            }
+        }
+
+        /**
+         * SGSN Number
+         */
+        if (gmlcCdrState.getSgsnNumber() != null) {
+            sgsnNumber = gmlcCdrState.getSgsnNumber();
+            cdrModel.setSgsnNumber(sgsnNumber.getAddress());
+        }
+
+        /**
+         * SGSN NAME
+         */
+        if (gmlcCdrState.getSgsnName() != null) {
+            sgsnName = gmlcCdrState.getSgsnName();
+            cdrModel.setSgsnName(new String(sgsnName.getData(), StandardCharsets.UTF_8));
+        }
+
+        /**
+         * SGSN REALM
+         */
+        if (gmlcCdrState.getSgsnRealm() != null) {
+            sgsnRealm = gmlcCdrState.getSgsnRealm();
+            cdrModel.setSgsnRealm(new String(sgsnRealm.getData(), StandardCharsets.UTF_8));
+        }
+
+        /**
+         * MME NAME
+         */
+        if (gmlcCdrState.getMmeName() != null) {
+            mmeName = gmlcCdrState.getMmeName();
+            cdrModel.setMmeName(new String(mmeName.getData(), StandardCharsets.UTF_8));
+        }
+
+        /**
+         * MME REALM
+         */
+        if (gmlcCdrState.getMmeRealm() != null) {
+            mmeRealm = gmlcCdrState.getMmeRealm();
+            cdrModel.setMmeRealm(new String(mmeRealm.getData(), StandardCharsets.UTF_8));
+        }
+
+        /**
+         * MSC Number
+         */
+        if (gmlcCdrState.getMscNumber() != null) {
+            mscNumber = gmlcCdrState.getMscNumber();
+            cdrModel.setMscNumber(mscNumber.getAddress());
+        }
+
+        /**
+         * 3GPP AAA Server Name
+         */
+        if (gmlcCdrState.getAaaServerName() != null) {
+            aaaServerName = gmlcCdrState.getAaaServerName();
+            cdrModel.setTgppAAAServerName(new String(aaaServerName.getData(), StandardCharsets.UTF_8));
+        }
+
+        /**
+         * LOCATION ESTIMATE
+         */
+        ExtGeographicalInformation locationEstimate = gmlcCdrState.getLocationEstimate();
+        if (locationEstimate != null) {
+            // LOCATION ESTIMATE TYPE OF SHAPE
+            if (locationEstimate.getTypeOfShape() != null) {
+                typeOfShape = String.valueOf(locationEstimate.getTypeOfShape());
+                cdrModel.setLocationEstimateTypeOfShape(String.valueOf(locationEstimate.getTypeOfShape()));
+            }
+
+            // LOCATION ESTIMATE LATITUDE
+            locationEstimate.getLatitude();
+            if (locationEstimate.getTypeOfShape() != TypeOfShape.Polygon) {
+                String formattedLatitude = coordinatesFormat.format(Double.valueOf(locationEstimate.getLatitude()));
+                latitude = Double.valueOf(formattedLatitude);
+                cdrModel.setLocationEstimateLatitude(formattedLatitude);
+            }
+
+            // LOCATION ESTIMATE LONGITUDE
+            locationEstimate.getLongitude();
+            if (locationEstimate.getTypeOfShape() != TypeOfShape.Polygon) {
+                String formattedLongitude = coordinatesFormat.format(Double.valueOf(locationEstimate.getLongitude()));
+                longitude = Double.valueOf(formattedLongitude);
+                cdrModel.setLocationEstimateLongitude(formattedLongitude);
+            }
+
+            // LOCATION ESTIMATE UNCERTAINTY
+            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyCircle) {
+                uncertainty = Double.valueOf(uncertaintyFormat.format(locationEstimate.getUncertainty()));
+                cdrModel.setLocationEstimateUncertainty(uncertaintyFormat.format(locationEstimate.getUncertainty()));
+            }
+
+            // LOCATION ESTIMATE UNCERTAINTY SEMI MAJOR AXIS
+            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
+                    locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
+                uncertaintySemiMajorAxis = Double.valueOf(uncertaintyFormat.format(locationEstimate.getUncertaintySemiMajorAxis()));
+                cdrModel.setLocationEstimateUncertaintySemiMajorAxis(uncertaintyFormat.format(locationEstimate.getUncertaintySemiMajorAxis()));
+            }
+
+            // LOCATION ESTIMATE UNCERTAINTY SEMI MINOR AXIS
+            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
+                    locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
+                uncertaintySemiMinorAxis = Double.valueOf(uncertaintyFormat.format(locationEstimate.getUncertaintySemiMinorAxis()));
+                cdrModel.setLocationEstimateUncertaintySemiMinorAxis(uncertaintyFormat.format(locationEstimate.getUncertaintySemiMinorAxis()));
+            }
+
+            // LOCATION ESTIMATE CONFIDENCE
+            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
+                    locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid ||
+                    locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
+                estimateConfidence = locationEstimate.getConfidence();
+                cdrModel.setLocationEstimateConfidence(String.valueOf(locationEstimate.getConfidence()));
+            }
+
+            // LOCATION ESTIMATE ANGLE OF MAJOR AXIS
+            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
+                    locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
+                angleOfMajorAxis = locationEstimate.getAngleOfMajorAxis();
+                cdrModel.setLocationEstimateAngleOfMajorAxis(String.valueOf(locationEstimate.getAngleOfMajorAxis()));
+            }
+
+            // LOCATION ESTIMATE ALTITUDE
+            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
+                    locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid ||
+                    locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
+                altitude = locationEstimate.getAltitude();
+                cdrModel.setLocationEstimateAltitude(String.valueOf(locationEstimate.getAltitude()));
+            }
+
+            // LOCATION ESTIMATE UNCERTAINTY ALTITUDE
+            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
+                uncertaintyAltitude = Double.valueOf(uncertaintyFormat.format(locationEstimate.getUncertaintyAltitude()));
+                cdrModel.setLocationEstimateUncertaintyAltitude(uncertaintyFormat.format(locationEstimate.getUncertaintyAltitude()));
+            }
+
+            // LOCATION ESTIMATE INNER RADIUS
+            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
+                innerRadius = locationEstimate.getInnerRadius();
+                cdrModel.setLocationEstimateInnerRadius(String.valueOf(locationEstimate.getInnerRadius()));
+            }
+
+            // LOCATION ESTIMATE UNCERTAINTY RADIUS
+            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
+                uncertaintyRadius = Double.valueOf(uncertaintyFormat.format(locationEstimate.getUncertaintyRadius()));
+                cdrModel.setLocationEstimateUncertaintyRadius(uncertaintyFormat.format(locationEstimate.getUncertaintyRadius()));
+            }
+
+            // LOCATION ESTIMATE OFFSET ANGLE
+            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
+                offsetAngle = locationEstimate.getOffsetAngle();
+                cdrModel.setLocationEstimateOffSetAngle(String.valueOf(locationEstimate.getOffsetAngle()));
+            }
+
+            // LOCATION ESTIMATE INCLUDED ANGLE
+            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
+                includedAngle = locationEstimate.getIncludedAngle();
+                cdrModel.setLocationEstimateIncludedAngle(String.valueOf(locationEstimate.getIncludedAngle()));
+            }
+
+        }
+
+        /**
+         * ADDITIONAL LOCATION ESTIMATE
+         */
+        AddGeographicalInformation additionalLocationEstimate = gmlcCdrState.getAdditionalLocationEstimate();
+        if (additionalLocationEstimate != null) {
+            // ADDITIONAL LOCATION ESTIMATE TYPE OF SHAPE
+            if (additionalLocationEstimate.getTypeOfShape() != null) {
+                typeOfShape = String.valueOf(additionalLocationEstimate.getTypeOfShape());
+                cdrModel.setAdditionalLocationEstimateTypeOfShape(String.valueOf(additionalLocationEstimate.getTypeOfShape()));
+            }
+
+            // ADDITIONAL LOCATION ESTIMATE TYPE OF SHAPE == Polygon
+            if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.Polygon) {
+                // ADDITIONAL LOCATION ESTIMATE POLYGON NUMBER OF POINTS
+                polygonNumberOfPoints = gmlcCdrState.getAdditionalNumberOfPoints();
+                if (polygonNumberOfPoints != -1) {
+                    cdrModel.setAdditionalLocationEstimatePolygonNumberOfPoint(String.valueOf(polygonNumberOfPoints));
+                }
+
+                // ADDITIONAL LOCATION ESTIMATE LATITUDES & LONGITUDES of each POLYGON point
+                estimatePolygon = gmlcCdrState.getAdditionalPolygon();
+
+            } else {
+
+                // ADDITIONAL LOCATION ESTIMATE LATITUDE
+                latitude = additionalLocationEstimate.getLatitude();
+                String formattedAdditionalLocationEstimateLatitude;
+                formattedAdditionalLocationEstimateLatitude = coordinatesFormat.format(Double.valueOf(additionalLocationEstimate.getLatitude()));
+                cdrModel.setAdditionalLocationEstimateLatitude(formattedAdditionalLocationEstimateLatitude);
+
+                // ADDITIONAL LOCATION ESTIMATE LONGITUDE
+                longitude = additionalLocationEstimate.getLongitude();
+                String formattedAdditionalLocationEstimateLongitude;
+                formattedAdditionalLocationEstimateLongitude = coordinatesFormat.format(Double.valueOf(additionalLocationEstimate.getLongitude()));
+                cdrModel.setAdditionalLocationEstimateLongitude(formattedAdditionalLocationEstimateLongitude);
+
+                // ADDITIONAL LOCATION ESTIMATE UNCERTAINTY
+                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyCircle) {
+                    uncertainty = Double.valueOf(uncertaintyFormat.format(additionalLocationEstimate.getUncertainty()));
+                    cdrModel.setAdditionalLocationEstimateUncertainty(uncertaintyFormat.format(Double.valueOf(additionalLocationEstimate.getUncertainty())));
+                }
+                // ADDITIONAL LOCATION ESTIMATE UNCERTAINTY SEMI MAJOR AXIS
+                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
+                        additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
+                    uncertaintySemiMajorAxis = Double.valueOf(uncertaintyFormat.format(additionalLocationEstimate.getUncertaintySemiMajorAxis()));
+                    cdrModel.setAdditionalLocationEstimateUncertaintySemiMajorAxis(uncertaintyFormat.format(Double.valueOf(additionalLocationEstimate.getUncertaintySemiMajorAxis())));
+                }
+
+                // ADDITIONAL LOCATION ESTIMATE UNCERTAINTY SEMI MINOR AXIS
+                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
+                        additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
+                    uncertaintySemiMinorAxis = Double.valueOf(uncertaintyFormat.format(additionalLocationEstimate.getUncertaintySemiMinorAxis()));
+                    cdrModel.setAdditionalLocationEstimateUncertaintySemiMinorAxis(uncertaintyFormat.format(Double.valueOf(additionalLocationEstimate.getUncertaintySemiMinorAxis())));
+                }
+
+                // ADDITIONAL LOCATION ESTIMATE ANGLE OF MAJOR AXIS
+                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
+                        additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
+                    angleOfMajorAxis = additionalLocationEstimate.getAngleOfMajorAxis();
+                    cdrModel.setAdditionalLocationEstimateAngleOfMajorAxis(String.valueOf(additionalLocationEstimate.getAngleOfMajorAxis()));
+                }
+
+                // ADDITIONAL LOCATION ESTIMATE CONFIDENCE
+                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
+                        additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid ||
+                        additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
+                    estimateConfidence = additionalLocationEstimate.getConfidence();
+                    cdrModel.setAdditionalLocationEstimateConfidence(String.valueOf(additionalLocationEstimate.getConfidence()));
+                }
+
+                // ADDITIONAL LOCATION ESTIMATE ALTITUDE
+                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitude ||
+                        additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitude ||
+                        additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
+                    altitude = additionalLocationEstimate.getAltitude();
+                    if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitude ||
+                            additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitude ||
+                            additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
+                        cdrModel.setAdditionalLocationEstimateAltitude(String.valueOf(additionalLocationEstimate.getAltitude()));
+                    }
+                }
+
+                // ADDITIONAL LOCATION ESTIMATE UNCERTAINTY ALTITUDE
+                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
+                    uncertaintyAltitude = Double.valueOf(uncertaintyFormat.format(additionalLocationEstimate.getUncertaintyAltitude()));
+                    cdrModel.setAdditionalLocationEstimateUncertaintyAltitude(uncertaintyFormat.format(additionalLocationEstimate.getUncertaintyAltitude()));
+                }
+
+                // ADDITIONAL LOCATION ESTIMATE INNER RADIUS
+                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
+                    innerRadius = additionalLocationEstimate.getInnerRadius();
+                    cdrModel.setAdditionalLocationEstimateInnerRadius(String.valueOf(additionalLocationEstimate.getInnerRadius()));
+                }
+
+                // ADDITIONAL LOCATION ESTIMATE UNCERTAINTY RADIUS
+                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
+                    uncertaintyRadius = Double.valueOf(uncertaintyFormat.format(additionalLocationEstimate.getUncertaintyRadius()));
+                    if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
+                        cdrModel.setAdditionalLocationEstimateUncertaintyRadius(uncertaintyFormat.format(Double.valueOf(additionalLocationEstimate.getUncertaintyRadius())));
+                    }
+                }
+
+                // ADDITIONAL LOCATION ESTIMATE OFFSET ANGLE
+                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
+                    offsetAngle = additionalLocationEstimate.getOffsetAngle();
+                    if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
+                        cdrModel.setAdditionalLocationEstimateOffSetAngle(String.valueOf(additionalLocationEstimate.getOffsetAngle()));
+                    }
+                }
+
+                // ADDITIONAL LOCATION ESTIMATE INCLUDED ANGLE
+                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
+                    includedAngle = additionalLocationEstimate.getIncludedAngle();
+                    if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
+                        cdrModel.setAdditionalLocationEstimateIncludedAngle(String.valueOf(additionalLocationEstimate.getIncludedAngle()));
+                    }
+                }
+
+            }
+        }
+
+        /**
+         * DEFERRED MT LR RESPONSE INDICATOR
+         */
+        deferredMTLRResponseIndicator = gmlcCdrState.isDeferredMTLRResponseIndicator();
+        if (deferredMTLRResponseIndicator != null) {
+            cdrModel.setDeferredMTLRResponseIndicator(String.valueOf(deferredMTLRResponseIndicator));
+        }
+
+        /**
+         * CGI or SAI or LAI
+         */
+        CellGlobalIdOrServiceAreaIdOrLAI lcsCGIorSAIorLAI = gmlcCdrState.getCellGlobalIdOrServiceAreaIdOrLAI();
+        if (lcsCGIorSAIorLAI != null) {
+            if (lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
+                try {
+                    // LCS CGI MCC
+                    cgiMcc = lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
+                    cdrModel.setLcsCGIorSAIorLAIMCC(String.valueOf(lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getMCC()));
+                    // LCS CGI MNC
+                    cgiMnc = lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getMNC();
+                    cdrModel.setLcsCGIorSAIorLAIMNC(String.valueOf(lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getMNC()));
+                    // LCS CGI LAC
+                    cgiLac = lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
+                    cdrModel.setLcsCGIorSAIorLAILAC(String.valueOf(lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getLac()));
+                    // LCS CGI CI
+                    cgiCiorSac = lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
+                    cdrModel.setLcsCGIorSAIorLAICI(String.valueOf(lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode()));
+                } catch (MAPException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (lcsCGIorSAIorLAI.getLAIFixedLength() != null) {
+                try {
+                    // LCS CGI MCC
+                    cgiMcc = lcsCGIorSAIorLAI.getLAIFixedLength().getMCC();
+                    cdrModel.setLcsCGIorSAIorLAIMCC(String.valueOf(lcsCGIorSAIorLAI.getLAIFixedLength().getMCC()));
+                    // LCS CGI MNC
+                    cgiMnc = lcsCGIorSAIorLAI.getLAIFixedLength().getMNC();
+                    cdrModel.setLcsCGIorSAIorLAIMNC(String.valueOf(lcsCGIorSAIorLAI.getLAIFixedLength().getMNC()));
+                    // LCS CGI LAC
+                    cgiLac = lcsCGIorSAIorLAI.getLAIFixedLength().getLac();
+                    cdrModel.setLcsCGIorSAIorLAILAC(String.valueOf(lcsCGIorSAIorLAI.getLAIFixedLength().getLac()));
+                } catch (MAPException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        /*
+         * LTE ECGI (obtained from SLg)
+         */
+        EUTRANCGI lcsEutranCgi = gmlcCdrState.getEUtranCgi();
+        if (lcsEutranCgi != null) {
+            try {
+                // ECGI MCC
+                ecgiMcc = lcsEutranCgi.getMCC();
+                cdrModel.setLcsEutranCgiMCC(String.valueOf(ecgiMcc));
+                // ECGI MNC
+                ecgiMnc = lcsEutranCgi.getMNC();
+                cdrModel.setLcsEutranCgiMNC(String.valueOf(ecgiMnc));
+                // ECGI ECI
+                eci = lcsEutranCgi.getEci();
+                cdrModel.setLcsEutranCgiECI(String.valueOf(eci));
+                // ECGI ENBID
+                eNBId = lcsEutranCgi.getENodeBId();
+                cdrModel.setLcsEutranCgiENBID(String.valueOf(eNBId));
+                // ECGI CI
+                ecgiCi = lcsEutranCgi.getCi();
+                cdrModel.setLcsEutranCgiCI(String.valueOf(ecgiCi));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (cellPortionId != null) {
+            cdrModel.setLcsCellPortionId(String.valueOf(cellPortionId));
+        }
+
+        /**
+         * SERVING NODE ADDRESS
+         */
+        ServingNodeAddress servingNodeAddress = gmlcCdrState.getServingNodeAddress();
+        if (servingNodeAddress != null) {
+            if (servingNodeAddress.getMscNumber() != null) {
+                // SERVING NODE ADDRESS MSC NUMBER
+                mscNumber = servingNodeAddress.getMscNumber();
+                cdrModel.setServingNodeAddressMSCNumber(servingNodeAddress.getMscNumber().getAddress());
+            }
+            if (servingNodeAddress.getSgsnNumber() != null) {
+                // SERVING NODE ADDRESS SGSN Number
+                sgsnNumber = servingNodeAddress.getSgsnNumber();
+                cdrModel.setServingNodeAddressSGSNNumber(servingNodeAddress.getSgsnNumber().getAddress());
+            }
+            if (servingNodeAddress.getMmeNumber() != null) {
+                // SERVING NODE ADDRESS MME NUMBER
+                servingNodeAddressMmeNumber = servingNodeAddress.getMmeNumber();
+                String mmeNumStr = new String(servingNodeAddress.getMmeNumber().getData(), StandardCharsets.UTF_8);
+                cdrModel.setServingNodeAddressMMENumber(mmeNumStr);
+            }
+        }
+
+        if (sendCdrToGlass) {
+            try {
+                taskManager.addTask(new TaskCDR(cdrModel));
+            } catch (Exception ex) {
+                logger.severe("Error on try to send CDR to GLaaS " + ex.getMessage());
+            }
+        }
+
+
+        /**
+         * MSISDN
+         */
+        ISDNAddressString msisdn = gmlcCdrState.getMsisdn();
+        if (msisdn != null) {
+            cdrModel.setMsisdnAddress(msisdn.getAddress());
+            stringBuilder.append(cdrModel.getMsisdnAddress()).append(SEPARATOR);
         } else {
             stringBuilder.append(SEPARATOR);
         }
@@ -1753,12 +2002,24 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         if (imsi != null) {
             String imsiStr;
             if (imsi.getData() != null) {
-                imsiStr = new String(imsi.getData().getBytes(), StandardCharsets.ISO_8859_1);
+                imsiStr = new String(imsi.getData().getBytes(), StandardCharsets.UTF_8);
                 cdrModel.setImsi(imsiStr);
                 stringBuilder.append(cdrModel.getImsi()).append(SEPARATOR);
             } else {
                 stringBuilder.append(SEPARATOR);
             }
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * IMEI
+         */
+        IMEI imei = gmlcCdrState.getImei();
+        if (imei != null) {
+            String imeiStr = new String(imei.getIMEI().getBytes());
+            cdrModel.setImei(imeiStr);
+            stringBuilder.append(cdrModel.getImei()).append(SEPARATOR);
         } else {
             stringBuilder.append(SEPARATOR);
         }
@@ -1775,10 +2036,163 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
             stringBuilder.append(SEPARATOR);
         }
 
+        /**
+         * CGI
+         */
+        if (cgiMcc != -1) {
+            stringBuilder.append(cgiMcc).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (cgiMnc != -1) {
+            stringBuilder.append(cgiMnc).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (cgiLac != -1) {
+            stringBuilder.append(cgiLac).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (cgiCiorSac != -1) {
+            stringBuilder.append(cgiCiorSac).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (saiPresent) {
+            stringBuilder.append(saiPresent).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
 
         /**
-         * MAP LSM (SRILCS, PSL & SLR) and LTE LCS (RIR, PLR, LRR) gathered parameters
+         * RAI
          */
+        if (raiMcc != -1) {
+            stringBuilder.append(raiMcc).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (raiMnc != -1) {
+            stringBuilder.append(raiMnc).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (raiLac != -1) {
+            stringBuilder.append(raiLac).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (raiRac != -1) {
+            stringBuilder.append(raiRac).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * LSA
+         */
+        if (lsaId != -1) {
+            stringBuilder.append(lsaId).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (lsaIdPLMNSig != null) {
+            stringBuilder.append(lsaIdPLMNSig).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * ECGI
+         */
+        if (ecgiMcc != -1) {
+            stringBuilder.append(ecgiMcc).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (ecgiMnc != -1) {
+            stringBuilder.append(ecgiMnc).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (eci != null) {
+            stringBuilder.append(eci).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (eNBId != null) {
+            stringBuilder.append(eNBId).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (ecgiCi != -1) {
+            stringBuilder.append(ecgiCi).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (cellPortionId != null) {
+            stringBuilder.append(cellPortionId).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * TAI
+         */
+        if (taiMcc != -1) {
+            stringBuilder.append(taiMcc).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (taiMnc != -1) {
+            stringBuilder.append(taiMnc).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (taiTac != -1) {
+            stringBuilder.append(taiTac).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * 5GS NRCGI
+         */
+        if (nrCgiMcc != -1) {
+            stringBuilder.append(nrCgiMcc).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (nrCgiMnc != -1) {
+            stringBuilder.append(nrCgiMnc).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (nci != null) {
+            stringBuilder.append(nci).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * 5GS TAI
+         */
+        if (nrTaiMcc != -1) {
+            stringBuilder.append(nrTaiMcc).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (nrTaiMnc != -1) {
+            stringBuilder.append(nrTaiMnc).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        if (nrTaiTac != -1) {
+            stringBuilder.append(nrTaiTac).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
 
         /**
          * NETWORK NODE NUMBER
@@ -1803,73 +2217,119 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         }
 
         /**
-         * ADDITIONAL NUMBER
+         * VLR Number
          */
-        AdditionalNumber additionalNumber = gmlcCdrState.getAdditionalNumber();
-        if (additionalNumber != null) {
-            if (additionalNumber.getMSCNumber() != null) {
-                // MAP LSM ADDITIONAL NUMBER (MSC)
-                cdrModel.setMapMSCNumber(additionalNumber.getMSCNumber().getAddress());
-                stringBuilder.append(cdrModel.getMapMSCNumber()).append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-            if (additionalNumber.getSGSNNumber() != null) {
-                // MAP LSM ADDITIONAL NUMBER (SGSN)
-                cdrModel.setMapSGSNNumber(additionalNumber.getSGSNNumber().getAddress());
-                stringBuilder.append(cdrModel.getMapSGSNNumber()).append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-        } else {
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-        }
-
-        /**
-         * MME NAME
-         */
-        DiameterIdentity mmeName = gmlcCdrState.getMmeName();
-        if (mmeName != null) {
-            String mmeNameStr = new String(mmeName.getData(), StandardCharsets.ISO_8859_1);
-            cdrModel.setMmeName(mmeNameStr);
-            stringBuilder.append(cdrModel.getMmeName()).append(SEPARATOR);
+        if (vlrNumber != null) {
+            stringBuilder.append(vlrNumber.getAddress()).append(SEPARATOR);
         } else {
             stringBuilder.append(SEPARATOR);
         }
 
         /**
-         * MME REALM
+         * SGSN Number
          */
-        DiameterIdentity mmeRealm = gmlcCdrState.getMmeRealm();
-        if (mmeRealm != null) {
-            String mmeRealmStr = new String(mmeRealm.getData(), StandardCharsets.ISO_8859_1);
-            cdrModel.setMmeRealm(mmeRealmStr);
-            stringBuilder.append(cdrModel.getMmeRealm()).append(SEPARATOR);
+        if (sgsnNumber != null) {
+            stringBuilder.append(sgsnNumber.getAddress()).append(SEPARATOR);
         } else {
             stringBuilder.append(SEPARATOR);
         }
 
         /**
-         * SGSN NAME
+         * SGSN Name
          */
-        DiameterIdentity sgsnName = gmlcCdrState.getSgsnName();
         if (sgsnName != null) {
-            String sgsnNameStr = new String(sgsnName.getData(), StandardCharsets.ISO_8859_1);
-            cdrModel.setSgsnName(sgsnNameStr);
-            stringBuilder.append(cdrModel.getSgsnName()).append(SEPARATOR);
+            stringBuilder.append(new String(sgsnName.getData(), StandardCharsets.UTF_8)).append(SEPARATOR);
         } else {
             stringBuilder.append(SEPARATOR);
         }
 
         /**
-         * SGSN REALM
+         * SGSN Realm
          */
-        DiameterIdentity sgsnRealm = gmlcCdrState.getSgsnRealm();
         if (sgsnRealm != null) {
-            String sgsnRealmStr = new String(sgsnRealm.getData(), StandardCharsets.ISO_8859_1);
-            cdrModel.setSgsnRealm(sgsnRealmStr);
-            stringBuilder.append(cdrModel.getSgsnRealm()).append(SEPARATOR);
+            stringBuilder.append(new String(sgsnRealm.getData(), StandardCharsets.UTF_8)).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * MME Name
+         */
+        if (mmeName != null || servingNodeAddressMmeNumber != null) {
+            if (servingNodeAddressMmeNumber != null)
+                stringBuilder.append(new String(servingNodeAddressMmeNumber.getData(), StandardCharsets.UTF_8)).append(SEPARATOR);
+            else
+                stringBuilder.append(new String(mmeName.getData(), StandardCharsets.UTF_8)).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * MME Realm
+         */
+        if (mmeRealm != null) {
+            stringBuilder.append(new String(mmeRealm.getData(), StandardCharsets.UTF_8)).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * MSC Number
+         */
+        if (mscNumber != null) {
+            stringBuilder.append(mscNumber.getAddress()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * 3GPP AAA Server Name
+         */
+        if (aaaServerName != null) {
+            stringBuilder.append(new String(aaaServerName.getData(), StandardCharsets.UTF_8)).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * LCS Capabilities Sets
+         */
+        SupportedLCSCapabilitySets supportedLCSCapabilitySets = gmlcCdrState.getLcsCapabilitySets();
+        Long lcsCapabilitiesSets = gmlcCdrState.getLcsCapabilitiesSets();
+        if (supportedLCSCapabilitySets != null || lcsCapabilitiesSets != null) {
+            String lcsCapSets = null;
+            if (supportedLCSCapabilitySets != null) {
+                if (supportedLCSCapabilitySets.getCapabilitySetRelease98_99())
+                    lcsCapSets = "release98_99";
+                if (supportedLCSCapabilitySets.getCapabilitySetRelease4())
+                    lcsCapSets = "release4";
+                if (supportedLCSCapabilitySets.getCapabilitySetRelease5())
+                    lcsCapSets = "release5";
+                if (supportedLCSCapabilitySets.getCapabilitySetRelease6())
+                    lcsCapSets = "release6";
+                if (supportedLCSCapabilitySets.getCapabilitySetRelease7())
+                    lcsCapSets = "release7";
+            } else {
+                switch ((int) (long) lcsCapabilitiesSets) {
+                    case 0:
+                        lcsCapSets = "release98_99";
+                        break;
+                    case 1:
+                        lcsCapSets = "release4";
+                        break;
+                    case 2:
+                        lcsCapSets = "release5";
+                        break;
+                    case 3:
+                        lcsCapSets = "release6";
+                        break;
+                    case 4:
+                        lcsCapSets = "release7";
+                        break;
+                }
+            }
+            cdrModel.setLcsCapabilitySets(lcsCapSets);
+            stringBuilder.append(cdrModel.getLcsCapabilitySets()).append(SEPARATOR);
         } else {
             stringBuilder.append(SEPARATOR);
         }
@@ -1901,8 +2361,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                 stringBuilder.append(SEPARATOR);
             }
         } else {
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
+            stringBuilder.append(SEPARATOR).append(SEPARATOR);
         }
 
         /**
@@ -1932,8 +2391,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                 stringBuilder.append(SEPARATOR);
             }
         } else {
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
+            stringBuilder.append(SEPARATOR).append(SEPARATOR);
         }
 
         /**
@@ -1963,791 +2421,48 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                 stringBuilder.append(SEPARATOR);
             }
         } else {
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
+            stringBuilder.append(SEPARATOR).append(SEPARATOR);
         }
 
         /**
-         * LOCATION ESTIMATE
+         * AMF Address
          */
-        ExtGeographicalInformation locationEstimate = gmlcCdrState.getLocationEstimate();
-        if (locationEstimate != null) {
-            // LOCATION ESTIMATE TYPE OF SHAPE
-            if (locationEstimate.getTypeOfShape() != null) {
-                cdrModel.setLocationEstimateTypeOfShape(String.valueOf(locationEstimate.getTypeOfShape()));
-                stringBuilder.append(cdrModel.getLocationEstimateTypeOfShape()).append(SEPARATOR);
-            } else
-                stringBuilder.append(SEPARATOR);
-
-            // LOCATION ESTIMATE LATITUDE
-            if (Double.valueOf(locationEstimate.getLatitude()) != null) {
-                if (locationEstimate.getTypeOfShape() != TypeOfShape.Polygon) {
-                    String formattedLatitude;
-                    formattedLatitude = coordinatesFormat.format(Double.valueOf(locationEstimate.getLatitude()));
-                    cdrModel.setLocationEstimateLatitude(formattedLatitude);
-                    stringBuilder.append(cdrModel.getLocationEstimateLatitude()).append(SEPARATOR);
-                }
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-
-            // LOCATION ESTIMATE LONGITUDE
-            if (Double.valueOf(locationEstimate.getLongitude()) != null) {
-                if (locationEstimate.getTypeOfShape() != TypeOfShape.Polygon) {
-                    String formattedLongitude;
-                    formattedLongitude = coordinatesFormat.format(Double.valueOf(locationEstimate.getLongitude()));
-                    cdrModel.setLocationEstimateLongitude(formattedLongitude);
-                    stringBuilder.append(cdrModel.getLocationEstimateLongitude()).append(SEPARATOR);
-                }
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-
-            // LOCATION ESTIMATE UNCERTAINTY
-            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyCircle) {
-                if (Double.valueOf(locationEstimate.getUncertainty()) != null) {
-                    cdrModel.setLocationEstimateUncertainty(uncertaintyFormat.format(locationEstimate.getUncertainty()));
-                    stringBuilder.append(cdrModel.getLocationEstimateUncertainty()).append(SEPARATOR);
-                } else
-                    stringBuilder.append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-
-            // LOCATION ESTIMATE UNCERTAINTY SEMI MAJOR AXIS
-            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
-                    locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
-                if (Double.valueOf(locationEstimate.getUncertaintySemiMajorAxis()) != null) {
-                    cdrModel.setLocationEstimateUncertaintySemiMajorAxis(uncertaintyFormat.format(locationEstimate.getUncertaintySemiMajorAxis()));
-                    stringBuilder.append(cdrModel.getLocationEstimateUncertaintySemiMajorAxis()).append(SEPARATOR);
-                } else
-                    stringBuilder.append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-
-            // LOCATION ESTIMATE UNCERTAINTY SEMI MINOR AXIS
-            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
-                    locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
-                if (Double.valueOf(locationEstimate.getUncertaintySemiMinorAxis()) != null) {
-                    cdrModel.setLocationEstimateUncertaintySemiMinorAxis(uncertaintyFormat.format(locationEstimate.getUncertaintySemiMinorAxis()));
-                    stringBuilder.append(cdrModel.getLocationEstimateUncertaintySemiMinorAxis()).append(SEPARATOR);
-                } else
-                    stringBuilder.append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-
-            // LOCATION ESTIMATE CONFIDENCE
-            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
-                    locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid ||
-                    locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
-                if (Integer.valueOf(locationEstimate.getConfidence()) != null) {
-                    cdrModel.setLocationEstimateConfidence(String.valueOf(locationEstimate.getConfidence()));
-                    stringBuilder.append(cdrModel.getLocationEstimateConfidence()).append(SEPARATOR);
-                } else
-                    stringBuilder.append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-
-            // LOCATION ESTIMATE ANGLE OF MAJOR AXIS
-            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
-                    locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
-                if (Double.valueOf(locationEstimate.getAngleOfMajorAxis()) != null) {
-                    cdrModel.setLocationEstimateAngleOfMajorAxis(String.valueOf(locationEstimate.getAngleOfMajorAxis()));
-                    stringBuilder.append(cdrModel.getLocationEstimateAngleOfMajorAxis()).append(SEPARATOR);
-                } else
-                    stringBuilder.append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-
-            // LOCATION ESTIMATE ALTITUDE
-            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
-                    locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid ||
-                    locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
-                if (Integer.valueOf(locationEstimate.getAltitude()) != null) {
-                    cdrModel.setLocationEstimateAltitude(String.valueOf(locationEstimate.getAltitude()));
-                    stringBuilder.append(cdrModel.getLocationEstimateAltitude()).append(SEPARATOR);
-                } else
-                    stringBuilder.append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-
-            // LOCATION ESTIMATE UNCERTAINTY ALTITUDE
-            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
-                if (Double.valueOf(locationEstimate.getUncertaintyAltitude()) != null) {
-                    cdrModel.setLocationEstimateUncertaintyAltitude(uncertaintyFormat.format(locationEstimate.getUncertaintyAltitude()));
-                    stringBuilder.append(cdrModel.getLocationEstimateUncertaintyAltitude()).append(SEPARATOR);
-                } else
-                    stringBuilder.append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-
-            // LOCATION ESTIMATE INNER RADIUS
-            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
-                if (Integer.valueOf(locationEstimate.getInnerRadius()) != null) {
-                    cdrModel.setLocationEstimateInnerRadius(String.valueOf(locationEstimate.getInnerRadius()));
-                    stringBuilder.append(cdrModel.getLocationEstimateInnerRadius()).append(SEPARATOR);
-                } else
-                    stringBuilder.append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-
-            // LOCATION ESTIMATE UNCERTAINTY RADIUS
-            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
-                if (Double.valueOf(locationEstimate.getUncertaintyRadius()) != null) {
-                    cdrModel.setLocationEstimateUncertaintyRadius(uncertaintyFormat.format(locationEstimate.getUncertaintyRadius()));
-                    stringBuilder.append(cdrModel.getLocationEstimateUncertaintyRadius()).append(SEPARATOR);
-                } else
-                    stringBuilder.append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-
-            // LOCATION ESTIMATE OFFSET ANGLE
-            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
-                if (Double.valueOf(locationEstimate.getOffsetAngle()) != null) {
-                    cdrModel.setLocationEstimateOffSetAngle(String.valueOf(locationEstimate.getOffsetAngle()));
-                    stringBuilder.append(cdrModel.getLocationEstimateOffSetAngle()).append(SEPARATOR);
-                } else
-                    stringBuilder.append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-
-            // LOCATION ESTIMATE INCLUDED ANGLE
-            if (locationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
-                if (Double.valueOf(locationEstimate.getIncludedAngle()) != null) {
-                    cdrModel.setLocationEstimateIncludedAngle(String.valueOf(locationEstimate.getIncludedAngle()));
-                    stringBuilder.append(cdrModel.getLocationEstimateIncludedAngle()).append(SEPARATOR);
-                } else
-                    stringBuilder.append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-
-        } else {
-            // NULL LOCATION ESTIMATE
-            stringBuilder.append(SEPARATOR); // TYPE OF SHAPE
-            stringBuilder.append(SEPARATOR); // LATITUDE
-            stringBuilder.append(SEPARATOR); // LONGITUDE
-            stringBuilder.append(SEPARATOR); // UNCERTAINTY
-            stringBuilder.append(SEPARATOR); // UNCERTAINTY SEMI MAJOR AXIS
-            stringBuilder.append(SEPARATOR); // UNCERTAINTY SEMI MINOR AXIS
-            stringBuilder.append(SEPARATOR); // CONFIDENCE
-            stringBuilder.append(SEPARATOR); // ANGLE OF MAJOR AXIS
-            stringBuilder.append(SEPARATOR); // ALTITUDE
-            stringBuilder.append(SEPARATOR); // UNCERTAINTY ALTITUDE
-            stringBuilder.append(SEPARATOR); // INNER RADIUS
-            stringBuilder.append(SEPARATOR); // UNCERTAINTY RADIUS
-            stringBuilder.append(SEPARATOR); // OFFSET ANGLE
-            stringBuilder.append(SEPARATOR); // INCLUDED ANGLE
-        }
-
-        /**
-         * ADDITIONAL LOCATION ESTIMATE
-         */
-        AddGeographicalInformation additionalLocationEstimate = gmlcCdrState.getAdditionalLocationEstimate();
-        if (additionalLocationEstimate != null) {
-
-            // ADDITIONAL LOCATION ESTIMATE TYPE OF SHAPE
-            if (additionalLocationEstimate.getTypeOfShape() != null) {
-                cdrModel.setAdditionalLocationEstimateTypeOfShape(String.valueOf(additionalLocationEstimate.getTypeOfShape()));
-                stringBuilder.append(cdrModel.getAdditionalLocationEstimateTypeOfShape()).append(SEPARATOR);
-            } else
-                stringBuilder.append(SEPARATOR);
-
-            // ADDITIONAL LOCATION ESTIMATE TYPE OF SHAPE == Polygon
-            if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.Polygon) {
-
-                // ADDITIONAL LOCATION ESTIMATE POLYGON NUMBER OF POINTS
-                Integer additionalPolygonNumberOfPoints = gmlcCdrState.getAdditionalNumberOfPoints();
-                if (additionalPolygonNumberOfPoints != null) {
-                    cdrModel.setAdditionalLocationEstimatePolygonNumberOfPoint(String.valueOf(additionalPolygonNumberOfPoints));
-                    stringBuilder.append(cdrModel.getAdditionalLocationEstimatePolygonNumberOfPoint()).append(SEPARATOR);
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                }
-
-                // ADDITIONAL LOCATION ESTIMATE LATITUDES & LONGITUDES of each POLYGON point
-                Polygon additionalLocationEstimatePolygon = gmlcCdrState.getAdditionalPolygon();
-                int additionalCoordinates = 0;
-                StringBuilder locationsPoints = new StringBuilder();
-                if (additionalLocationEstimatePolygon.getNumberOfPoints() > 2 && additionalLocationEstimatePolygon.getNumberOfPoints() <= 15) {
-                    Double[][] polygonArray = new Double[additionalLocationEstimatePolygon.getNumberOfPoints()][additionalLocationEstimatePolygon.getNumberOfPoints()];
-                    Double lat, lon;
-                    String formattedLatitude, formattedLongitude;
-                    for (additionalCoordinates = 0; additionalCoordinates < additionalLocationEstimatePolygon.getNumberOfPoints(); additionalCoordinates++) {
-                        lat = additionalLocationEstimatePolygon.getEllipsoidPoint(additionalCoordinates).getLatitude();
-                        lon = additionalLocationEstimatePolygon.getEllipsoidPoint(additionalCoordinates).getLongitude();
-                        polygonArray[additionalCoordinates][0] = lat;
-                        polygonArray[additionalCoordinates][1] = lon;
-                        formattedLatitude = coordinatesFormat.format(lat);
-                        formattedLongitude = coordinatesFormat.format(lon);
-                        locationsPoints.append("-{").append(formattedLatitude).append(",").append(formattedLongitude).append("}");
-                        stringBuilder.append(formattedLatitude).append(SEPARATOR);
-                        stringBuilder.append(formattedLongitude).append(SEPARATOR);
-
-                    }
-                    while (additionalCoordinates < 15) {
-                        stringBuilder.append(SEPARATOR);
-                        stringBuilder.append(SEPARATOR);
-                        locationsPoints.append("-{0").append(",").append("0}");
-                        additionalCoordinates++;
-                    }
-                    cdrModel.setAdditionalLocationEstPolyListLatLongPoints(locationsPoints.toString());
-                    List<Point2D> listOfPoints = new ArrayList<>();
-                    Point2D[] point2D = new Point2D.Double[polygonArray.length];
-                    Point2D polygonPoint;
-                    for (int point = 0; point < polygonArray.length; point++) {
-                        lat = polygonArray[point][0];
-                        lon = polygonArray[point][1];
-                        polygonPoint = new Point2D.Double(lat, lon);
-                        listOfPoints.add(polygonPoint);
-                        point2D[point] = listOfPoints.get(point);
-                    }
-                    formattedLatitude = coordinatesFormat.format(polygonCentroid(point2D).getX());
-                    formattedLongitude = coordinatesFormat.format(polygonCentroid(point2D).getY());
-                    cdrModel.setPolygonCentroIdLatitude(formattedLatitude);
-                    cdrModel.setPolygonCentroIdLongitude(formattedLongitude);
-                    stringBuilder.append(formattedLatitude).append(SEPARATOR);
-                    stringBuilder.append(formattedLongitude).append(SEPARATOR);
-                }
-
-            } else {
-
-                // ADDITIONAL LOCATION ESTIMATE LATITUDE
-                if (Double.valueOf(additionalLocationEstimate.getLatitude()) != null) {
-                    String formattedAdditionalLocationEstimateLatitude;
-                    formattedAdditionalLocationEstimateLatitude = coordinatesFormat.format(Double.valueOf(additionalLocationEstimate.getLatitude()));
-                    cdrModel.setAdditionalLocationEstimateLatitude(formattedAdditionalLocationEstimateLatitude);
-                    stringBuilder.append(cdrModel.getAdditionalLocationEstimateLatitude()).append(SEPARATOR);
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                }
-
-                // ADDITIONAL LOCATION ESTIMATE LONGITUDE
-                if (Double.valueOf(additionalLocationEstimate.getLongitude()) != null) {
-                    String formattedAdditionalLocationEstimateLongitude;
-                    formattedAdditionalLocationEstimateLongitude = coordinatesFormat.format(Double.valueOf(additionalLocationEstimate.getLongitude()));
-                    cdrModel.setAdditionalLocationEstimateLongitude(formattedAdditionalLocationEstimateLongitude);
-                    stringBuilder.append(cdrModel.getAdditionalLocationEstimateLongitude()).append(SEPARATOR);
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                }
-
-                // ADDITIONAL LOCATION ESTIMATE UNCERTAINTY
-                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyCircle) {
-                    if (Double.valueOf(additionalLocationEstimate.getUncertainty()) != null) {
-                        cdrModel.setAdditionalLocationEstimateUncertainty(uncertaintyFormat.format(Double.valueOf(additionalLocationEstimate.getUncertainty())));
-                        stringBuilder.append(cdrModel.getAdditionalLocationEstimateUncertainty()).append(SEPARATOR);
-                    } else {
-                        stringBuilder.append(SEPARATOR);
-                    }
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                }
-
-                // ADDITIONAL LOCATION ESTIMATE UNCERTAINTY SEMI MAJOR AXIS
-                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
-                        additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
-                    if (Double.valueOf(additionalLocationEstimate.getUncertaintySemiMajorAxis()) != null) {
-                        cdrModel.setAdditionalLocationEstimateUncertaintySemiMajorAxis(uncertaintyFormat.format(Double.valueOf(additionalLocationEstimate.getUncertaintySemiMajorAxis())));
-                        stringBuilder.append(cdrModel.getAdditionalLocationEstimateUncertaintySemiMajorAxis()).append(SEPARATOR);
-                    } else {
-                        stringBuilder.append(SEPARATOR);
-                    }
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                }
-
-                // ADDITIONAL LOCATION ESTIMATE UNCERTAINTY SEMI MINOR AXIS
-                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
-                        additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
-                    if (Double.valueOf(additionalLocationEstimate.getUncertaintySemiMinorAxis()) != null) {
-                        cdrModel.setAdditionalLocationEstimateUncertaintySemiMinorAxis(uncertaintyFormat.format(Double.valueOf(additionalLocationEstimate.getUncertaintySemiMinorAxis())));
-                        stringBuilder.append(cdrModel.getAdditionalLocationEstimateUncertaintySemiMinorAxis()).append(SEPARATOR);
-                    } else {
-                        stringBuilder.append(SEPARATOR);
-                    }
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                }
-
-                // ADDITIONAL LOCATION ESTIMATE ANGLE OF MAJOR AXIS
-                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
-                        additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
-                    if (Double.valueOf(additionalLocationEstimate.getAngleOfMajorAxis()) != null) {
-                        cdrModel.setAdditionalLocationEstimateAngleOfMajorAxis(String.valueOf(additionalLocationEstimate.getAngleOfMajorAxis()));
-                        stringBuilder.append(cdrModel.getAdditionalLocationEstimateAngleOfMajorAxis()).append(SEPARATOR);
-                    } else {
-                        stringBuilder.append(SEPARATOR);
-                    }
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                }
-
-                // ADDITIONAL LOCATION ESTIMATE CONFIDENCE
-                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithUncertaintyEllipse ||
-                        additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid ||
-                        additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
-                    if (Integer.valueOf(additionalLocationEstimate.getConfidence()) != null) {
-                        cdrModel.setAdditionalLocationEstimateConfidence(String.valueOf(additionalLocationEstimate.getConfidence()));
-                        stringBuilder.append(cdrModel.getAdditionalLocationEstimateConfidence()).append(SEPARATOR);
-                    } else {
-                        stringBuilder.append(SEPARATOR);
-                    }
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                }
-
-                // ADDITIONAL LOCATION ESTIMATE ALTITUDE
-                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitude ||
-                        additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitude ||
-                        additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
-                    if (Integer.valueOf(additionalLocationEstimate.getAltitude()) != null &&
-                            (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitude ||
-                                    additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitude ||
-                                    additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid)) {
-                        cdrModel.setAdditionalLocationEstimateAltitude(String.valueOf(additionalLocationEstimate.getAltitude()));
-                        stringBuilder.append(cdrModel.getAdditionalLocationEstimateAltitude()).append(SEPARATOR);
-                    } else {
-                        stringBuilder.append(SEPARATOR);
-                    }
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                }
-
-                // ADDITIONAL LOCATION ESTIMATE UNCERTAINTY ALTITUDE
-                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidPointWithAltitudeAndUncertaintyEllipsoid) {
-                    if (Double.valueOf(additionalLocationEstimate.getUncertaintyAltitude()) != null) {
-                        cdrModel.setAdditionalLocationEstimateUncertaintyAltitude(uncertaintyFormat.format(additionalLocationEstimate.getUncertaintyAltitude()));
-                        stringBuilder.append(cdrModel.getAdditionalLocationEstimateUncertaintyAltitude()).append(SEPARATOR);
-                    } else {
-                        stringBuilder.append(SEPARATOR);
-                    }
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                }
-
-                // ADDITIONAL LOCATION ESTIMATE INNER RADIUS
-                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
-                    if (Integer.valueOf(additionalLocationEstimate.getInnerRadius()) != null) {
-                        cdrModel.setAdditionalLocationEstimateInnerRadius(String.valueOf(additionalLocationEstimate.getInnerRadius()));
-                        stringBuilder.append(cdrModel.getAdditionalLocationEstimateInnerRadius()).append(SEPARATOR);
-                    } else {
-                        stringBuilder.append(SEPARATOR);
-                    }
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                }
-
-                // ADDITIONAL LOCATION ESTIMATE UNCERTAINTY RADIUS
-                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
-                    if (Double.valueOf(additionalLocationEstimate.getUncertaintyRadius()) != null &&
-                            additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
-                        cdrModel.setAdditionalLocationEstimateUncertaintyRadius(uncertaintyFormat.format(Double.valueOf(additionalLocationEstimate.getUncertaintyRadius())));
-                        stringBuilder.append(cdrModel.getAdditionalLocationEstimateUncertaintyRadius()).append(SEPARATOR);
-                    } else {
-                        stringBuilder.append(SEPARATOR);
-                    }
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                }
-
-                // ADDITIONAL LOCATION ESTIMATE OFFSET ANGLE
-                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
-                    if (Double.valueOf(additionalLocationEstimate.getOffsetAngle()) != null &&
-                            additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
-                        cdrModel.setAdditionalLocationEstimateOffSetAngle(String.valueOf(additionalLocationEstimate.getOffsetAngle()));
-                        stringBuilder.append(cdrModel.getAdditionalLocationEstimateOffSetAngle()).append(SEPARATOR);
-                    } else {
-                        stringBuilder.append(SEPARATOR);
-                    }
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                }
-
-                // ADDITIONAL LOCATION ESTIMATE INCLUDED ANGLE
-                if (additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
-                    if (Double.valueOf(additionalLocationEstimate.getIncludedAngle()) != null &&
-                            additionalLocationEstimate.getTypeOfShape() == TypeOfShape.EllipsoidArc) {
-                        cdrModel.setAdditionalLocationEstimateIncludedAngle(String.valueOf(additionalLocationEstimate.getIncludedAngle()));
-                        stringBuilder.append(cdrModel.getAdditionalLocationEstimateIncludedAngle()).append(SEPARATOR);
-                    } else {
-                        stringBuilder.append(SEPARATOR);
-                    }
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                }
-
-            }
-        } else {
-            // NULL ADDITIONAL LOCATION ESTIMATE
-            stringBuilder.append(SEPARATOR); // TYPE OF SHAPE
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON NUMBER OF POINTS
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION POLYGON LATITUDE POINT 1
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION POLYGON LONGITUDE POINT 1
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LATITUDE POINT 2
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LONGITUDE POINT 2
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LATITUDE POINT 3
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LONGITUDE POINT 3
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LATITUDE POINT 4
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LONGITUDE POINT 4
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LATITUDE POINT 5
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LONGITUDE POINT 5
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LATITUDE POINT 6
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LONGITUDE POINT 6
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LATITUDE POINT 7
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LONGITUDE POINT 7
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LATITUDE POINT 8
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LONGITUDE POINT 8
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LATITUDE POINT 9
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LONGITUDE POINT 9
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LATITUDE POINT 10
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LONGITUDE POINT 10
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LATITUDE POINT 11
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LONGITUDE POINT 11
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LATITUDE POINT 12
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LONGITUDE POINT 12
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LATITUDE POINT 13
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LONGITUDE POINT 13
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LATITUDE POINT 14
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LONGITUDE POINT 14
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LATITUDE POINT 15
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON LONGITUDE POINT 15
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON CENTROID LATITUDE
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE POLYGON CENTROID LONGITUDE
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE LATITUDE
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE LONGITUDE
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE UNCERTAINTY
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE UNCERTAINTY SEMI MAJOR AXIS
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE UNCERTAINTY SEMI MINOR AXIS
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE ANGLE OF MAJOR AXIS
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE CONFIDENCE
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE ALTITUDE
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE UNCERTAINTY ALTITUDE
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE INNER RADIUS
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE UNCERTAINTY RADIUS
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE OFFSET ANGLE
-            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION ESTIMATE INCLUDED ANGLE
-        }
-
-        /**
-         * AGE OF LOCATION ESTIMATE
-         */
-        Integer ageOfLocationEstimate = gmlcCdrState.getAgeOfLocationEstimate();
-        if (ageOfLocationEstimate != null) {
-            cdrModel.setAgeOfLocationEstimate(String.valueOf(ageOfLocationEstimate));
-            stringBuilder.append(cdrModel.getAgeOfLocationEstimate()).append(SEPARATOR);
+        if (amfAddress != null) {
+            stringBuilder.append(amfAddress).append(SEPARATOR);
         } else {
             stringBuilder.append(SEPARATOR);
         }
 
         /**
-         * GERAN POSITIONING DATA
+         * SMSF Address
          */
-        PositioningDataInformation geranPositioningDataInformation = gmlcCdrState.getGeranPositioningDataInformation();
-        if (geranPositioningDataInformation != null) {
-            cdrModel.setGeranPositioningDataInformation(bytesToHexString(geranPositioningDataInformation.getData()));
-            stringBuilder.append(cdrModel.getGeranPositioningDataInformation()).append(SEPARATOR);
+        if (smsfAddress != null) {
+            stringBuilder.append(smsfAddress).append(SEPARATOR);
         } else {
             stringBuilder.append(SEPARATOR);
         }
 
         /**
-         * GERAN GANSS POSITIONING DATA
+         * V-PLMN ID
          */
-        GeranGANSSpositioningData geranGANSSPositioningDataInformation = gmlcCdrState.getGeranGANSSpositioningData();
-        if (geranGANSSPositioningDataInformation != null) {
-            cdrModel.setGeranGANSSPositioningDataInformation(bytesToHexString(geranGANSSPositioningDataInformation.getData()));
-            stringBuilder.append(cdrModel.getGeranGANSSPositioningDataInformation()).append(SEPARATOR);
+        if (visitedPlmnId != null) {
+            stringBuilder.append(visitedPlmnId.getMcc()).append(SEPARATOR);
+            stringBuilder.append(visitedPlmnId.getMnc()).append(SEPARATOR);
         } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        /**
-         * UTRAN POSITIONING DATA
-         */
-        UtranPositioningDataInfo utranPositioningDataInfo = gmlcCdrState.getUtranPositioningDataInfo();
-        if (utranPositioningDataInfo != null) {
-            cdrModel.setUtranPositioningDataInfo(bytesToHexString(utranPositioningDataInfo.getData()));
-            stringBuilder.append(cdrModel.getUtranPositioningDataInfo()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        /**
-         * UTRAN GANSS POSITIONING DATA
-         */
-        UtranGANSSpositioningData utranGANSSpositioningData = gmlcCdrState.getUtranGANSSpositioningData();
-        if (utranGANSSpositioningData != null) {
-            cdrModel.setUtranGANSSpositioningData(bytesToHexString(utranGANSSpositioningData.getData()));
-            stringBuilder.append(cdrModel.getUtranGANSSpositioningData()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        /**
-         * UTRAN ADDITIONAL POSITIONING DATA
-         */
-        String utranAddPositioningDataInfo = gmlcCdrState.getUtranAdditionalPositioningData();
-        if (utranAddPositioningDataInfo != null) {
-            cdrModel.setUtranAdditionalPositioningDataInfo(utranAddPositioningDataInfo);
-            stringBuilder.append(cdrModel.getUtranAdditionalPositioningDataInfo()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        /**
-         * E-UTRAN POSITIONING DATA
-         */
-        String eUtranPositioningDataInfo = gmlcCdrState.geteUTRANPositioningData();
-        if (eUtranPositioningDataInfo != null) {
-            cdrModel.setEutranPositioningDataInfo(eUtranPositioningDataInfo);
-            stringBuilder.append(cdrModel.getEutranPositioningDataInfo()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        /**
-         * DEFERRED MT LR RESPONSE INDICATOR
-         */
-        Boolean deferredMTLRResponseIndicator = gmlcCdrState.isDeferredMTLRResponseIndicator();
-        if (deferredMTLRResponseIndicator != null) {
-            cdrModel.setDeferredMTLRResponseIndicator(String.valueOf(deferredMTLRResponseIndicator));
-            stringBuilder.append(cdrModel.getDeferredMTLRResponseIndicator()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        /**
-         * CGI or SAI or LAI
-         */
-        CellGlobalIdOrServiceAreaIdOrLAI lcsCGIorSAIorLAI = gmlcCdrState.getCellGlobalIdOrServiceAreaIdOrLAI();
-        if (lcsCGIorSAIorLAI != null) {
-            if (lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
-                try {
-                    // LCS CGI MCC
-                    cdrModel.setLcsCGIorSAIorLAIMCC(String.valueOf(lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getMCC()));
-                    stringBuilder.append(cdrModel.getLcsCGIorSAIorLAIMCC()).append(SEPARATOR);
-                    // LCS CGI MNC
-                    cdrModel.setLcsCGIorSAIorLAIMNC(String.valueOf(lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getMNC()));
-                    stringBuilder.append(cdrModel.getLcsCGIorSAIorLAIMNC()).append(SEPARATOR);
-                    // LCS CGI LAC
-                    cdrModel.setLcsCGIorSAIorLAILAC(String.valueOf(lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getLac()));
-                    stringBuilder.append(cdrModel.getLcsCGIorSAIorLAILAC()).append(SEPARATOR);
-                    // LCS CGI CI
-                    cdrModel.setLcsCGIorSAIorLAICI(String.valueOf(lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode()));
-                    stringBuilder.append(cdrModel.getLcsCGIorSAIorLAICI()).append(SEPARATOR);
-                } catch (MAPException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (lcsCGIorSAIorLAI.getLAIFixedLength() != null) {
-                try {
-                    // LCS CGI MCC
-                    cdrModel.setLcsCGIorSAIorLAIMCC(String.valueOf(lcsCGIorSAIorLAI.getLAIFixedLength().getMCC()));
-                    stringBuilder.append(cdrModel.getLcsCGIorSAIorLAIMCC()).append(SEPARATOR);
-                    // LCS CGI MNC
-                    cdrModel.setLcsCGIorSAIorLAIMNC(String.valueOf(lcsCGIorSAIorLAI.getLAIFixedLength().getMNC()));
-                    stringBuilder.append(cdrModel.getLcsCGIorSAIorLAIMNC()).append(SEPARATOR);
-                    // LCS CGI LAC
-                    cdrModel.setLcsCGIorSAIorLAILAC(String.valueOf(lcsCGIorSAIorLAI.getLAIFixedLength().getLac()));
-                    stringBuilder.append(cdrModel.getLcsCGIorSAIorLAILAC()).append(SEPARATOR);
-
-                    stringBuilder.append(SEPARATOR);
-                } catch (MAPException e) {
-                    e.printStackTrace();
-                }
-            }
-        } else {
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-        }
-
-        /*
-         * LTE ECGI (obtained from SLg)
-         */
-        EUTRANCGI lcsEutranCgi = gmlcCdrState.getEUtranCgi();
-        if (lcsEutranCgi != null) {
-            try {
-                // ECGI MCC
-                int ecgiMcc = lcsEutranCgi.getMCC();
-                cdrModel.setLcsEutranCgiMCC(String.valueOf(ecgiMcc));
-                stringBuilder.append(cdrModel.getLcsEutranCgiMCC()).append(SEPARATOR);
-                // ECGI MNC
-                int ecgiMnc = lcsEutranCgi.getMNC();
-                cdrModel.setLcsEutranCgiMNC(String.valueOf(ecgiMnc));
-                stringBuilder.append(cdrModel.getLcsEutranCgiMNC()).append(SEPARATOR);
-                // ECGI ECI
-                long eci = lcsEutranCgi.getEci();
-                cdrModel.setLcsEutranCgiECI(String.valueOf(eci));
-                stringBuilder.append(cdrModel.getLcsEutranCgiECI()).append(SEPARATOR);
-                // ECGI ENBID
-                long ecgiENBId = lcsEutranCgi.getENodeBId();
-                cdrModel.setLcsEutranCgiENBID(String.valueOf(ecgiENBId));
-                stringBuilder.append(cdrModel.getLcsEutranCgiENBID()).append(SEPARATOR);
-                // ECGI CI
-                int ecgiCi = lcsEutranCgi.getCi();
-                cdrModel.setLcsEutranCgiCI(String.valueOf(ecgiCi));
-                stringBuilder.append(cdrModel.getLcsEutranCgiCI()).append(SEPARATOR);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-        }
-        if (cellPortionId != null) {
-            cdrModel.setLcsCellPortionId(String.valueOf(cellPortionId));
-            stringBuilder.append(cdrModel.getLcsCellPortionId()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        /**
-         * PSEUDONYM INDICATOR
-         */
-        Boolean pseudonymIndicator = gmlcCdrState.isPseudonymIndicator();
-        if (pseudonymIndicator != null) {
-            cdrModel.setPseudonymIndicator(String.valueOf(pseudonymIndicator));
-            stringBuilder.append(cdrModel.getPseudonymIndicator()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        /**
-         * ACCURACY FULFILLMENT INDICATOR
-         */
-        AccuracyFulfilmentIndicator accuracyFulfilmentIndicator = gmlcCdrState.getAccuracyFulfilmentIndicator();
-        if (accuracyFulfilmentIndicator != null) {
-            cdrModel.setAccuracyFulfilmentIndicator(String.valueOf(accuracyFulfilmentIndicator.getIndicator()));
-            stringBuilder.append(cdrModel.getAccuracyFulfilmentIndicator()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        /**
-         * SEQUENCE NUMBER
-         */
-        Integer sequenceNumber = gmlcCdrState.getSequenceNumber();
-        if (sequenceNumber != null) {
-            cdrModel.setSequenceNumber(String.valueOf(sequenceNumber));
-            stringBuilder.append(cdrModel.getSequenceNumber()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        /**
-         * VELOCITY ESTIMATE
-         */
-        // HORIZONTAL VELOCITY ESTIMATE
-        VelocityEstimate horizontalVelocityEstimate = gmlcCdrState.getVelocityEstimate();
-        if (horizontalVelocityEstimate != null) {
-            cdrModel.setHorizontalVelocityEstimate(String.valueOf(horizontalVelocityEstimate.getHorizontalSpeed()));
-            stringBuilder.append(cdrModel.getHorizontalVelocityEstimate()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        // VELOCITY ESTIMATE BEARING
-        VelocityEstimate velocityEstimateBearing = gmlcCdrState.getVelocityEstimate();
-        if (velocityEstimateBearing != null) {
-            cdrModel.setVelocityEstimateBearing(String.valueOf(velocityEstimateBearing.getBearing()));
-            stringBuilder.append(cdrModel.getVelocityEstimateBearing()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        // VERTICAL VELOCITY ESTIMATE
-        VelocityEstimate verticalVelocityEstimate = gmlcCdrState.getVelocityEstimate();
-        if (verticalVelocityEstimate != null) {
-            cdrModel.setVerticalVelocityEstimate(String.valueOf(verticalVelocityEstimate.getVerticalSpeed()));
-            stringBuilder.append(cdrModel.getVerticalVelocityEstimate()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        // VELOCITY ESTIMATE HORIZONTAL UNCERTAINTY
-        VelocityEstimate velocityHorizontalUncertainty = gmlcCdrState.getVelocityEstimate();
-        if (velocityHorizontalUncertainty != null) {
-            cdrModel.setVelocityHorizontalUncertainty(String.valueOf(velocityHorizontalUncertainty.getUncertaintyHorizontalSpeed()));
-            stringBuilder.append(cdrModel.getVelocityHorizontalUncertainty()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        // VELOCITY ESTIMATE VERTICAL UNCERTAINTY
-        VelocityEstimate velocityVerticalUncertainty = gmlcCdrState.getVelocityEstimate();
-        if (velocityVerticalUncertainty != null) {
-            cdrModel.setVelocityVerticalUncertainty(String.valueOf(velocityVerticalUncertainty.getUncertaintyVerticalSpeed()));
-            stringBuilder.append(cdrModel.getVelocityVerticalUncertainty()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        // VELOCITY ESTIMATE TYPE
-        VelocityEstimate velocityType = gmlcCdrState.getVelocityEstimate();
-        if (velocityType != null) {
-            cdrModel.setVelocityType(String.valueOf(velocityType.getVelocityType().name()));
-            stringBuilder.append(cdrModel.getVelocityType()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        /**
-         * SERVING NODE ADDRESS
-         */
-        ServingNodeAddress servingNodeAddress = gmlcCdrState.getServingNodeAddress();
-        if (servingNodeAddress != null) {
-            if (servingNodeAddress.getMscNumber() == null) {
-                stringBuilder.append(SEPARATOR);
-            } else {
-                // SERVING NODE ADDRESS MSC NUMBER
-                cdrModel.setServingNodeAddressMSCNumber(servingNodeAddress.getMscNumber().getAddress());
-                stringBuilder.append(cdrModel.getServingNodeAddressMSCNumber()).append(SEPARATOR);
-            }
-            if (servingNodeAddress.getSgsnNumber() == null) {
-                stringBuilder.append(SEPARATOR);
-            } else {
-                // SERVING NODE ADDRESS SGSN Number
-                cdrModel.setServingNodeAddressSGSNNumber(servingNodeAddress.getSgsnNumber().getAddress());
-                stringBuilder.append(cdrModel.getServingNodeAddressSGSNNumber()).append(SEPARATOR);
-            }
-            if (servingNodeAddress.getMmeNumber() == null) {
-                stringBuilder.append(SEPARATOR);
-            } else {
-                // SERVING NODE ADDRESS MME NUMBER
-                String mmeNumStr = new String(servingNodeAddress.getMmeNumber().getData(), StandardCharsets.ISO_8859_1);
-                cdrModel.setServingNodeAddressMMENumber(mmeNumStr);
-                stringBuilder.append(cdrModel.getServingNodeAddressMMENumber()).append(SEPARATOR);
-            }
-        } else {
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
+            stringBuilder.append(SEPARATOR).append(SEPARATOR);
         }
 
         /**
          * LCSClientID
          */
         LCSClientID lcsClientID = gmlcCdrState.getLcsClientID();
+        String lcsEpsClientName = gmlcCdrState.getLcsEpsClientName();
+        LCSFormatIndicator lcsEpsClientFormatIndicator = gmlcCdrState.getLcsEpsClientFormatIndicator();
         if (lcsClientID != null) {
             try {
                 // LCS CLIENT ID TYPE
                 if (lcsClientID.getLCSClientType() != null && (lcsClientID.getLCSClientType().getType() > Integer.MIN_VALUE
-                        && lcsClientID.getLCSClientType().getType() < Integer.MAX_VALUE)) {
+                    && lcsClientID.getLCSClientType().getType() < Integer.MAX_VALUE)) {
                     cdrModel.setLcsClientType(String.valueOf(lcsClientID.getLCSClientType().getType()));
                     stringBuilder.append(cdrModel.getLcsClientType()).append(SEPARATOR);
                 } else {
@@ -2756,24 +2471,30 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                 if (lcsClientID.getLCSClientName() != null) {
                     if (lcsClientID.getLCSClientName().getNameString() != null) {
                         // LCS CLIENT ID NAME
-                        cdrModel.setLcsClientName(new String(lcsClientID.getLCSClientName().getNameString().getEncodedString()));
+                        cdrModel.setLcsClientName(lcsClientID.getLCSClientName().getNameString().getString(Charset.defaultCharset()));
                         stringBuilder.append(cdrModel.getLcsClientName()).append(SEPARATOR);
+                    } else {
+                        stringBuilder.append(SEPARATOR);
                     }
-                    // LCS CLIENT ID NAME DCS
-                    cdrModel.setLcsClientDCS(String.valueOf(lcsClientID.getLCSClientName().getDataCodingScheme().getCode()));
-                    stringBuilder.append(cdrModel.getLcsClientDCS()).append(SEPARATOR);
-                    // LCS CLIENT ID NAME FI
-                    cdrModel.setLcsClientFI(String.valueOf(lcsClientID.getLCSClientName().getLCSFormatIndicator().getIndicator()));
-                    stringBuilder.append(cdrModel.getLcsClientFI()).append(SEPARATOR);
-                } else {
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
-                    stringBuilder.append(SEPARATOR);
+                    if (lcsClientID.getLCSClientName().getDataCodingScheme() != null) {
+                        // LCS CLIENT ID NAME DCS
+                        cdrModel.setLcsClientDCS(String.valueOf(lcsClientID.getLCSClientName().getDataCodingScheme().getCode()));
+                        stringBuilder.append(cdrModel.getLcsClientDCS()).append(SEPARATOR);
+                    } else {
+                        stringBuilder.append(SEPARATOR);
+                    }
+                    if (lcsClientID.getLCSClientName().getLCSFormatIndicator() != null) {
+                        // LCS CLIENT ID NAME FI
+                        cdrModel.setLcsClientFI(String.valueOf(lcsClientID.getLCSClientName().getLCSFormatIndicator().getIndicator()));
+                        stringBuilder.append(cdrModel.getLcsClientFI()).append(SEPARATOR);
+                    } else {
+                        stringBuilder.append(SEPARATOR);
+                    }
                 }
                 if (lcsClientID.getLCSAPN() != null) {
                     // LCS CLIENT ID APN
                     if (lcsClientID.getLCSAPN().getApn() != null) {
-                        cdrModel.setLcsClientAPN(new String(lcsClientID.getLCSAPN().getApn().getBytes(), StandardCharsets.ISO_8859_1));
+                        cdrModel.setLcsClientAPN(new String(lcsClientID.getLCSAPN().getApn().getBytes(), StandardCharsets.UTF_8));
                         stringBuilder.append(cdrModel.getLcsClientAPN()).append(SEPARATOR);
                     }
                 } else {
@@ -2793,7 +2514,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                     stringBuilder.append(SEPARATOR);
                 // LCS CLIENT INT ID
                 if (lcsClientID.getLCSClientInternalID() != null && (lcsClientID.getLCSClientInternalID().getId() > Integer.MIN_VALUE
-                        && lcsClientID.getLCSClientInternalID().getId() < Integer.MAX_VALUE)) {
+                    && lcsClientID.getLCSClientInternalID().getId() < Integer.MAX_VALUE)) {
                     cdrModel.setLcsClientInternalID(String.valueOf(lcsClientID.getLCSClientInternalID().getId()));
                     stringBuilder.append(cdrModel.getLcsClientInternalID()).append(SEPARATOR);
                 } else
@@ -2806,7 +2527,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                     cdrModel.setLcsClientRequestorFI(String.valueOf(lcsClientID.getLCSRequestorID().getLCSFormatIndicator().getIndicator()));
                     stringBuilder.append(cdrModel.getLcsClientRequestorFI()).append(SEPARATOR);
                     // LCS CLIENT REQUESTOR STRING
-                    cdrModel.setLcsClientRequestorString(Arrays.toString(lcsClientID.getLCSRequestorID().getRequestorIDString().getEncodedString()));
+                    cdrModel.setLcsClientRequestorString(lcsClientID.getLCSRequestorID().getRequestorIDString().getString(Charset.defaultCharset()));
                     stringBuilder.append(cdrModel.getLcsClientRequestorString()).append(SEPARATOR);
                 } else {
                     stringBuilder.append(SEPARATOR);
@@ -2817,6 +2538,18 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                 e.printStackTrace();
             }
         } else {
+
+            if (lcsEpsClientName != null) {
+                stringBuilder.append(lcsEpsClientName).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (lcsEpsClientFormatIndicator != null) {
+                stringBuilder.append(lcsEpsClientFormatIndicator.getValue()).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+
             stringBuilder.append(SEPARATOR);
             stringBuilder.append(SEPARATOR);
             stringBuilder.append(SEPARATOR);
@@ -2826,7 +2559,278 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
             stringBuilder.append(SEPARATOR);
             stringBuilder.append(SEPARATOR);
             stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * PSEUDONYM INDICATOR
+         */
+        Boolean pseudonymIndicator = gmlcCdrState.isPseudonymIndicator();
+        if (pseudonymIndicator != null) {
+            cdrModel.setPseudonymIndicator(String.valueOf(pseudonymIndicator));
+            stringBuilder.append(cdrModel.getPseudonymIndicator()).append(SEPARATOR);
+        } else {
             stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * GEOGRAPHICAL INFO or GEODETIC INFO or LOCATION ESTIMATE
+         */
+        if (geoInfo) {
+            /*
+             * GEOGRAPHICAL INFO or GEODETIC INFO
+             */
+            if (typeOfShape != null) {
+                stringBuilder.append(typeOfShape).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (latitude != null) {
+                stringBuilder.append(latitude).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (longitude != null) {
+                stringBuilder.append(longitude).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (uncertainty != null) {
+                stringBuilder.append(uncertainty).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (geodeticConfidence != -1)  {
+                stringBuilder.append(geodeticConfidence).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (geodeticScreeningAndPresentationInd != -1) {
+                stringBuilder.append(geodeticScreeningAndPresentationInd).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            stringBuilder.append(SEPARATOR); // ESTIMATE UNCERTAINTY SEMI MAJOR AXIS
+            stringBuilder.append(SEPARATOR); // ESTIMATE UNCERTAINTY SEMI MINOR AXIS
+            stringBuilder.append(SEPARATOR); // ESTIMATE ANGLE OF MAJOR AXIS
+            stringBuilder.append(SEPARATOR); // ESTIMATE ALTITUDE
+            stringBuilder.append(SEPARATOR); // ESTIMATE UNCERTAINTY ALTITUDE
+            stringBuilder.append(SEPARATOR); // ESTIMATE INNER RADIUS
+            stringBuilder.append(SEPARATOR); // ESTIMATE UNCERTAINTY RADIUS
+            stringBuilder.append(SEPARATOR); // ESTIMATE OFFSET ANGLE
+            stringBuilder.append(SEPARATOR); // ESTIMATE INCLUDED ANGLE
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON NUMBER OF POINTS
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 1
+            stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION POLYGON LONGITUDE POINT 1
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 2
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 2
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 3
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 3
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 4
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 4
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 5
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 5
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 6
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 6
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 7
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 7
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 8
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 8
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 9
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 9
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 10
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 10
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 11
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 11
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 12
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 12
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 13
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 13
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 14
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 14
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 15
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 15
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON CENTROID LATITUDE
+            stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON CENTROID LONGITUDE
+
+        } else {
+            /*
+             * LOCATION ESTIMATE
+             */
+            if (typeOfShape != null) {
+                stringBuilder.append(typeOfShape).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (latitude != null && latitude != 0.0) {
+                stringBuilder.append(latitude).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (longitude != null && longitude != 0.0) {
+                stringBuilder.append(longitude).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (uncertainty != null) {
+                stringBuilder.append(uncertainty).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (estimateConfidence != -1) {
+                stringBuilder.append(estimateConfidence).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+
+            stringBuilder.append(SEPARATOR); // place of geodetic screening and presentation indicators
+
+            if (uncertaintySemiMajorAxis != null) {
+                stringBuilder.append(uncertaintySemiMajorAxis).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (uncertaintySemiMinorAxis != null) {
+                stringBuilder.append(uncertaintySemiMinorAxis).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (angleOfMajorAxis != null) {
+                stringBuilder.append(angleOfMajorAxis).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (altitude != -1) {
+                stringBuilder.append(altitude).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (uncertaintyAltitude != null) {
+                stringBuilder.append(uncertaintyAltitude).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (innerRadius != -1) {
+                stringBuilder.append(innerRadius).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (uncertaintyRadius != null) {
+                stringBuilder.append(uncertaintyRadius).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (offsetAngle != null) {
+                stringBuilder.append(offsetAngle).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (includedAngle != null) {
+                stringBuilder.append(includedAngle).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (polygonNumberOfPoints != -1) {
+                stringBuilder.append(polygonNumberOfPoints).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (estimatePolygon != null) {
+                int polygonCoordinates;
+                StringBuilder locationsPoints = new StringBuilder();
+                if (estimatePolygon.getNumberOfPoints() > 2 && estimatePolygon.getNumberOfPoints() <= 15) {
+                    Double[][] polygonArray = new Double[estimatePolygon.getNumberOfPoints()][estimatePolygon.getNumberOfPoints()];
+                    Double lat, lon;
+                    String formattedLatitude, formattedLongitude;
+                    for (polygonCoordinates = 0; polygonCoordinates < estimatePolygon.getNumberOfPoints(); polygonCoordinates++) {
+                        lat = estimatePolygon.getEllipsoidPoint(polygonCoordinates).getLatitude();
+                        lon = estimatePolygon.getEllipsoidPoint(polygonCoordinates).getLongitude();
+                        polygonArray[polygonCoordinates][0] = lat;
+                        polygonArray[polygonCoordinates][1] = lon;
+                        formattedLatitude = coordinatesFormat.format(lat);
+                        formattedLongitude = coordinatesFormat.format(lon);
+                        locationsPoints.append("-{").append(formattedLatitude).append(",").append(formattedLongitude).append("}");
+                        stringBuilder.append(formattedLatitude).append(SEPARATOR);
+                        stringBuilder.append(formattedLongitude).append(SEPARATOR);
+                    }
+                    while (polygonCoordinates < 15) {
+                        stringBuilder.append(SEPARATOR);
+                        stringBuilder.append(SEPARATOR);
+                        locationsPoints.append("-{0").append(",").append("0}");
+                        polygonCoordinates++;
+                    }
+                    cdrModel.setAdditionalLocationEstPolyListLatLongPoints(locationsPoints.toString());
+                    List<Point2D> listOfPoints = new ArrayList<>();
+                    Point2D[] point2D = new Point2D.Double[polygonArray.length];
+                    Point2D polygonPoint;
+                    for (int point = 0; point < polygonArray.length; point++) {
+                        lat = polygonArray[point][0];
+                        lon = polygonArray[point][1];
+                        polygonPoint = new Point2D.Double(lat, lon);
+                        listOfPoints.add(polygonPoint);
+                        point2D[point] = listOfPoints.get(point);
+                    }
+                    formattedLatitude = coordinatesFormat.format(polygonCentroid(point2D).getX());
+                    formattedLongitude = coordinatesFormat.format(polygonCentroid(point2D).getY());
+                    cdrModel.setPolygonCentroidLatitude(formattedLatitude);
+                    cdrModel.setPolygonCentroidLongitude(formattedLongitude);
+                    stringBuilder.append(formattedLatitude).append(SEPARATOR);
+                    stringBuilder.append(formattedLongitude).append(SEPARATOR);
+                }
+            } else {
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 1
+                stringBuilder.append(SEPARATOR); // ADDITIONAL LOCATION POLYGON LONGITUDE POINT 1
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 2
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 2
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 3
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 3
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 4
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 4
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 5
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 5
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 6
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 6
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 7
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 7
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 8
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 8
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 9
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 9
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 10
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 10
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 11
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 11
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 12
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 12
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 13
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 13
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 14
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 14
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LATITUDE POINT 15
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON LONGITUDE POINT 15
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON CENTROID LATITUDE
+                stringBuilder.append(SEPARATOR); // ESTIMATE POLYGON CENTROID LONGITUDE
+            }
+        }
+
+        /**
+         * AGE OF LOCATION ESTIMATE
+         */
+        Integer ageOfLocationEstimate = gmlcCdrState.getAgeOfLocationEstimate();
+        if (ageOfLocationEstimate != null) {
+            cdrModel.setAgeOfLocationEstimate(String.valueOf(ageOfLocationEstimate));
+            stringBuilder.append(cdrModel.getAgeOfLocationEstimate()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * Current Location Retrieved
+         */
+        Boolean currentLocationRetrieved = gmlcCdrState.isCurrentLocationRetrieved();
+        if (currentLocationRetrieved != null) {
+            cdrModel.setCurrentLocationRetrieved(String.valueOf(currentLocationRetrieved));
+            stringBuilder.append(cdrModel.getCurrentLocationRetrieved()).append(SEPARATOR);
+        } else {
             stringBuilder.append(SEPARATOR);
         }
 
@@ -2887,23 +2891,259 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         }
 
         /**
-         * Client LCS REFERENCE NUMBER
+         * ACCURACY FULFILLMENT INDICATOR
          */
-        Integer clientReferenceNumber = gmlcCdrState.getClientReferenceNumber();
-        if (clientReferenceNumber != null) {
-            cdrModel.setClientReferenceNumber(String.valueOf(clientReferenceNumber));
-            stringBuilder.append(cdrModel.getClientReferenceNumber()).append(SEPARATOR);
+        AccuracyFulfilmentIndicator accuracyFulfilmentIndicator = gmlcCdrState.getAccuracyFulfilmentIndicator();
+        if (accuracyFulfilmentIndicator != null) {
+            cdrModel.setAccuracyFulfilmentIndicator(String.valueOf(accuracyFulfilmentIndicator.getIndicator()));
+            stringBuilder.append(cdrModel.getAccuracyFulfilmentIndicator()).append(SEPARATOR);
         } else {
             stringBuilder.append(SEPARATOR);
         }
 
         /**
-         * LCS REFERENCE NUMBER
+         * GERAN POSITIONING DATA
          */
-        Integer lcsReferenceNumber = gmlcCdrState.getLcsReferenceNumber();
-        if (lcsReferenceNumber != null) {
-            cdrModel.setLcsReferenceNumber(String.valueOf(lcsReferenceNumber));
-            stringBuilder.append(cdrModel.getLcsReferenceNumber()).append(SEPARATOR);
+        PositioningDataInformation geranPositioningDataInformation = gmlcCdrState.getGeranPositioningDataInformation();
+        if (geranPositioningDataInformation != null) {
+            try {
+                HashMap<String, Integer> methodsAndUsage = geranPositioningDataInformation.getPositioningDataSet();
+                StringBuilder geranPositioningDataInfo = new StringBuilder();
+                int itemCounter = 0;
+                for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
+                    itemCounter++;
+                    String method = item.getKey();
+                    Integer usage = item.getValue();
+                    geranPositioningDataInfo.append("method=").append(method).append(" usage=").append(usage);
+                    if (methodsAndUsage.size() != itemCounter)
+                        geranPositioningDataInfo.append(" -- ");
+                }
+                cdrModel.setGeranPositioningDataInformation(String.valueOf(geranPositioningDataInfo));
+            } catch (MAPException e) {
+                logger.severe(e.getMessage());
+            }
+            stringBuilder.append(cdrModel.getGeranPositioningDataInformation()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * GERAN GANSS POSITIONING DATA
+         */
+        GeranGANSSpositioningData geranGANSSPositioningDataInformation = gmlcCdrState.getGeranGANSSpositioningData();
+        if (geranGANSSPositioningDataInformation != null) {
+            try {
+                Multimap<String, String> methodsAndGanssIds = geranGANSSPositioningDataInformation.getGeranGANSSPositioningMethodsAndGANSSIds();
+                StringBuilder geranGANSSPosDataInfo = new StringBuilder();
+                String method = null, ganssId = null;
+                int i = 0, usage;
+                for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
+                    if (method != null || ganssId != null)
+                        geranGANSSPosDataInfo.append(" -- ");
+                    method = item.getKey();
+                    ganssId = item.getValue();
+                    usage = geranGANSSPositioningDataInformation.getUsageCode(geranGANSSPositioningDataInformation.getData(), i+1);
+                    geranGANSSPosDataInfo.append("method=").append(method).append(" ganssId=").append(ganssId).append(" usage=").append(usage);
+                    i++;
+                }
+                cdrModel.setGeranGANSSPositioningDataInformation(String.valueOf(geranGANSSPosDataInfo));
+            } catch (MAPException e) {
+                logger.severe(e.getMessage());
+            }
+            stringBuilder.append(cdrModel.getGeranGANSSPositioningDataInformation()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * UTRAN POSITIONING DATA
+         */
+        UtranPositioningDataInfo utranPositioningDataInfo = gmlcCdrState.getUtranPositioningDataInfo();
+        if (utranPositioningDataInfo != null) {
+            try {
+                HashMap<String, Integer> methodsAndUsage = utranPositioningDataInfo.getUtranPositioningDataSet();
+                StringBuilder utranPosDataInfo = new StringBuilder();
+                int itemCounter = 0;
+                for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
+                    itemCounter++;
+                    String method = item.getKey();
+                    Integer usage = item.getValue();
+                    utranPosDataInfo.append("method=").append(method).append(" usage=").append(usage);
+                    if (methodsAndUsage.size() != itemCounter)
+                        utranPosDataInfo.append(" -- ");
+                }
+                cdrModel.setUtranPositioningDataInfo(String.valueOf(utranPosDataInfo));
+            } catch (MAPException e) {
+                logger.severe(e.getMessage());
+            }
+            stringBuilder.append(cdrModel.getUtranPositioningDataInfo()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * UTRAN GANSS POSITIONING DATA
+         */
+        UtranGANSSpositioningData utranGANSSpositioningData = gmlcCdrState.getUtranGANSSpositioningData();
+        if (utranGANSSpositioningData != null) {
+            try {
+                Multimap<String, String> methodsAndGanssIds = utranGANSSpositioningData.getUtranGANSSPositioningMethodsAndGANSSIds();
+                StringBuilder utranGANSSPosDataInfo = new StringBuilder();
+                String method = null, ganssId = null;
+                int i = 0, usage;
+                for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
+                    if (method != null || ganssId != null)
+                        utranGANSSPosDataInfo.append(" -- ");
+                    method = item.getKey();
+                    ganssId = item.getValue();
+                    usage = utranGANSSpositioningData.getUsageCode(utranGANSSpositioningData.getData(), i);
+                    utranGANSSPosDataInfo.append("method=").append(method).append(" ganssId=").append(ganssId).append(" usage=").append(usage);
+                    i++;
+                }
+                cdrModel.setUtranGANSSPositioningData(String.valueOf(utranGANSSPosDataInfo));
+            } catch (MAPException e) {
+                logger.severe(e.getMessage());
+            }
+            stringBuilder.append(cdrModel.getUtranGANSSPositioningData()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * UTRAN ADDITIONAL POSITIONING DATA
+         */
+        UtranAdditionalPositioningData utranAdditionalPositioningData = gmlcCdrState.getUtranAdditionalPositioningData();
+        if (utranAdditionalPositioningData != null) {
+            try {
+                Multimap<String, String> methodsAndAddPosIds = utranAdditionalPositioningData.getUtranAdditionalPositioningMethodsAndIds();
+                StringBuilder utranAddPositioningData = new StringBuilder();
+                String method = null, id = null;
+                int i = 0, usage;
+                for (Map.Entry<String, String> item : methodsAndAddPosIds.entries()) {
+                    if (method != null || id != null)
+                        utranAddPositioningData.append(" -- ");
+                    method = item.getKey();
+                    id = item.getValue();
+                    usage = utranAdditionalPositioningData.getUsageCode(utranAdditionalPositioningData.getData(), i);
+                    utranAddPositioningData.append("method=").append(method).append(" addPosId=").append(id).append(" usage=").append(usage);
+                    i++;
+                }
+                cdrModel.setUtranAdditionalPositioningDataInfo(String.valueOf(utranAddPositioningData));
+            } catch (MAPException e) {
+                logger.severe(e.getMessage());
+            }
+            stringBuilder.append(cdrModel.getUtranAdditionalPositioningDataInfo()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * EUTRAN POSITIONING DATA
+         */
+        EUTRANPositioningData eutranPositioningData = gmlcCdrState.getEUTRANPositioningData();
+        if (eutranPositioningData != null) {
+            try {
+                if (eutranPositioningData.getPositioningDataSet() != null) {
+                    HashMap<String, Integer> methodsAndUsage = eutranPositioningData.getPositioningDataMethodsAndUsage(eutranPositioningData.getPositioningDataSet());
+                    StringBuilder positioningDataInfo = new StringBuilder();
+                    int itemCounter = 0;
+                    for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
+                        String method = item.getKey();
+                        Integer usage = item.getValue();
+                        positioningDataInfo.append("method=").append(method).append(" usage=").append(usage);
+                        if (methodsAndUsage.size() != itemCounter)
+                            positioningDataInfo.append(" -- ");
+                        itemCounter++;
+                    }
+                    cdrModel.setEutranPositioningDataInfo(String.valueOf(positioningDataInfo));
+                } else if (eutranPositioningData.getGNSSPositioningDataSet() != null) {
+                    Multimap<String, String> methodsAndGanssIds = eutranPositioningData.getGNSSPositioningMethodsAndGNSSIds(eutranPositioningData.getGNSSPositioningDataSet());
+                    StringBuilder gnssPositioningDataInfo = new StringBuilder();
+                    String method = null, gnssId = null;
+                    int i = 0, usage;
+                    for (Map.Entry<String, String> entry : methodsAndGanssIds.entries()) {
+                        if (method != null || gnssId != null)
+                            gnssPositioningDataInfo.append(" -- ");
+                        method = entry.getKey();
+                        gnssId = entry.getValue();
+                        usage = eutranPositioningData.getUsageCode(eutranPositioningData.getGNSSPositioningDataSet(), i);
+                        gnssPositioningDataInfo.append("method=").append(method).append(" gnssId=").append(gnssId).append(" usage=").append(usage);
+                        i++;
+                    }
+                    cdrModel.setEutranPositioningDataInfo(String.valueOf(gnssPositioningDataInfo));
+                } else if (eutranPositioningData.getAdditionalPositioningDataSet() != null) {
+                    Multimap<String, String> methodsAndAddPosIds = eutranPositioningData.getEUtranAdditionalPositioningMethodsAndIds(eutranPositioningData.getAdditionalPositioningDataSet());
+                    StringBuilder eutranAddPositioningData = new StringBuilder();
+                    String method = null, id = null;
+                    int i = 0, usage;
+                    for (Map.Entry<String, String> entry : methodsAndAddPosIds.entries()) {
+                        if (method != null || id != null)
+                            eutranAddPositioningData.append(" -- ");
+                        method = entry.getKey();
+                        id = entry.getValue();
+                        usage = eutranPositioningData.getUsageCode(eutranPositioningData.getAdditionalPositioningDataSet(), i);
+                        eutranAddPositioningData.append("method=").append(method).append(" addPosId=").append(id).append(" usage=").append(usage);
+                        i++;
+                    }
+                    cdrModel.setEutranPositioningDataInfo(String.valueOf(eutranAddPositioningData));
+                }
+            } catch (Exception e) {
+                logger.severe(e.getMessage());
+            }
+            stringBuilder.append(cdrModel.getEutranPositioningDataInfo()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * VELOCITY ESTIMATE
+         */
+        // HORIZONTAL VELOCITY ESTIMATE
+        VelocityEstimate horizontalVelocityEstimate = gmlcCdrState.getVelocityEstimate();
+        if (horizontalVelocityEstimate != null) {
+            cdrModel.setHorizontalVelocityEstimate(String.valueOf(horizontalVelocityEstimate.getHorizontalSpeed()));
+            stringBuilder.append(cdrModel.getHorizontalVelocityEstimate()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        // VELOCITY ESTIMATE BEARING
+        VelocityEstimate velocityEstimateBearing = gmlcCdrState.getVelocityEstimate();
+        if (velocityEstimateBearing != null) {
+            cdrModel.setVelocityEstimateBearing(String.valueOf(velocityEstimateBearing.getBearing()));
+            stringBuilder.append(cdrModel.getVelocityEstimateBearing()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        // VERTICAL VELOCITY ESTIMATE
+        VelocityEstimate verticalVelocityEstimate = gmlcCdrState.getVelocityEstimate();
+        if (verticalVelocityEstimate != null) {
+            cdrModel.setVerticalVelocityEstimate(String.valueOf(verticalVelocityEstimate.getVerticalSpeed()));
+            stringBuilder.append(cdrModel.getVerticalVelocityEstimate()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        // VELOCITY ESTIMATE HORIZONTAL UNCERTAINTY
+        VelocityEstimate velocityHorizontalUncertainty = gmlcCdrState.getVelocityEstimate();
+        if (velocityHorizontalUncertainty != null) {
+            cdrModel.setVelocityHorizontalUncertainty(String.valueOf(velocityHorizontalUncertainty.getUncertaintyHorizontalSpeed()));
+            stringBuilder.append(cdrModel.getVelocityHorizontalUncertainty()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        // VELOCITY ESTIMATE VERTICAL UNCERTAINTY
+        VelocityEstimate velocityVerticalUncertainty = gmlcCdrState.getVelocityEstimate();
+        if (velocityVerticalUncertainty != null) {
+            cdrModel.setVelocityVerticalUncertainty(String.valueOf(velocityVerticalUncertainty.getUncertaintyVerticalSpeed()));
+            stringBuilder.append(cdrModel.getVelocityVerticalUncertainty()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        // VELOCITY ESTIMATE TYPE
+        VelocityEstimate velocityType = gmlcCdrState.getVelocityEstimate();
+        if (velocityType != null) {
+            cdrModel.setVelocityType(velocityType.getVelocityType().name());
+            stringBuilder.append(cdrModel.getVelocityType()).append(SEPARATOR);
         } else {
             stringBuilder.append(SEPARATOR);
         }
@@ -2920,23 +3160,45 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         }
 
         /**
-         * BAROMETRIC PRESSURE
+         * MO-LR SHORT-CIRCUIT INDICATOR
          */
-        Long barometricPressureMeasurement = gmlcCdrState.getBarometricPressureMeasurement();
-        if (barometricPressureMeasurement != null) {
-            cdrModel.setBarometricPressureMeasurement(String.valueOf(barometricPressureMeasurement));
-            stringBuilder.append(cdrModel.getBarometricPressureMeasurement()).append(SEPARATOR);
+        Boolean moLrShortCircuitIndicator = gmlcCdrState.isMoLrShortCircuitIndicator();
+        if (moLrShortCircuitIndicator != null) {
+            cdrModel.setMoLrShortCircuitIndicator(String.valueOf(moLrShortCircuitIndicator));
+            stringBuilder.append(cdrModel.getMoLrShortCircuitIndicator()).append(SEPARATOR);
         } else {
             stringBuilder.append(SEPARATOR);
         }
 
         /**
-         * CIVIC ADDRESS
+         * REPORTING PLMN LIST
          */
-        String civicAddress = gmlcCdrState.getCivicAddress();
-        if (civicAddress != null) {
-            cdrModel.setCivicAddress(civicAddress);
-            stringBuilder.append(cdrModel.getCivicAddress()).append(SEPARATOR);
+        ReportingPLMNList reportingPLMNList = gmlcCdrState.getReportingPLMNList();
+        if (reportingPLMNList != null) {
+            int plmnCounter = 0;
+            String reportingPLMNListArray = "[ ";
+            while (reportingPLMNList.getPlmnList().iterator().hasNext()) {
+                reportingPLMNListArray = reportingPLMNListArray + reportingPLMNList.getPlmnList().get(plmnCounter);
+                plmnCounter++;
+                if (reportingPLMNList.getPlmnList().get(plmnCounter) != null) {
+                    reportingPLMNListArray = reportingPLMNListArray + ", ";
+                } else {
+                    reportingPLMNListArray = reportingPLMNListArray + " ]";
+                }
+                cdrModel.setReportingPLMNList(reportingPLMNListArray);
+                stringBuilder.append(cdrModel.getReportingPLMNList()).append(SEPARATOR);
+            }
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * Client REFERENCE NUMBER
+         */
+        Integer clientReferenceNumber = gmlcCdrState.getClientReferenceNumber();
+        if (clientReferenceNumber != null) {
+            cdrModel.setClientReferenceNumber(String.valueOf(clientReferenceNumber));
+            stringBuilder.append(cdrModel.getClientReferenceNumber()).append(SEPARATOR);
         } else {
             stringBuilder.append(SEPARATOR);
         }
@@ -2949,36 +3211,22 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         if (lcsEvent != null) {
             // LCS EVENT (MAP)
             cdrModel.setLcsEvent(String.valueOf(lcsEvent.getEvent()));
-            stringBuilder.append(cdrModel.getLcsEvent()).append(SEPARATOR);
+            stringBuilder.append(getLocationEvent(lcsEvent.getEvent())).append(SEPARATOR);
         } else {
             if (locationEvent != null) {
                 // LCS EVENT (LTE)
                 cdrModel.setLcsEvent(String.valueOf(locationEvent.getValue()));
-                stringBuilder.append(cdrModel.getLcsEvent()).append(SEPARATOR);
+                stringBuilder.append(getLocationEvent(locationEvent.getValue())).append(SEPARATOR);
             } else {
                 stringBuilder.append(SEPARATOR);
             }
         }
 
         /**
-         * MSISDN
+         * DEFERRED MT LR RESPONSE INDICATOR
          */
-        ISDNAddressString msisdn = gmlcCdrState.getMsisdn();
-        if (msisdn != null) {
-            cdrModel.setMsisdnAddress(msisdn.getAddress());
-            stringBuilder.append(cdrModel.getMsisdnAddress()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
-
-        /**
-         * IMEI
-         */
-        IMEI imei = gmlcCdrState.getImei();
-        if (imei != null) {
-            String imeiStr = new String(imei.getIMEI().getBytes());
-            cdrModel.setImei(imeiStr);
-            stringBuilder.append(cdrModel.getImei()).append(SEPARATOR);
+        if (deferredMTLRResponseIndicator != null) {
+            stringBuilder.append(deferredMTLRResponseIndicator).append(SEPARATOR);
         } else {
             stringBuilder.append(SEPARATOR);
         }
@@ -3008,7 +3256,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         }
 
         /*
-         * DEFERRED MT-LR DATA
+         * DEFERRED MT-LR DATA LCS Location Info
          */
         DeferredmtlrData deferredLcsLocationInfo = gmlcCdrState.getDeferredmtlrData();
         if (deferredLcsLocationInfo != null) {
@@ -3017,27 +3265,30 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                     // DEFERRED MT-LR DATA NETWORK NODE NUMBER
                     cdrModel.setDeferredLcsLocationInfoNetworkNodeNumber(deferredLcsLocationInfo.getLCSLocationInfo().getNetworkNodeNumber().getAddress());
                     stringBuilder.append(cdrModel.getDeferredLcsLocationInfoNetworkNodeNumber()).append(SEPARATOR);
-                } else
+                } else {
                     stringBuilder.append(SEPARATOR);
+                }
                 if (deferredLcsLocationInfo.getLCSLocationInfo().getGprsNodeIndicator()) {
                     // DEFERRED MT-LR DATA GPRS NODE IND
                     cdrModel.setDeferredLcsLocationInfoGprsNodeIndicator(String.valueOf(deferredLcsLocationInfo.getLCSLocationInfo().getGprsNodeIndicator()));
                     stringBuilder.append(cdrModel.getDeferredLcsLocationInfoGprsNodeIndicator()).append(SEPARATOR);
-                } else
+                } else {
                     stringBuilder.append(false).append(SEPARATOR);
+                }
                 if (deferredLcsLocationInfo.getLCSLocationInfo().getAdditionalNumber() != null) {
                     // DEFERRED MT-LR DATA ADDITIONAL NUMBER
                     if (deferredLcsLocationInfo.getLCSLocationInfo().getAdditionalNumber().getMSCNumber() != null)
                         cdrModel.setDeferredLcsLocationInfoAdditionalNumber(deferredLcsLocationInfo.getLCSLocationInfo().getAdditionalNumber().getMSCNumber().getAddress());
-
-                    if (deferredLcsLocationInfo.getLCSLocationInfo().getAdditionalNumber().getSGSNNumber() != null)
+                    else if (deferredLcsLocationInfo.getLCSLocationInfo().getAdditionalNumber().getSGSNNumber() != null)
                         cdrModel.setDeferredLcsLocationInfoAdditionalNumber(deferredLcsLocationInfo.getLCSLocationInfo().getAdditionalNumber().getSGSNNumber().getAddress());
 
                     stringBuilder.append(cdrModel.getDeferredLcsLocationInfoAdditionalNumber()).append(SEPARATOR);
+                } else {
+                    stringBuilder.append(SEPARATOR);
                 }
                 if (deferredLcsLocationInfo.getLCSLocationInfo().getLMSI() != null) {
                     // DEFERRED MT-LR DATA LMSI
-                    String lmsiStr = new String(deferredLcsLocationInfo.getLCSLocationInfo().getLMSI().getData(), StandardCharsets.ISO_8859_1);
+                    String lmsiStr = bytesToHex(deferredLcsLocationInfo.getLCSLocationInfo().getLMSI().getData());
                     cdrModel.setDeferredLcsLocationInfoLMSI(lmsiStr);
                     stringBuilder.append(cdrModel.getDeferredLcsLocationInfoLMSI()).append(SEPARATOR);
                 } else {
@@ -3045,7 +3296,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                 }
                 if (deferredLcsLocationInfo.getLCSLocationInfo().getMmeName() != null) {
                     // DEFERRED MT-LR DATA MME NAME
-                    String mmeNameStr = new String(deferredLcsLocationInfo.getLCSLocationInfo().getMmeName().getData(), StandardCharsets.ISO_8859_1);
+                    String mmeNameStr = new String(deferredLcsLocationInfo.getLCSLocationInfo().getMmeName().getData(), StandardCharsets.UTF_8);
                     cdrModel.setDeferredLcsLocationInfoMmeName(mmeNameStr);
                     stringBuilder.append(cdrModel.getDeferredLcsLocationInfoMmeName()).append(SEPARATOR);
                 } else {
@@ -3053,7 +3304,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                 }
                 if (deferredLcsLocationInfo.getLCSLocationInfo().getAaaServerName() != null) {
                     // DEFERRED MT-LR DATA AAA SERVER NAME
-                    String aaaServerNameStr = new String(deferredLcsLocationInfo.getLCSLocationInfo().getAaaServerName().getData(), StandardCharsets.ISO_8859_1);
+                    String aaaServerNameStr = new String(deferredLcsLocationInfo.getLCSLocationInfo().getAaaServerName().getData(), StandardCharsets.UTF_8);
                     cdrModel.setDeferredLcsLocationInfoAaaServerName(aaaServerNameStr);
                     stringBuilder.append(cdrModel.getDeferredLcsLocationInfoAaaServerName()).append(SEPARATOR);
                 } else {
@@ -3134,7 +3385,6 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
             stringBuilder.append(SEPARATOR);
             stringBuilder.append(SEPARATOR);
         }
-
         // TERMINATION CAUSE
         DeferredmtlrData deferredTerminationCause = gmlcCdrState.getDeferredmtlrData();
         if (deferredTerminationCause != null) {
@@ -3155,7 +3405,6 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         } else {
             stringBuilder.append(SEPARATOR);
         }
-
         // REPORTING INTERVAL
         PeriodicLDRInfo periodicReportingInterval = gmlcCdrState.getPeriodicLDRInfo();
         if (periodicReportingInterval != null) {
@@ -3166,34 +3415,93 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         }
 
         /**
-         * MO-LR SHORT-CIRCUIT INDICATOR
+         * LCS REFERENCE NUMBER
          */
-        Boolean moLrShortCircuitIndicator = gmlcCdrState.isMoLrShortCircuitIndicator();
-        if (moLrShortCircuitIndicator != null) {
-            cdrModel.setMoLrShortCircuitIndicator(String.valueOf(moLrShortCircuitIndicator));
-            stringBuilder.append(cdrModel.getMoLrShortCircuitIndicator()).append(SEPARATOR);
+        Integer lcsReferenceNumber = gmlcCdrState.getLcsReferenceNumber();
+        if (lcsReferenceNumber != null) {
+            cdrModel.setLcsReferenceNumber(String.valueOf(lcsReferenceNumber));
+            stringBuilder.append(cdrModel.getLcsReferenceNumber()).append(SEPARATOR);
         } else {
             stringBuilder.append(SEPARATOR);
         }
 
         /**
-         * REPORTING PLMN LIST
+         * SEQUENCE NUMBER
          */
-        ReportingPLMNList reportingPLMNList = gmlcCdrState.getReportingPLMNList();
-        if (reportingPLMNList != null) {
-            int plmnCounter = 0;
-            String reportingPLMNListArray = "[ ";
-            while (reportingPLMNList.getPlmnList().iterator().hasNext()) {
-                reportingPLMNListArray = reportingPLMNListArray + reportingPLMNList.getPlmnList().get(plmnCounter);
-                plmnCounter++;
-                if (reportingPLMNList.getPlmnList().get(plmnCounter) != null) {
-                    reportingPLMNListArray = reportingPLMNListArray + ", ";
-                } else {
-                    reportingPLMNListArray = reportingPLMNListArray + " ]";
-                }
-                cdrModel.setReportingPLMNList(reportingPLMNListArray);
-                stringBuilder.append(cdrModel.getReportingPLMNList()).append(SEPARATOR);
+        Integer sequenceNumber = gmlcCdrState.getSequenceNumber();
+        if (sequenceNumber != null) {
+            cdrModel.setSequenceNumber(String.valueOf(sequenceNumber));
+            stringBuilder.append(cdrModel.getSequenceNumber()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * BAROMETRIC PRESSURE
+         */
+        Long barometricPressureMeasurement = gmlcCdrState.getBarometricPressureMeasurement();
+        Integer utranBarometricPressureMeasurement = gmlcCdrState.getUtranBaroPressureMeas();
+        if (barometricPressureMeasurement != null || utranBarometricPressureMeasurement != null) {
+            if (barometricPressureMeasurement != null) {
+                cdrModel.setBarometricPressureMeasurement(String.valueOf(barometricPressureMeasurement));
+                stringBuilder.append(cdrModel.getBarometricPressureMeasurement()).append(SEPARATOR);
+            } else {
+                cdrModel.setBarometricPressureMeasurement(String.valueOf(utranBarometricPressureMeasurement));
+                stringBuilder.append(cdrModel.getBarometricPressureMeasurement()).append(SEPARATOR);
             }
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * CIVIC ADDRESS
+         */
+        String civicAddress = gmlcCdrState.getCivicAddress();
+        UtranCivicAddress utranCivicAddress = gmlcCdrState.getUtranCivicAddress();
+        if (civicAddress != null || utranCivicAddress != null) {
+            if (civicAddress != null) {
+                cdrModel.setCivicAddress(civicAddress);
+                StringBuilder sb = getCivicAddress(civicAddress);
+                stringBuilder.append(sb).append(SEPARATOR);
+            } else {
+                Charset charset = StandardCharsets.UTF_8;
+                String utranCivicAddressStr = new String(utranCivicAddress.getData(), charset);
+                StringBuilder sb = getCivicAddress(utranCivicAddressStr);
+                stringBuilder.append(sb).append(SEPARATOR);
+            }
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * na-ESRK Request
+         */
+        Boolean naEsrkRequest = gmlcCdrState.getNaEsrkRequest();
+        if (naEsrkRequest != null) {
+            cdrModel.setNaEsrkRequest(String.valueOf(naEsrkRequest));
+            stringBuilder.append(cdrModel.getNaEsrkRequest()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * na-ESRD
+         */
+        ISDNAddressString naESRD = gmlcCdrState.getNaESRD();
+        if (naESRD != null) {
+            cdrModel.setNaESRD(naESRD.getAddress());
+            stringBuilder.append(cdrModel.getNaESRD()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * na-ESRK
+         */
+        ISDNAddressString naESRK = gmlcCdrState.getNaESRD();
+        if (naESRK != null) {
+            cdrModel.setNaESRK(naESRK.getAddress());
+            stringBuilder.append(cdrModel.getNaESRK()).append(SEPARATOR);
         } else {
             stringBuilder.append(SEPARATOR);
         }
@@ -3204,20 +3512,331 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         String oneXRTTRCID = gmlcCdrState.getOneXRTTRCID();
         if (oneXRTTRCID != null) {
             cdrModel.setOneXRTTRCID(oneXRTTRCID);
-            stringBuilder.append(cdrModel.getOneXRTTRCID()); //.append(SEPARATOR); uncomment if further fields apply
+            stringBuilder.append(cdrModel.getOneXRTTRCID()).append(SEPARATOR);
         } else {
-            //stringBuilder.append(SEPARATOR); //Uncomment if further fields apply
+            stringBuilder.append(SEPARATOR);
         }
 
-        if (sendCdrToGlass) {
-            try {
-                taskManager.addTask(new TaskCDR(cdrModel));
-            }catch (Exception ex) {
-                logger.severe("Error on try to send CDR to GLaaS " + ex.getMessage());
+        /**
+         * AMF-Instance-Id
+         */
+        String amfInstanceId = gmlcCdrState.getAmfInstanceId();
+        if (amfInstanceId != null) {
+            cdrModel.setAmfInstanceId(amfInstanceId);
+            stringBuilder.append(cdrModel.getAmfInstanceId()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * SLh RIA-Flags
+         */
+        Long riaFlags = gmlcCdrState.getRiaFlags();
+        if (riaFlags != null) {
+            cdrModel.setRiaFlags(riaFlags);
+            stringBuilder.append(cdrModel.getRiaFlags()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * SLg PLR-Flags
+         */
+        Long plrFlags = gmlcCdrState.getPlrFlags();
+        if (plrFlags != null) {
+            cdrModel.setPlrFlags(plrFlags);
+            stringBuilder.append(cdrModel.getPlrFlags()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * SLg PLA-Flags
+         */
+        Long plaFlags = gmlcCdrState.getPlaFlags();
+        if (plaFlags != null) {
+            cdrModel.setPlaFlags(plaFlags);
+            stringBuilder.append(cdrModel.getPlaFlags()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * SLg LRR-Flags
+         */
+        Long lrrFlags = gmlcCdrState.getLrrFlags();
+        if (lrrFlags != null) {
+            cdrModel.setLrrFlags(lrrFlags);
+            stringBuilder.append(cdrModel.getLrrFlags()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * SLg LRA-Flags
+         */
+        Long lraFlags = gmlcCdrState.getLraFlags();
+        if (lraFlags != null) {
+            cdrModel.setLraFlags(lraFlags);
+            stringBuilder.append(cdrModel.getLraFlags()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * Subscriber Status from ATI or PSI
+         */
+        if (state != null) {
+            stringBuilder.append(state).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+        /**
+         * Subscriber Not Reachable Reason from ATI or PSI
+         */
+        if (notReachableReasonState != null) {
+            stringBuilder.append(notReachableReasonState).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * Local Time Zone from Sh UDR/UDA
+         */
+        if (localTimeZone != null) {
+            stringBuilder.append(localTimeZone.getTimeZone()).append(SEPARATOR);
+            stringBuilder.append(localTimeZone.getDaylightSavingTime()).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+            stringBuilder.append(SEPARATOR);
+        }
+        /**
+         * RAT type from Sh UDR/UDA or ATI or PSI
+         */
+        if (ratTypeCode != null) {
+            stringBuilder.append(getRatType(ratTypeCode)).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * LOCATION NUMBER from ATI or PSI or Sh UDR
+         */
+        if (locationNumber) {
+            if (locationNumberOddFlag) {
+                stringBuilder.append(locationNumberOddFlag).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
             }
+            if (locationNumberNAI != -1) {
+                stringBuilder.append(locationNumberNAI).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (locationNumberNNI != -1) {
+                stringBuilder.append(locationNumberNNI).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (locationNumberNPI != -1) {
+                stringBuilder.append(locationNumberNPI).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (locationNumberAddressRepresentationRestrictedIndicator != -1) {
+                stringBuilder.append(locationNumberAddressRepresentationRestrictedIndicator).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (locationNumberScreeningIndicator != -1) {
+                stringBuilder.append(locationNumberScreeningIndicator).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            if (locationNumberAddress != null) {
+                stringBuilder.append(locationNumberAddress).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+        } else {
+            stringBuilder.append(SEPARATOR).append(SEPARATOR).append(SEPARATOR).append(SEPARATOR).append(SEPARATOR).append(SEPARATOR).append(SEPARATOR);
+        }
+
+        /**
+         * MNP INFO RESULT (from ATI or PSI)
+         */
+        if (mnpInfoResult != null) {
+            // MNP NUMBER PORTABILITY STATUS
+            if (mnpInfoResult.getNumberPortabilityStatus() != null)
+                stringBuilder.append(mnpInfoResult.getNumberPortabilityStatus().name()).append(SEPARATOR);
+            else
+                stringBuilder.append(SEPARATOR);
+            // MNP IMSI
+            if (mnpInfoResult.getIMSI() != null)
+                stringBuilder.append(new String(mnpInfoResult.getIMSI().getData().getBytes())).append(SEPARATOR);
+            else
+                stringBuilder.append(SEPARATOR);
+            // MNP MSISDN
+            if (mnpInfoResult.getMSISDN() != null)
+                stringBuilder.append(mnpInfoResult.getMSISDN().getAddress()).append(SEPARATOR);
+            else
+                stringBuilder.append(SEPARATOR);
+            // MNP ROUTEING NUMBER
+            if (mnpInfoResult.getRouteingNumber() != null)
+                stringBuilder.append(mnpInfoResult.getRouteingNumber().getRouteingNumber()).append(SEPARATOR);
+            else
+                stringBuilder.append(SEPARATOR);
+        } else {
+
+            stringBuilder.append(SEPARATOR);
+            stringBuilder.append(SEPARATOR);
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * MS CLASSMARK 2
+         */
+        if (msClassmark != null) {
+            stringBuilder.append(bytesToHexString(msClassmark.getData())).append(SEPARATOR);
+        } else {
+            stringBuilder.append(SEPARATOR);
+        }
+
+        /**
+         * GPRS MS CLASS
+         */
+        if (gprsMsClass != null) {
+            // GPRS MS CLASS MS RADIO ACCESS CAPABILITY
+            if (gprsMsClass.getMSRadioAccessCapability() != null) {
+                stringBuilder.append(bytesToHexString(gprsMsClass.getMSRadioAccessCapability().getData())).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+            // GPRS MS CLASS MS NETWORK CAPABILITY
+            if (gprsMsClass.getMSNetworkCapability() != null) {
+                stringBuilder.append(bytesToHexString(gprsMsClass.getMSNetworkCapability().getData())).append(SEPARATOR);
+            } else {
+                stringBuilder.append(SEPARATOR);
+            }
+        } else {
+            stringBuilder.append(SEPARATOR);
+            stringBuilder.append(SEPARATOR);
         }
 
         return stringBuilder.toString();
+    }
+
+    private static String getLocationEvent(Integer lcsEvent) {
+        String locationEvent = null;
+        if (lcsEvent != null) {
+            switch (lcsEvent) {
+                case 0:
+                    locationEvent = "EMERGENCY_CALL_ORIGINATION";
+                    break;
+                case 1:
+                    locationEvent = "EMERGENCY_CALL_RELEASE";
+                    break;
+                case 2:
+                    locationEvent = "MO_LR";
+                    break;
+                case 3:
+                    locationEvent = "EMERGENCY_CALL_HANDOVER";
+                    break;
+                case 4:
+                    locationEvent = "DEFERRED_MT_LR_RESPONSE";
+                    break;
+                case 5:
+                    locationEvent = "DEFERRED_MO_LR_TTTP_INITIATION";
+                    break;
+                case 6:
+                    locationEvent = "DELAYED_LOCATION_REPORTING";
+                    break;
+                case 7:
+                    locationEvent = "HANDOVER_TO_5GC";
+                    break;
+                default:
+                    break;
+            }
+        }
+        return locationEvent;
+    }
+
+    private StringBuilder getCivicAddress(String civicAddressStr) {
+        CivicAddressXmlReader reader = new CivicAddressXmlReader();
+        reader.civicAddressXMLReader(civicAddressStr);
+        CivicAddressElements civicAddressElements = reader.getCivicAddressElements();
+        StringBuilder sb = new StringBuilder();
+        if (civicAddressElements != null) {
+            if (civicAddressElements.getCountry() != null)
+                sb.append("Country=").append(civicAddressElements.getCountry());
+            if (civicAddressElements.getA1() != null)
+                sb.append(" A1=").append(civicAddressElements.getA1());
+            if (civicAddressElements.getA2() != null)
+                sb.append(" A2=").append(civicAddressElements.getA2());
+            if (civicAddressElements.getA3() != null)
+                sb.append(" A3=").append(civicAddressElements.getA3());
+            if (civicAddressElements.getA4() != null)
+                sb.append(" A4=").append(civicAddressElements.getA4());
+            if (civicAddressElements.getA5() != null)
+                sb.append(" A5=").append(civicAddressElements.getA5());
+            if (civicAddressElements.getA6() != null)
+                sb.append(" A6=").append(civicAddressElements.getA6());
+            if (civicAddressElements.getPrm() != null)
+                sb.append(" PRM=").append(civicAddressElements.getPrm());
+            if (civicAddressElements.getPrd() != null)
+                sb.append(" PRD=").append(civicAddressElements.getPrd());
+            if (civicAddressElements.getRd() != null)
+                sb.append(" RD=").append(civicAddressElements.getRd());
+            if (civicAddressElements.getSts() != null)
+                sb.append(" STS=").append(civicAddressElements.getSts());
+            if (civicAddressElements.getPod() != null)
+                sb.append(" POD").append(civicAddressElements.getPod());
+            if (civicAddressElements.getPom() != null)
+                sb.append(" POM").append(civicAddressElements.getPom());
+            if (civicAddressElements.getRdsec() != null)
+                sb.append(" RDSEC=").append(civicAddressElements.getRdsec());
+            if (civicAddressElements.getRdbr() != null)
+                sb.append(" RDBR=").append(civicAddressElements.getRdbr());
+            if (civicAddressElements.getRdsubbr() != null)
+                sb.append(" RDSUBBR=").append(civicAddressElements.getRdsubbr());
+            if (civicAddressElements.getHno() != null)
+                sb.append(" HNO=").append(civicAddressElements.getHno());
+            if (civicAddressElements.getHns() != null)
+                sb.append(" HNS=").append(civicAddressElements.getHns());
+            if (civicAddressElements.getLmk() != null)
+                sb.append(" LMK=").append(civicAddressElements.getLmk());
+            if (civicAddressElements.getLoc() != null)
+                sb.append(" LOC=").append(civicAddressElements.getLoc());
+            if (civicAddressElements.getFlr() != null)
+                sb.append(" FLR=").append(civicAddressElements.getFlr());
+            if (civicAddressElements.getNam() != null)
+                sb.append(" NAM=").append(civicAddressElements.getNam());
+            if (civicAddressElements.getPc() != null)
+                sb.append(" PC=").append(civicAddressElements.getPc());
+            if (civicAddressElements.getBld() != null)
+                sb.append(" BLD=").append(civicAddressElements.getBld());
+            if (civicAddressElements.getUnit() != null)
+                sb.append(" UNIT=").append(civicAddressElements.getUnit());
+            if (civicAddressElements.getRoom() != null)
+                sb.append(" ROOM=").append(civicAddressElements.getRoom());
+            if (civicAddressElements.getSeat() != null)
+                sb.append(" SEAT=").append(civicAddressElements.getSeat());
+            if (civicAddressElements.getPlc() != null)
+                sb.append(" PLC=").append(civicAddressElements.getPlc());
+            if (civicAddressElements.getPcn() != null)
+                sb.append(" PCN=").append(civicAddressElements.getPcn());
+            if (civicAddressElements.getPobox() != null)
+                sb.append(" POBOX=").append(civicAddressElements.getPobox());
+            if (civicAddressElements.getPn() != null)
+                sb.append(" PN=").append(civicAddressElements.getPn());
+            if (civicAddressElements.getMp() != null)
+                sb.append(" MP=").append(civicAddressElements.getMp());
+            if (civicAddressElements.getStp() != null)
+                sb.append(" STP=").append(civicAddressElements.getStp());
+            if (civicAddressElements.getHnp() != null)
+                sb.append(" HNP=").append(civicAddressElements.getHnp());
+        }
+        return sb;
     }
 
     private String getRatType(Integer ratTypeCode) {
@@ -3267,14 +3886,13 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                     ratType = "EHRPD";
                     break;
                 default:
-                    ratType = null;
                     break;
             }
         }
         return ratType;
     }
 
-    public String bytesToHexString(byte[] bytes) {
+    private String bytesToHexString(byte[] bytes) {
         char[] hexArray = "0123456789ABCDEF".toCharArray();
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {

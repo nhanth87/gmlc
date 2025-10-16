@@ -272,15 +272,15 @@ public class CDRCreationHelper {
         GMLCCDRState gmlcCdrState = cdrInterface.getState();
         if (!gmlcCdrState.isInitialized()) {
             if (riaEvent != null) {
-                gmlcCdrState.init(riaEvent != null ? riaEvent.getSessionId() : null, originHost, originRealm, gmlcHost, gmlcRealm);
+                gmlcCdrState.init(riaEvent.getSessionId(), originHost, originRealm, gmlcHost, gmlcRealm);
             }
             else if (plaEvent != null) {
                 logger.fine("\nonProvideLocationAnswer: CDR state is NOT initialized: " + gmlcCdrState + ", initiating\n");
-                gmlcCdrState.init(plaEvent != null ? plaEvent.getSessionId() : null, originHost, originRealm, gmlcHost, gmlcRealm);
+                gmlcCdrState.init(plaEvent.getSessionId(), originHost, originRealm, gmlcHost, gmlcRealm);
             }
             else if (lrrEvent != null) {
                 logger.fine("\nonLocationReportRequest: CDR state is NOT initialized: " + gmlcCdrState + ", initiating\n");
-                gmlcCdrState.init(lrrEvent != null ? lrrEvent.getSessionId() : null, originHost, originRealm, gmlcHost, gmlcRealm);
+                gmlcCdrState.init(lrrEvent.getSessionId(), originHost, originRealm, gmlcHost, gmlcRealm);
             }
             gmlcCdrState.setDialogEndTime(DateTime.now());
             cdrInterface.setState(gmlcCdrState);
@@ -448,6 +448,36 @@ public class CDRCreationHelper {
                         @Override
                         public double getIncludedAngle() {
                             return suplResponseHelperForMLP.getIncludedAngle();
+                        }
+
+                        @Override
+                        public double getHiAccLatitude() {
+                            return 0;
+                        }
+
+                        @Override
+                        public double getHiAccLongitude() {
+                            return 0;
+                        }
+
+                        @Override
+                        public int getHorizontalConfidence() {
+                            return 0;
+                        }
+
+                        @Override
+                        public int getVerticalConfidence() {
+                            return 0;
+                        }
+
+                        @Override
+                        public int getHiAccAltitude() {
+                            return 0;
+                        }
+
+                        @Override
+                        public double getHiAccUncertaintyAltitude() {
+                            return 0;
                         }
                     };
                     gmlcCdrState.setLocationEstimate(extGeographicalInformation);

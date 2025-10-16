@@ -2,6 +2,7 @@ package org.mobicents.gmlc.slee.primitives;
 
 import javolution.xml.XMLFormat;
 import javolution.xml.stream.XMLStreamException;
+
 import org.mobicents.protocols.asn.AsnInputStream;
 import org.mobicents.protocols.asn.AsnOutputStream;
 import org.restcomm.protocols.ss7.map.api.MAPException;
@@ -10,7 +11,6 @@ import org.restcomm.protocols.ss7.map.primitives.OctetStringBase;
 import org.restcomm.protocols.ss7.map.primitives.TbcdString;
 
 import java.io.IOException;
-import javax.xml.bind.DatatypeConverter;
 
 /**
  * @author <a href="mailto:fernando.mendioroz@gmail.com"> Fernando Mendioroz </a>
@@ -23,6 +23,7 @@ public class TrackingAreaId5GSImpl extends OctetStringBase implements TrackingAr
 
     private static final String DATA = "data";
     private static final String DEFAULT_VALUE = null;
+    private static final int DEFAULT_INT_VALUE = 0;
 
     public TrackingAreaId5GSImpl() { super(6,6,"5GSTrackingAreaId");}
 
@@ -171,20 +172,32 @@ public class TrackingAreaId5GSImpl extends OctetStringBase implements TrackingAr
         return sb.toString();
     }
 
+    /**
+     * XML Serialization/Deserialization
+     */
     protected static final XMLFormat<TrackingAreaId5GSImpl> TA_ID_5GS_XML = new XMLFormat<>(TrackingAreaId5GSImpl.class) {
 
         @Override
         public void read(javolution.xml.XMLFormat.InputElement xml, TrackingAreaId5GSImpl taId) throws XMLStreamException {
-            String s = xml.getAttribute(DATA, DEFAULT_VALUE);
-            if (s != null) {
-                taId.data = DatatypeConverter.parseHexBinary(s);
+            int mcc = xml.getAttribute(MCC, DEFAULT_INT_VALUE);
+            int mnc = xml.getAttribute(MNC, DEFAULT_INT_VALUE);
+            int tac = xml.getAttribute(TAC, DEFAULT_INT_VALUE);
+
+            try {
+                taId.setData(mcc, mnc, tac);
+            } catch (MAPException e) {
+                throw new XMLStreamException("MAPException when deserializing TrackingAreaId5GSImpl", e);
             }
         }
 
         @Override
         public void write(TrackingAreaId5GSImpl taId, javolution.xml.XMLFormat.OutputElement xml) throws XMLStreamException {
-            if (taId.data != null) {
-                xml.setAttribute(DATA, DatatypeConverter.printHexBinary(taId.data));
+            try {
+                xml.setAttribute(MCC, taId.getMCC());
+                xml.setAttribute(MNC, taId.getMNC());
+                xml.setAttribute(TAC, taId.get5GSTAC());
+            } catch (MAPException e) {
+                throw new XMLStreamException("MAPException when serializing TrackingAreaId5GSImpl", e);
             }
         }
     };

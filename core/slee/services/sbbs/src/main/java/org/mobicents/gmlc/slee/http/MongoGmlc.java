@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
  */
 public class MongoGmlc {
 
-    private Logger logger = Logger.getLogger(MongoGmlc.class);
+    private final Logger logger = Logger.getLogger(MongoGmlc.class);
 
     DB mongoGmlc;
     MongoClient mongoClient;
@@ -25,7 +25,7 @@ public class MongoGmlc {
             mongoClient = new MongoClient(mongoHost, mongoPort);
             mongoGmlc = mongoClient.getDB(mongoDatabase);
         } catch (Exception e) {
-            logger.error(String.format("Exception on MongoGmlc(String mongoHost, int mongoPort, String mongoDatabase) constructor : ", e));
+            logger.error("Exception on MongoGmlc(String mongoHost, int mongoPort, String mongoDatabase) constructor : ", e);
         }
     }
 

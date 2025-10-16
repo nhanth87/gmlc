@@ -2,7 +2,6 @@ package org.mobicents.gmlc.slee.diameter.sh.elements;
 
 import org.mobicents.gmlc.slee.primitives.EUTRANCGI;
 import org.mobicents.gmlc.slee.primitives.EUTRANCGIImpl;
-import org.restcomm.protocols.ss7.map.api.MAPException;
 
 import java.util.Base64;
 
@@ -60,13 +59,11 @@ public class ShEUTRANCellGlobalId {
   }
 
   public byte[] getECGIBytes(String ecgiInfo) {
-    byte[] bytes = Base64.getDecoder().decode(ecgiInfo);
-    return bytes;
+    return Base64.getDecoder().decode(ecgiInfo);
   }
 
   public EUTRANCGI decodeECGIBytes(byte[] cgiBytes) {
-    EUTRANCGI ecgi = new EUTRANCGIImpl(cgiBytes);
-    return ecgi;
+    return new EUTRANCGIImpl(cgiBytes);
   }
 
   @Override

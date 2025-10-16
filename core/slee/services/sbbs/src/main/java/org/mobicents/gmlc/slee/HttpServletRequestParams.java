@@ -172,7 +172,7 @@ public class HttpServletRequestParams {
             }
             try {
                 locationRequestParams.psiOnlyImsi = httpServletRequest.getParameter("psiImsi");
-                Long imsiValue = Long.parseLong(locationRequestParams.psiOnlyImsi);
+                long imsiValue = Long.parseLong(locationRequestParams.psiOnlyImsi);
                 if (locationRequestParams.psiOnlyImsi.length() > 15 || imsiValue <= 0) {
                     throw new IllegalArgumentException("Incorrect psiImsi argument entered (" + imsiValue + "), must be valid IMSI value according to ITU-T E.212, " +
                         "a number with an amount of digits not greater than 15");
@@ -191,7 +191,7 @@ public class HttpServletRequestParams {
             }
             try {
                 locationRequestParams.psiOnlyNnn = httpServletRequest.getParameter("psiNnn");
-                Long nnnDigits = Long.parseLong(locationRequestParams.psiOnlyNnn);
+                long nnnDigits = Long.parseLong(locationRequestParams.psiOnlyNnn);
                 if (nnnDigits <= 0) {
                     throw new IllegalArgumentException("Incorrect psiNnn argument entered (" + nnnDigits + "), must be valid numeric value according to ITU-T E.214");
                 }
@@ -290,11 +290,10 @@ public class HttpServletRequestParams {
                 // lcsClientExternalID (O), lcsClientInternalID (NA), lcsClientName (NA), lcsClientDialedByMS (NA), lcsRequestorID (NA)
                 if (httpServletRequest.getParameter("lcsClientExternalID") != null) {
                     try {
-                        locationRequestParams.pslClientExternalID = httpServletRequest.getParameter("lcsClientExternalID");
-                        if (locationRequestParams.pslClientExternalID.length() > 16) {
+                        if (httpServletRequest.getParameter("lcsClientExternalID").length() > 16) {
                             throw new IllegalArgumentException("lcsClientExternalID argument represents an ISDN address whose length must not exceed 16 digits");
                         } else {
-                            Long isdnAddress = Long.valueOf(httpServletRequest.getParameter("lcsClientExternalID"));
+                            locationRequestParams.pslClientExternalID = httpServletRequest.getParameter("lcsClientExternalID");
                         }
                     } catch (NumberFormatException nfe) {
                         numberFormatException = "lcsClientExternalID argument represents an ISDN address whose length must not exceed 16 digits";
@@ -311,14 +310,13 @@ public class HttpServletRequestParams {
                 // lcsClientExternalID (M), lcsClientInternalID (NA), lcsClientName (M), lcsClientDialedByMS (O*), lcsRequestorID (O)
                 // lcsClientDialedByMS (O*) : This component shall be present if the MT-LR is associated to either CS call or PS session.
                 // If the MT-LR is associated with the CS call, the number dialled by UE is used.
-                // Otherwise if the MT-LR is associated with the PS session, the APN-NI is used
+                // Otherwise, if the MT-LR is associated with the PS session, the APN-NI is used
                 if (httpServletRequest.getParameter("lcsClientExternalID") != null) {
                     try {
-                        locationRequestParams.pslClientExternalID = httpServletRequest.getParameter("lcsClientExternalID");
-                        if (locationRequestParams.pslClientExternalID.length() > 16) {
+                        if (httpServletRequest.getParameter("lcsClientExternalID").length() > 16) {
                             throw new IllegalArgumentException("lcsClientExternalID argument represents an ISDN address whose length must not exceed 16 digits");
                         } else {
-                            Long isdnAddress = Long.valueOf(httpServletRequest.getParameter("lcsClientExternalID"));
+                            locationRequestParams.pslClientExternalID = httpServletRequest.getParameter("lcsClientExternalID");
                         }
                     } catch (NumberFormatException nfe) {
                         numberFormatException = "lcsClientExternalID argument represents an ISDN address whose length must not exceed 16 digits";
@@ -402,10 +400,6 @@ public class HttpServletRequestParams {
                     throw new IllegalArgumentException("lcsClientInternalID argument cannot be null when lcsClientType is 2 (PLMN operator services), must be one of 0 (broadcastService), 1 (oandMHPLMN), " +
                         "2 (oandMVPLMN), 3 (anonymousLocation) or 4 (targetMSsubscribedServiceSIP)");
                 }
-
-            } else if (locationRequestParams.pslLcsClientType == org.restcomm.protocols.ss7.map.api.service.lsm.LCSClientType.lawfulInterceptServices.getType()) {
-                // lcsClientType = lawfulInterceptServices :
-                // lcsClientExternalID (NA), lcsClientInternalID (NA), lcsClientName (NA), lcsClientDialedByMS (NA), lcsRequestorID (NA)
             }
         } else {
             throw new IllegalArgumentException("lcsClientType argument cannot be null for PSL, must be one of 0 (emergency services), 1 (value-added services), " +
@@ -447,7 +441,7 @@ public class HttpServletRequestParams {
         // Horizontal Accuracy
         if (httpServletRequest.getParameter("horizontalAccuracy") != null) {
             try {
-                int horizontalAccuracy = Integer.valueOf(httpServletRequest.getParameter("horizontalAccuracy"));
+                int horizontalAccuracy = Integer.parseInt(httpServletRequest.getParameter("horizontalAccuracy"));
                 if (horizontalAccuracy < 0) {
                     throw new IllegalArgumentException("Incorrect horizontalAccuracy argument, must be a positive number " +
                         "corresponding to the desired horizontal accuracy in metres");
@@ -464,7 +458,7 @@ public class HttpServletRequestParams {
         // Vertical Accuracy
         if (httpServletRequest.getParameter("verticalAccuracy") != null) {
             try {
-                int verticalAccuracy = Integer.valueOf(httpServletRequest.getParameter("verticalAccuracy"));
+                int verticalAccuracy = Integer.parseInt(httpServletRequest.getParameter("verticalAccuracy"));
                 if (verticalAccuracy < 0) {
                     throw new IllegalArgumentException("Incorrect verticalAccuracy argument, must be a positive number " +
                         "corresponding to the desired vertical accuracy in metres");
@@ -492,6 +486,34 @@ public class HttpServletRequestParams {
             if (!locationRequestParams.pslResponseTimeCategory.equalsIgnoreCase(ResponseTimeCategory.delaytolerant.name())
                 && !locationRequestParams.pslResponseTimeCategory.equalsIgnoreCase(ResponseTimeCategory.lowdelay.name())) {
                 throw new IllegalArgumentException("Incorrect responseTime argument, must be delaytolerant or lowdelay");
+            }
+        }
+        // Velocity Request
+        if (httpServletRequest.getParameter("velocityRequested") != null) {
+            String pslVelocityRequestedStr = httpServletRequest.getParameter("velocityRequested");
+            if (!pslVelocityRequestedStr.equals("true") && !pslVelocityRequestedStr.equals("false")) {
+                throw new IllegalArgumentException("Incorrect velocityRequested argument, must be one of true or false");
+            } else {
+                locationRequestParams.pslVelocityRequest = Boolean.valueOf(httpServletRequest.getParameter("velocityRequested"));
+            }
+        }
+        //
+        if (httpServletRequest.getParameter("pslQosClass") != null) {
+            try {
+                locationRequestParams.pslQoSClass = Integer.valueOf(httpServletRequest.getParameter("pslQosClass"));
+                if (locationRequestParams.pslQoSClass != org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoSClass.bestEffort.getCode() &&
+                        locationRequestParams.pslQoSClass != org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoSClass.assured.getCode()) {
+                    throw new IllegalArgumentException("Incorrect lcsQoSClass argument, must be one of 0 (bestEffort) or 1 (assured)");
+                } else {
+                    if (locationRequestParams.pslQoSClass == 0)
+                        locationRequestParams.pslQoSClass = org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoSClass.bestEffort.getCode();
+                    else if (locationRequestParams.pslQoSClass == 1)
+                        locationRequestParams.pslQoSClass = org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoSClass.assured.getCode();
+                }
+            } catch (NumberFormatException nfe) {
+                numberFormatException = "Incorrect lcsQoSClass argument, must be one of 0 (bestEffort) or 1 (assured)";
+                locationRequestParams.numberFormatException = numberFormatException;
+                return locationRequestParams;
             }
         }
 
@@ -769,7 +791,7 @@ public class HttpServletRequestParams {
             }
         }
 
-        /**** Other non mandatory parameters for PSL ****/
+        /**** Other non-mandatory parameters for PSL ****/
 
         /*** IMEI for PSL ***/
         if (httpServletRequest.getParameter("imei") != null) {
@@ -998,7 +1020,7 @@ public class HttpServletRequestParams {
                 } else {
                     if (locationRequestParams.plrQoSClass == 0)
                         locationRequestParams.plrQoSClass = LCSQoSClass._ASSURED;
-                    else if (locationRequestParams.plrQoSClass == 1)
+                    else
                         locationRequestParams.plrQoSClass = LCSQoSClass._BEST_EFFORT;
                 }
             } catch (NumberFormatException nfe) {
@@ -1014,7 +1036,7 @@ public class HttpServletRequestParams {
         // Bits 7 to 31 shall be ignored.
         if (httpServletRequest.getParameter("horizontalAccuracy") != null) {
             try {
-                long horizontalAccuracy = Long.valueOf(httpServletRequest.getParameter("horizontalAccuracy"));
+                long horizontalAccuracy = Long.parseLong(httpServletRequest.getParameter("horizontalAccuracy"));
                 if (horizontalAccuracy < 0) {
                     throw new IllegalArgumentException("Incorrect horizontalAccuracy argument, must be a positive number " +
                         "corresponding to the desired horizontal accuracy in metres");
@@ -1035,7 +1057,7 @@ public class HttpServletRequestParams {
         // Bits 7 to 31 shall be ignored
         if (httpServletRequest.getParameter("verticalAccuracy") != null) {
             try {
-                long verticalAccuracy = Long.valueOf(httpServletRequest.getParameter("verticalAccuracy"));
+                long verticalAccuracy = Long.parseLong(httpServletRequest.getParameter("verticalAccuracy"));
                 if (verticalAccuracy < 0) {
                     throw new IllegalArgumentException("Incorrect verticalAccuracy argument, must be a positive number " +
                         "corresponding to the desired vertical accuracy in metres");
@@ -2357,24 +2379,22 @@ public class HttpServletRequestParams {
         else if (locationRequestParams.operation.equalsIgnoreCase("PLR")) {
             if (mlpLocationRequest.getLocationEstimateType() != null) {
                 locationRequestParams.plrSlgLocationType = mlpLocationRequest.getLocationEstimateType().getType();
-                if (locationRequestParams.plrSlgLocationType != null) {
-                    try {
-                        long plrSlgLocationType = locationRequestParams.plrSlgLocationType;
-                        if (plrSlgLocationType != SLgLocationType._CURRENT_LOCATION &&
-                            plrSlgLocationType != SLgLocationType._CURRENT_OR_LAST_KNOWN_LOCATION &&
-                            plrSlgLocationType != SLgLocationType._INITIAL_LOCATION &&
-                            plrSlgLocationType != SLgLocationType._ACTIVATE_DEFERRED_LOCATION &&
-                            plrSlgLocationType != SLgLocationType._CANCEL_DEFERRED_LOCATION &&
-                            plrSlgLocationType != SLgLocationType._NOTIFICATION_VERIFICATION_ONLY) {
-                            throw new IllegalArgumentException("Incorrect loc_type type value for PSL, must be one of CURRENT, CURRENT_OR_LAST, LAST_OR_CURRENT, " +
-                                "INITIAL, LAST or CURRENT_AND_INTERMEDIATE");
-                        }
-                    } catch (NumberFormatException nfe) {
-                        numberFormatException = "Incorrect loc_type type value for PSL, must be one of CURRENT, CURRENT_OR_LAST, LAST_OR_CURRENT, " +
-                            "INITIAL, LAST or CURRENT_AND_INTERMEDIATE";
-                        locationRequestParams.numberFormatException = numberFormatException;
-                        return locationRequestParams;
+                try {
+                    long plrSlgLocationType = locationRequestParams.plrSlgLocationType;
+                    if (plrSlgLocationType != SLgLocationType._CURRENT_LOCATION &&
+                        plrSlgLocationType != SLgLocationType._CURRENT_OR_LAST_KNOWN_LOCATION &&
+                        plrSlgLocationType != SLgLocationType._INITIAL_LOCATION &&
+                        plrSlgLocationType != SLgLocationType._ACTIVATE_DEFERRED_LOCATION &&
+                        plrSlgLocationType != SLgLocationType._CANCEL_DEFERRED_LOCATION &&
+                        plrSlgLocationType != SLgLocationType._NOTIFICATION_VERIFICATION_ONLY) {
+                        throw new IllegalArgumentException("Incorrect loc_type type value for PSL, must be one of CURRENT, " +
+                                "CURRENT_OR_LAST, LAST_OR_CURRENT, " + "INITIAL, LAST or CURRENT_AND_INTERMEDIATE");
                     }
+                } catch (NumberFormatException nfe) {
+                    numberFormatException = "Incorrect loc_type type value for PSL, must be one of CURRENT, CURRENT_OR_LAST, LAST_OR_CURRENT, " +
+                        "INITIAL, LAST or CURRENT_AND_INTERMEDIATE";
+                    locationRequestParams.numberFormatException = numberFormatException;
+                    return locationRequestParams;
                 }
             } else {
                 throw new IllegalArgumentException("Incorrect loc_type type value for PLR, must be one of CURRENT, CURRENT_OR_LAST, LAST_OR_CURRENT, " +
@@ -2666,7 +2686,7 @@ public class HttpServletRequestParams {
                     locationRequestParams.numberFormatException = numberFormatException;
                     return locationRequestParams;
                 }
-                if (mlpLocationRequest.getLcsQoS().getVerticalCoordinateRequest() == true)
+                if (mlpLocationRequest.getLcsQoS().getVerticalCoordinateRequest())
                     locationRequestParams.pslVerticalCoordinateRequest = "true";
                 else
                     locationRequestParams.pslVerticalCoordinateRequest = "false";
@@ -2746,7 +2766,7 @@ public class HttpServletRequestParams {
                     } else {
                         if (plrQoSClass == 0) {
                             locationRequestParams.plrQoSClass = LCSQoSClass._ASSURED;
-                        } else if (plrQoSClass == 1) {
+                        } else {
                             locationRequestParams.plrQoSClass = LCSQoSClass._BEST_EFFORT;
                         }
                     }
@@ -2819,7 +2839,7 @@ public class HttpServletRequestParams {
                     } else {
                         if (plrQoSClass == 0) {
                             locationRequestParams.suplMaximumLocationAge = 60L;
-                        } else if (plrQoSClass == 1) {
+                        } else {
                             locationRequestParams.suplMaximumLocationAge = 65535L;
                         }
                     }
@@ -2909,16 +2929,16 @@ public class HttpServletRequestParams {
                             plrDeferredLocationType != 16 && plrDeferredLocationType != 32 &&
                             plrDeferredLocationType != 64 && plrDeferredLocationType != 128) {
                             throw new IllegalArgumentException("Incorrect ms_action or change_area type value for PLR, must be one of MS_AVAIL (ms_action), MS_ENTERING, MS_OUTSIDE_AREA, " +
-                                "MS_LEAVING, MS_WITHIN_AREA (change_area) or PERIODIC, or an equidistance_event must exist");
+                                "MS_LEAVING, MS_WITHIN_AREA (change_area) or PERIODIC, or an equidistant_event must exist");
                         }
                     } catch (NumberFormatException nfe) {
                         numberFormatException = "Incorrect ms_action or change_area type value for PLR, must be one of MS_AVAIL (ms_action), MS_ENTERING, MS_OUTSIDE_AREA, " +
-                            "MS_LEAVING, MS_WITHIN_AREA (change_area) or PERIODIC, or an equidistance_event must exist";
+                            "MS_LEAVING, MS_WITHIN_AREA (change_area) or PERIODIC, or an equidistant_event must exist";
                         locationRequestParams.numberFormatException = numberFormatException;
                         return locationRequestParams;
                     }
                 } else {
-                    throw new IllegalArgumentException("An equidistance_event must exist or ms_action or change_area type value cannot be null if loc_type type " +
+                    throw new IllegalArgumentException("An equidistant_event must exist or ms_action or change_area type value cannot be null if loc_type type " +
                         "equals CURRENT_AND_INTERMEDIATE");
                 }
             }

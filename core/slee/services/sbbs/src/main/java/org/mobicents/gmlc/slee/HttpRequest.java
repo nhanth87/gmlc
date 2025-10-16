@@ -3,8 +3,8 @@ package org.mobicents.gmlc.slee;
 import net.java.slee.resource.diameter.slg.events.avp.*;
 import org.jdiameter.api.Avp;
 import org.mobicents.slee.resource.diameter.slg.events.avp.*;
-import org.restcomm.protocols.ss7.map.api.primitives.MAPExtensionContainer;
 import org.restcomm.protocols.ss7.map.api.service.lsm.*;
+import org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoSClass;
 import org.restcomm.protocols.ss7.map.api.service.lsm.OccurrenceInfo;
 import org.restcomm.protocols.ss7.map.api.service.lsm.ResponseTime;
 import org.restcomm.protocols.ss7.map.service.lsm.*;
@@ -38,6 +38,7 @@ public class HttpRequest implements Serializable {
     public Boolean verticalCoordinateRequest;
     public ResponseTimeCategory responseTimeCategory;
     public ResponseTime responseTime;
+    public Boolean velocityRequest;
     public LCSQoS lcsQoS;
     public AreaDefinition areaDefinition;
     public OccurrenceInfo occurrenceInfo;
@@ -60,22 +61,22 @@ public class HttpRequest implements Serializable {
     public Integer lteVerticalCoordinateRequested;
     public Integer lteResponseTime;
     public Long lteServiceTypeId;
-    public LCSQoSAvp lteLcsQoS = new LCSQoSAvpImpl(Avp.LCS_QOS, MobileCoreNetworkInterfaceSbb.SLg_VENDOR_ID, 0, 0, new byte[]{});
+    public LCSQoSAvp lteLcsQoS = new LCSQoSAvpImpl(Avp.LCS_QOS, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
     public Integer lteAreaOccurrenceInfo;
-    public AreaEventInfoAvp lteAreaEventInfo = new AreaEventInfoAvpImpl(Avp.AREA_EVENT_INFO, MobileCoreNetworkInterfaceSbb.SLg_VENDOR_ID, 0, 0, new byte[]{});
+    public AreaEventInfoAvp lteAreaEventInfo = new AreaEventInfoAvpImpl(Avp.AREA_EVENT_INFO, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
     public Integer lteMotionOccurrenceInfo;
-    public MotionEventInfoAvp lteMotionEventInfo = new MotionEventInfoAvpImpl(Avp.MOTION_EVENT_INFO, MobileCoreNetworkInterfaceSbb.SLg_VENDOR_ID, 0, 0, new byte[]{});
-    public PeriodicLDRInfoAvp ltePeriodicLDRInfo = new PeriodicLDRInfoAvpImpl(Avp.PERIODIC_LDR_INFORMATION, MobileCoreNetworkInterfaceSbb.SLg_VENDOR_ID, 0, 0, new byte[]{});
-    public AreaAvp area = new AreaAvpImpl(Avp.AREA, MobileCoreNetworkInterfaceSbb.SLg_VENDOR_ID, 0, 0, new byte[]{});
-    public AdditionalAreaAvp additionalArea = new AdditionalAreaAvpImpl(Avp.ADDITIONAL_AREA, MobileCoreNetworkInterfaceSbb.SLg_VENDOR_ID, 0, 0, new byte[]{});
+    public MotionEventInfoAvp lteMotionEventInfo = new MotionEventInfoAvpImpl(Avp.MOTION_EVENT_INFO, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
+    public PeriodicLDRInfoAvp ltePeriodicLDRInfo = new PeriodicLDRInfoAvpImpl(Avp.PERIODIC_LDR_INFORMATION, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
+    public AreaAvp area = new AreaAvpImpl(Avp.AREA, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
+    public AdditionalAreaAvp additionalArea = new AdditionalAreaAvpImpl(Avp.ADDITIONAL_AREA, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
     public String lteLrrCallbackUrl;
 
     public HttpRequest(HttpRequestType httpRequestType, String msisdnAddress, String imsiData, String imsPublicId, String operation, String domain,
-                       String priority, Integer horAccuracy, Integer vertAccuracy, String vertCoordRequest, String responseTimeCategoryValue,
-                       Integer lcsReferenceNumberValue, Integer lcsServiceTypeId, String areaType, String areaId, String addAreaT, String addAreaId,
-                       String areaOccurrenceInfo, Integer areaIntervalTime, Long areaMaxInterval, Long areaSamplingInterval, Long areaReportingDuration,
-                       Long areaRepLocReqs, Integer motionOccurrenceInfo, Long motionLinearDistance, Long motionSamplingInterval, Long motionIntervalTime,
-                       Long motionMaxInterval, Long motionReportingDuration, Long motionRepLocReqs, Integer periodicReportingAmount,
+                       String priority, Integer horAccuracy, Integer vertAccuracy, String verticalCoordinateReq, String responseTimeCategoryValue,
+                       Boolean velocityRequested, Integer lcsReferenceNumberValue, Integer lcsServiceTypeId, String areaType, String areaId, String addAreaT,
+                       String addAreaId, String areaOccurrenceInfo, Integer areaIntervalTime, Long areaMaxInterval, Long areaSamplingInterval,
+                       Long areaReportingDuration, Long areaRepLocReqs, Integer motionOccurrenceInfo, Long motionLinearDistance, Long motionSamplingInterval,
+                       Long motionIntervalTime, Long motionMaxInterval, Long motionReportingDuration, Long motionRepLocReqs, Integer periodicReportingAmount,
                        Integer periodicReportingInterval, String callbackUrl, Integer lcsQosClass, String httpRespType,
                        String epsLocationInfo, String activeLocation, String sh5GSLocationInfo, String ratTypeRequested, Integer translationType) {
 
@@ -105,8 +106,8 @@ public class HttpRequest implements Serializable {
                     }
                     horizontalAccuracy = horAccuracy;
                     verticalAccuracy = vertAccuracy;
-                    if (vertCoordRequest != null) {
-                        verticalCoordinateRequest = !vertCoordRequest.equalsIgnoreCase("false");
+                    if (verticalCoordinateReq != null) {
+                        verticalCoordinateRequest = !verticalCoordinateReq.equalsIgnoreCase("false");
                     }
                     if (responseTimeCategoryValue != null) {
                         if (responseTimeCategoryValue.equalsIgnoreCase("tolerant")) {
@@ -116,12 +117,16 @@ public class HttpRequest implements Serializable {
                         }
                         responseTime = new ResponseTimeImpl(responseTimeCategory);
                     }
-                    MAPExtensionContainer mec = null;
+                    velocityRequest = velocityRequested;
+                    LCSQoSClass qosClass = null;
+                    if (lcsQosClass != null) {
+                        qosClass = LCSQoSClass.valueOf(String.valueOf(lcsQosClass.intValue()));
+                    }
                     if (horizontalAccuracy != null && verticalAccuracy != null && verticalCoordinateRequest != null && responseTime != null)
-                        lcsQoS = new LCSQoSImpl(horizontalAccuracy, verticalAccuracy, verticalCoordinateRequest, responseTime, mec);
+                        lcsQoS = new LCSQoSImpl(horizontalAccuracy, verticalAccuracy, verticalCoordinateRequest, responseTime, null, velocityRequest, qosClass);
                     if (areaType != null) {
                         try {
-                            ArrayList<Area> areaArrayList = new ArrayList<Area>();
+                            ArrayList<Area> areaArrayList = new ArrayList<>();
                             AreaType areaT = AreaType.locationAreaId;
                             if (areaType.equalsIgnoreCase("routing")) {
                                 areaT = AreaType.routingAreaId;
@@ -154,8 +159,10 @@ public class HttpRequest implements Serializable {
                             logger.warning(String.format("Error while creating AreaEventInfo from HttpRequest:" + e));
                         }
                     }
-                    if (periodicReportingAmount != null && periodicReportingInterval != null)
-                        periodicLDRInfo = new PeriodicLDRInfoImpl(periodicReportingAmount, periodicReportingInterval);
+                    if (periodicReportingAmount != null && periodicReportingInterval != null) {
+                        // FIXME with ReportingOptionMilliseconds
+                        periodicLDRInfo = new PeriodicLDRInfoImpl(periodicReportingAmount, periodicReportingInterval, null);
+                    }
                     slrCallbackUrl = callbackUrl;
                 }
 
@@ -175,7 +182,7 @@ public class HttpRequest implements Serializable {
                         lteHorizontalAccuracy = Long.valueOf(horAccuracy);
                     if (vertAccuracy != null)
                         lteVerticalAccuracy = Long.valueOf(vertAccuracy);
-                    if (vertCoordRequest != null && vertCoordRequest.equalsIgnoreCase("false")) {
+                    if (verticalCoordinateReq != null && verticalCoordinateReq.equalsIgnoreCase("false")) {
                         lteVerticalCoordinateRequested = VerticalRequested._VERTICAL_COORDINATE_IS_NOT_REQUESTED; // VERTICAL_COORDINATE_IS_NOT REQUESTED (0)
                     } else {
                         lteVerticalCoordinateRequested = VerticalRequested._VERTICAL_COORDINATE_IS_REQUESTED; // VERTICAL_COORDINATE_IS_REQUESTED (1)
@@ -185,8 +192,7 @@ public class HttpRequest implements Serializable {
                     } else {
                         lteResponseTime = net.java.slee.resource.diameter.slg.events.avp.ResponseTime._LOW_DELAY; // LOW_DELAY (0)
                     }
-                    if (lteResponseTime != null)
-                        lteLcsQoS.setResponseTime(net.java.slee.resource.diameter.slg.events.avp.ResponseTime.fromInt(lteResponseTime));
+                    lteLcsQoS.setResponseTime(net.java.slee.resource.diameter.slg.events.avp.ResponseTime.fromInt(lteResponseTime));
                     if (lteHorizontalAccuracy != null)
                         lteLcsQoS.setHorizontalAccuracy(lteHorizontalAccuracy);
                     if (lteVerticalAccuracy != null)
@@ -194,17 +200,17 @@ public class HttpRequest implements Serializable {
                     if (lteVerticalCoordinateRequested != null)
                         lteLcsQoS.setVerticalRequested(VerticalRequested.fromInt(lteVerticalCoordinateRequested));
                     if (lcsQosClass != null)
-                        lteLcsQoS.setLCSQoSClass(LCSQoSClass.fromInt(lcsQosClass));
+                        lteLcsQoS.setLCSQoSClass(net.java.slee.resource.diameter.slg.events.avp.LCSQoSClass.fromInt(lcsQosClass));
                     if (areaType != null) {
-                        area.setAreaType(Long.valueOf(areaType));
+                        area.setAreaType(Long.parseLong(areaType));
                     }
                     if (areaId != null)
                         area.setAreaIdentification(areaId.getBytes());
                     if (addAreaT != null)
-                        additionalArea.setAreaType(Long.valueOf(addAreaT));
+                        additionalArea.setAreaType(Long.parseLong(addAreaT));
                     if (addAreaId != null)
                         additionalArea.setAreaIdentification(addAreaId.getBytes());
-                    AreaDefinitionAvp areaDefinition = new AreaDefinitionAvpImpl(Avp.AREA_DEFINITION, MobileCoreNetworkInterfaceSbb.SLg_VENDOR_ID, 0, 0, new byte[]{});
+                    AreaDefinitionAvp areaDefinition = new AreaDefinitionAvpImpl(Avp.AREA_DEFINITION, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
                     areaDefinition.setArea(area);
                     areaDefinition.setAdditionalArea(additionalArea);
                     if (areaOccurrenceInfo != null && areaOccurrenceInfo.equalsIgnoreCase("multiple")) {
@@ -212,8 +218,7 @@ public class HttpRequest implements Serializable {
                     } else {
                         lteAreaOccurrenceInfo = net.java.slee.resource.diameter.slg.events.avp.OccurrenceInfo._ONE_TIME_EVENT; // ONE_TIME_EVENT (0)
                     }
-                    if (areaDefinition != null)
-                        lteAreaEventInfo.setAreaDefinition(areaDefinition);
+                    lteAreaEventInfo.setAreaDefinition(areaDefinition);
                     if (lteAreaOccurrenceInfo != null)
                         lteAreaEventInfo.setOccurrenceInfo(net.java.slee.resource.diameter.slg.events.avp.OccurrenceInfo.fromInt(lteAreaOccurrenceInfo));
                     if (areaIntervalTime != null)
@@ -231,8 +236,7 @@ public class HttpRequest implements Serializable {
                     } else {
                         lteMotionOccurrenceInfo = net.java.slee.resource.diameter.slg.events.avp.OccurrenceInfo._ONE_TIME_EVENT; // ONE_TIME_EVENT (0)
                     }
-                    if (lteMotionOccurrenceInfo != null)
-                        lteMotionEventInfo.setOccurrenceInfo(net.java.slee.resource.diameter.slg.events.avp.OccurrenceInfo.fromInt(lteMotionOccurrenceInfo));
+                    lteMotionEventInfo.setOccurrenceInfo(net.java.slee.resource.diameter.slg.events.avp.OccurrenceInfo.fromInt(lteMotionOccurrenceInfo));
                     if (motionLinearDistance != null)
                         lteMotionEventInfo.setLinearDistance(motionLinearDistance);
                     if (motionSamplingInterval != null)
@@ -270,7 +274,7 @@ public class HttpRequest implements Serializable {
 
     public HttpRequest(HttpRequestType type) {
         this(type, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null,
                 null, null, null, null, null, null,
                 null, null, null, null, null, null,

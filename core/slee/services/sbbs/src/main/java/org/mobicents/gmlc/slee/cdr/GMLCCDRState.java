@@ -1,10 +1,14 @@
 package org.mobicents.gmlc.slee.cdr;
 
+import com.google.common.collect.Multimap;
+import net.java.slee.resource.diameter.slg.events.avp.LCSFormatIndicator;
 import net.java.slee.resource.diameter.slg.events.avp.LCSQoSClass;
 import net.java.slee.resource.diameter.slg.events.avp.LocationEvent;
 import org.joda.time.DateTime;
 import org.mobicents.gmlc.slee.diameter.sh.LocalTimeZone;
 import org.mobicents.gmlc.slee.primitives.EUTRANCGI;
+import org.mobicents.gmlc.slee.primitives.EUTRANPositioningData;
+import org.mobicents.gmlc.slee.primitives.EUTRANPositioningDataImpl;
 import org.mobicents.gmlc.slee.primitives.EllipsoidPoint;
 import org.mobicents.gmlc.slee.primitives.LocationInformation5GS;
 import org.mobicents.gmlc.slee.primitives.NRCellGlobalId;
@@ -21,10 +25,13 @@ import org.restcomm.protocols.ss7.map.api.primitives.GSNAddress;
 import org.restcomm.protocols.ss7.map.api.primitives.CellGlobalIdOrServiceAreaIdOrLAI;
 
 import org.restcomm.protocols.ss7.map.api.primitives.PlmnId;
+import org.restcomm.protocols.ss7.map.api.primitives.Time;
 import org.restcomm.protocols.ss7.map.api.service.lsm.LCSClientID;
 import org.restcomm.protocols.ss7.map.api.service.lsm.AdditionalNumber;
 import org.restcomm.protocols.ss7.map.api.service.lsm.ExtGeographicalInformation;
 import org.restcomm.protocols.ss7.map.api.service.lsm.PositioningDataInformation;
+import org.restcomm.protocols.ss7.map.api.service.lsm.UtranAdditionalPositioningData;
+import org.restcomm.protocols.ss7.map.api.service.lsm.UtranCivicAddress;
 import org.restcomm.protocols.ss7.map.api.service.lsm.UtranPositioningDataInfo;
 import org.restcomm.protocols.ss7.map.api.service.lsm.UtranGANSSpositioningData;
 import org.restcomm.protocols.ss7.map.api.service.lsm.GeranGANSSpositioningData;
@@ -38,10 +45,15 @@ import org.restcomm.protocols.ss7.map.api.service.lsm.DeferredmtlrData;
 import org.restcomm.protocols.ss7.map.api.service.lsm.PeriodicLDRInfo;
 import org.restcomm.protocols.ss7.map.api.service.lsm.ReportingPLMNList;
 
+import org.restcomm.protocols.ss7.map.api.service.mobility.locationManagement.SupportedLCSCapabilitySets;
+import org.restcomm.protocols.ss7.map.api.service.mobility.locationManagement.UsedRATType;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.EUtranCgi;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.GPRSMSClass;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformation;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformationEPS;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.MSClassmark2;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.NRTAId;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.PSSubscriberState;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.SubscriberInfo;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.MNPInfoRes;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.TypeOfShape;
@@ -49,10 +61,14 @@ import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformationGPRS;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationNumberMap;
 
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberManagement.FQDN;
 import org.restcomm.protocols.ss7.sccp.parameter.SccpAddress;
 
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -112,6 +128,7 @@ public class GMLCCDRState implements Serializable {
   // MAP ATI and PSI response parameters
   protected SubscriberInfo subscriberInfo;
   protected LocationInformation locationInformation;
+  protected PSSubscriberState epsSubscriberState;
   protected LocationInformationEPS locationInformationEPS;
   protected LocationInformationGPRS locationInformationGPRS;
   protected Boolean saiPresent;
@@ -131,6 +148,8 @@ public class GMLCCDRState implements Serializable {
   protected AdditionalNumber additionalNumber;
   protected ISDNAddressString mscNumber, sgsnNumber;
   protected DiameterIdentity mmeName, mmeRealm, sgsnName, sgsnRealm, aaaServerName;
+  protected SupportedLCSCapabilitySets supportedLCSCapabilitySets; // MAP
+  protected Long lcsCapabilitiesSets; // Diameter
   protected GSNAddress hGmlcAddress, vGmlcAddress, pprAddress;
   protected ExtGeographicalInformation locationEstimate;
   protected TypeOfShape typeOfShape;
@@ -166,19 +185,32 @@ public class GMLCCDRState implements Serializable {
   protected Integer sequenceNumber;
   protected PeriodicLDRInfo periodicLDRInfo;
   protected ReportingPLMNList reportingPLMNList;
+  protected UtranAdditionalPositioningData utranAdditionalPositioningData;
+  protected Integer utranBaroPressureMeas;
+  protected UtranCivicAddress utranCivicAddress;
+  protected Boolean naEsrkRequest;
+  protected ISDNAddressString naESRD;
+  protected ISDNAddressString naESRK;
 
   // EPC Network / LTE params
   // LTE LCS operations parameters (not analogue to SS7 location services parameters)
-  protected String eUTRANPositioningData;
+  protected String lcsEpsClientName;
+  protected LCSFormatIndicator lcsEpsClientFormatIndicator;
+  protected EUTRANPositioningData eutranPositioningData;
   protected String cellGlobalIdentity;
-  protected String utranAdditionalPositioningData;
   protected String serviceAreaIdentity;
   protected Long cellPortionId;
   protected LocationEvent locationEvent;
   protected LCSQoSClass lteLcsQoSClass;
   protected String oneXRTTRCID;
+  protected Long riaFlags;
+  protected Long plrFlags;
+  protected Long plaFlags;
+  protected Long lrrFlags;
+  protected Long lraFlags;
+  protected String amfInstanceId;
 
-  // 5GS params
+  // 5GS params for Diameter Sh
   LocationInformation5GS locationInformation5GS;
   protected NRCellGlobalId nrCellGlobalId;
   protected Integer ageOfLocationInformation;
@@ -188,12 +220,44 @@ public class GMLCCDRState implements Serializable {
   protected LocalTimeZone localTimeZone;
   protected Integer ratType;
 
+  /**
+   * From MAP v18.0.0
+   * LocationInformation5GS ::= SEQUENCE {
+   *    nrCellGlobalIdentity          [0] NR-CGI OPTIONAL,
+   *    e-utranCellGlobalIdentity     [1] E-UTRAN-CGI OPTIONAL,
+   *    geographicalInformation       [2] GeographicalInformation OPTIONAL,
+   *    geodeticInformation           [3] GeodeticInformation OPTIONAL,
+   *    amf-address                   [4] FQDN OPTIONAL,
+   *    trackingAreaIdentity          [5] TA-Id OPTIONAL,
+   *    currentLocationRetrieved      [6] NULL OPTIONAL,
+   *    ageOfLocationInformation      [7] AgeOfLocationInformation OPTIONAL,
+   *    vplmnId                       [8] PLMN-Id OPTIONAL,
+   *    localtimeZone                 [9] TimeZone OPTIONAL,
+   *    rat-Type                      [10] Used-RAT-Type OPTIONAL,
+   *    extensionContainer            [11] ExtensionContainer OPTIONAL,
+   *    ...,
+   *    nrTrackingAreaIdentity        [12] NR-TA-Id OPTIONAL
+   *  }
+   */
+  private org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformation5GS locationInformation5GSFromMap;
+  private org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.NRCellGlobalId nrCellGlobalIdentity;
+  private EUtranCgi eUtranCellGlobalId;
+  private TAId trackingAreaId;
+  private NRTAId nrTrackingAreaIdentity;
+  private FQDN amfAddressFromMap;
+  private PlmnId vPlmnId;
+  private UsedRATType usedRATType;
+  private Time lastUEActivityTime;
+  private UsedRATType lastRATType;
+
+
+
   /****************/
   /*** GETTERS ***/
   /**************/
 
   /**
-   * @return the curl user name
+   * @return the curl username
    */
   public String getCurlUser() {
     return curlUser;
@@ -458,6 +522,14 @@ public class GMLCCDRState implements Serializable {
     return networkNodeNumber;
   }
 
+  public void setMscNumber(ISDNAddressString mscNumber) {
+    this.mscNumber = mscNumber;
+  }
+
+  public void setSgsnNumber(ISDNAddressString sgsnNumber) {
+    this.sgsnNumber = sgsnNumber;
+  }
+
   /**
    * @return GPRS Node Indicator
    */
@@ -519,6 +591,21 @@ public class GMLCCDRState implements Serializable {
    */
   public DiameterIdentity getAaaServerName() {
     return aaaServerName;
+  }
+
+  /**
+   * @return the LCS Capability Sets (MAP)
+   */
+  public SupportedLCSCapabilitySets getLcsCapabilitySets() {
+    return supportedLCSCapabilitySets;
+  }
+
+  /**
+   *
+   * @return the LCs Capabilities Sets (Diameter)
+   */
+  public Long getLcsCapabilitiesSets() {
+    return lcsCapabilitiesSets;
   }
 
   /**
@@ -781,6 +868,48 @@ public class GMLCCDRState implements Serializable {
   }
 
   /**
+   * @return the UTRAN additional positioning data
+   */
+  public UtranAdditionalPositioningData getUtranAdditionalPositioningData() {
+    return utranAdditionalPositioningData;
+  }
+
+  /**
+   * @return the UTRAN barometric pressure measurement
+   */
+  public Integer getUtranBaroPressureMeas() {
+    return utranBaroPressureMeas;
+  }
+
+  /**
+   * @return the reporting UTRAN civic address
+   */
+  public UtranCivicAddress getUtranCivicAddress() {
+    return utranCivicAddress;
+  }
+
+  /**
+   * @return if na-ESRK has been requested in MAP SLR
+   */
+  public Boolean getNaEsrkRequest() {
+    return naEsrkRequest;
+  }
+
+  /**
+   * @return the na-ESRD
+   */
+  public ISDNAddressString getNaESRD() {
+    return naESRD;
+  }
+
+  /**
+   * @return the na-ESRD
+   */
+  public ISDNAddressString getNaESRK() {
+    return naESRK;
+  }
+
+  /**
    * @return the subscriber info
    */
   public SubscriberInfo getSubscriberInfo() {
@@ -799,6 +928,14 @@ public class GMLCCDRState implements Serializable {
    */
   public LocationInformationEPS getLocationInformationEPS() {
     return locationInformationEPS;
+  }
+
+  public PSSubscriberState getEpsSubscriberState() {
+    return epsSubscriberState;
+  }
+
+  public void setEpsSubscriberState(PSSubscriberState epsSubscriberState) {
+    this.epsSubscriberState = epsSubscriberState;
   }
 
   /**
@@ -865,17 +1002,24 @@ public class GMLCCDRState implements Serializable {
   }
 
   /**
-   * @return the subscriber's EUTRAN positioning data
+   * @return the LCS EPS Client ID Name
    */
-  public String geteUTRANPositioningData() {
-    return eUTRANPositioningData;
+  public String getLcsEpsClientName() {
+    return lcsEpsClientName;
   }
 
   /**
-   * @return the subscriber's UTRAN Additional positioning data
+   * @return the LCS EPS Client ID Format Indicator
    */
-  public String getUtranAdditionalPositioningData() {
-    return utranAdditionalPositioningData;
+  public LCSFormatIndicator getLcsEpsClientFormatIndicator() {
+    return lcsEpsClientFormatIndicator;
+  }
+
+  /**
+   * @return the subscriber's EUTRAN positioning data
+   */
+  public EUTRANPositioningData getEUTRANPositioningData() {
+    return eutranPositioningData;
   }
 
   /**
@@ -890,6 +1034,48 @@ public class GMLCCDRState implements Serializable {
    */
   public String getOneXRTTRCID() {
     return oneXRTTRCID;
+  }
+
+  /**
+   * @return the riaFlags
+   */
+  public Long getRiaFlags() {
+    return riaFlags;
+  }
+
+  /**
+   * @return the plrFlags
+   */
+  public Long getPlrFlags() {
+    return plrFlags;
+  }
+
+  /**
+   * @return the plaFlags
+   */
+  public Long getPlaFlags() {
+    return plaFlags;
+  }
+
+  /**
+   * @return the lrrFlags
+   */
+  public Long getLrrFlags() {
+    return lrrFlags;
+  }
+
+  /**
+   * @return the lraFlags
+   */
+  public Long getLraFlags() {
+    return lraFlags;
+  }
+
+  /**
+   * @return the amfInstanceId
+   */
+  public String getAmfInstanceId() {
+    return amfInstanceId;
   }
 
   /**
@@ -1166,7 +1352,7 @@ public class GMLCCDRState implements Serializable {
    * @param cellGlobalIdentity to set
    */
   public void setCellGlobalIdentity(String cellGlobalIdentity) {
-    cellGlobalIdentity = cellGlobalIdentity;
+    this.cellGlobalIdentity = cellGlobalIdentity;
   }
 
   /**
@@ -1226,20 +1412,6 @@ public class GMLCCDRState implements Serializable {
   }
 
   /**
-   * @param additionalMscNumber to set
-   */
-  public void setMscNumber(ISDNAddressString additionalMscNumber) {
-    this.mscNumber = mscNumber;
-  }
-
-  /**
-   * @param additionalSgsnNumber to set
-   */
-  public void setSgsnNumber(ISDNAddressString additionalSgsnNumber) {
-    this.sgsnNumber = sgsnNumber;
-  }
-
-  /**
    * @param mmeRealm to set
    */
   public void setMmeRealm(DiameterIdentity mmeRealm) {
@@ -1272,6 +1444,22 @@ public class GMLCCDRState implements Serializable {
    */
   public void setAaaServerName(DiameterIdentity aaaServerName) {
     this.aaaServerName = aaaServerName;
+  }
+
+  /**
+   *
+   * @param supportedLCSCapabilitySets the serving or additional serving node LCS Capability Sets (MAP)
+   */
+  public void setLcsCapabilitySets(SupportedLCSCapabilitySets supportedLCSCapabilitySets) {
+    this.supportedLCSCapabilitySets = supportedLCSCapabilitySets;
+  }
+
+  /**
+   *
+   * @param lcsCapabilitiesSets the serving or additional serving node LCS Capabilities Sets (Diameter)
+   */
+  public void setLcsCapabilitiesSets(Long lcsCapabilitiesSets) {
+    this.lcsCapabilitiesSets = lcsCapabilitiesSets;
   }
 
   /**
@@ -1556,6 +1744,48 @@ public class GMLCCDRState implements Serializable {
   }
 
   /**
+   * @param utranAdditionalPositioningData to set
+   */
+  public void setUtranAdditionalPositioningData(UtranAdditionalPositioningData utranAdditionalPositioningData) {
+    this.utranAdditionalPositioningData = utranAdditionalPositioningData;
+  }
+
+  /**
+   * @param utranBaroPressureMeas to set
+   */
+  public void setUtranBaroPressureMeas(Integer utranBaroPressureMeas) {
+    this.utranBaroPressureMeas = utranBaroPressureMeas;
+  }
+
+  /**
+   * @param utranCivicAddress to set
+   */
+  public void setUtranCivicAddress(UtranCivicAddress utranCivicAddress) {
+    this.utranCivicAddress = utranCivicAddress;
+  }
+
+  /**
+   * @param naEsrkRequest to set
+   */
+  public void setNaEsrkRequest(Boolean naEsrkRequest) {
+    this.naEsrkRequest = naEsrkRequest;
+  }
+
+  /**
+   * @param naESRD to set
+   */
+  public void setNaESRD(ISDNAddressString naESRD) {
+    this.naESRD = naESRD;
+  }
+
+  /**
+   * @param naESRK to set
+   */
+  public void setNaESRK(ISDNAddressString naESRK) {
+    this.naESRK = naESRK;
+  }
+
+  /**
    * @param subscriberInfo to set
    */
   public void setSubscriberInfo(SubscriberInfo subscriberInfo) {
@@ -1637,17 +1867,24 @@ public class GMLCCDRState implements Serializable {
   }
 
   /**
-   * @param eUTRANPositioningData subscriber's UTRAN positioning data to set
+   * @param lcsEpsClientName LCS EPS Client ID name
    */
-  public void seteUTRANPositioningData(String eUTRANPositioningData) {
-    this.eUTRANPositioningData = eUTRANPositioningData;
+  public void setLcsEpsClientName(String lcsEpsClientName) {
+    this.lcsEpsClientName = lcsEpsClientName;
   }
 
   /**
-   * @param utranAdditionalPositioningData subscriber's UTRAN additional positioning data to set
+   * @param lcsEpsClientFormatIndicator LCS EPS Client ID format indicator
    */
-  public void setUtranAdditionalPositioningData(String utranAdditionalPositioningData) {
-    this.utranAdditionalPositioningData = utranAdditionalPositioningData;
+  public void setLcsEpsClientFormatIndicator(LCSFormatIndicator lcsEpsClientFormatIndicator) {
+    this.lcsEpsClientFormatIndicator = lcsEpsClientFormatIndicator;
+  }
+
+  /**
+   * @param eutranPositioningData subscriber's UTRAN positioning data to set
+   */
+  public void setEUTRANPositioningData(EUTRANPositioningDataImpl eutranPositioningData) {
+    this.eutranPositioningData = eutranPositioningData;
   }
 
   /**
@@ -1662,6 +1899,48 @@ public class GMLCCDRState implements Serializable {
    */
   public void setOneXRTTRCID(String oneXRTTRCID) {
     this.oneXRTTRCID = oneXRTTRCID;
+  }
+
+  /**
+   * @param riaFlags to set out of SLh RIA
+   */
+  public void setRiaFlags(Long riaFlags) {
+    this.riaFlags = riaFlags;
+  }
+
+  /**
+   * @param plrFlags to set out of SLg PLR
+   */
+  public void setPlrFlags(Long plrFlags) {
+    this.plrFlags = plrFlags;
+  }
+
+  /**
+   * @param plaFlags to set out of SLg PLA
+   */
+  public void setPlaFlags(Long plaFlags) {
+    this.plaFlags = plaFlags;
+  }
+
+  /**
+   * @param lrrFlags to set out of SLg LRR
+   */
+  public void setLrrFlags(Long lrrFlags) {
+    this.lrrFlags = lrrFlags;
+  }
+
+  /**
+   * @param lraFlags to set out of SLg LRA
+   */
+  public void setLraFlags(Long lraFlags) {
+    this.lraFlags = lraFlags;
+  }
+
+  /**
+   * @param amfInstanceId to set out of SLg LRE
+   */
+  public void setAmfInstanceId(String amfInstanceId) {
+    this.amfInstanceId = amfInstanceId;
   }
 
   /**
@@ -1736,6 +2015,95 @@ public class GMLCCDRState implements Serializable {
    */
   public void setRatType(Integer ratType) {
     this.ratType = ratType;
+  }
+
+  public org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformation5GS getLocationInformation5GSFromMap() {
+    return locationInformation5GSFromMap;
+  }
+
+  public void setLocationInformation5GSFromMap(org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformation5GS locationInformation5GSFromMap) {
+    this.locationInformation5GSFromMap = locationInformation5GSFromMap;
+    if (locationInformation5GSFromMap != null) {
+      this.nrCellGlobalIdentity = locationInformation5GSFromMap.getNRCellGlobalId();
+      this.trackingAreaId = locationInformation5GSFromMap.getTAId();
+      this.eUtranCellGlobalId = locationInformation5GSFromMap.getEUtranCgi();
+      if (locationInformation5GSFromMap.getGeographicalInformation() != null) {
+        this.typeOfShape = locationInformation5GSFromMap.getGeographicalInformation().getTypeOfShape();
+      } else if (locationInformation5GSFromMap.getGeodeticInformation() != null) {
+        this.typeOfShape = locationInformation5GSFromMap.getGeodeticInformation().getTypeOfShape();
+      }
+      this.currentLocationRetrieved = locationInformation5GSFromMap.isCurrentLocationRetrieved();
+      this.ageOfLocationInformation = locationInformation5GSFromMap.getAgeOfLocationInformation();
+      this.amfAddressFromMap = locationInformation5GSFromMap.getAMFAddress();
+      this.vPlmnId = locationInformation5GSFromMap.getVPlmnId();
+      // TODO TimeZone
+      this.usedRATType = locationInformation5GSFromMap.getUsedRATType();
+      this.nrTrackingAreaIdentity = locationInformation5GSFromMap.getNRTAId();
+    }
+  }
+
+  public org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.NRCellGlobalId getNrCellGlobalIdentity() {
+    return nrCellGlobalIdentity;
+  }
+
+  public void setNrCellGlobalIdentity(org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.NRCellGlobalId nrCellGlobalIdentity) {
+    this.nrCellGlobalIdentity = nrCellGlobalIdentity;
+  }
+
+  public EUtranCgi geteUtranCellGlobalId() {
+    return eUtranCellGlobalId;
+  }
+
+  public void seteUtranCellGlobalId(EUtranCgi eUtranCellGlobalId) {
+    this.eUtranCellGlobalId = eUtranCellGlobalId;
+  }
+
+  public TAId getTrackingAreaId() {
+    return trackingAreaId;
+  }
+
+  public void setTrackingAreaId(TAId trackingAreaId) {
+    this.trackingAreaId = trackingAreaId;
+  }
+
+  public FQDN getAmfAddressFromMap() {
+    return amfAddressFromMap;
+  }
+
+  public void setAmfAddressFromMap(FQDN amfAddressFromMap) {
+    this.amfAddressFromMap = amfAddressFromMap;
+  }
+
+  public PlmnId getvPlmnId() {
+    return vPlmnId;
+  }
+
+  public void setvPlmnId(PlmnId vPlmnId) {
+    this.vPlmnId = vPlmnId;
+  }
+
+  public UsedRATType getUsedRATType() {
+    return usedRATType;
+  }
+
+  public void setUsedRATType(UsedRATType usedRATType) {
+    this.usedRATType = usedRATType;
+  }
+
+  public UsedRATType getLastRATType() {
+    return lastRATType;
+  }
+
+  public void setLastRATType(UsedRATType lastRATType) {
+    this.lastRATType = lastRATType;
+  }
+
+  public NRTAId getNrTrackingAreaIdentity() {
+    return nrTrackingAreaIdentity;
+  }
+
+  public void setNrTrackingAreaIdentity(NRTAId nrTrackingAreaIdentity) {
+    this.nrTrackingAreaIdentity = nrTrackingAreaIdentity;
   }
 
   /*********************/
@@ -1836,6 +2204,7 @@ public class GMLCCDRState implements Serializable {
     result = prime * result + ((statusCode == null) ? 0 : statusCode.hashCode());
     result = prime * result + ((subscriberInfo == null) ? 0 : subscriberInfo.hashCode());
     result = prime * result + ((locationInformation == null) ? 0 : locationInformation.hashCode());
+    result = prime * result + ((epsSubscriberState == null) ? 0 : epsSubscriberState.hashCode());
     result = prime * result + ((locationInformationEPS == null) ? 0 : locationInformationEPS.hashCode());
     result = prime * result + ((locationInformationGPRS == null) ? 0 : locationInformationGPRS.hashCode());
     result = prime * result + ((locationInformation5GS == null) ? 0 : locationInformation5GS.hashCode());
@@ -1858,6 +2227,7 @@ public class GMLCCDRState implements Serializable {
     result = prime * result + ((sgsnName == null) ? 0 : sgsnName.hashCode());
     result = prime * result + ((sgsnRealm == null) ? 0 : sgsnRealm.hashCode());
     result = prime * result + ((aaaServerName == null) ? 0 : aaaServerName.hashCode());
+    result = prime * result + ((supportedLCSCapabilitySets == null) ? 0 : supportedLCSCapabilitySets.hashCode());
     result = prime * result + ((hGmlcAddress == null) ? 0 : hGmlcAddress.hashCode());
     result = prime * result + ((vGmlcAddress == null) ? 0 : vGmlcAddress.hashCode());
     result = prime * result + ((pprAddress == null) ? 0 : pprAddress.hashCode());
@@ -1880,8 +2250,21 @@ public class GMLCCDRState implements Serializable {
     result = prime * result + ((deferredmtlrData == null) ? 0 : deferredmtlrData.hashCode());
     result = prime * result + ((periodicLDRInfo == null) ? 0 : periodicLDRInfo.hashCode());
     result = prime * result + ((reportingPLMNList == null) ? 0 : reportingPLMNList.hashCode());
+    result = prime * result + ((utranAdditionalPositioningData == null) ? 0 : utranAdditionalPositioningData.hashCode());
+    result = prime * result + ((utranBaroPressureMeas == null) ? 0 : utranBaroPressureMeas.hashCode());
+    result = prime * result + ((utranCivicAddress == null) ? 0 : utranCivicAddress.hashCode());
+    result = prime * result + ((naESRD == null) ? 0 : naESRD.hashCode());
+    result = prime * result + ((naESRK == null) ? 0 : naESRK.hashCode());
     result = prime * result + ((nrCellGlobalId == null) ? 0 : nrCellGlobalId.hashCode());
+    result = prime * result + ((eUtranCellGlobalId == null) ? 0 : eUtranCellGlobalId.hashCode());
+    result = prime * result + ((trackingAreaId == null) ? 0 : trackingAreaId.hashCode());
     result = prime * result + ((ageOfLocationInformation == null) ? 0 : ageOfLocationInformation.hashCode());
+    result = prime * result + ((nrTrackingAreaIdentity == null) ? 0 : nrTrackingAreaIdentity.hashCode());
+    result = prime * result + ((amfAddress == null) ? 0 : amfAddress.hashCode());
+    result = prime * result + ((amfAddressFromMap == null) ? 0 : amfAddressFromMap.hashCode());
+    result = prime * result + ((vPlmnId == null) ? 0 : vPlmnId.hashCode());
+    result = prime * result + ((usedRATType == null) ? 0 : usedRATType.hashCode());
+    result = prime * result + ((lastRATType == null) ? 0 : lastRATType.hashCode());
     return result;
   }
 
@@ -2095,10 +2478,10 @@ public class GMLCCDRState implements Serializable {
     } else if (!networkNodeNumber.equals(other.networkNodeNumber))
       return false;
 
-    if (gprsNodeIndicator != false && gprsNodeIndicator != true) {
-      if (other.gprsNodeIndicator == false && other.gprsNodeIndicator == true)
+    if (gprsNodeIndicator == null) {
+      if (other.gprsNodeIndicator != null)
         return false;
-    } else if (!(gprsNodeIndicator == (other.gprsNodeIndicator)))
+    } else if (!gprsNodeIndicator.equals(other.gprsNodeIndicator))
       return false;
 
     if (additionalNumber == null) {
@@ -2151,6 +2534,12 @@ public class GMLCCDRState implements Serializable {
     } else if (!aaaServerName.equals(other.aaaServerName))
       return false;
 
+    if (supportedLCSCapabilitySets == null) {
+      if (other.supportedLCSCapabilitySets != null)
+        return false;
+    } else if (!supportedLCSCapabilitySets.equals(other.supportedLCSCapabilitySets))
+      return false;
+
     if (hGmlcAddress == null) {
       if (other.hGmlcAddress != null)
         return false;
@@ -2190,7 +2579,7 @@ public class GMLCCDRState implements Serializable {
     if (polygonEllipsoidPoints == null) {
       if (other.polygonEllipsoidPoints != null)
         return false;
-    } else if (!polygonEllipsoidPoints.equals(other.polygonEllipsoidPoints))
+    } else if (!Arrays.equals(polygonEllipsoidPoints, other.polygonEllipsoidPoints))
       return false;
 
     if (additionalPolygon == null) {
@@ -2208,11 +2597,11 @@ public class GMLCCDRState implements Serializable {
     if (additionalPolygonEllipsoidPoints == null) {
       if (other.additionalPolygonEllipsoidPoints != null)
         return false;
-    } else if (!additionalPolygonEllipsoidPoints.equals(other.additionalPolygonEllipsoidPoints))
+    } else if (!Arrays.equals(additionalPolygonEllipsoidPoints, other.additionalPolygonEllipsoidPoints))
       return false;
 
-    if (moLrShortCircuitIndicator != false && moLrShortCircuitIndicator != true) {
-      if (other.moLrShortCircuitIndicator == false && other.moLrShortCircuitIndicator == true)
+    if (moLrShortCircuitIndicator == null) {
+      if (other.moLrShortCircuitIndicator != null)
         return false;
     } else if (!(moLrShortCircuitIndicator == (other.moLrShortCircuitIndicator)))
       return false;
@@ -2227,12 +2616,6 @@ public class GMLCCDRState implements Serializable {
       if (other.utranPositioningDataInfo != null)
         return false;
     } else if (!utranPositioningDataInfo.equals(other.utranPositioningDataInfo))
-      return false;
-
-    if (utranAdditionalPositioningData == null) {
-      if (other.utranAdditionalPositioningData != null)
-        return false;
-    } else if (!utranAdditionalPositioningData.equals(other.utranAdditionalPositioningData))
       return false;
 
     if (geranGANSSpositioningData == null) {
@@ -2250,7 +2633,7 @@ public class GMLCCDRState implements Serializable {
     if (ageOfLocationEstimate < 0) {
       if (other.ageOfLocationEstimate > 0)
         return false;
-    } else if (ageOfLocationEstimate != other.ageOfLocationEstimate)
+    } else if (!ageOfLocationEstimate.equals(other.ageOfLocationEstimate))
       return false;
 
     if (additionalLocationEstimate == null) {
@@ -2259,10 +2642,10 @@ public class GMLCCDRState implements Serializable {
     } else if (!additionalLocationEstimate.equals(other.additionalLocationEstimate))
       return false;
 
-    if (deferredMTLRResponseIndicator != false && deferredMTLRResponseIndicator != true) {
-      if (other.deferredMTLRResponseIndicator == false && other.deferredMTLRResponseIndicator == true)
+    if (deferredMTLRResponseIndicator == null) {
+      if (other.deferredMTLRResponseIndicator != null)
         return false;
-    } else if (!(deferredMTLRResponseIndicator == (other.deferredMTLRResponseIndicator)))
+    } else if (!deferredMTLRResponseIndicator.equals(other.deferredMTLRResponseIndicator))
       return false;
 
     if (cellGlobalIdOrServiceAreaIdOrLAI == null) {
@@ -2304,13 +2687,13 @@ public class GMLCCDRState implements Serializable {
     if (lcsReferenceNumber < 0) {
       if (other.lcsReferenceNumber > 0)
         return false;
-    } else if (lcsReferenceNumber != other.lcsReferenceNumber)
+    } else if (!lcsReferenceNumber.equals(other.lcsReferenceNumber))
       return false;
 
     if (clientReferenceNumber < 0) {
       if (other.clientReferenceNumber > 0)
         return false;
-    } else if (clientReferenceNumber != other.clientReferenceNumber)
+    } else if (!clientReferenceNumber.equals(other.clientReferenceNumber))
       return false;
 
     if (barometricPressureMeasurement == null) {
@@ -2358,11 +2741,11 @@ public class GMLCCDRState implements Serializable {
     if (lcsServiceTypeID < 0) {
       if (other.lcsServiceTypeID > 0)
         return false;
-    } else if (lcsServiceTypeID != other.lcsServiceTypeID)
+    } else if (!lcsServiceTypeID.equals(other.lcsServiceTypeID))
       return false;
 
-    if (pseudonymIndicator != false && pseudonymIndicator != true) {
-      if (other.pseudonymIndicator == false && other.pseudonymIndicator == true)
+    if (pseudonymIndicator == null) {
+      if (other.pseudonymIndicator != null)
         return false;
     } else if (!(pseudonymIndicator == (other.pseudonymIndicator)))
       return false;
@@ -2370,7 +2753,7 @@ public class GMLCCDRState implements Serializable {
     if (sequenceNumber < 0) {
       if (other.sequenceNumber > 0)
         return false;
-    } else if (sequenceNumber != other.sequenceNumber)
+    } else if (!sequenceNumber.equals(other.sequenceNumber))
       return false;
 
     if (periodicLDRInfo == null) {
@@ -2385,6 +2768,42 @@ public class GMLCCDRState implements Serializable {
     } else if (!reportingPLMNList.equals(other.reportingPLMNList))
       return false;
 
+    if (utranAdditionalPositioningData == null) {
+      if (other.utranAdditionalPositioningData != null)
+        return false;
+    } else if (!utranAdditionalPositioningData.equals(other.utranAdditionalPositioningData))
+      return false;
+
+    if (utranBaroPressureMeas == null) {
+      if (other.utranBaroPressureMeas != null)
+        return false;
+    } else if (!utranBaroPressureMeas.equals(other.utranBaroPressureMeas))
+      return false;
+
+    if (utranCivicAddress == null) {
+      if (other.utranCivicAddress != null)
+        return false;
+    } else if (!utranCivicAddress.equals(other.utranCivicAddress))
+      return false;
+
+    if (naEsrkRequest == null) {
+      if (other.naEsrkRequest != null)
+        return false;
+    } else if (!naEsrkRequest.equals(other.naEsrkRequest))
+      return false;
+
+    if (naESRD == null) {
+      if (other.naESRD != null)
+        return false;
+    } else if (!naESRD.equals(other.naESRD))
+      return false;
+
+    if (naESRK == null) {
+      if (other.naESRK != null)
+        return false;
+    } else if (!naESRK.equals(other.naESRK))
+      return false;
+
     if (subscriberInfo == null) {
       if (other.subscriberInfo != null)
         return false;
@@ -2395,6 +2814,12 @@ public class GMLCCDRState implements Serializable {
       if (other.locationInformation != null)
         return false;
     } else if (!locationInformation.equals(other.locationInformation))
+      return false;
+
+    if (epsSubscriberState == null) {
+      if (other.epsSubscriberState != null)
+        return false;
+    } else if (!epsSubscriberState.equals(other.epsSubscriberState))
       return false;
 
     if (locationInformationEPS == null) {
@@ -2421,16 +2846,16 @@ public class GMLCCDRState implements Serializable {
     } else if (!mnpInfoRes.equals(other.mnpInfoRes))
       return false;
 
-    if (saiPresent != false && saiPresent != true) {
-      if (other.saiPresent == false && other.saiPresent == true)
+    if (saiPresent == null) {
+      if (other.saiPresent != null)
         return false;
-    } else if (!(saiPresent == (other.saiPresent)))
+    } else if (!saiPresent.equals(other.saiPresent))
       return false;
 
-    if (currentLocationRetrieved != false && currentLocationRetrieved != true) {
-      if (other.currentLocationRetrieved == false && other.currentLocationRetrieved == true)
+    if (currentLocationRetrieved == null) {
+      if (other.currentLocationRetrieved != null)
         return false;
-    } else if (!(currentLocationRetrieved == (other.currentLocationRetrieved)))
+    } else if (!currentLocationRetrieved.equals(other.currentLocationRetrieved))
       return false;
 
     if (taId == null) {
@@ -2457,10 +2882,22 @@ public class GMLCCDRState implements Serializable {
     } else if (!locationNumberMap.equals(other.locationNumberMap))
       return false;
 
-    if (eUTRANPositioningData == null) {
-      if (other.eUTRANPositioningData != null)
+    if (lcsEpsClientName == null) {
+      if (other.lcsEpsClientName != null)
         return false;
-    } else if (!eUTRANPositioningData.equals(other.eUTRANPositioningData))
+    } else if (!lcsEpsClientName.equals(other.lcsEpsClientName))
+      return false;
+
+    if (lcsEpsClientFormatIndicator == null) {
+      if (other.lcsEpsClientFormatIndicator != null)
+        return false;
+    } else if (!lcsEpsClientFormatIndicator.equals(other.lcsEpsClientFormatIndicator))
+      return false;
+
+    if (eutranPositioningData == null) {
+      if (other.eutranPositioningData != null)
+        return false;
+    } else if (!eutranPositioningData.equals(other.eutranPositioningData))
       return false;
 
     if (oneXRTTRCID == null) {
@@ -2469,10 +2906,64 @@ public class GMLCCDRState implements Serializable {
     } else if (!oneXRTTRCID.equals(other.oneXRTTRCID))
       return false;
 
+    if (riaFlags == null) {
+      if (other.riaFlags != null)
+        return false;
+    } else if (!riaFlags.equals(other.riaFlags))
+      return false;
+
+    if (plrFlags == null) {
+      if (other.plrFlags != null)
+        return false;
+    } else if (!plrFlags.equals(other.plrFlags))
+      return false;
+
+    if (plaFlags == null) {
+      if (other.plaFlags != null)
+        return false;
+    } else if (!plaFlags.equals(other.plaFlags))
+      return false;
+
+    if (lrrFlags == null) {
+      if (other.lrrFlags != null)
+        return false;
+    } else if (!lrrFlags.equals(other.lrrFlags))
+      return false;
+
+    if (lraFlags == null) {
+      if (other.lraFlags != null)
+        return false;
+    } else if (!lraFlags.equals(other.lraFlags))
+      return false;
+
+    if (amfInstanceId == null) {
+      if (other.amfInstanceId != null)
+        return false;
+    } else if (!amfInstanceId.equals(other.amfInstanceId))
+      return false;
+
     if (nrCellGlobalId == null) {
       if (other.nrCellGlobalId != null)
         return false;
     } else if (!nrCellGlobalId.equals(other.nrCellGlobalId))
+      return false;
+
+    if (eUtranCellGlobalId == null) {
+      if (other.eUtranCellGlobalId != null)
+        return false;
+    } else if (!eUtranCellGlobalId.equals(other.eUtranCellGlobalId))
+      return false;
+
+    if (trackingAreaId == null) {
+      if (other.trackingAreaId != null)
+        return false;
+    } else if (!trackingAreaId.equals(other.trackingAreaId))
+      return false;
+
+    if (nrTrackingAreaIdentity == null) {
+      if (other.nrTrackingAreaIdentity != null)
+        return false;
+    } else if (!nrTrackingAreaIdentity.equals(other.nrTrackingAreaIdentity))
       return false;
 
     if (ageOfLocationInformation == null) {
@@ -2511,6 +3002,30 @@ public class GMLCCDRState implements Serializable {
     } else if (!ratType.equals(other.ratType))
       return false;
 
+    if (amfAddressFromMap == null) {
+      if (other.amfAddressFromMap != null)
+        return false;
+    } else if (!amfAddressFromMap.equals(other.amfAddressFromMap))
+      return false;
+
+    if (vPlmnId == null) {
+      if (other.vPlmnId != null)
+        return false;
+    } else if (!vPlmnId.equals(other.vPlmnId))
+      return false;
+
+    if (usedRATType == null) {
+      if (other.usedRATType != null)
+        return false;
+    } else if (!usedRATType.equals(other.usedRATType))
+      return false;
+
+    if (lastRATType == null) {
+      if (other.lastRATType != null)
+        return false;
+    } else if (!lastRATType.equals(other.lastRATType))
+      return false;
+
     return true;
   }
 
@@ -2522,529 +3037,167 @@ public class GMLCCDRState implements Serializable {
   @Override
   public String toString() {
 
-    String msisdnStr = null, imsiStr = null, lmsiStr = null, imeiStr = null, msClassmark = null, msNetworkCapability = null, msRASCapability = null,
-        lcsClientID_Name = null, lcsClientID_APN = null, lcsClientID_LCSClientExternalID = null, lcsClientID_LCSClientDialedByMS = null,
-        lcsClientID_LCSRequestorID_IDString = null, additionalMSCNumber = null, additionalSGSNNumber = null, nnn = null, mmeNameStr = null,
-        mmeRealmStr = null, sgsnNameStr = null, sgsnRealmStr = null, aaaServerNameStr = null, hGmlcAddressStr = null, vGmlcAddressStr = null,
-        pprAddressStr = null, locEstTypeOfShape = null, geranPosDataInfo = null, utranPosDataInfo = null, geranGANSSPosDataInfo = null,
-        utranGANSSPosDataInfo = null, utranAdditionalPosDataInfo = null, addLocEstTypeOfShape = null, moLrShortCircuitIndicatorStr = null,
-        deferredMTLRResponseIndicatorStr = null, cgi = null, sai = null, servingNodeAddressMSC = null, servingNodeAddressSGSN = null,
-        servingNodeAddressMME = null, lcsQoSVerticalCoordRequest = null, pseudonymIndicatorStr = null, deferredmtlrDataLMSI = null,
-        deferredmtlrDataNNN = null, deferredmtlrDataMSCnum = null, deferredmtlrDataSGSNnum = null, deferredmtlrDataAAAServerName = null,
-        deferredmtlrDataMMEname = null, deferredmtlrDataGPRSNodeInd = null, deferredmtlrDataEventType = null, reportingPLMNListArray = null,
-        reportingPLMNListPrioritized = null, geogTypeOfShape = null, geodTypeOfShape = null, vlrNum = null, mscNum = null, sgsnNum = null,
-        trackingAreaId = null, ecgi = null, mnpImsi = null, mnpMsisdn = null, mnpRouteingNum = null, saiPresent = null,
-        currentLocRetrieved = null, subState = null, lsaIdentity = null, raIdentity = null, eUTRANPositioningDataStr = null,
-        civicAddr = null, oneXRttRcid = null, nr5gsCellGlobalId = null, shTimeZone = null, sh5gsAmfAddress = null, sh5gsSmsfAddress = null, curlUsr = null;
+    String reportingPLMNListPrioritized = null, eUTRANPositioningDataStr = null;
 
-    Integer lcsRefNum = null, clientRefNum = null, ageOfLocEstimate = null, ageOfLocation = null, lcsClientID_DCS = null, lcsClientID_FI = null,
-        lcsClientID_LCSClientInternalID = null, lcsClientID_LCSClientType = null, lcsClientID_LCSRequestorID_DCS = null, lcsClientID_LCSRequestorID_FI = null,
-        locEstConfidence = null, locEstAltitude = null, locEstInnerRadius = null, addLocEstConfidence = null, addLocEstAltitude = null,
-        addLocEstInnerRadius = null, lsmMCC = null, lsmMNC = null, lsmLAC = null, lsmCI = null, accuracyFulfilmentIndicatorValue = null,
-        sequenceNumberValue = null, velEstHorizontalSpeed = null, velEstVerticalSpeed = null, velEstBearing = null, velEstHorSpeedUncertainty = null,
-        velEstVertSpeedUncertainty = null, velocityEstTypeValue = null, lcsQoSHorizontalAccuracy = null, lcsQoSVerticalAccuracy = null,
-        lcsQoSResponseTimeCategory = null, lcsQosClass = null, lcsServiceTypeIDValue = null, lcsEventValue = null, locationEventValue = null,
-        deferredmtlrDataTerminationCause = null, periodicLDRInfoReportingAmount = null, periodicLDRInfoReportingInterval = null, cgiSaiLaiMCC = null,
-        cgiSaiLaiMNC = null, cgiSaiLaiLAC = null, cgiSaiLaiCI = null, aol = null, geodConfidence = null, geodScreeningAndPresentationInd = null,
-        mnpStatus = null, daylightSaveTime = null, ratT = null;
-
-    Long cellPortionIdentity = null, barometricPressure = null, errorCode = null;
-
-    Double locEstLatitude = null, locEstLongitude = null, locEstUncertainty = null, locEstIncludeAngle = null, locEstOffsetAngle = null,
-        locEstUncertaintyAltitude = null, locEstUncertaintyRadius = null, locEstAngleOfMajorAxis = null, locEstUncertaintySemiMajorAxis = null,
-        locEstUncertaintySemiMinorAxis = null, addLocEstLatitude = null, addLocEstLongitude = null, addLocEstUncertainty = null, addLocEstIncludeAngle = null,
-        addLocEstOffsetAngle = null, addLocEstUncertaintyAltitude = null, addLocEstUncertaintyRadius = null, addLocEstAngleOfMajorAxis = null,
-        addLocEstUncertaintySemiMajorAxis = null, addLocEstUncertaintySemiMinorAxis = null, geogLat = null, geogLong = null, geogUncertainty = null,
-        geodLat = null, geodLong = null, geodUncertainty = null;
-
-    Boolean gprsNodeInd = false, psiIsPlmnSignificantLSA = false, currentLocationRetrieved = false;
-
+    StringBuilder reportingPLMNListArray = null, geranPositioningDataInfo = null, utranPosDataInfo = null, geranGANSSPosDataInfo = null,
+            utranGANSSPosDataInfo = null, utranAddPositioningData = null;
 
     try {
 
-      if (curlUser != null)
-        curlUsr = curlUser;
-
-      if (statusCode != null)
-        errorCode = statusCode;
-
-      if (msisdn != null)
-        msisdnStr = msisdn.getAddress();
-
-      if (imsi != null)
-        imsiStr = imsi.getData();
-
-      if (lmsi != null)
-        lmsiStr = new String(lmsi.getData());
-
-      if (imei != null)
-        imeiStr = imei.getIMEI();
-
-      if (networkNodeNumber != null)
-        nnn = networkNodeNumber.getAddress();
-
-      if (msClassmark2 != null)
-        msClassmark = new String (msClassmark2.getData());
-
-      if (gprsmsClass != null) {
-        msNetworkCapability = new String (gprsmsClass.getMSNetworkCapability().getData());
-        msRASCapability = new String (gprsmsClass.getMSRadioAccessCapability().getData());
-      }
-
-      if (locationEstimate != null) {
-        locEstLatitude = locationEstimate.getLatitude();
-        locEstLongitude = locationEstimate.getLongitude();
-        locEstUncertainty = locationEstimate.getUncertainty();
-        locEstAltitude = locationEstimate.getAltitude();
-        locEstUncertaintyAltitude = locationEstimate.getUncertaintyAltitude();
-        locEstConfidence = locationEstimate.getConfidence();
-        locEstInnerRadius = locationEstimate.getInnerRadius();
-        locEstUncertaintyRadius = locationEstimate.getUncertaintyRadius();
-        locEstIncludeAngle = locationEstimate.getIncludedAngle();
-        locEstOffsetAngle = locationEstimate.getOffsetAngle();
-        locEstAngleOfMajorAxis = locationEstimate.getAngleOfMajorAxis();
-        locEstUncertaintySemiMajorAxis = locationEstimate.getUncertaintySemiMajorAxis();
-        locEstUncertaintySemiMinorAxis = locationEstimate.getUncertaintySemiMinorAxis();
-        if (locationEstimate.getTypeOfShape() != null)
-          locEstTypeOfShape = locationEstimate.getTypeOfShape().name();
-      }
-
-      if (ageOfLocationEstimate != null)
-        ageOfLocEstimate = ageOfLocationEstimate;
-
-      if (geranPositioningDataInformation!= null)
-        geranPosDataInfo = new String(geranPositioningDataInformation.getData());
-
-      if (utranPositioningDataInfo != null)
-        utranPosDataInfo = new String(utranPositioningDataInfo.getData());
-
-      if (utranAdditionalPositioningData != null)
-        utranAdditionalPosDataInfo = utranAdditionalPositioningData;
-
-      if (geranGANSSpositioningData != null)
-        geranGANSSPosDataInfo = new String(geranGANSSpositioningData.getData());
-
-      if (utranGANSSpositioningData != null)
-        utranGANSSPosDataInfo = new String(utranGANSSpositioningData.getData());
-
-      if (additionalNumber != null) {
-        if (additionalNumber.getMSCNumber() != null)
-          additionalMSCNumber = additionalNumber.getMSCNumber().getAddress();
-        if (additionalNumber.getSGSNNumber() != null)
-          additionalSGSNNumber = additionalNumber.getSGSNNumber().getAddress();
-      }
-
-      if (mmeName != null)
-        mmeNameStr = new String(mmeName.getData());
-
-      if (mmeRealm != null)
-        mmeRealmStr = new String(mmeRealm.getData());
-
-      if (sgsnName != null)
-        sgsnNameStr = new String(sgsnName.getData());
-
-      if (sgsnRealm != null)
-        sgsnRealmStr = new String(sgsnRealm.getData());
-
-      if (aaaServerName != null)
-        aaaServerNameStr = new String(aaaServerName.getData());
-
-      if (hGmlcAddress != null)
-        hGmlcAddressStr = new String(hGmlcAddress.getData());
-
-      if (vGmlcAddress != null)
-        vGmlcAddressStr = new String(vGmlcAddress.getData());
-
-      if (pprAddress != null)
-        pprAddressStr = new String(pprAddress.getData());
-
-      if (additionalLocationEstimate != null) {
-        addLocEstLatitude = additionalLocationEstimate.getLatitude();
-        addLocEstLongitude = additionalLocationEstimate.getLongitude();
-        addLocEstUncertainty = additionalLocationEstimate.getUncertainty();
-        addLocEstAltitude = additionalLocationEstimate.getAltitude();
-        addLocEstUncertaintyAltitude = additionalLocationEstimate.getUncertaintyAltitude();
-        addLocEstConfidence = additionalLocationEstimate.getConfidence();
-        addLocEstInnerRadius = additionalLocationEstimate.getInnerRadius();
-        addLocEstUncertaintyRadius = additionalLocationEstimate.getUncertaintyRadius();
-        addLocEstIncludeAngle = additionalLocationEstimate.getIncludedAngle();
-        addLocEstOffsetAngle = additionalLocationEstimate.getOffsetAngle();
-        addLocEstAngleOfMajorAxis = additionalLocationEstimate.getAngleOfMajorAxis();
-        addLocEstUncertaintySemiMajorAxis = additionalLocationEstimate.getUncertaintySemiMajorAxis();
-        addLocEstUncertaintySemiMinorAxis = additionalLocationEstimate.getUncertaintySemiMinorAxis();
-        if (additionalLocationEstimate.getTypeOfShape() != null)
-          addLocEstTypeOfShape = additionalLocationEstimate.getTypeOfShape().name();
-      }
-
-      if (moLrShortCircuitIndicator != null)
-        moLrShortCircuitIndicatorStr = String.valueOf(moLrShortCircuitIndicator);
-
-      if (deferredMTLRResponseIndicator != null)
-        deferredMTLRResponseIndicatorStr = String.valueOf(deferredMTLRResponseIndicator);
-
-      if (cellGlobalIdOrServiceAreaIdOrLAI != null) {
-        if (cellGlobalIdOrServiceAreaIdOrLAI.getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
-          lsmMCC = + cellGlobalIdOrServiceAreaIdOrLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
-          lsmMNC = + cellGlobalIdOrServiceAreaIdOrLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getMNC();
-          lsmLAC = + cellGlobalIdOrServiceAreaIdOrLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
-          lsmCI = + cellGlobalIdOrServiceAreaIdOrLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
+      if (geranPositioningDataInformation!= null) {
+        HashMap<String, Integer> methodsAndUsage = geranPositioningDataInformation.getPositioningDataSet();
+        geranPositioningDataInfo = new StringBuilder();
+        int itemCounter = 0;
+        geranPositioningDataInfo.append("[GERAN Positioning data: ");
+        for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
+          itemCounter++;
+          String method = item.getKey();
+          Integer usage = item.getValue();
+          geranPositioningDataInfo.append("Method=").append(method).append(", usage=").append(usage);
+          if (methodsAndUsage.size() != itemCounter)
+            geranPositioningDataInfo.append(", ");
         }
-        if (cellGlobalIdOrServiceAreaIdOrLAI.getLAIFixedLength() != null) {
-          lsmMCC = + cellGlobalIdOrServiceAreaIdOrLAI.getLAIFixedLength().getMCC();
-          lsmMNC = + cellGlobalIdOrServiceAreaIdOrLAI.getLAIFixedLength().getMNC();
-          lsmLAC = + cellGlobalIdOrServiceAreaIdOrLAI.getLAIFixedLength().getLac();
-        }
+        geranPositioningDataInfo.append("]");
       }
 
-      if (accuracyFulfilmentIndicator != null)
-        accuracyFulfilmentIndicatorValue = accuracyFulfilmentIndicator.getIndicator();
+      if (utranPositioningDataInfo != null) {
+        HashMap<String, Integer> methodsAndUsage = utranPositioningDataInfo.getUtranPositioningDataSet();
+        utranPosDataInfo = new StringBuilder();
+        int itemCounter = 0;
+        utranPosDataInfo.append("[UTRAN Positioning data: ");
+        for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
+          itemCounter++;
+          String method = item.getKey();
+          Integer usage = item.getValue();
+          utranPosDataInfo.append("Method=").append(method).append(", usage=").append(usage);
+          if (methodsAndUsage.size() != itemCounter)
+            utranPosDataInfo.append(", ");
+        }
+        utranPosDataInfo.append("]");
+      }
 
-      if (sequenceNumber != null) {
+      if (geranGANSSpositioningData != null) {
+        Multimap<String, String> methodsAndGanssIds = geranGANSSpositioningData.getGeranGANSSPositioningMethodsAndGANSSIds();
+        geranGANSSPosDataInfo = new StringBuilder();
+        String method = null, ganssId = null;
+        int i = 0, usage;
+        geranGANSSPosDataInfo.append("[GERAN GANSS Positioning data: ");
+        for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
+          if (method != null || ganssId != null)
+            geranGANSSPosDataInfo.append("; ");
+          method = item.getKey();
+          ganssId = item.getValue();
+          usage = geranGANSSpositioningData.getUsageCode(geranGANSSpositioningData.getData(), i+1);
+          geranGANSSPosDataInfo.append("Method=").append(method).append(", GANSSId=").append(ganssId).append(", usage=").append(usage);
+          i++;
+        }
+        geranGANSSPosDataInfo.append("]");
+      }
+
+      if (utranGANSSpositioningData != null) {
+        Multimap<String, String> methodsAndGanssIds = utranGANSSpositioningData.getUtranGANSSPositioningMethodsAndGANSSIds();
+        utranGANSSPosDataInfo = new StringBuilder();
+        String method = null, ganssId = null;
+        int i = 0, usage;
+        utranGANSSPosDataInfo.append("[UTRAN GANSS Positioning data: ");
+        for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
+          if (method != null || ganssId != null)
+            utranGANSSPosDataInfo.append("; ");
+          method = item.getKey();
+          ganssId = item.getValue();
+          usage = utranGANSSpositioningData.getUsageCode(utranGANSSpositioningData.getData(), i);
+          utranGANSSPosDataInfo.append("Method=").append(method).append(", GANSSId=").append(ganssId).append(", usage=").append(usage);
+          i++;
+        }
+        utranGANSSPosDataInfo.append("]");
+
+      }
+
+      if (utranAdditionalPositioningData != null) {
+        Multimap<String, String> methodsAndAddPosIds = utranAdditionalPositioningData.getUtranAdditionalPositioningMethodsAndIds();
+        utranAddPositioningData = new StringBuilder();
+        String method = null, id = null;
+        int i = 0, usage;
+        utranAddPositioningData.append("[UTRAN Additional Positioning data");
+        for (Map.Entry<String, String> item : methodsAndAddPosIds.entries()) {
+          if (method != null || id != null)
+            utranAddPositioningData.append("; ");
+          method = item.getKey();
+          id = item.getValue();
+          usage = utranAdditionalPositioningData.getUsageCode(utranAdditionalPositioningData.getData(), i);
+          utranAddPositioningData.append("Method=").append(method).append(", addPosId=").append(id).append(", usage =").append(usage);
+          i++;
+        }
+        utranAddPositioningData.append("]");
+      }
+
+      if (eutranPositioningData != null) {
         try {
-          sequenceNumberValue = sequenceNumber;
-        } catch (NumberFormatException nfe) {
-          sequenceNumberValue = -1;
-        }
-      }
-
-      if (velocityEstimate != null) {
-        if (velocityEstimate.getData() != null) {
-          try {
-            velEstHorizontalSpeed = velocityEstimate.getHorizontalSpeed();
-            velEstVerticalSpeed = velocityEstimate.getVerticalSpeed();
-            velEstHorSpeedUncertainty = velocityEstimate.getUncertaintyHorizontalSpeed();
-            velEstVertSpeedUncertainty = velocityEstimate.getUncertaintyVerticalSpeed();
-            velEstBearing = velocityEstimate.getBearing();
-            velocityEstTypeValue = velocityEstimate.getVelocityType().getCode();
-          } catch (Exception e) {
-            e.printStackTrace();
+          if (eutranPositioningData.getPositioningDataSet() != null) {
+            HashMap<String, Integer> methodsAndUsage = eutranPositioningData.getPositioningDataMethodsAndUsage(eutranPositioningData.getPositioningDataSet());
+            StringBuilder positioningDataInfo = new StringBuilder();
+            int itemCounter = 0;
+            for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
+              String method = item.getKey();
+              Integer usage = item.getValue();
+              positioningDataInfo.append("method=").append(method).append(" usage=").append(usage);
+              if (methodsAndUsage.size() != itemCounter)
+                positioningDataInfo.append(" -- ");
+              itemCounter++;
+            }
+            eUTRANPositioningDataStr = String.valueOf(positioningDataInfo);
+          } else if (eutranPositioningData.getGNSSPositioningDataSet() != null) {
+            Multimap<String, String> methodsAndGanssIds = eutranPositioningData.getGNSSPositioningMethodsAndGNSSIds(eutranPositioningData.getGNSSPositioningDataSet());
+            StringBuilder gnssPositioningDataInfo = new StringBuilder();
+            String method = null, gnssId = null;
+            int i = 0, usage;
+            for (Map.Entry<String, String> entry : methodsAndGanssIds.entries()) {
+              if (method != null || gnssId != null)
+                gnssPositioningDataInfo.append(" -- ");
+              method = entry.getKey();
+              gnssId = entry.getValue();
+              usage = eutranPositioningData.getUsageCode(eutranPositioningData.getGNSSPositioningDataSet(), i);
+              gnssPositioningDataInfo.append("method=").append(method).append(" gnssId=").append(gnssId).append(" usage=").append(usage);
+              i++;
+            }
+            eUTRANPositioningDataStr = String.valueOf(gnssPositioningDataInfo);
+          } else if (eutranPositioningData.getAdditionalPositioningDataSet() != null) {
+            Multimap<String, String> methodsAndAddPosIds = eutranPositioningData.getEUtranAdditionalPositioningMethodsAndIds(eutranPositioningData.getAdditionalPositioningDataSet());
+            StringBuilder eutranAddPositioningData = new StringBuilder();
+            String method = null, id = null;
+            int i = 0, usage;
+            for (Map.Entry<String, String> entry : methodsAndAddPosIds.entries()) {
+              if (method != null || id != null)
+                eutranAddPositioningData.append(" -- ");
+              method = entry.getKey();
+              id = entry.getValue();
+              usage = eutranPositioningData.getUsageCode(eutranPositioningData.getAdditionalPositioningDataSet(), i);
+              eutranAddPositioningData.append("method=").append(method).append(" addPosId=").append(id).append(" usage=").append(usage);
+              i++;
+            }
+            eUTRANPositioningDataStr = String.valueOf(eutranAddPositioningData);
           }
+        } catch (Exception e) {
+          e.printStackTrace();
         }
-      }
-
-      if (lcsReferenceNumber != null)
-        lcsRefNum = lcsReferenceNumber;
-
-      if (clientReferenceNumber != null)
-        clientRefNum = clientReferenceNumber;
-
-      if (gprsNodeIndicator != null)
-        gprsNodeInd = gprsNodeIndicator;
-
-      if (pseudonymIndicator != null)
-        pseudonymIndicatorStr = String.valueOf(pseudonymIndicator);
-
-      if (servingNodeAddress != null) {
-        if (servingNodeAddress.getMscNumber() != null)
-          servingNodeAddressMSC = servingNodeAddress.getMscNumber().getAddress();
-        if (servingNodeAddress.getSgsnNumber() != null)
-          servingNodeAddressSGSN = servingNodeAddress.getSgsnNumber().getAddress();
-        if (servingNodeAddress.getMmeNumber() != null)
-          servingNodeAddressMME = new String(servingNodeAddress.getMmeNumber().getData());
-      }
-
-      if (lcsClientID != null) {
-        if (lcsClientID.getLCSAPN() != null)
-          lcsClientID_APN =  new String(lcsClientID.getLCSAPN().getApn());
-        if (lcsClientID.getLCSClientName() != null) {
-          lcsClientID_Name = lcsClientID.getLCSClientName().getNameString().toString();
-          lcsClientID_DCS = lcsClientID.getLCSClientName().getDataCodingScheme().getCode();
-          lcsClientID_FI = lcsClientID.getLCSClientName().getLCSFormatIndicator().getIndicator();
-        }
-        if (lcsClientID.getLCSClientExternalID() != null)
-          lcsClientID_LCSClientExternalID = lcsClientID.getLCSClientExternalID().getExternalAddress().getAddress();
-        if (lcsClientID.getLCSClientInternalID() != null)
-          lcsClientID_LCSClientInternalID = lcsClientID.getLCSClientInternalID().getId();
-        if (lcsClientID.getLCSClientDialedByMS() != null)
-          lcsClientID_LCSClientDialedByMS = lcsClientID.getLCSClientDialedByMS().getAddress();
-        if (lcsClientID.getLCSClientType() != null)
-          lcsClientID_LCSClientType = lcsClientID.getLCSClientType().getType();
-        if (lcsClientID.getLCSRequestorID() != null) {
-          lcsClientID_LCSRequestorID_DCS = lcsClientID.getLCSRequestorID().getDataCodingScheme().getCode();
-          lcsClientID_LCSRequestorID_FI = lcsClientID.getLCSRequestorID().getLCSFormatIndicator().getIndicator();
-          lcsClientID_LCSRequestorID_IDString = lcsClientID.getLCSRequestorID().getRequestorIDString().getEncodedString().toString();
-        }
-      }
-
-      if (lcsQoS != null) {
-        if (lcsQoS.getHorizontalAccuracy() != null)
-          lcsQoSHorizontalAccuracy = lcsQoS.getHorizontalAccuracy();
-        if (lcsQoS.getVerticalAccuracy() != null)
-          lcsQoSVerticalAccuracy = lcsQoS.getVerticalAccuracy();
-        if (lcsQoS.getResponseTime() != null) {
-          try {
-            lcsQoSResponseTimeCategory = lcsQoS.getResponseTime().getResponseTimeCategory().getCategory();
-          } catch (NumberFormatException nfe) {
-            nfe.printStackTrace();
-          }
-        }
-        if (lcsQoS.getVerticalCoordinateRequest() == true || lcsQoS.getVerticalCoordinateRequest() == false)
-          lcsQoSVerticalCoordRequest = String.valueOf(lcsQoSVerticalCoordRequest);
-      }
-
-      if (lcsQosClass != null) {
-        if (lteLcsQoSClass != null)
-          lcsQosClass = lteLcsQoSClass.getValue();
-      }
-
-      if (lcsServiceTypeID != null) {
-        try {
-          lcsServiceTypeIDValue = lcsServiceTypeID;
-        } catch (NumberFormatException nfe) {
-          nfe.printStackTrace();
-        }
-      }
-
-      if (lcsEvent != null) {
-        try {
-          lcsEventValue = lcsEvent.getEvent();
-        } catch (NumberFormatException nfe) {
-          nfe.printStackTrace();
-        }
-      }
-
-      if (locationEvent != null) {
-        try {
-          locationEventValue = locationEvent.getValue();
-        } catch (NumberFormatException nfe) {
-          nfe.printStackTrace();
-        }
-      }
-
-      if (deferredmtlrData != null) {
-        if (deferredmtlrData.getDeferredLocationEventType() != null) {
-          if (deferredmtlrData.getDeferredLocationEventType().getEnteringIntoArea() == true)
-            deferredmtlrDataEventType = "EnteringIntoArea";
-          else if (deferredmtlrData.getDeferredLocationEventType().getBeingInsideArea() == true)
-            deferredmtlrDataEventType = "BeingInsideArea";
-          else if (deferredmtlrData.getDeferredLocationEventType().getLeavingFromArea() == true)
-            deferredmtlrDataEventType = "LeavingFromArea";
-          else if (deferredmtlrData.getDeferredLocationEventType().getMsAvailable() == true)
-            deferredmtlrDataEventType = "MSAvailable";
-        }
-        if (deferredmtlrData.getLCSLocationInfo() != null) {
-          if (deferredmtlrData.getLCSLocationInfo().getLMSI() != null)
-            deferredmtlrDataLMSI = new String(deferredmtlrData.getLCSLocationInfo().getLMSI().getData());
-          if (deferredmtlrData.getLCSLocationInfo().getNetworkNodeNumber() != null)
-            deferredmtlrDataNNN = deferredmtlrData.getLCSLocationInfo().getNetworkNodeNumber().getAddress();
-          if (deferredmtlrData.getLCSLocationInfo().getAdditionalNumber() != null) {
-            if (deferredmtlrData.getLCSLocationInfo().getAdditionalNumber().getMSCNumber() != null)
-              deferredmtlrDataMSCnum = deferredmtlrData.getLCSLocationInfo().getAdditionalNumber().getMSCNumber().getAddress();
-            if (deferredmtlrData.getLCSLocationInfo().getAdditionalNumber().getSGSNNumber() != null)
-              deferredmtlrDataSGSNnum = deferredmtlrData.getLCSLocationInfo().getAdditionalNumber().getSGSNNumber().getAddress();
-          }
-          if (deferredmtlrData.getLCSLocationInfo().getAaaServerName() != null)
-            deferredmtlrDataAAAServerName = new String(deferredmtlrData.getLCSLocationInfo().getAaaServerName().getData());
-          if (deferredmtlrData.getLCSLocationInfo().getMmeName() != null)
-            deferredmtlrDataMMEname = new String(deferredmtlrData.getLCSLocationInfo().getMmeName().getData());
-          if (deferredmtlrData.getLCSLocationInfo().getGprsNodeIndicator() == true ||
-              deferredmtlrData.getLCSLocationInfo().getGprsNodeIndicator() == false)
-            deferredmtlrDataGPRSNodeInd = String.valueOf(deferredmtlrData.getLCSLocationInfo().getGprsNodeIndicator());
-        }
-        if (deferredmtlrData.getTerminationCause() != null)
-          deferredmtlrDataTerminationCause = deferredmtlrData.getTerminationCause().getCause();
-      }
-
-      if (periodicLDRInfo != null) {
-        periodicLDRInfoReportingAmount = periodicLDRInfo.getReportingAmount();
-        periodicLDRInfoReportingInterval = periodicLDRInfo.getReportingInterval();
       }
 
       if (reportingPLMNList != null) {
         if (reportingPLMNList.getPlmnList() != null) {
           int plmnCounter = 0;
-          reportingPLMNListArray = "[ ";
+          reportingPLMNListArray = new StringBuilder("[");
           while (reportingPLMNList.getPlmnList().iterator().hasNext()) {
-            reportingPLMNListArray = reportingPLMNListArray + reportingPLMNList.getPlmnList().get(plmnCounter);
+            reportingPLMNListArray.append(reportingPLMNList.getPlmnList().get(plmnCounter));
             plmnCounter++;
             if (reportingPLMNList.getPlmnList().get(plmnCounter) != null) {
-              reportingPLMNListArray = reportingPLMNListArray + ", ";
+              reportingPLMNListArray.append(", ");
             } else {
-              reportingPLMNListArray = reportingPLMNListArray + " ]";
+              reportingPLMNListArray.append("]");
             }
           }
         }
-        if (reportingPLMNList.getPlmnListPrioritized() == true ||
-            reportingPLMNList.getPlmnListPrioritized() == false)
+        if (reportingPLMNList.getPlmnListPrioritized() || !reportingPLMNList.getPlmnListPrioritized())
           reportingPLMNListPrioritized = String.valueOf(reportingPLMNList.getPlmnListPrioritized());
-      }
-
-      if (subscriberInfo != null) {
-        if (locationInformation != null) {
-          if (locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
-            cgiSaiLaiMCC = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
-            cgiSaiLaiMNC = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC();
-            cgiSaiLaiLAC = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
-            cgiSaiLaiCI = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
-          }
-          if (locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
-            cgiSaiLaiMCC = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC();
-            cgiSaiLaiMNC = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC();
-            cgiSaiLaiLAC = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac();
-          }
-
-          if (locationInformation.getGeographicalInformation() != null) {
-            geogLat = locationInformation.getGeographicalInformation().getLatitude();
-            geogLong = locationInformation.getGeographicalInformation().getLongitude();
-            geogUncertainty = locationInformation.getGeographicalInformation().getUncertainty();
-            geogTypeOfShape = locationInformation.getGeographicalInformation().getTypeOfShape().name();
-          }
-
-          if (locationInformation.getGeodeticInformation() != null) {
-            geodLat = locationInformation.getGeodeticInformation().getLatitude();
-            geodLong = locationInformation.getGeodeticInformation().getLongitude();
-            geodUncertainty = locationInformation.getGeodeticInformation().getUncertainty();
-            geodTypeOfShape = locationInformation.getGeodeticInformation().getTypeOfShape().name();
-            geodConfidence = locationInformation.getGeodeticInformation().getConfidence();
-            geodScreeningAndPresentationInd = locationInformation.getGeodeticInformation().getScreeningAndPresentationIndicators();
-          }
-
-          if (locationInformation.getVlrNumber() != null)
-            vlrNum = locationInformation.getVlrNumber().getAddress();
-
-          if (locationInformation.getMscNumber() != null)
-            mscNum = locationInformation.getMscNumber().getAddress();
-
-          if (locationInformation.getSaiPresent() == true || locationInformation.getSaiPresent() == false)
-            saiPresent = String.valueOf(locationInformation.getSaiPresent());
-
-          if (locationInformation.getCurrentLocationRetrieved() == true || locationInformation.getCurrentLocationRetrieved() == false)
-            currentLocRetrieved = String.valueOf(locationInformation.getCurrentLocationRetrieved());
-
-          if (locationInformation.getAgeOfLocationInformation() <=Integer.MAX_VALUE && locationInformation.getAgeOfLocationInformation() >= Integer.MIN_VALUE)
-            aol = locationInformation.getAgeOfLocationInformation();
-
-          if (locationInformation.getLocationInformationEPS() != null) {
-            if (locationInformationEPS.getGeographicalInformation() != null) {
-              geogLat = locationInformationEPS.getGeographicalInformation().getLatitude();
-              geogLong = locationInformationEPS.getGeographicalInformation().getLongitude();
-              geogUncertainty = locationInformationEPS.getGeographicalInformation().getUncertainty();
-              geogTypeOfShape = locationInformationEPS.getGeographicalInformation().getTypeOfShape().name();
-            }
-
-            if (locationInformationEPS.getGeodeticInformation() != null) {
-              geodLat = locationInformationEPS.getGeodeticInformation().getLatitude();
-              geodLong = locationInformationEPS.getGeodeticInformation().getLongitude();
-              geodUncertainty = locationInformationEPS.getGeodeticInformation().getUncertainty();
-              geodTypeOfShape = locationInformationEPS.getGeodeticInformation().getTypeOfShape().name();
-              geodConfidence = locationInformationEPS.getGeodeticInformation().getConfidence();
-              geodScreeningAndPresentationInd = locationInformationEPS.getGeodeticInformation().getScreeningAndPresentationIndicators();
-            }
-            if (locationInformation.getLocationInformationEPS().getTrackingAreaIdentity() != null)
-              trackingAreaId = new String(locationInformation.getLocationInformationEPS().getTrackingAreaIdentity().getData());
-            if (locationInformation.getLocationInformationEPS().getEUtranCellGlobalIdentity() != null)
-              ecgi = new String(locationInformation.getLocationInformationEPS().getEUtranCellGlobalIdentity().getData());
-          }
-        }
-
-        if (locationInformationGPRS != null) {
-
-          if(locationInformationGPRS.getSGSNNumber() != null)
-            sgsnNum = locationInformationGPRS.getSGSNNumber().getAddress();
-
-          if(locationInformationGPRS.getLSAIdentity() != null) {
-            lsaIdentity = new String(locationInformationGPRS.getLSAIdentity().getData());
-            if(locationInformationGPRS.getLSAIdentity().isPlmnSignificantLSA())
-              psiIsPlmnSignificantLSA = locationInformationGPRS.getLSAIdentity().isPlmnSignificantLSA();
-          }
-
-          if(locationInformationGPRS.getRouteingAreaIdentity() != null) {
-            raIdentity = new String(locationInformationGPRS.getRouteingAreaIdentity().getData());
-          }
-        }
-
-        if (subscriberInfo.getSubscriberState() != null)
-          subState = subscriberInfo.getSubscriberState().getSubscriberStateChoice().toString();
-        if (subscriberInfo.getMNPInfoRes() != null) {
-          mnpImsi = subscriberInfo.getMNPInfoRes().getIMSI().getData();
-          mnpMsisdn = subscriberInfo.getMNPInfoRes().getMSISDN().getAddress();
-          mnpStatus = subscriberInfo.getMNPInfoRes().getNumberPortabilityStatus().getType();
-          mnpRouteingNum = subscriberInfo.getMNPInfoRes().getRouteingNumber().getRouteingNumber();
-        }
-
-        if (eUTRANPositioningData != null)
-          eUTRANPositioningDataStr = eUTRANPositioningData;
-
-        if (cellGlobalIdentity != null)
-          cgi = cellGlobalIdentity;
-
-        if (sai != null)
-          sai = serviceAreaIdentity;
-
-        if (cellPortionId != null)
-          cellPortionIdentity = cellPortionId;
-
-        if (civicAddress != null)
-          civicAddr = civicAddress;
-
-        if (barometricPressureMeasurement != null)
-          barometricPressure = barometricPressureMeasurement;
-
-        if (oneXRTTRCID != null)
-          oneXRttRcid = oneXRTTRCID;
-
-        if (locationInformationEPS != null) {
-          if (locationInformationEPS.getEUtranCellGlobalIdentity() != null) {
-            ecgi = new String(locationInformation.getLocationInformationEPS().getEUtranCellGlobalIdentity().getData());
-          }
-          if (locationInformationEPS.getTrackingAreaIdentity() != null) {
-            trackingAreaId = new String(locationInformation.getLocationInformationEPS().getTrackingAreaIdentity().getData());
-          }
-          if (locationInformationEPS.getGeographicalInformation() != null) {
-            geogLat = locationInformationEPS.getGeographicalInformation().getLatitude();
-            geogLong = locationInformationEPS.getGeographicalInformation().getLongitude();
-            geogUncertainty = locationInformationEPS.getGeographicalInformation().getUncertainty();
-            geogTypeOfShape = locationInformationEPS.getGeographicalInformation().getTypeOfShape().name();
-          }
-          if (locationInformationEPS.getGeodeticInformation() != null) {
-            geodLat = locationInformationEPS.getGeodeticInformation().getLatitude();
-            geodLong = locationInformationEPS.getGeodeticInformation().getLongitude();
-            geodUncertainty = locationInformationEPS.getGeodeticInformation().getUncertainty();
-            geodTypeOfShape = locationInformationEPS.getGeodeticInformation().getTypeOfShape().name();
-            geodConfidence = locationInformationEPS.getGeodeticInformation().getConfidence();
-            geodScreeningAndPresentationInd = locationInformationEPS.getGeodeticInformation().getScreeningAndPresentationIndicators();
-          }
-          if (locationInformationEPS.getCurrentLocationRetrieved()) {
-            currentLocationRetrieved = true;
-          }
-          if (locationInformationEPS.getAgeOfLocationInformation() != null) {
-            ageOfLocation = locationInformationEPS.getAgeOfLocationInformation().intValue();
-            if (locationInformationEPS.getAgeOfLocationInformation() != 0)
-              currentLocationRetrieved = false;
-          }
-          if (locationInformationEPS.getMmeName() != null) {
-            mmeNameStr = new String(locationInformationEPS.getMmeName().getData());
-          }
-        }
-
-        if (locationInformation5GS != null) {
-          if (locationInformation5GS.getNRCellGlobalIdentity() != null) {
-            nr5gsCellGlobalId = new String (locationInformation5GS.getNRCellGlobalIdentity().getData());
-          }
-          if (locationInformation5GS.getEUtranCellGlobalIdentity() != null) {
-            ecgi = new String (locationInformation5GS.getEUtranCellGlobalIdentity().getData());
-          }
-          if (locationInformation5GS.getGeographicalInformation() != null) {
-            geogLat = locationInformation5GS.getGeographicalInformation().getLatitude();
-            geogLong = locationInformation5GS.getGeographicalInformation().getLongitude();
-            geogUncertainty = locationInformation5GS.getGeographicalInformation().getUncertainty();
-            geogTypeOfShape = locationInformation5GS.getGeographicalInformation().getTypeOfShape().name();
-          }
-          if (locationInformation5GS.getAMFAddress() != null) {
-            sh5gsAmfAddress = locationInformation5GS.getAMFAddress();
-          }
-          if (locationInformation5GS.getSMSFAddress() != null) {
-            sh5gsSmsfAddress = locationInformation5GS.getSMSFAddress();
-          }
-          if (locationInformation5GS.getCurrentLocationRetrieved()) {
-            currentLocationRetrieved = true;
-          }
-          if (locationInformation5GS.getAgeOfLocationInformation() != null) {
-            ageOfLocation = locationInformation5GS.getAgeOfLocationInformation().intValue();
-            if (ageOfLocation != 0)
-              currentLocationRetrieved = false;
-          }
-        }
       }
 
     } catch (MAPException e) {
@@ -3052,181 +3205,97 @@ public class GMLCCDRState implements Serializable {
     }
 
     return "GMLCCDRState [initiated=" + initiated +
-        ", generated=" + generated +
-        ", user=" + curlUsr +
-        ", id=" + id +
-        ", recordStatus=" + recordStatus +
-        ", statusCode=" + errorCode +
-        ", localDialogId=" + localDialogId  +
-        ", remoteDialogId=" + remoteDialogId +
-        ", dialogDuration" + dialogDuration +
-        ", origReference=" + origReference +
-        ", destReference=" + destReference +
-        ", localAddress=" + localAddress +
-        ", remoteAddress=" + remoteAddress +
-        ", diameterOriginHost=" + diameterOriginHost +
-        ", diameterOriginRealm=" + diameterOriginRealm +
-        ", diameterOriginPort=" + diameterOriginPort +
-        ", diameterDestHost=" + diameterDestHost +
-        ", diameterDestRealm=" + diameterDestRealm +
-        ", diameterDestPort=" + diameterDestPort +
-        ", slpSocketAddress=" + slpSocketAddress +
-        ", slpSocketPort=" + slpSocketPort +
-        ", setSocketAddress=" + setSocketAddress +
-        ", setSocketPort=" + setSocketPort +
-        ", vlrAddress=" + vlrAddress +
-        ", ISDNString=" + isdnAddressString +
-
-        // MAP ATI response parameters concerning detail records
-        ", msClassmark=" + msClassmark +
-        ", msNetworkCapability=" + msNetworkCapability +
-        ", msRadioAcessCapability=" + msRASCapability +
-
-        // MAP LSM / LTE LCS response parameters parameters concerning detail records
-        ", IMSI=" + imsiStr +
-        ", LMSI=" + lmsiStr +
-        ", networkNodeNumber=" + nnn +
-        ", GPRSNodeIndicator=" + gprsNodeInd +
-        ", additionalMSCNumber=" + additionalMSCNumber +
-        ", additionalSGSNNumber=" + additionalSGSNNumber +
-        ", MMEName=" + mmeNameStr +
-        ", MMERealm=" + mmeRealmStr +
-        ", SGSNName=" + sgsnNameStr +
-        ", SGSNRealm=" + sgsnRealmStr +
-        ", AAAServerName=" + aaaServerNameStr +
-        ", vGMLCAddressData=" + vGmlcAddressStr +
-        ", hGMLCAddressData=" + hGmlcAddressStr +
-        ", PPRAddressData=" + pprAddressStr +
-        ", locationEstimateLatitude=" + locEstLatitude +
-        ", locationEstimateLongitude=" + locEstLongitude +
-        ", locationEstimateUncertainty=" + locEstUncertainty +
-        ", locationEstimateAltitude=" + locEstAltitude +
-        ", locationEstimateUncertaintyAltitude=" + locEstUncertaintyAltitude +
-        ", locationEstimateConfidence=" + locEstConfidence +
-        ", locationEstimateInnerRadius=" + locEstInnerRadius +
-        ", locationEstimateUncertaintyInnerRadius=" + locEstUncertaintyRadius +
-        ", locationEstimateIncludeAngle=" + locEstIncludeAngle +
-        ", locationEstimateOffsetAngle=" + locEstOffsetAngle +
-        ", locationEstimateAngleOfMajorAxis=" + locEstAngleOfMajorAxis +
-        ", locationEstimateUncertaintySemiMajorAxis=" + locEstUncertaintySemiMajorAxis +
-        ", locationEstimateUncertaintySemiMinorAxis=" + locEstUncertaintySemiMinorAxis +
-        ", locationEstimateTypeOfShape=" + locEstTypeOfShape +
-        ", geranPositioningDataInformation=" + geranPosDataInfo +
-        ", utranPositioningDataInfo=" + utranPosDataInfo +
-        ", utranAdditionalPositioningDataInfo=" + utranAdditionalPosDataInfo +
-        ", geranGANSSPositioningData=" + geranGANSSPosDataInfo +
-        ", utranGANSSPositioningData=" + utranGANSSPosDataInfo +
-        ", ageOfLocationEstimate=" + ageOfLocEstimate +
-        ", additionalLocationEstimateLatitude=" + addLocEstLatitude +
-        ", additionalLocationEstimateLongitude=" + addLocEstLongitude +
-        ", additionalLocationEstimateUncertainty=" + addLocEstUncertainty +
-        ", additionalLocationEstimateAltitude=" + addLocEstAltitude +
-        ", additionalLocationEstimateUncertaintyAltitude=" + addLocEstUncertaintyAltitude +
-        ", additionalLocationEstimateConfidence=" + addLocEstConfidence +
-        ", additionalLocationEstimateInnerRadius=" + addLocEstInnerRadius +
-        ", additionalLocationEstimateUncertaintyInnerRadius=" + addLocEstUncertaintyRadius +
-        ", additionalLocationEstimateIncludeAngle=" + addLocEstIncludeAngle +
-        ", additionalLocationEstimateOffsetAngle=" + addLocEstOffsetAngle +
-        ", additionalLocationEstimateAngleOfMajorAxis=" + addLocEstAngleOfMajorAxis +
-        ", additionalLocationEstimateUncertaintySemiMajorAxis=" + addLocEstUncertaintySemiMajorAxis +
-        ", additionalLocationEstimateUncertaintySemiMinorAxis=" + addLocEstUncertaintySemiMinorAxis +
-        ", additionalLocationEstimateTypeOfShape=" + addLocEstTypeOfShape +
-        ", deferredMTLRResponseIndicator=" + deferredMTLRResponseIndicatorStr +
-        ", locationServicesMCC=" + lsmMCC +
-        ", locationServicesMNC=" + lsmMNC +
-        ", locationServicesLAC=" + lsmLAC +
-        ", locationServicesCI=" + lsmCI +
-        ", CGI=" + cgi +
-        ", SAI=" + sai +
-        ", accuracyFulfilmentIndicator=" + accuracyFulfilmentIndicatorValue +
-        ", sequenceNumber" + sequenceNumberValue +
-        ", horizontalVelocityEstimate=" + velEstHorizontalSpeed +
-        ", verticalVelocityEstimate=" + velEstVerticalSpeed +
-        ", horizontalVelocityEstimateUncertainty=" + velEstHorSpeedUncertainty +
-        ", verticalVelocityEstimateUncertainty=" + velEstVertSpeedUncertainty +
-        ", velocityEstimateType=" + velocityEstTypeValue +
-        ", velocityEstimateBearing=" + velEstBearing +
-        ", pseudonymIndicator" + pseudonymIndicatorStr +
-        ", servingNodeAddressMSCNumber=" + servingNodeAddressMSC +
-        ", servingNodeAddressSGSNNumber=" + servingNodeAddressSGSN +
-        ", servingNodeAddressMMENumber=" + servingNodeAddressMME +
-        ", lcsClientID_LCSClientName=" + lcsClientID_Name +
-        ", lcsClientID_LCSClientName_DCS=" + lcsClientID_DCS +
-        ", lcsClientID_LCSClientName_FormatIndicator=" + lcsClientID_FI +
-        ", lcsClientID_LCS_APN=" + lcsClientID_APN +
-        ", lcsClientID_LCSClientDialedByMS=" + lcsClientID_LCSClientDialedByMS +
-        ", lcsClientID_LCSClientExternalID=" + lcsClientID_LCSClientExternalID +
-        ", lcsClientID_LCSClientInternalID=" + lcsClientID_LCSClientInternalID +
-        ", lcsClientID_LCSClientType=" + lcsClientID_LCSClientType +
-        ", lcsClientID_LCSRequestorID_DCS=" + lcsClientID_LCSRequestorID_DCS +
-        ", lcsClientID_LCSRequestorID_FormatIndicator=" +  lcsClientID_LCSRequestorID_FI +
-        ", lcsClientID_LCSRequestorID_IDString=" + lcsClientID_LCSRequestorID_IDString +
-        ", lcsQoShorizontalAccuracy=" + lcsQoSHorizontalAccuracy +
-        ", lcsQoSverticalAccuracy=" + lcsQoSVerticalAccuracy +
-        ", lcsQoSResponseTimeCategory=" + lcsQoSResponseTimeCategory +
-        ", lcsQoSVertCoordRequest=" + lcsQoSVerticalCoordRequest +
-        ", lcsQoClass=" + lcsQosClass +
-        ", lcsReferenceNumber=" + lcsRefNum +
-        ", clientReferenceNumber=" + clientRefNum +
-        ", lcsServiceTypeID" + lcsServiceTypeIDValue +
-        ", barometricPressureMeasurement=" + barometricPressure +
-        ", civicAddress=" + civicAddr +
-        ", lcsEvent=" + lcsEventValue +
-        ", locationEvent=" + locationEventValue +
-        ", MSISDN=" + msisdnStr +
-        ", IMEI=" + imeiStr +
-        ", deferredmtlrData_EventType=" + deferredmtlrDataEventType +
-        ", deferredmtlrData_LMSI=" + deferredmtlrDataLMSI +
-        ", deferredmtlrData_NNN=" + deferredmtlrDataNNN +
-        ", deferredmtlrData_MSCnum=" + deferredmtlrDataMSCnum +
-        ", deferredmtlrData_SGSNnum=" + deferredmtlrDataSGSNnum +
-        ", deferredmtlrData_AAAserverName=" + deferredmtlrDataAAAServerName +
-        ", deferredmtlrData_MMEName=" + deferredmtlrDataMMEname +
-        ", deferredmtlrData_GPRSNodeIndicator=" + deferredmtlrDataGPRSNodeInd +
-        ", deferredmtlrData_TerminationCause=" + deferredmtlrDataTerminationCause +
-        ", PeriodicReportingAmount=" + periodicLDRInfoReportingAmount +
-        ", PeriodicReportingInterval=" + periodicLDRInfoReportingInterval +
-        ", moLrShortCircuitIndicator=" + moLrShortCircuitIndicatorStr +
-        ", ReportingPLMNList=" + reportingPLMNListArray +
-        ", ReportingPLMNList_Prioritized=" + reportingPLMNListPrioritized +
-        ", EUTRANPositioningData" + eUTRANPositioningDataStr +
-        ", 1XRTTRCID" + oneXRttRcid +
-
-        // MAP PSI response parameters parameters concerning detail records
-        ", cgiSaiLaiMCC=" + cgiSaiLaiMCC +
-        ", cgiSaiLaiMNC=" + cgiSaiLaiMNC +
-        ", cgiSaiLaiLAC=" + cgiSaiLaiLAC +
-        ", cgiSaiLaiCI=" + cgiSaiLaiCI +
-        ", geographicLatitude=" + geogLat +
-        ", geographicLongitude=" + geogLong +
-        ", geographicUncertainty=" + geogUncertainty +
-        ", geographicTypeOfShape=" + geogTypeOfShape +
-        ", geodeticLatitude=" + geodLat +
-        ", geodeticLongitude=" + geodLong +
-        ", geodeticUncertainty=" + geodUncertainty +
-        ", geodeticConfidence=" + geodConfidence +
-        ", geodeticScreeningAndPresentationIndicators=" + geodScreeningAndPresentationInd +
-        ", geodeticTypeOfShape=" + geodTypeOfShape +
-        ", vlrNumber=" + vlrNum +
-        ", mscNumber=" + mscNum +
-        ", sgsnNumber=" + sgsnNum +
-        ", saiPresent=" + saiPresent +
-        ", lsaIdentity" + lsaIdentity +
-        ", psiIsPLMNSignificantLSA" + psiIsPlmnSignificantLSA +
-        ", raIdentity" + raIdentity +
-        ", currentLocationRetrieved=" + currentLocationRetrieved +
-        ", ageOfLocationInformation=" + aol +
-        ", trackingAreaId=" + trackingAreaId +
-        ", E-UTRAN-CGI=" + ecgi +
-        ", E-UTRAN-CellPortionId=" + cellPortionIdentity +
-        ", mnpStatus=" + mnpStatus +
-        ", mnpRouteingNumber=" + mnpRouteingNum +
-        ", mnpImsi=" + mnpImsi +
-        ", mnpMsisdn=" + mnpMsisdn +
-        ", subState=" + subState +
-        ", nrCellGlobalId=" + nr5gsCellGlobalId +
-        ", ageOfLocation=" + ageOfLocation +
-        "]@" + super.hashCode();
+            ", generated=" + generated +
+            ", user=" + curlUser +
+            ", id=" + id +
+            ", recordStatus=" + recordStatus +
+            ", statusCode=" + statusCode +
+            ", localDialogId=" + localDialogId  +
+            ", remoteDialogId=" + remoteDialogId +
+            ", dialogDuration" + dialogDuration +
+            ", origReference=" + origReference +
+            ", destReference=" + destReference +
+            ", localAddress=" + localAddress +
+            ", remoteAddress=" + remoteAddress +
+            ", diameterOriginHost=" + diameterOriginHost +
+            ", diameterOriginRealm=" + diameterOriginRealm +
+            ", diameterOriginPort=" + diameterOriginPort +
+            ", diameterDestHost=" + diameterDestHost +
+            ", diameterDestRealm=" + diameterDestRealm +
+            ", diameterDestPort=" + diameterDestPort +
+            ", slpSocketAddress=" + slpSocketAddress +
+            ", slpSocketPort=" + slpSocketPort +
+            ", setSocketAddress=" + setSocketAddress +
+            ", setSocketPort=" + setSocketPort +
+            ", vlrAddress=" + vlrAddress +
+            ", ISDNString=" + isdnAddressString +
+            ", msClassmark=" + msClassmark2 +
+            ", gprsMsClass=" + gprsmsClass +
+            ", MSISDN=" + msisdn +
+            ", IMSI=" + imsi +
+            ", IMEI=" + imei +
+            ", LMSI=" + lmsi +
+            ", networkNodeNumber=" + networkNodeNumber +
+            ", GPRSNodeIndicator=" + gprsNodeIndicator +
+            ", additionalNumber=" + additionalNumber +
+            ", MMEName=" + mmeName +
+            ", MMERealm=" + mmeRealm +
+            ", SGSNName=" + sgsnName +
+            ", SGSNRealm=" + sgsnRealm +
+            ", AAAServerName=" + aaaServerName +
+            ", LCSCapabilitySets=" + supportedLCSCapabilitySets +
+            ", vGMLCAddressData=" + vGmlcAddress +
+            ", hGMLCAddressData=" + hGmlcAddress +
+            ", PPRAddressData=" + pprAddress +
+            ", location=" + locationEstimate +
+            ", geranPositioningDataInformation=" + geranPositioningDataInfo +
+            ", utranPositioningDataInfo=" + utranPosDataInfo +
+            ", geranGANSSPositioningData=" + geranGANSSPosDataInfo +
+            ", utranGANSSPositioningData=" + utranGANSSPosDataInfo +
+            ", utranAdditionalPositioningDataInfo=" + utranAddPositioningData +
+            ", EUTRANPositioningData=" + eUTRANPositioningDataStr +
+            ", ageOfLocationEstimate=" + ageOfLocationEstimate +
+            ", accuracyFulfilmentIndicator=" + accuracyFulfilmentIndicator +
+            ", additionalLocationEstimate=" + additionalLocationEstimate +
+            ", deferredMTLRResponseIndicator=" + deferredMTLRResponseIndicator +
+            ", CGI or SAI or LAI=" + cellGlobalIdOrServiceAreaIdOrLAI +
+            ", ECGI=" + eUtranCgi +
+            ", cellPortionId=" + cellPortionId +
+            ", sequenceNumber" + sequenceNumber +
+            ", velocityEstimate=" + velocityEstimate +
+            ", pseudonymIndicator" + pseudonymIndicator +
+            ", servingNode=" + servingNodeAddress +
+            ", lcsClientID=" + lcsClientID +
+            ", lcsEpsClientName=" + lcsEpsClientName +
+            ", lcsEpsClientFormatIndicator=" + lcsEpsClientFormatIndicator +
+            ", lcsQoS=" + lcsQoS +
+            ", lcsQoClass=" + lteLcsQoSClass +
+            ", lcsReferenceNumber=" + lcsReferenceNumber +
+            ", clientReferenceNumber=" + clientReferenceNumber +
+            ", lcsServiceTypeID" + lcsServiceTypeID +
+            ", barometricPressureMeasurement=" + barometricPressureMeasurement +
+            ", civicAddress=" + civicAddress +
+            ", lcsEvent=" + lcsEvent +
+            ", locationEvent=" + locationEvent +
+            ", deferredMtLrData=" + deferredmtlrData +
+            ", periodicLDRInfo=" + periodicLDRInfo +
+            ", moLrShortCircuitIndicator=" + moLrShortCircuitIndicator +
+            ", ReportingPLMNList=" + reportingPLMNListArray +
+            ", reportingPLMNListPrioritized=" + reportingPLMNListPrioritized +
+            ", 1XRTTRCID=" + oneXRTTRCID +
+            ", naESRK-Request=" + naEsrkRequest +
+            ", naESRD=" + naESRD +
+            ", naERK=" + naESRK +
+            ", amfInstanceId=" + amfInstanceId +
+            ", locationInformation=" + locationInformation +
+            ", locationInformationGPRS=" + locationInformationGPRS +
+            ", locationInformationEPS=" + locationInformationEPS +
+            ", locationInformation5GS=" + locationInformation5GS +
+            ", currentLocationRetrieved=" + currentLocationRetrieved +
+            ", ageOfLocationInformation=" + ageOfLocationInformation +
+            ", trackingAreaId=" + taId +
+            ", mnpInfoRes=" + mnpInfoRes +
+            "]@" + super.hashCode();
   }
 
 }

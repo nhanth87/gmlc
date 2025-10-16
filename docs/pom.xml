@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.mobicents.gmlc</groupId>
 		<artifactId>restcomm-gmlc-parent</artifactId>
-		<version>5.0.0-SNAPSHOT</version>
+		<version>6.0.1-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.mobicents.gmlc.docs</groupId>
@@ -15,7 +15,7 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<docs.this.platform>Extended</docs.this.platform>
+		<docs.this.platform>PAiCore</docs.this.platform>
 		<docs.this.folder>restcomm</docs.this.folder>
 		<docs.this.application>GMLC</docs.this.application>
 		<docs.project.version>${project.version}</docs.project.version>

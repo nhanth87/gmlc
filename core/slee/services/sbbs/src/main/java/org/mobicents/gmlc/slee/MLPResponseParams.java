@@ -13,7 +13,7 @@ class MLPResponseParams implements Serializable {
    /*** MLP Response ***/
    /*******************/
    String mlpMsisdn;
-   Integer mlpMcc, mlpMnc, mlpLac, mlpCi, mlpSac, mlpTac, mlpRac;
+   Integer mlpMcc, mlpMnc, mlpLac, mlpCi, mlpSac, mlpTac, mlpRac, mlpNrTac;
    Long mlpEci, mlpNci;
    String mlpVlrNo, mlpMscNo, mlpMmeName, mlpSgsnName;
    String mlpState;

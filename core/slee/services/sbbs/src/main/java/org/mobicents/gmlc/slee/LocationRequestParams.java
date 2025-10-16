@@ -16,8 +16,9 @@ public class LocationRequestParams implements Serializable {
     protected String pslMsisdn, pslImsi, pslImei, pslOccurrenceInfo, pslAreaType, pslAreaId, pslLocationEstimateType, pslDeferredLocationEventType,
         pslLcsPriority, pslVerticalCoordinateRequest, pslResponseTimeCategory, slrCallbackUrl, psiServiceType, psiOnlyImsi, psiOnlyNnn;
     protected String pslClientExternalID, pslClientName, pslClientDialedByMS, pslRequestorIdString, pslLcsCodeword;
+    protected Boolean pslVelocityRequest;
     Integer pslClientInternalID, pslClientFormatIndicator, pslRequestorFormatIndicator;
-    protected Integer pslLcsClientType, pslLcsHorizontalAccuracy, pslLcsVerticalAccuracy, pslLcsServiceTypeID, pslIntervalTime, pslReportingAmount, pslReportingInterval;
+    protected Integer pslLcsClientType, pslLcsHorizontalAccuracy, pslLcsVerticalAccuracy, pslLcsServiceTypeID, pslIntervalTime, pslReportingAmount, pslReportingInterval, pslQoSClass;
     protected String pslPLMNIdList;
     protected Integer pslVisitedPLMNIdRAN, pslPeriodicLocationSupportIndicator, pslPrioritizedListIndicator;
 
@@ -31,7 +32,8 @@ public class LocationRequestParams implements Serializable {
         plrFlags, plrAreaType, plrAdditionalAreaType, plrAreaEventIntervalTime, plrAreaEventSamplingInterval, plrAreaEventMaxInterval,
         plrAreaEventReportingDuration, plrAreaEventRepLocRequirements, plrPeriodicLDRReportingAmount, plrPeriodicLDRReportingInterval, plrMotionEventLinearDistance,
         plrMotionEventIntervalTime, plrMotionEventMaximumInterval, plrMotionEventSamplingInterval, plrMotionEvenReportingDuration, plrMotionEvenReportingLocationRequirements;
-    protected Integer plrSlgLocationType, plrLcsFormatInd, plrLcsClientType, plrLcsRequestorFormatIndicator, plrLcsReferenceNumber, plrQoSClass, plrVerticalRequested, plrResponseTime, plrVelocityRequested, plrPrivacyCheckNonSession, plrPrivacyCheckSession,
+    protected Integer plrSlgLocationType, plrLcsFormatInd, plrLcsClientType, plrLcsRequestorFormatIndicator, plrLcsReferenceNumber, plrQoSClass,
+        plrVerticalRequested, plrResponseTime, plrVelocityRequested, plrPrivacyCheckNonSession, plrPrivacyCheckSession,
         plrAreaEventOccurrenceInfo, plrPeriodicLocationSupportIndicator, plrPrioritizedListIndicator, plrMotionEventOccurrenceInfo;
     protected ReportingPLMNListAvp reportingPLMNListAvp;
     protected Integer lteLcsReferenceNumber;
@@ -223,6 +225,22 @@ public class LocationRequestParams implements Serializable {
 
     public void setPslResponseTimeCategory(String pslResponseTimeCategory) {
         this.pslResponseTimeCategory = pslResponseTimeCategory;
+    }
+
+    public Boolean getPslVelocityRequest() {
+        return pslVelocityRequest;
+    }
+
+    public void setPslVelocityRequest(Boolean pslVelocityRequest) {
+        this.pslVelocityRequest = pslVelocityRequest;
+    }
+
+    public Integer getPslQoSClass() {
+        return pslQoSClass;
+    }
+
+    public void setPslQoSClass(Integer pslQoSClass) {
+        this.pslQoSClass = pslQoSClass;
     }
 
     public String getPslLcsCodeword() {
@@ -669,8 +687,8 @@ public class LocationRequestParams implements Serializable {
         return plrMotionEventLinearDistance;
     }
 
-    public void setPlrMotionEventLinearDistance(Long plrMotionEventlinearDistance) {
-        this.plrMotionEventLinearDistance = plrMotionEventlinearDistance;
+    public void setPlrMotionEventLinearDistance(Long plrMotionEventLinearDistance) {
+        this.plrMotionEventLinearDistance = plrMotionEventLinearDistance;
     }
 
     public Long getPlrMotionEventIntervalTime() {

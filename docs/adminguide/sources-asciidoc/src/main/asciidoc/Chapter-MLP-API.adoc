@@ -10,12 +10,9 @@ As for up-to-date version of {this-platform} {this-application}, the following O
 * *Triggered Location Reporting Service*. Used when an application wants the position of several MSs to be tracked upon events such as change of area, distance, an action of the mobile subscriber such as becoming available, a distance event since the last report, a velocity event, etc. Request/Answer XML root elements of this service: *TLRR*/*TLRA*.
 * *Standard Location Reporting Service*. Used when a mobile subscriber wants an LCS client to receive the MS location, e.g. by initiating a MO-LR procedure according to [23.271]. {this-platform} {this-application} also uses this service for  MAP or Diameter LCS reports upon RAN events such as emergency call origination.  Request/Answer XML root elements of this service: *SLREP*/*SLRA*.
 
-.MLP API parameters and XML elements
-[%autowidth, cols="b,v,v,v"]]
-|=======================================================================
-|PROPERTY |ELEMENTS| ATTRIBUTES | DESCRIPTION
+== MLP API parameters and XML elements
 
-|
+=== Properties, elements and attributes
 
 *scv_init*
 
@@ -195,7 +192,8 @@ As for up-to-date version of {this-platform} {this-application}, the following O
 
 *civicloc*
 
-|_ver_
+
+_ver_
 
 _type_
 
@@ -217,11 +215,22 @@ _srsName_
 
 _gid_
 
-|
 
-*scv_init*: XML root element for `service initiation`. Its _ver_ attribute must be set to "3.4.0". Example: `<svc_init ver="3.4.0">`
+*scv_init*: XML root element for `service initiation`. Its _ver_ attribute must be set to "3.4.0". Example:
+[source,xml]
+----
+<svc_init ver="3.4.0">
+...
+</svc_init>
+----
 
-*svc_result*: XML root element for `service result`. Its _ver_ attribute must be set to "3.4.0". Example: `<svc_result ver="3.4.0">`
+*svc_result*: XML root element for `service result`. Its _ver_ attribute must be set to "3.4.0". Example:
+[source,xml]
+----
+<svc_result ver="3.4.0">
+...
+</svc_result>
+----
 
 *hdr*: XML child element of _scv_init_ constituting the `header` part of the service. It holds the authentication and authorization data pertinent to a particular location request.
 
@@ -229,240 +238,498 @@ _gid_
 
 *requestor*: XML child element of _hdr_. It contains the information of the LCS Client requestor.
 
-*id*: XML child element of _client_ or _requestor_. It defines the name of a registered user performing a location request. Example: `<id>ExtendedGeolocationAPI</id>`
+*id*: XML child element of _client_ or _requestor_. It defines the name of a registered user performing a location request. Example:
+[source,xml]
+----
+<id>ExtendedGeolocationAPI</id>
+----
 
-*pwd*: XML child element of _client_. HTTP POST (cURL) request token. This value must match the one configured as `curltoken` in the `GmlcManagement_gmlcproperties.xml` file or the `token` at the MongoDB database within the `curl-account` collection. Example: `<pwd>RmVybmFuZG9NZW5kaW9yb3o</pwd>`
+*pwd*: XML child element of _client_. HTTP POST (cURL) request token. This value must match the one configured as `curltoken` in the `GmlcManagement_gmlcproperties.xml` file or the `token` at the MongoDB database within the `curl-account` collection. Example:
+[source,xml]
+----
+<pwd>RmVybmFuZG9NZW5kaW9yb3o</pwd>
+----
 
-*serviceid*: XML child element of _client_. Specifies an id that is used by an entity to identify the service or application that is accessing the network. Values used by this {this-platform} {this-application} are "0100" for *MAP ATI*, "0101" for *MAP SRISM-PSI*, "0104" for *Diameter SLh/SLg RIR/PLR*, "0105" for *MAP SRILCS-PSL* and "0106" for *Diameter Sh UDR*. Example: `<serviceid>0105</serviceid>`
+*serviceid*: XML child element of _client_. Specifies an id that is used by an entity to identify the service or application that is accessing the network. Values used by this {this-platform} {this-application} are "0100" for *MAP ATI*, "0101" for *MAP SRISM-PSI*, "0104" for *Diameter SLh/SLg RIR/PLR*, "0105" for *MAP SRILCS-PSL* and "0106" for *Diameter Sh UDR*. Example:
+[source,xml]
+----
+<serviceid>0105</serviceid>
+----
 
-*lcs_client_type*: XML child element of _client_. Indicates the LCS client type, which can be one of the following integer values: "EMERGENCY_SERVICES", "VALUE_ADDED_SERVICES", "PLMN_OPERATOR_SERVICES" or "LAWFUL_INTERCEPT_SERVICES". This parameter is mandatory when _serviceid_ attribute equals "0104" or "0105". Example: `<lcs_client_type>EMERGENCY_SERVICES</lcs_client_type>`
+*lcs_client_type*: XML child element of _client_. Indicates the LCS client type, which can be one of the following integer values: "EMERGENCY_SERVICES", "VALUE_ADDED_SERVICES", "PLMN_OPERATOR_SERVICES" or "LAWFUL_INTERCEPT_SERVICES". This parameter is mandatory when _serviceid_ attribute equals "0104" or "0105". Example:
+[source,xml]
+----
+<lcs_client_type>EMERGENCY_SERVICES</lcs_client_type>
+----
 
-*lcs_client_name*: XML child element of _client_. Indicates the name of the LCS Client, an UTF8 string consistent with its format indicator. Example: `<lcs_client_name>sip:+1-212-555-1212:1234@gateway.com;user=phone</lcs_client_name>`.
+*lcs_client_name*: XML child element of _client_. Indicates the name of the LCS Client, an UTF8 string consistent with its format indicator. Example:.
+[source,xml]
+----
+<lcs_client_name>sip:+1-212-555-1212:1234@gateway.com;user=phone</lcs_client_name>
+----
 
-*lcs_client_name_fi*: XML child element of _client_. Indicates the format of the LCS Client name given by _lcs_client_name_ attribute. It can take the following values: "NAME", "E-MAIL", "MSISDN", "URL" or "SIPURL". This parameter is mandatory when _serviceid_ attribute equals "0104" or "0105". Example: `<lcs_client_name_fi>SIPURL</lcs_client_name_fi>`.
+*lcs_client_name_fi*: XML child element of _client_. Indicates the format of the LCS Client name given by _lcs_client_name_ attribute. It can take the following values: "NAME", "E-MAIL", "MSISDN", "URL" or "SIPURL". This parameter is mandatory when _serviceid_ attribute equals "0104" or "0105". Example:.
+[source,xml]
+----
+<lcs_client_name_fi>SIPURL</lcs_client_name_fi>
+----
 
-*lcs_client_external_id*: XML child element of _client_. Indicates the LCS Client external identity. It comprises a number with a maximum length of 16 digits. This parameter is mandatory when _lcs_client_type_ attribute equals  "EMERGENCY_SERVICES" or "VALUE_ADDED_SERVICES" and _serviceid_ attribute equals "0104". Example: `<lcs_client_external_id>911</lcs_client_external_id>`.
+*lcs_client_external_id*: XML child element of _client_. Indicates the LCS Client external identity. It comprises a number with a maximum length of 16 digits. This parameter is mandatory when _lcs_client_type_ attribute equals  "EMERGENCY_SERVICES" or "VALUE_ADDED_SERVICES" and _serviceid_ attribute equals "0104". Example:.
+[source,xml]
+----
+<lcs_client_external_id>911</lcs_client_external_id>
+----
 
-*lcs_client_internal_id*: XML child element of _client_. Indicates the LCS Client internal identity. This parameter is mandatory when _lcs_client_type_ attribute equals  "PLMN_OPERATOR_SERVICES" only and _serviceid_ attribute equals "0104". Possible values are "0" (broadcast service), "1" (Operation and Maintenance HPLMN), "2" (Operation and Maintenance VPLMN), "3" (anonymousLocation) or "4" (target MS subscribed service SIP). Example: `<lcs_client_internal_id>1</lcs_client_internal_id>`.
+*lcs_client_internal_id*: XML child element of _client_. Indicates the LCS Client internal identity. This parameter is mandatory when _lcs_client_type_ attribute equals  "PLMN_OPERATOR_SERVICES" only and _serviceid_ attribute equals "0104". Possible values are "0" (broadcast service), "1" (Operation and Maintenance HPLMN), "2" (Operation and Maintenance VPLMN), "3" (anonymousLocation) or "4" (target MS subscribed service SIP). Example:
+[source,xml]
+----
+<lcs_client_internal_id>1</lcs_client_internal_id>
+----
 
 *lcs_service_type_id*: XML child element of _client_. Indication of the service type identity of the location service. Possible values range from 0 to 127 (explained further in this document). This parameter is only valid when _serviceid_ attribute equals "0104" or "0105".
 
-*slir*: XML child element of _scv_init_. It indicates that the service request is *Standard Location Immediate Request*. Its argument _ver_ must be set to "3.4.0", while the argument _res_type_ may take the values "SYNC" or "ASYNC" respectively indicating requests to receive the location response in one response or in pieces using several consecutive connections initiated by the location Server. Example: `<slir ver="3.4.0" res_type="SYNC">`.
+*slir*: XML child element of _scv_init_. It indicates that the service request is *Standard Location Immediate Request*. Its argument _ver_ must be set to "3.4.0", while the argument _res_type_ may take the values "SYNC" or "ASYNC" respectively indicating requests to receive the location response in one response or in pieces using several consecutive connections initiated by the location Server. Example:.
+[source,xml]
+----
+<slir ver="3.4.0" res_type="SYNC">
+...
+</slir>
+----
 
-*tlrr*: XML child element of _scv_init_. It indicates that the service request is *Triggered Location Reporting Request*. Its argument _ver_ must be set to "3.4.0", while the argument _res_type_ may take the value "SYNC" or "ASYNC" respectively indicating requests to receive the location response in one response or in pieces using several consecutive connections initiated by the location Server. Example: `<slir ver="3.4.0" res_type="SYNC">`.
+*tlrr*: XML child element of _scv_init_. It indicates that the service request is *Triggered Location Reporting Request*. Its argument _ver_ must be set to "3.4.0", while the argument _res_type_ may take the value "SYNC" or "ASYNC" respectively indicating requests to receive the location response in one response or in pieces using several consecutive connections initiated by the location Server. Example:.
+[source,xml]
+----
+<slir ver="3.4.0" res_type="SYNC">
+...
+</slir>
+----
 
 *msids*: XML child element of _slir_ or _tlrr_. It contains the information of the location request mobile subscriber targets.
 
-*msid*: XML child element of _msids_ or _pos_. It contains the value of the mobile subscriber target of the location request. For SLIR or TLRR it is defined by its argument _type_, which can be "MSISDN" or "IMSI", constituting the E.164 number or the E.212 number respectively. Example: `<msid type="MSISDN">59899077937</msid>`.
+*msid*: XML child element of _msids_ or _pos_. It contains the value of the mobile subscriber target of the location request. For SLIR or TLRR it is defined by its argument _type_, which can be "MSISDN" or "IMSI", constituting the E.164 number or the E.212 number respectively. Example:.
+[source,xml]
+----
+<msid type="MSISDN">59899077937</msid>
+----
 
-*trans_id*: XML child element of _msids_. An integer identifier originally provided by the LCS client so it can associate responses to the original request. This parameter is mandatory when `client` element attribute _serviceid_ equals "0104" or "0105". Example: `<trans_id>57892</trans_id>`.
+*trans_id*: XML child element of _msids_. An integer identifier originally provided by the LCS client so it can associate responses to the original request. This parameter is mandatory when `client` element attribute _serviceid_ equals "0104" or "0105". Example:
+[source,xml]
+----
+<trans_id>57892</trans_id>
+----
 
-*loc_type*: XML child element of _slir_ or _tlrr_. Indication of the type of location request required. This parameter is mandatory when `client` element attribute _serviceid_ equals "0104" or "0105". Allowed values are: "CURRENT", "INITIAL", "CURRENT_OR_LAST", "LAST" and "CURRENT_AND_INTERMEDIATE". Example: `<loc_type type="CURRENT" />`.
+*loc_type*: XML child element of _slir_ or _tlrr_. Indication of the type of location request required. This parameter is mandatory when `client` element attribute _serviceid_ equals "0104" or "0105". Allowed values are: "CURRENT", "INITIAL", "CURRENT_OR_LAST", "LAST" and "CURRENT_AND_INTERMEDIATE". Example:
+[source,xml]
+----
+<loc_type type="CURRENT" />
+----
 
-*prio*: XML child element of _slir_ or _tlrr_. Defines the priority of a location request. Its _type_ attribute shall take the value "DELAY_TOL", "NO_DELAY" or "LOW_DELAY". Example: `<prio type="DELAY_TOL" />`.
+*prio*: XML child element of _slir_ or _tlrr_. Defines the priority of a location request. Its _type_ attribute shall take the value "DELAY_TOL", "NO_DELAY" or "LOW_DELAY". Example:
+[source,xml]
+----
+<prio type="DELAY_TOL" />
+----
 
 *qop*: XML child element of _slir_. Defines que quality of positioning desired of the location request.
 
 *eqop*: XML child element of _tlrr_. Defines que quality of positioning desired of the location request.
 
-*resp_timer*: XML child element of _qop_ or _eqop_. Defines a timer for the response time within which the current location SHOULD be obtained and returned to the LCS Client. Example: `<eqop>
-<resp_timer>45</resp_timer>
-</eqop>`.
+*resp_timer*: XML child element of _qop_ or _eqop_. Defines a timer for the response time within which the current location SHOULD be obtained and returned to the LCS Client. Example:
+[source,xml]
+----
+<eqop>
+    <resp_timer>45</resp_timer>
+</eqop>
+----
 
-*hor_acc*: XML child element of _slir_ or _tlrr_. Indicates the desired horizontal accuracy of the location request. Must be an integer value from 0 to 127 governed by the equation r=C((1+x)^k -1) with C = 10 and x = 0,1. With 0 <= K <= 127, a suitably useful range between 0 and 1800 kilometres. The horizontal location error should be less than the error indicated by the uncertainty code (r) with 67% confidence. Its _qos_class_ attribute defines the degree of adherence by th to the quality this quality of service parameter, whose value can be one of "ASSURED" or "BEST_EFFORT". Example: `<hor_acc qos_class="BEST_EFFORT">100</hor_acc>`.
+*hor_acc*: XML child element of _slir_ or _tlrr_. Indicates the desired horizontal accuracy of the location request. Must be an integer value from 0 to 127 governed by the equation r=C((1+x)^k -1) with C = 10 and x = 0,1. With 0 <= K <= 127, a suitably useful range between 0 and 1800 kilometres. The horizontal location error should be less than the error indicated by the uncertainty code (r) with 67% confidence. Its _qos_class_ attribute defines the degree of adherence by th to the quality this quality of service parameter, whose value can be one of "ASSURED" or "BEST_EFFORT". Example:
+[source,xml]
+----
+<hor_acc qos_class="BEST_EFFORT">100</hor_acc>
+----
 
-*ver_acc*: XML child element of _slir_ or _tlrr_. Indicates the desired vertical accuracy of the location request. Must be an integer value from 0 to 127, governed by the equation h=C((1+x)^k -1), with C = 45 and x = 0,025. With 0 <= K <= 127, a suitably useful range between 0 and 990.5 kilometres. The horizontal location error should be less than the error indicated by the uncertainty code (h) with 67% confidence. Its _qos_class_ attribute defines the degree of adherence by th to the quality this quality of service parameter, whose value can be one of "ASSURED" or "BEST_EFFORT". Example: `<ver_acc>100</ver_acc>`
+*ver_acc*: XML child element of _slir_ or _tlrr_. Indicates the desired vertical accuracy of the location request. Must be an integer value from 0 to 127, governed by the equation h=C((1+x)^k -1), with C = 45 and x = 0,025. With 0 <= K <= 127, a suitably useful range between 0 and 990.5 kilometres. The horizontal location error should be less than the error indicated by the uncertainty code (h) with 67% confidence. Its _qos_class_ attribute defines the degree of adherence by th to the quality this quality of service parameter, whose value can be one of "ASSURED" or "BEST_EFFORT". Example:
+[source,xml]
+----
+<ver_acc>100</ver_acc>
+----
 
-*resp_req*: XML child element of _slir_ or _tlrr_. represents the response time required for the location request. Its _type_ attribute can take the values "LOW_DELAY", "NO_DELAY" or "DELAY_TOL". Example: `<resp_req type="LOW_DELAY" />`.
+*resp_req*: XML child element of _slir_ or _tlrr_. represents the response time required for the location request. Its _type_ attribute can take the values "LOW_DELAY", "NO_DELAY" or "DELAY_TOL". Example:
+[source,xml]
+----
+<resp_req type="LOW_DELAY" />
+----
 
-*ll_acc*: XML child element of _slir_ or _tlrr_. Longitude and latitude accuracy in seconds. Its _qos_class_ attribute defines the degree of adherence by th to the quality this quality of service parameter, whose value can be one of "ASSURED" or "BEST_EFFORT". Example: `<ll_acc qos_class="ASSURED">30</ll_acc>`.
+*ll_acc*: XML child element of _slir_ or _tlrr_. Longitude and latitude accuracy in seconds. Its _qos_class_ attribute defines the degree of adherence by th to the quality this quality of service parameter, whose value can be one of "ASSURED" or "BEST_EFFORT". Example:
+[source,xml]
+----
+<ll_acc qos_class="ASSURED">30</ll_acc>
+----
 
-*interval*: XML child element of _tlrr_. TLRR with `interval` shall be interpreted as a request for periodic location reports, and TLRR with `tlrr_event` SHALL be interpreted as a request for a location report on the occurrence of a specific event. `interval` and `tlrr_event` MAY be combined for combined periodic and event based location request. Indicates the time interval between location reports (in seconds). Values may vary between `1` and `8639999`. Example: `<interval>30</interval>`.
+*interval*: XML child element of _tlrr_. TLRR with `interval` shall be interpreted as a request for periodic location reports, and TLRR with `tlrr_event` SHALL be interpreted as a request for a location report on the occurrence of a specific event. `interval` and `tlrr_event` MAY be combined for combined periodic and event based location request. Indicates the time interval between location reports (in seconds). Values may vary between `1` and `8639999`. Example:
+[source,xml]
+----
+<interval>30</interval>
+----
 
-*duration*: XML child element of _tlrr_. Defines the time range of triggered location reporting service. The division between this element's value and interval's value defines the amount of periodic location deferred reports (which needs to be between `1` and `8639999`). Example: `<duration>600</duration>`.
+*duration*: XML child element of _tlrr_. Defines the time range of triggered location reporting service. The division between this element's value and interval's value defines the amount of periodic location deferred reports (which needs to be between `1` and `8639999`). Example:
+[source,xml]
+----
+<duration>600</duration>
+----
 
 *tlrr_event*: XML child element of _tlrr_. It defines one of the following events for target subscriber tracking: an mobile subscriber action defined as the event "UE available"; an area event defined as “change of area”, a velocity event (used in SUPL 3.0); a distance event, that is based on the distances between the target mobile subscriber and one or more reference objects, and an equidistance event, based on the distance travelled from the last location report.
 
-*ms_action*: XML child element of _tlrr_event_. Specifies the trigger that initiated the positioning of the target mobile subscriber. Its _type_ attribute can have the "MS_AVAIL" value, indicating when the user equipment becomes reachable within the radio access network, or "PERIODIC" for deferred location reports based on `interval` and `duration` (the latter used only for MAP PSL and Diameter PLR). Example: `<ms_action type="MS_AVAIL" />`.
+*ms_action*: XML child element of _tlrr_event_. Specifies the trigger that initiated the positioning of the target mobile subscriber. Its _type_ attribute can have the "MS_AVAIL" value, indicating when the user equipment becomes reachable within the radio access network, or "PERIODIC" for deferred location reports based on `interval` and `duration` (the latter used only for MAP PSL and Diameter PLR). Example:
+[source,xml]
+----
+<ms_action type="MS_AVAIL" />
+----
 
-*change_area*: XML child element of _tlrr_event_. Defines the area that shall trigger a location report. Its _type_ attribute may have the values "MS_ENTERING", "MS_LEAVING", "MS_WITHIN_AREA" or "MS_OUTSIDE_AREA". Its _loc_estimates_ attribute indicates whether a location estimate is required for each report ("TRUE" or "FALSE"). Example: `<change_area type="MS_ENTERING" loc_estimates="TRUE">`.
+*change_area*: XML child element of _tlrr_event_. Defines the area that shall trigger a location report. Its _type_ attribute may have the values "MS_ENTERING", "MS_LEAVING", "MS_WITHIN_AREA" or "MS_OUTSIDE_AREA". Its _loc_estimates_ attribute indicates whether a location estimate is required for each report ("TRUE" or "FALSE"). Example:
+[source,xml]
+----
+<change_area type="MS_ENTERING" loc_estimates="TRUE">
+</change_area>
+----
 
 *target_area*: XML child element of _change_area_. Defines the area that shall trigger a location report whenever the tracked mobile subscriber enters, leaves, remains inside or outside the target area.
 
-*cc*: XML child element of _target_area_ in a TLRR. Indicates the country code of the PLMN at which the tracked mobile subscriber is roaming at which shall generate a change of area location report. Example: `<cc>502</cc>`.
+*cc*: XML child element of _target_area_ in a TLRR. Indicates the country code of the PLMN at which the tracked mobile subscriber is roaming at which shall generate a change of area location report. Example:
+[source,xml]
+----
+<cc>502</cc>
+----
 
-*plmn*: XML child element of _target_area_ in a TLRR. Indicates the PLMN at which the tracked mobile subscriber is roaming at which shall generate a change of area location report. It is defined by its child elements *mcc* and *mnc*, which respectively indicate the mobile country code and mobile network code. Example: `<plmn>
-<mcc>502</mcc>
-<mnc>18</mnc>
-</plmn>`.
+*plmn*: XML child element of _target_area_ in a TLRR. Indicates the PLMN at which the tracked mobile subscriber is roaming at which shall generate a change of area location report. It is defined by its child elements *mcc* and *mnc*, which respectively indicate the mobile country code and mobile network code. Example:
+[source,xml]
+----
+<plmn>
+    <mcc>502</mcc>
+    <mnc>18</mnc>
+</plmn>
+----
 
 *serving_cell*: XML child element of _target_area_ in a TLRR or _pos_ in a SLIA, TLRA or SLREP. Indicates the cell identity at which the tracked mobile subscriber is roaming at which shall generate a change of area location report.
 
-*cgi*: XML child element of _serving_cell_ or _gsm_net_param_. It defines the Cell Global Identification by its child elements *mcc*, *mnc*, *lac* and *cell_id*. Example: `<cgi>
-<mcc>732</mcc>
-<mnc>103</mnc>
-<lac>1</lac>
-<cellid>20042</cellid>
-</cgi>`.
+*cgi*: XML child element of _serving_cell_ or _gsm_net_param_. It defines the Cell Global Identification by its child elements *mcc*, *mnc*, *lac* and *cell_id*. Example:.
+[source,xml]
+----
+<cgi>
+    <mcc>732</mcc>
+    <mnc>103</mnc>
+    <lac>1</lac>
+    <cellid>20042</cellid>
+</cgi>
+----
 
-*sai*: XML child element of _serving_cell_. It defines the Service Area Identification by its child elements *mcc*, *mnc*, *lac* and *sac*. Example: `<sai>
+*sai*: XML child element of _serving_cell_. It defines the Service Area Identification by its child elements *mcc*, *mnc*, *lac* and *sac*. Example: .
+[source,xml]
+----
+<sai>
+    <mcc>437</mcc>
+    <mnc>109</mnc>
+    <lac>8304</lac>
+    <sac>17185</sac>
+</sai>
+----
+
+*mcc*: XML child element of _cgi_ or _sai_ or _serving_cell_. Indicates the Mobile Country Code as per ITU-T E.212. Example:.
+[source,xml]
+----
 <mcc>437</mcc>
-<mnc>109</mnc>
+----
+
+*mnc*: XML child element of _cgi_ or _sai_ or _serving_cell_. Indicates the Mobile Network Code as per ITU-T E.212. Example:.
+[source,xml]
+----
+<mnc>2</mnc>
+----
+
+*lac*: XML child element of _cgi_ or _sai_ or _serving_cell_. Indicates the Location Area Code. Example:.
+[source,xml]
+----
 <lac>8304</lac>
+----
+
+*cellid*: XML child element of _cgi_ or _sai_ or _serving_cell_. Indicates the identifier of the base station. Example:.
+[source,xml]
+----
+<cellid>20042</cellid>
+----
+
+*sac*: XML child element of _cgi_ or _sai_ or _serving_cell_. Indicates the identifier of the service area. Example: ``.
+[source,xml]
+----
 <sac>17185</sac>
-</sai>`.
+----
 
-*mcc*: XML child element of _cgi_ or _sai_ or _serving_cell_. Indicates the Mobile Country Code as per ITU-T E.212. Example: `<mcc>437</mcc>`.
+*lte_ci*: XML child element of _serving_cell_. Indicates the identifier of an LTE base station (eNB). Example:.
+[source,xml]
+----
+<lte_ci>562944</lte_ci>
+----
 
-*mnc*: XML child element of _cgi_ or _sai_ or _serving_cell_. Indicates the Mobile Network Code as per ITU-T E.212. Example: `<mnc>2</mnc>`.
+*nci*: XML child element of _serving_cell_. Indicates the identifier of a 5G NR base station (gNB). Example:.
+[source,xml]
+----
+<nci>34359738376</nci>
+----
 
-*lac*: XML child element of _cgi_ or _sai_ or _serving_cell_. Indicates the Location Area Code. Example: `<lac>8304</lac>`.
+*rac*: XML child element of _target_area_ in a TLRR or _pos_ in a SLIA, TLRA or SLREP. Indicates the Routing Area Code of the tracked mobile subscriber. Example:.
+[source,xml]
+----
+<rac>1805</rac>
+----
 
-*cellid*: XML child element of _cgi_ or _sai_ or _serving_cell_. Indicates the identifier of the base station. Example: `<cellid>20042</cellid>`.
+*tac*: XML child element of _target_area_ in a TLRR or _pos_ in a SLIA, TLRA or SLREP. Indicates the Tracking Area Code of the tracked mobile subscriber. Example:.
+[source,xml]
+----
+<tac>109</tac>
+----
 
-*sac*: XML child element of _cgi_ or _sai_ or _serving_cell_. Indicates the identifier of the service area. Example: `<sac>17185</sac>`.
+*nr_tac*: XML child element of _target_area_ in a TLRR or _pos_ in a SLIA, TLRA or SLREP. Indicates the Tracking Area Code of the tracked mobile subscriber within 5GS. Example:.
+[source,xml]
+----
+<nr_tac>495570</nr_tac>
+----
 
-*lte_ci*: XML child element of _serving_cell_. Indicates the identifier of an LTE base station. Example: `<lte_ci>562944</lte_ci>`.
+*no_of_reports*: XML child element of _change_area_ or _distance_event_ or _equidistance_event_ or _velocity_event_. Specifies the maximum number of reports for a TLRR or HLIR. Example:.
+[source,xml]
+----
+<no_of_reports>20</no_of_reports>
+----
 
-*rac*: XML child element of _target_area_ in a TLRR or _pos_ in a SLIA, TLRA or SLREP. Indicates the Routing Area Code of the tracked mobile subscriber. Example: `<rac>1805</rac>`.
+*minimumIntervalTime*: XML child element of _change_area_ or _distance_event_ or _equidistance_event_ or _velocity_event_. Indicates the minimum time interval between location reports (in seconds) for a TLRR. Values may vary between 1 and 32767. Example: ``.
+[source,xml]
+----
+<minimumIntervalTime>600</minimumIntervalTime>
+----
 
-*tac*: XML child element of _target_area_ in a TLRR or _pos_ in a SLIA, TLRA or SLREP. Indicates the Tracking Area Code of the tracked mobile subscriber. Example: `<rac>1805</rac>`.
+*equidistance_event*: XML child element of _tlrr_event_. Specifies an equidistance event in triggered location reporting service. When `client` element attribute _serviceid_ equals "0105" in TLRR, it refers to a motion event as per 3GPP TS 29.172. Example: ``.
+[source,xml]
+----
+<equidistance_event type="ENTERING_TARGET_EQUIDISTANCE">
+</equidistance_event>
+----
 
-*no_of_reports*: XML child element of _change_area_ or _distance_event_ or _equidistance_event_ or _velocity_event_. Specifies the maximum number of reports for a TLRR or HLIR. Example: `<no_of_reports>20</no_of_reports>`.
-
-*minimumIntervalTime*: XML child element of _change_area_ or _distance_event_ or _equidistance_event_ or _velocity_event_. Indicates the minimum time interval between location reports (in seconds) for a TLRR. Values may vary between 1 and 32767. Example: `<minimumIntervalTime>600</minimumIntervalTime>`.
-
-*equidistance_event*: XML child element of _tlrr_event_. Specifies an equidistance event in triggered location reporting service. When `client` element attribute _serviceid_ equals "0105" in TLRR, it refers to a motion event as per 3GPP TS 29.172. Example: `<equidistance_event type=”ENTERING_TARGET_EQUIDISTANCE”>`.
-
-*target_equidistance*: XML child element of _equidistance_event_. Specifies the target distance expressed in meters in equidistance event trigger. When `client` element attribute _serviceid_ equals "0105" in TLRR, it refers to the distance of a motion event as per 3GPP TS 29.172. Examle:
+*target_equidistance*: XML child element of _equidistance_event_. Specifies the target distance expressed in meters in equidistance event trigger. When `client` element attribute _serviceid_ equals "0105" in TLRR, it refers to the distance of a motion event as per 3GPP TS 29.172. Example:
+[source,xml]
+----
+<target_equidistance>5000</target_equidistance>
+----
 
 *pushaddr*: XML child element of _tlrr_. Contains the URL to send the location report.
 
-*url* XML child element of _pushaddr_. URL to send the location report. If absent, it defaults to the value set in the correspondent configuration file. Example: `<url>http://192.168.1.25:8081/api/report</url>`.
+*url* XML child element of _pushaddr_. URL to send the location report. If absent, it defaults to the value set in the correspondent configuration file. Example:.
+[source,xml]
+----
+<url>http://192.168.1.25:8081/api/report</url>
+----
 
-*slia*: XML child element of _scv_result_. It corresponds to the SLIR response, *Standard Location Immediate Answer*. Its argument _ver_ must be set to "3.4.0". Example: `<slia ver="3.4.0">`.
+*slia*: XML child element of _scv_result_. It corresponds to the SLIR response, *Standard Location Immediate Answer*. Its argument _ver_ must be set to "3.4.0". Example:.
+[source,xml]
+----
+<slia ver="3.4.0">
+...
+</slia>
+----
 
-*tlra*: XML child element of _scv_result_. It corresponds to a TLRR response, *Triggered Location Reporting Answer*. Its argument _ver_ must be set to "3.4.0". Example: `<tlra ver="3.4.0">`.
+*tlra*: XML child element of _scv_result_. It corresponds to a TLRR response, *Triggered Location Reporting Answer*. Its argument _ver_ must be set to "3.4.0". Example:.
+[source,xml]
+----
+<tlra ver="3.4.0">
+...
+</tlra>
+----
 
-*tlrep*: XML child element of _scv_result_. It corresponds to a TLRR response, *Triggered Location Report*. Its argument _ver_ must be set to "3.4.0". Example: `<tlra ver="3.4.0">`.
+*tlrep*: XML child element of _scv_result_. It corresponds to a TLRR response, *Triggered Location Report*. Its argument _ver_ must be set to "3.4.0". Example: ``.
+[source,xml]
+----
+<tlra ver="3.4.0">
+...
+</tlra>
+----
 
-*slrep*: XML child element of _scv_result_. It corresponds to a *Standard Location Report*, corresponding to a location report from the mobile subscriber upon a certain action. Its argument _ver_ must be set to "3.4.0". Example: `<slrep ver=3.4.0>`.
+*slrep*: XML child element of _scv_result_. It corresponds to a *Standard Location Report*, corresponding to a location report from the mobile subscriber upon a certain action. Its argument _ver_ must be set to "3.4.0". Example:.
+[source,xml]
+----
+<slrep ver="3.4.0">
+...
+</slrep>
+----
 
 *pos*: XML child element of _slia_ or _tlra_ or _tlrep_ or _slrep_. It contains the position parameters of location request response.
 
 *pd*: XML child element of _pos_. Root element of elements _time_ , _shape_, _civicloc_, _mapData_, _alt_, _alt_unc_, _speed_, _direction_, _lev_conf_, _qos_not_met_, and _MotionStateList_.
 
-*time*. XML child element of _pd_. In a location answer this element indicates the time when the positioning was performed in format YYYYMMDDhhmmss. Its _utc_off_ attribute specifies the UTC [UTC] offset in hours and minutes. Positive values indicate time zones east of Greenwich. Example: `<time utc_off="-0300">20210325234000</time>`.
+*time*. XML child element of _pd_. In a location answer this element indicates the time when the positioning was performed in format YYYYMMDDhhmmss. Its _utc_off_ attribute specifies the UTC [UTC] offset in hours and minutes. Positive values indicate time zones east of Greenwich. Example:
+[source,xml]
+----
+<time utc_off="-0300">20210325234000</time>
+----
 
 *shape*. XML child element of _pd_. Represents a geographic area that describes where a mobile subscriber is located. Root element of _Point_, _LineString_, _Polygon_, _Box_, _CircularArea_, _CircularArcArea_, _EllipticalArea_, _MultiLineString_, _MultiPoint_, _MultiPolygon_, _LinearRing_. For all type of shapes, _srsName_ optional attribute is a short hand method of defining the Coordinate Reference System (CRS). It is a URI datatype that contains the codeSpace and code values. If the srsName is not included the WGS84 CRS must be assumed Its _gid_ optional attribute allows XML technologies such as XPointer and xref to be used
 
-*Point*: XML child element of _shape_. It represents a geographic coordinate. Example: `<Point>
-<coord>
-<X>-34.810256</X>
-<Y>-56.000211</Y>
-</coord>
-</Point>`.
-
-*MultiPoint*: XML child element of _shape_. A collection of points. Example: `<MultiPoint>
+*Point*: XML child element of _shape_. It represents a geographic coordinate. Example:.
+[source,xml]
+----
 <Point>
-...
+    <coord>
+        <X>-34.810256</X>
+        <Y>-56.000211</Y>
+    </coord>
 </Point>
-</MultiPoint>`.
+----
 
-*Box*: XML child element of _shape_. The Box element is used to encode extents. Each <Box> element encloses a sequence of two <coord> elements containing exactly two coordinate tuples; the first of these is constructed from the minimum values measured along all axes, and the second is constructed from the maximum values measured along all axes. Example: `<Box srsName="www.epsg.org#4326" gid="some_thing"> <coord> <X>30 27 45.3N</X> <Y>45 25 52.9E</Y> </coord> <coord> <X>31 27 45.3N</X> <Y>46 25 52.9E</Y> </coord> </Box>`.
+*MultiPoint*: XML child element of _shape_. A collection of points. Example:.
+[source,xml]
+----
+<MultiPoint>
+    <Point>
+    ...
+    </Point>
+</MultiPoint>
+----
 
-*CircularArea*: XML child element of _shape_. It contains the set of points on the ellipsoid, which are at a distance from the point of origin less than or equal to “r” (radius). `<CircularArea>
-<coord>
-<X>-34.910345</X>
-<Y>-56.149814</Y>
-</coord>
-<radius>50.0</radius>
-</CircularArea>`.
+*Box*: XML child element of _shape_. The Box element is used to encode extents. Each <Box> element encloses a sequence of two <coord> elements containing exactly two coordinate tuples; the first of these is constructed from the minimum values measured along all axes, and the second is constructed from the maximum values measured along all axes. Example:.
+[source,xml]
+----
+<Box srsName="www.epsg.org#4326" gid="some_thing">
+    <coord>
+        <X>30 27 45.3N</X>
+        <Y>45 25 52.9E</Y>
+    </coord> <coord>
+        <X>31 27 45.3N</X>
+        <Y>46 25 52.9E</Y>
+    </coord>
+</Box>
+----
 
-*CircularArcArea*: XML child element of _shape_. An arc is defined by a point of origin with one offset angle and one uncertainty angle plus one inner radius and one uncertainty radius. Example: `<CircularArcArea>
-<coord>
-<X>-34.909734</X>
-<Y>-56.146317</Y>
-</coord>
-<inRadius>32.0</inRadius>
-<startAngle>12.0</startAngle>
-<stopAngle>20.0</stopAngle>
-</CircularArcArea>`.
+*CircularArea*: XML child element of _shape_. It contains the set of points on the ellipsoid, which are at a distance from the point of origin less than or equal to “r” (radius)..
+[source,xml]
+----
+<CircularArea>
+    <coord>
+        <X>-34.910345</X>
+        <Y>-56.149814</Y>
+    </coord>
+    <radius>50.0</radius>
+</CircularArea>
+----
 
-*EllipticalArea*: XML child element of _shape_. A set of points on the ellipsoid, which fall within or on the boundary of an ellipse. This ellipse has a semi-major axis of length r1 oriented at angle A (0 to 180°) measured clockwise from north and a semi-minor axis of length r2. Example: `<EllipticalArea>
-<coord>
-<X>6.195592</X>
-<Y>-75.558107</Y>
-</coord>
-<angle>4.0</angle>
-<semiMajor>2.1</semiMajor>
-<semiMinor>2.1</semiMinor>
-</EllipticalArea>`.
+*CircularArcArea*: XML child element of _shape_. An arc is defined by a point of origin with one offset angle and one uncertainty angle plus one inner radius and one uncertainty radius. Example:.
+[source,xml]
+----
+<CircularArcArea>
+    <coord>
+        <X>-34.909734</X>
+        <Y>-56.146317</Y>
+    </coord>
+    <inRadius>32.0</inRadius>
+    <startAngle>12.0</startAngle>
+    <stopAngle>20.0</stopAngle>
+</CircularArcArea>
+----
 
-*MultiLineString*: XML child element of _shape_. A collection of line strings. Example: `<MultiLineString srsName="www.epsg.org#4326" gid="some_thing">
-<LineString>
-...
-</LineString>
-</MultiLineString>`.
+*EllipticalArea*: XML child element of _shape_. A set of points on the ellipsoid, which fall within or on the boundary of an ellipse. This ellipse has a semi-major axis of length r1 oriented at angle A (0 to 180°) measured clockwise from north and a semi-minor axis of length r2. Example:.
+[source,xml]
+----
+<EllipticalArea>
+    <coord>
+        <X>6.195592</X>
+        <Y>-75.558107</Y>
+    </coord>
+    <angle>4.0</angle>
+    <semiMajor>2.1</semiMajor>
+    <semiMinor>2.1</semiMinor>
+</EllipticalArea>
+----
 
-*Polygon*: XML child element of _shape_. A connected surface. Any pair of points in the polygon can be connected to one another by a path. The boundary of the Polygon is a set of LinearRings. We distinguish the outer (exterior) boundary and the inner (interior) boundaries; the LinearRings of the interior boundary cannot cross one another and cannot be contained within one another. Example: `<Polygon>
-<outerBoundaryIs>
-<LinearRing>
-<coord>
-<X>6.646503</X>
-<Y>-75.492060</Y>
-</coord>
-<coord>
-<X>6.648016</X>
-<Y>-75.495687</Y>
-</coord>
-<coord>
-<X>6.648735</X>
-<Y>-75.495622</Y>
-</coord>
-<coord>
-<X>6.648746</X>
-<Y>-75.495708</Y>
-</coord>
-</LinearRing>
-</outerBoundaryIs>
-</Polygon>`.
+*MultiLineString*: XML child element of _shape_. A collection of line strings. Example:.
+[source,xml]
+----
+<MultiLineString srsName="www.epsg.org#4326" gid="some_thing">
+    <LineString>
+    ...
+    </LineString>
+</MultiLineString>
+----
 
-*MultiPolygon*: XML child element of _shape_. A collection of polygons. Example: `<MultiPolygon>
+*Polygon*: XML child element of _shape_. A connected surface. Any pair of points in the polygon can be connected to one another by a path. The boundary of the Polygon is a set of LinearRings. We distinguish the outer (exterior) boundary and the inner (interior) boundaries; the LinearRings of the interior boundary cannot cross one another and cannot be contained within one another. Example:.
+[source,xml]
+----
 <Polygon>
-...
+    <outerBoundaryIs>
+        <LinearRing>
+            <coord>
+                <X>6.646503</X>
+                <Y>-75.492060</Y>
+            </coord>
+            <coord>
+                <X>6.648016</X>
+                <Y>-75.495687</Y>
+            </coord>
+            <coord>
+                <X>6.648735</X>
+                <Y>-75.495622</Y>
+            </coord>
+            <coord>
+                <X>6.648746</X>
+                <Y>-75.495708</Y>
+            </coord>
+        </LinearRing>
+    </outerBoundaryIs>
 </Polygon>
-</MultiPolygon>`.
+----
 
-*LinearRing*: XML child element of _shape_. A linear ring is a closed, simple piece-wise linear path which is defined by a list of coordinates that are assumed to be connected by straight-line segments. If the element is used in the construction of a Polygon the last coordinate may be different to the first coordinate, otherwise the last coordinate must be coincident with the first coordinate. Example: `<LinearRing>
-<coord>
-<X>6.646503</X>
-<Y>-75.492060</Y>
-</coord>
-<coord>
-<X>6.648016</X>
-<Y>-75.495687</Y>
-</coord>
-<coord>
-<X>6.648735</X>
-<Y>-75.495622</Y>
-</coord>
-</LinearRing>`.
+*MultiPolygon*: XML child element of _shape_. A collection of polygons. Example:.
+[source,xml]
+----
+<MultiPolygon>
+    <Polygon>
+    ...
+    </Polygon>
+</MultiPolygon>
+----
 
-*LineString*: XML child element of _shape_. A LineString is a piece-wise linear path defined by a list of coordinates that are assumed to be connected by straight line segments. A closed path is indicated by having coincident first and last coordinates. Example: `<LineString srsName="www.epsg.org#4326">
-<coord>
-<X>30 27 45.3N</X>
-<Y>48 25 52.9E</Y>
-</coord>
-<coord>
-<X>40 27 45.3N</X>
-<Y>48 25 52.9E</Y>
-</coord>
-<coord>
-<X>33 27 45.3N</X>
-<Y>48 25 52.9E</Y>
-</coord>
-</LineString>`.
+*LinearRing*: XML child element of _shape_. A linear ring is a closed, simple piece-wise linear path which is defined by a list of coordinates that are assumed to be connected by straight-line segments. If the element is used in the construction of a Polygon the last coordinate may be different to the first coordinate, otherwise the last coordinate must be coincident with the first coordinate. Example:.
+[source,xml]
+----
+<LinearRing>
+    <coord>
+        <X>6.646503</X>
+        <Y>-75.492060</Y>
+    </coord>
+    <coord>
+        <X>6.648016</X>
+        <Y>-75.495687</Y>
+    </coord>
+    <coord>
+        <X>6.648735</X>
+        <Y>-75.495622</Y>
+    </coord>
+</LinearRing>
+----
+
+*LineString*: XML child element of _shape_. A LineString is a piece-wise linear path defined by a list of coordinates that are assumed to be connected by straight line segments. A closed path is indicated by having coincident first and last coordinates. Example:.
+[source,xml]
+----
+<LineString srsName="www.epsg.org#4326">
+    <coord>
+        <X>30 27 45.3N</X>
+        <Y>48 25 52.9E</Y>
+    </coord>
+    <coord>
+        <X>40 27 45.3N</X>
+        <Y>48 25 52.9E</Y>
+    </coord>
+    <coord>
+        <X>33 27 45.3N</X>
+        <Y>48 25 52.9E</Y>
+    </coord>
+</LineString>
+----
 
 *outerBoundaryIs*: XML child element _Polygon_. It represents the exterior boundaries of a polygon.
 
@@ -480,29 +747,56 @@ _gid_
 
 *vmscid*: XML child element of _neid_. Contains the Visited MSC number identifier.
 
-*vmscno*: XML child element of _neid_. Contains the Visited MSC number Global Title. Example: `<vmscno>598970000004</vmscno>`.
+*vmscno*: XML child element of _neid_. Contains the Visited MSC number Global Title. Example:.
+[source,xml]
+----
+<vmscno>598970000004</vmscno>
+----
 
 *vlrid*: XML child element of _neid_. Contains the Visited MSC number identifier. Contains the Visited VLR number identifier.
 
-*vlrno*: XML child element of _neid_. Contains the Visited MSC number Global Title. Example: `<vlrno>502190000041</vlrno>`.
+*vlrno*: XML child element of _neid_. Contains the Visited MSC number Global Title. Example:.
+[source,xml]
+----
+<vlrno>502190000041</vlrno>
+----
 
-*lmsi*: XML child element of _neid_. Contains the Local Mobile Station Identity, a temporary id assigned to the mobile subscriber. Example: `<lmsi>7202e98c</lmsi>`.
+*lmsi*: XML child element of _neid_. Contains the Local Mobile Station Identity, a temporary id assigned to the mobile subscriber. Example:.
+[source,xml]
+----
+<lmsi>7202e98c</lmsi>
+----
 
-*imsi*: XML child element of _neid_. Contains the International Mobile Subscriber Identity (ITU-T E.212 number of the mobile subscriber). Example: `<imsi>748026871012345</imsi>`.
+*imsi*: XML child element of _neid_. Contains the International Mobile Subscriber Identity (ITU-T E.212 number of the mobile subscriber). Example:.
+[source,xml]
+----
+<imsi>748026871012345</imsi>
+----
 
-*req_id*: XML child element of _slia_, _tlra_ or _tlrep_. Represents a unique id of a request. For TLRA and TLREP, this value shall be identical to the one provided in in `trans_id` as the LCS Client reference number when `client` element attribute _serviceid_ equals "0104" or "0105" in the TLRR. Example: `<req_id>57892</req_id>`.
+*req_id*: XML child element of _slia_, _tlra_ or _tlrep_. Represents a unique id of a request. For TLRA and TLREP, this value shall be identical to the one provided in in `trans_id` as the LCS Client reference number when `client` element attribute _serviceid_ equals "0104" or "0105" in the TLRR. Example:.
+[source,xml]
+----
+<req_id>57892</req_id>
+----
 
-*lcs_ref*: XML child element of _slia_, _tlra_ or _tlrep_. The LCS reference number received on TLRA or TLREP from the core network, for TLRR when `serviceid` equals "0104" or "0105". Example: `<lcs_ref>15</lcs_ref>``
+*lcs_ref*: XML child element of _slia_, _tlra_ or _tlrep_. The LCS reference number received on TLRA or TLREP from the core network, for TLRR when `serviceid` equals "0104" or "0105". Example:
+[source,xml]
+----
+<lcs_ref>15</lcs_ref>
+----
 
-*result*: XML child element of _slia_, _tlra_ or _tlrep_. A text string indicating the result of the request or an individual positioning. Its _resid_ attribute represents the numeric representation of the result message. Both must be consistent with table `5.4.1 Result Codes` of OMA MLP 3.4 specification. Example: `<result resid="7">TIMEOUT</result>`.
+*result*: XML child element of _slia_, _tlra_ or _tlrep_. A text string indicating the result of the request or an individual positioning. Its _resid_ attribute represents the numeric representation of the result message. Both must be consistent with table `5.4.1 Result Codes` of OMA MLP 3.4 specification. Example: `.
+[source,xml]
+----
+<result resid="7">TIMEOUT</result>
+----
 
-*civicloc*: XML child element _pd_ or _target_area_. Specifies one element in a civic location. A civic location (civicloc) consists of one or more civicloc_element. The _element_type_ attribute represents the type of element an civicloc_element contains as specified by IETF RFC 4119 and RFC 5139. Example: `<civicloc_element element_type="COUNTRY">US</civicloc_element>`.
+*civicloc*: XML child element _pd_ or _target_area_. Specifies one element in a civic location. A civic location (civicloc) consists of one or more civicloc_element. The _element_type_ attribute represents the type of element an civicloc_element contains as specified by IETF RFC 4119 and RFC 5139. Example:.
+[source,xml]
+----
+<civicloc_element element_type="COUNTRY">US</civicloc_element>
+----
 
-|
-
-
-
-|=======================================================================
 
 
 

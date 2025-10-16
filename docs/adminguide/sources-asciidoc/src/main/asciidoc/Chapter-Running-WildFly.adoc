@@ -1,4 +1,4 @@
-= Running (WildFly 10)
+= Running (WildFly 24.0.1.Final)
 :doctype: book
 :sectnums:
 :toc: left
@@ -17,7 +17,7 @@
   Alternatively you can copy it to the JBoss native library path manually.
 
 . All you have to do to start the Gateway is start the Wildfly Application Server.
-  To start the Wildfly Server you must execute the [path]_standalone.sh_ (Unix) or [path]_standalone.bat_ (Microsoft Windows) startup script in the installation directory [path]_Extended-GMLC-<version>/wildfly-10.1.0.Final/bin_.
+  To start the Wildfly Server you must execute the [path]_standalone.sh_ (Unix) or [path]_standalone.bat_ (Microsoft Windows) startup script in the installation directory [path]_Extended-GMLC-<version>/wildfly-24.0.1.Final/bin_.
   Note that this will start the server in the default profile.
   The "default" profile is a clean profile where you start from scratch and configure the entire SS7 Stack and GMLC Gateway to suit your requirements.
 . Result: If the service started properly you should see the following last few output lines in the Unix terminal or Command Prompt depending on your environment:
@@ -26,7 +26,7 @@
 19:24:06,091 INFO  [org.mobicents.slee.container.management.ResourceManagement] (Timer-2) Created Resource Adaptor Entity HttpServletRA for ResourceAdaptorID[name=HttpServletResourceAdaptor,vendor=org.restcomm,version=1.0] Config Properties: [(name:java.lang.String=restcomm),(HTTP_REQUEST_TIMEOUT:java.lang.Integer=65000)]
 19:24:06,346 INFO  [org.mobicents.slee.container.management.ResourceManagement] (Timer-2) Activated RA Entity HttpServletRA
 19:24:06,601 INFO  [org.mobicents.slee.container.management.ResourceManagement] (Timer-2) Bound link between RA Entity HttpServletRA and Name HttpServletRA
-19:24:06,854 INFO  [org.mobicents.slee.container.management.jmx.DeploymentMBeanImpl] (Timer-2) Installing DeployableUnitID[url=file:/opt/paic/gmlc/Extended-GMLC-4.0.0-154/wildfly-10.1.0.Final/simulator/tmp/vfs/temp/tempaf92c91c178e81ac/content-c74bba2c3aa82219/content/]
+19:24:06,854 INFO  [org.mobicents.slee.container.management.jmx.DeploymentMBeanImpl] (Timer-2) Installing DeployableUnitID[url=file:/opt/paic/gmlc/Extended-GMLC-4.0.0-154/wildfly-24.0.1.Final/simulator/tmp/vfs/temp/tempaf92c91c178e81ac/content-c74bba2c3aa82219/content/]
 19:24:07,066 INFO  [org.mobicents.slee.container.component.deployment.PreferredPackagesBuilder] (Timer-2) No preferred package entry found. Applying defaults.
 19:24:07,067 INFO  [org.mobicents.slee.container.component.deployment.PreferredPackagesBuilder] (Timer-2) No preferred package entry found. Applying defaults.
 19:24:07,339 INFO  [org.mobicents.slee.container.management.jmx.DeploymentMBeanImpl] (Timer-2) Installed LibraryID[name=gmlc-library,vendor=org.mobicents,version=2.0]
@@ -34,7 +34,7 @@
 19:24:07,427 INFO  [org.mobicents.slee.container.management.jmx.DeploymentMBeanImpl] (Timer-2) Installed SbbID[name=CDRSbbPlain,vendor=org.mobicents,version=1.0]
 19:24:07,448 INFO  [org.mobicents.slee.container.management.jmx.DeploymentMBeanImpl] (Timer-2) Installed ServiceID[name=mobicents-gmlc,vendor=org.mobicents,version=1.0]. Root sbb is SbbID[name=MobileCoreNetworkInterfaceSbb,vendor=org.mobicents,version=1.0]
 19:24:07,448 INFO  [org.mobicents.slee.container.management.jmx.DeploymentMBeanImpl] (Timer-2) Installed ServiceID[name=mobicents-gmlc-cdr-plain,vendor=org.mobicents,version=1.0]. Root sbb is SbbID[name=CDRSbbPlain,vendor=org.mobicents,version=1.0]
-19:24:07,449 INFO  [org.mobicents.slee.container.management.jmx.DeploymentMBeanImpl] (Timer-2) Installed DeployableUnitID[url=file:/opt/paic/gmlc/Extended-GMLC-4.0.0-154/wildfly-10.1.0.Final/simulator/tmp/vfs/temp/tempaf92c91c178e81ac/content-c74bba2c3aa82219/content/]
+19:24:07,449 INFO  [org.mobicents.slee.container.management.jmx.DeploymentMBeanImpl] (Timer-2) Installed DeployableUnitID[url=file:/opt/paic/gmlc/Extended-GMLC-4.0.0-154/wildfly-24.0.1.Final/simulator/tmp/vfs/temp/tempaf92c91c178e81ac/content-c74bba2c3aa82219/content/]
 19:24:07,737 INFO  [org.mobicents.slee.container.management.ServiceManagementImpl] (Timer-2) Activated ServiceID[name=mobicents-gmlc,vendor=org.mobicents,version=1.0]
 19:24:07,990 INFO  [org.mobicents.slee.container.management.ServiceManagementImpl] (Timer-2) Activated ServiceID[name=mobicents-gmlc-cdr-plain,vendor=org.mobicents,version=1.0]
 19:24:07,992 INFO  [org.mobicents.slee.runtime.sbbentity.SbbEntityLockFacility] (SLEE-EventRouterExecutor-22-thread-1) Thread[SLEE-EventRouterExecutor-22-thread-1,5,main] put of lock java.util.concurrent.locks.ReentrantLock@342f90f0[Unlocked] for /ServiceID[name=mobicents-gmlc-cdr-plain,vendor=org.mobicents,version=1.0]/-78ef1604:17910481561:-7ffc____
@@ -48,7 +48,7 @@ The Installation Guide discusses in detail about configuring SS7 and Diameter st
 
 .Procedure: Stop the Gateway
 . To stop the {this-platform} {this-application} , you must shut down the JBoss Application Server.
-To shut down the server(s) you must execute the `shutdown.sh -s` (Unix) script in the installation directory [path]_Extended-GMLC-<version>/wildfly-10.1.0.Final/bin_.
+To shut down the server(s) you must execute the `shutdown.sh -s` (Unix) script in the installation directory [path]_Extended-GMLC-<version>/wildfly-24.0.1.Final/bin_.
 . If the server stopped properly, you will see the following three lines as the  last output in the Unix terminal or Command Prompt:
 +
 ----
@@ -70,7 +70,7 @@ The {this-platform} {this-application} offers an option to run the Gateway with 
 Starting the Gateway with the "simulator" profile is similar to the steps explained for the "standalone" profile, except that you must pass the string value with the path where the simulator profile stands when invoking the startup script.
 
 ----
-[bin]$ ./standalone.sh -Djboss.server.base.dir="/opt/paic/gmlc/Extended-GMLC-4.0.0-154/wildfly-10.1.0.Final/simulator/"
+[bin]$ ./standalone.sh -Djboss.server.base.dir="/opt/paic/gmlc/Extended-GMLC-6.0.0-312/wildfly-24.0.1.Final/simulator/"
 ----
 
 By default, {this-platform} {this-application} simulator profile is configured for use in Linux systems.
@@ -99,18 +99,22 @@ In this section you will find a simple Location Service example explained using 
 ----
 bin$ chmod +x run.sh
 ----
-. Execute the [path]_run.sh_ BASH script with the command `./run.sh gui`.
-+
+. Execute the [path]_run.sh_ BASH script with the command
+[source,bash]
 ----
-bin$ ./run.sh gui
+./run.sh gui.
 ----
-+
+
 This will launch the Simulator GUI Application.
 . When the GUI shows up, select "main" (default) as host name [or type "win" as host name under Windows] and press the 'Start' button.
+
 The Simulator is already pre-configured to connect to the GMLC Gateway (running in simulator profile). Press 'Run test' and again click on 'Start' in the next screen.
+
 The Simulator will connect to GMLC (via a SIGTRAN SCTP/M3UA association). The Low layer is configured to SCTP (not TCP) protocol, therefore you can test the GMLC in a Linux environment.
+
 To test under Windows OS, you must change the SS7 simulator settings to TCP.
-. After approximately 30 seconds you will see two events appearing in the the simulator window log showing "Sctp connection is up" and "M3UA connection is active" as in figure below:
+
+After approximately 30 seconds you will see two events appearing at the simulator window log showing "Sctp connection is up" and "M3UA connection is active" as in figure below:
 +
 
 image::images/GMLC_SS7_Simulator_ACTIVE.png[]
@@ -120,58 +124,38 @@ image::images/GMLC_SS7_Simulator_ACTIVE.png[]
 curl -d "username=fer&password=nando&msisdn=59899077937&operation=ATI" -X POST 127.0.0.1:8080/restcomm/gmlc/rest
 ----
 
-`msisdn` can be any number (except the dummy one reserved, i.e., 19395550113), while `token` should match the one provided in the `GmlcManagement_gmlcproperties.xml` configuration file or any of those set in the database.
+_msisdn_ can be any number (except the dummy one reserved, i.e., 19395550113), while _token_ should match the one provided at the _GmlcManagement_gmlcproperties.xml_ configuration file or any of those set in the database.
 
-You should immediately receive a testing response in JSON format like the following (responses may vary):
-
+You should immediately receive a testing response in JSON format like the following (responses may vary as the simulator randomly sets new values):
+[source,json]
 ----
 {
   "network": "GSM/UMTS",
   "protocol": "MAP",
   "operation": "ATI",
   "result": "SUCCESS",
+  "msisdn": 59899077937,
+  "imei": "011714004661050",
   "CSLocationInformation": {
-    "LocationNumber": {
-      "oddFlag": false,
-      "natureOfAddressIndicator": 4,
-      "internalNetworkNumberIndicator": 1,
-      "numberingPlanIndicator": 1,
-      "addressPresentationRestrictedIndicator": 1,
-      "screeningIndicator": 3,
-      "address": 819203961904
-    },
-    "GeographicalInformation": {},
-    "GeodeticInformation": {},
-    "currentLocationRetrieved": true,
     "EPSLocationInformation": {
       "ECGI": {
         "mcc": 748,
         "mnc": 1,
-        "eci": 23187296,
-        "eNBId": 90575,
-        "ci": 96
+        "eci": 520193,
+        "eNBId": 2032,
+        "ci": 1
       },
       "TAI": {
         "mcc": 748,
         "mnc": 1,
-        "tac": 14645
+        "tac": 109
       },
-      "GeographicalInformation": {
-        "typeOfShape": "EllipsoidPointWithUncertaintyCircle",
-        "latitude": -34.870101,
-        "longitude": -56.001005,
-        "uncertainty": 0.0
-      },
-      "GeodeticInformation": {},
       "ageOfLocationInformation": 0,
       "currentLocationRetrieved": true,
-      "mmeName": "mmec03.mmeer3000.mme.epc.mnc002.mcc748.3gppnetwork.org"
+      "mmeName": "mmec03.mmegi3000.mme.epc.mnc002.mcc748.3gppnetwork.org"
     }
   },
-  "PSLocationInformation": {},
-  "msisdn": 59899077938,
-  "imei": "011714004661050",
-  "subscriberState": "camelBusy",
+  "subscriberState": "assumedIdle",
   "MNPInfoResult": {
     "mnpStatus": "ownNumberNotPortedOut",
     "mnpMsisdn": 59899077937,
@@ -180,7 +164,6 @@ You should immediately receive a testing response in JSON format like the follow
   },
   "msClassmark": "393A52"
 }
-
 ----
 
 If you check the SS7 simulator (where the MAP ATI was sent and responded back), you should be able to see the following request and response (click on "Open Event Window" on each event logged):
@@ -191,15 +174,16 @@ image::images/SS7sim_MAP-ATI_resp.png[]
 
 . To send an OMA MLP request test, you must issue the following command where you have the slir_ati.txt XML file:
 
+[source,shell]
 ----
 curl -X POST -H "Content-Type: application/xml" -d @slir_ati.txt http://127.0.0.1:8080/restcomm/gmlc/mlp
 ----
 
 _slir_ati.txt_ could be like this (you may change the MSISDN):
 
+[source,xml]
 ----
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE svc_init PUBLIC "-//OMA//DTD MLP 3.2.0//EN" "http://openmobilealliance.org/tech/dtd/MLP_SLIR_320.DTD">
 <svc_init ver="3.4.0">
   <hdr>
      <client>
@@ -219,8 +203,10 @@ _slir_ati.txt_ could be like this (you may change the MSISDN):
 </svc_init>
 ----
 
-You should immediately receive the following testing MLP response:
+You should immediately receive an MLP response like the following (responses may vary as the simulator randomly sets new values):
 
+
+[source,xml]
 ----
 <?xml version="1.0" encoding="UTF-8"?><svc_result ver="3.4.0">
 	<slia ver="3.4.0">
@@ -263,98 +249,85 @@ You should immediately receive the following testing MLP response:
 
 For MAP PSI requests, you must select the MAP_PSI_TEST_SERVER testing task and proceed like with ATI_TEST_SERVER, but instead execute the corresponding HTTP request, e.g.
 
-....
+[source,shell]
+----
 curl -d "msisdn=59899077937&operation=PSI&token=n4ndO" -X POST 127.0.0.1:8080/restcomm/gmlc/rest
-....
+----
 
 You should immediately receive a testing response in JSON format like the following (responses may vary):
 
-....
+
+[source,json]
+----
 {
   "network": "GSM/UMTS",
   "protocol": "MAP",
   "operation": "PSI",
   "result": "SUCCESS",
-  "CSLocationInformation": {
-    "LocationNumber": {
-      "oddFlag": false,
-      "natureOfAddressIndicator": 4,
-      "internalNetworkNumberIndicator": 1,
-      "numberingPlanIndicator": 1,
-      "addressPresentationRestrictedIndicator": 1,
-      "screeningIndicator": 3,
-      "address": 819203961904
-    },
-    "GeographicalInformation": {},
-    "GeodeticInformation": {},
-    "currentLocationRetrieved": true,
-    "EPSLocationInformation": {
-      "ECGI": {
-        "mcc": 748,
-        "mnc": 1,
-        "eci": 23580518,
-        "eNBId": 92111,
-        "ci": 102
-      },
-      "TAI": {
-        "mcc": 748,
-        "mnc": 1,
-        "tac": 14642
-      },
-      "GeographicalInformation": {},
-      "GeodeticInformation": {},
-      "ageOfLocationInformation": 0,
-      "currentLocationRetrieved": true,
-      "mmeName": "mmec03.mmeer3000.mme.epc.mnc002.mcc748.3gppnetwork.org"
-    }
-  },
-  "PSLocationInformation": {},
   "msisdn": 59899077937,
   "imsi": 748026871012345,
-  "imei": "011714004661050",
-  "lmsi": "71ffacce",
-  "subscriberState": "camelBusy",
-  "MNPInfoResult": {
-    "mnpStatus": "ownNumberNotPortedOut",
-    "mnpMsisdn": 59899077937,
-    "mnpImsi": 748026871012345,
-    "mnpRouteingNumber": "598123"
+  "5GSLocationInformation": {
+    "NCGI": {
+      "mcc": 748,
+      "mnc": 2,
+      "nci": 34359738376
+    },
+    "NR-TAI": {
+      "mcc": 748,
+      "mnc": 2,
+      "tac": 495570
+    },
+    "GeodeticInformation": {
+      "typeOfShape": "EllipsoidPointWithUncertaintyCircle",
+      "latitude": -34.910345,
+      "longitude": -56.149814,
+      "uncertainty": 1.0,
+      "confidence": 1,
+      "screeningAndPresentationIndicators": 3
+    },
+    "amfAddress": "amf3.cluster2.net2.amf.5gc.mnc02.mcc748.3gppnetwork.org",
+    "ageOfLocationInformation": 0,
+    "VPLMN-ID": {
+      "mcc": 748,
+      "mnc": 2
+    },
+    "Used-RAT-Type": {
+      "ratType": "nbIoT"
+    }
   },
-  "msClassmark": "393A52"
+  "subscriberState": "assumedIdle"
 }
-....
+----
 
-Again, if you check the SS7 simulator (where the MAP SRISM and PSI was sent and responded back), you should be able to see the requests and responses, e.g.
+Again, if you check the SS7 simulator (where the MAP SRISM and PSI was sent and responded back), you should be able to see the requests and responses, e.g.,:
 
 image::images/SS7sim_MAP-PSI_resp.png[]
 
 Finally, for LSM MAP operations, you must select the MAP_LCS_TEST_SERVER testing task and proceed like with ATI_TEST_SERVER or MAP_PSI_TEST_SERVER, but instead execute the corresponding HTTP request, e.g.
 
-....
+[source,shell]
+----
 curl -d "msisdn=59899077937&operation=PSL&lcsClientType=0&lcsClientExternalID=6543210987&lcsLocationType=currentLocation&clientReferenceNumber=30000&token=n4ndO" -X POST 127.0.0.1:8080/restcomm/gmlc/rest
-....
+----
 
 You should immediately receive a testing response in JSON format like the following (responses may vary):
 
-....
+[source,json]
+----
 {
-  "network": "UMTS",
+  "network": "GSM/UMTS",
   "protocol": "MAP",
   "operation": "SRILCS-PSL",
   "result": "SUCCESS",
-  "clientReferenceNumber": 15271,
-  "lcsReferenceNumber": 0,
+  "clientReferenceNumber": 30000,
   "SRILCS": {
-    "msisdn": 59899077937,
-    "imsi": 748026871012345,
-    "lmsi": "71ffacce",
-    "networkNodeNumber": 5982123007,
+    "msisdn": 61909077937,
+    "imsi": 505036871012345,
+    "networkNodeNumber": 6100003451,
     "gprsNodeIndicator": false,
-    "mmeName": "mmec03.mmeer3000.mme.epc.mnc002.mcc748.3gppnetwork.org",
-    "3GPPAAAServerName": "aaa04.aaa3000.aaa.epc.mnc002.mcc748.3gppnetwork.org",
-    "hGmlcAddress": "181.104.201.3",
-    "vGmlcAddress": "180.53.105.48",
-    "pprAddress": "181.104.97.21"
+    "lmsi": "7202eb37",
+    "additionalNetworkNodeNumber": 61000030215,
+    "sgsnName": "mnc003.mcc505.gprs"
   },
   "PSL": {
     "LocationEstimate": {
@@ -364,215 +337,300 @@ You should immediately receive a testing response in JSON format like the follow
       "typeOfShape": "Polygon",
       "numberOfPoints": 3,
       "polygonPoint1": {
-        "latitude": 25.654825,
-        "longitude": 83.240318
+        "latitude": -34.419967,
+        "longitude": 150.897776
       },
       "polygonPoint2": {
-        "latitude": 25.658644,
-        "longitude": 83.240876
+        "latitude": -34.419968,
+        "longitude": 150.897777
       },
       "polygonPoint3": {
-        "latitude": 25.663719,
-        "longitude": 83.23946
+        "latitude": -34.419966,
+        "longitude": 150.897774
       },
       "polygonCentroid": {
-        "latitude": 25.659063,
-        "longitude": 83.240219
+        "latitude": -34.419967,
+        "longitude": 150.897776
       }
     },
     "ageOfLocationEstimate": 0,
+    "UtranPositioningData": {
+      "PositioningDataSet": {
+        "Item-0": {
+          "method": "Mobile Assisted GPS",
+          "usage": 0
+        },
+        "Item-1": {
+          "method": "Mobile Based GPS",
+          "usage": 0
+        },
+        "Item-2": {
+          "method": "U-TDOA",
+          "usage": 0
+        },
+        "Item-3": {
+          "method": "OTDOA",
+          "usage": 3
+        },
+        "Item-4": {
+          "method": "Conventional GPS",
+          "usage": 4
+        }
+      }
+    },
+    "CGI": {
+      "mcc": 505,
+      "mnc": 3,
+      "lac": 8820,
+      "ci": 9748
+    },
     "accuracyFulfilmentIndicator": "REQUESTED_ACCURACY_FULFILLED",
-    "deferredMTLRresponseIndicator": true,
-    "moLrShortCircuitIndicator": true,
-    "SAI": {
-      "mcc": 437,
-      "mnc": 109,
-      "lac": 8304,
-      "sac": 17185
+    "UtranGANSSPositioningData": {
+      "GanssPositioningDataSet": {
+        "Item-0": {
+          "method": "MS-Based",
+          "ganssId": "Galileo",
+          "usage": 0
+        },
+        "Item-1": {
+          "method": "Conventional",
+          "ganssId": "Modernized GPS",
+          "usage": 3
+        },
+        "Item-2": {
+          "method": "MS-Assisted",
+          "ganssId": "GLONASS",
+          "usage": 4
+        }
+      }
     },
-    "GERANPositioningInfo": {},
-    "UTRANPositioningInfo": {
-      "utranPositioningData": "393333363031",
-      "utranGanssPositioningData": "393333363030"
+    "TargetServingNodeForHandover": {
+      "mmeNumber": 61000040523
     },
-    "VelocityEstimate": {
-      "horizontalSpeed": 101,
-      "bearing": 3,
-      "verticalSpeed": 2,
-      "uncertaintyHorizontalSpeed": 5,
-      "uncertaintyVerticalSpeed": 1,
-      "velocityType": "HorizontalWithVerticalVelocityAndUncertainty"
+    "BarometricPressure": {
+      "measuredPa": 83122
+    },
+    "CivicAddress": {
+      "country": "AU",
+      "A1": "NSW",
+      "A3": "Wollongong",
+      "A4": "North Wollongong",
+      "RD": "Flinders",
+      "STS": "Street",
+      "RDBR": "Campbell Street",
+      "LMK": "Gilligan's Island",
+      "LOC": "Corner",
+      "NAM": "Video Rental Store",
+      "PC": "2500",
+      "ROOM": "Westerns and Classics",
+      "PLC": "store",
+      "POBOX": "Private Box 15"
     }
   }
 }
-....
+----
 
 You can execute SLR requests from the SS7 simulator by clicking the JButtons: *SubscriberLocationReportRequest (MT-LR)* or *SubscriberLocationReportRequest*. An HTTP REST API listening on the appropriate port should receive the JSON responses for each of these actions, e.g.:
 
-....
-api/report received '{
-  "network": "GSM/UMTS",
-  "protocol": "MAP",
-  "operation": "SLR",
-  "result": "SUCCESS",
-  "clientReferenceNumber": 15271,
-  "lcsReferenceNumber": 0,
-  "msisdn": 59899077937,
-  "imsi": 748026871012345,
-  "imei": "354449063537030",
-  "lcsServiceTypeID": 1,
-  "lcsClientID": {
-    "lcsClientType": 0,
-    "lcsClientInternalID": 3,
-    "lcsClientIDName": {
-      "lcsClientName": "3",
-      "lcsClientDataCodingScheme": 15,
-      "lcsClientDataFormatIndicator": 3
+[source,json]
+----
+{
+  "network" : "GSM/UMTS",
+  "protocol" : "MAP",
+  "operation" : "SLR",
+  "result" : "SUCCESS",
+  "clientReferenceNumber" : 15817,
+  "lcsEvent" : "DEFERRED_MT_LR_RESPONSE",
+  "LCSClientId" : {
+    "lcsClientType" : 0,
+    "lcsClientInternalID" : 3,
+    "lcsClientIDName" : {
+      "lcsClientName" : "*123#",
+      "lcsClientDataCodingScheme" : 15,
+      "lcsClientDataFormatIndicator" : 3
     },
-    "lcsClientAPN": "internet.mnc002.mcc345.gprs",
-    "lcsClientRequestorID": {},
-    "lcsClientDialedByMS": "545248"
+    "lcsClientAPN" : "internet.mnc002.mcc345.gprs",
+    "lcsClientRequestorID" : {
+      "requestorIdEncodedString" : "*123#",
+      "requestorIdDataCodingScheme" : 15,
+      "requestorIdDataFormatIndicator" : 3
+    },
+    "lcsClientDialedByMS" : "545248"
   },
-  "LocationEstimate": {
-    "typeOfShape": "Polygon"
+  "LCSLocationInfo" : {
+    "networkNodeNumber" : 6010009348,
+    "gprsNodeIndicator" : true,
+    "lmsi" : "7202e98c",
+    "SupportedLCSCapabilitySets" : {
+      "release98_99" : true,
+      "release4" : true,
+      "release5" : true,
+      "release6" : true,
+      "release7" : false
+    },
+    "AdditionalLCSCapabilitySets" : {
+      "release98_99" : true,
+      "release4" : true,
+      "release5" : true,
+      "release6" : true,
+      "release7" : true
+    },
+    "sgsnName" : "sgsn1B34.mnc019.mcc502.gprs",
+    "sgsnRealm" : "mnc019.mcc502.gprs"
   },
-  "ageOfLocationEstimate": 0,
-  "accuracyFulfilmentIndicator": "REQUESTED_ACCURACY_FULFILLED",
-  "AdditionalLocationEstimate": {
-    "typeOfShape": "Polygon",
-    "numberOfPoints": 5,
-    "polygonPoint1": {
-      "latitude": -2.907,
-      "longitude": 70.778003
-    },
-    "polygonPoint2": {
-      "latitude": -3.017228,
-      "longitude": 70.708909
-    },
-    "polygonPoint3": {
-      "latitude": -2.941386,
-      "longitude": 70.432084
-    },
-    "polygonPoint4": {
-      "latitude": -3.040016,
-      "longitude": 70.681894
-    },
-    "polygonPoint5": {
-      "latitude": -3.044994,
-      "longitude": 70.70009
-    },
-    "polygonCentroid": {
-      "latitude": -3.000526,
-      "longitude": 70.624266
+  "msisdn" : 60192235906,
+  "imsi" : 502196871012345,
+  "imei" : "354449063537030",
+  "LocationEstimate" : {
+    "typeOfShape" : "EllipsoidPointWithAltitudeAndUncertaintyEllipsoid",
+    "latitude" : 3.157703,
+    "longitude" : -101.711599,
+    "altitude" : 570,
+    "uncertaintySemiMajorAxis" : 24.522712,
+    "uncertaintySemiMinorAxis" : 11.435888,
+    "angleOfMajorAxis" : 30.0,
+    "uncertaintyAltitude" : 78.84857,
+    "confidence" : 5
+  },
+  "ageOfLocationEstimate" : 0,
+  "DeferredMTLRData" : {
+    "deferredLocationEventType" : "LEAVING_FROM_AREA",
+    "terminationCause" : "MT_LR_RESTART",
+    "ServingNode" : {
+      "gprsNodeIndicator" : true,
+      "networkNodeNumber" : 6010009348,
+      "lmsi" : "7202e98c",
+      "SupportedLCSCapabilitySets" : {
+        "release98_99" : true,
+        "release4" : true,
+        "release5" : true,
+        "release6" : true,
+        "release7" : false
+      },
+      "AdditionalLCSCapabilitySets" : {
+        "release98_99" : true,
+        "release4" : true,
+        "release5" : true,
+        "release6" : true,
+        "release7" : true
+      }
     }
   },
-  "CGI": {
-    "mcc": 748,
-    "mnc": 1,
-    "lac": 13474,
-    "ci": 222
-  },
-  "GERANPositioningInfo": {
-    "geranPositioningData": "3239313533",
-    "geranGanssPositioningData": "393230313334"
-  },
-  "UTRANPositioningInfo": {
-    "utranPositioningData": "393334363031",
-    "utranGanssPositioningData": "393333363130"
-  },
-  "VelocityEstimate": {
-    "horizontalSpeed": 101,
-    "bearing": 3,
-    "verticalSpeed": 2,
-    "uncertaintyHorizontalSpeed": 5,
-    "uncertaintyVerticalSpeed": 1,
-    "velocityType": "HorizontalWithVerticalVelocityAndUncertainty"
-  },
-  "pseudonymIndicator": "PSEUDONYM_NOT_REQUESTED",
-  "lcsEvent": "DEFERRED_MT_LR_RESPONSE",
-  "moLrShortCircuitIndicator": false,
-  "PeriodicLDRInfo": {
-    "reportingAmount": 10,
-    "reportingInterval": 60
-  },
-  "sequenceNumber": 0,
-  "DeferredMTLRData": {
-    "deferredLocationEventType": "BEING_INSIDE_AREA",
-    "terminationCause": "CONGESTION",
-    "gprsNodeIndicator": false,
-    "networkNodeNumber": 598048,
-    "lmsi": "71ffacce",
-    "mmeName": "mmec01.mmegi8000.mme.epc.mnc053.mcc404.3gppnetwork.org",
-    "aaaServerName": "aaa01.aaa8000.aaa.epc.mnc053.mcc404.3gppnetwork.org",
-    "SupportedLCSCapabilitySets": {
-      "RELEASE98_99": true,
-      "RELEASE4": true,
-      "RELEASE5": true,
-      "RELEASE6": true,
-      "RELEASE7": true
-    },
-    "AdditionalLCSCapabilitySets": {
-      "RELEASE98_99": true,
-      "RELEASE4": true,
-      "RELEASE5": true,
-      "RELEASE6": true,
-      "RELEASE7": true
+  "lcsReferenceNumber" : 3461923,
+  "UtranPositioningData" : {
+    "PositioningDataSet" : {
+      "Item-0" : {
+        "method" : "Mobile Assisted GPS",
+        "usage" : 0
+      },
+      "Item-1" : {
+        "method" : "U-TDOA",
+        "usage" : 2
+      },
+      "Item-2" : {
+        "method" : "OTDOA",
+        "usage" : 3
+      }
     }
+  },
+  "CGI" : {
+    "mcc" : 502,
+    "mnc" : 19,
+    "lac" : 3081,
+    "sac" : 33045
+  },
+  "hGmlcAddress" : "10.0.0.14",
+  "lcsServiceTypeID" : 1,
+  "pseudonymIndicator" : "PSEUDONYM_NOT_REQUESTED",
+  "accuracyFulfilmentIndicator" : "REQUESTED_ACCURACY_NOT_FULFILLED",
+  "VelocityEstimate" : {
+    "horizontalSpeed" : 101,
+    "bearing" : 2,
+    "verticalSpeed" : 7,
+    "uncertaintyHorizontalSpeed" : 3,
+    "uncertaintyVerticalSpeed" : 1,
+    "velocityType" : "HorizontalWithVerticalVelocityAndUncertainty"
+  },
+  "TargetServingNodeForHandover" : {
+    "mscNumber" : 6010009347
+  },
+  "BarometricPressure" : {
+    "measuredPa" : 113032
   }
- }'
-....
+}
+----
 
-....
-api/report received '{
-  "network": "GSM/UMTS",
-  "protocol": "MAP",
-  "operation": "SLR",
-  "result": "SUCCESS",
-  "msisdn": 919418967382,
-  "imsi": 404511170527751,
-  "lcsClientID": {
-    "lcsClientType": 0,
-    "lcsClientIDName": {},
-    "lcsClientRequestorID": {}
+
+[source,json]
+----
+{
+  "network" : "GSM/UMTS",
+  "protocol" : "MAP",
+  "operation" : "SLR",
+  "result" : "SUCCESS",
+  "lcsEvent" : "EMERGENCY_CALL_ORIGINATION",
+  "LCSClientId" : {
+    "lcsClientType" : 1,
+    "lcsClientExternalID" : "444567",
+    "lcsClientInternalID" : 0,
+    "lcsClientIDName" : {
+      "lcsClientName" : "*911#",
+      "lcsClientDataCodingScheme" : 15,
+      "lcsClientDataFormatIndicator" : 3
+    },
+    "lcsClientAPN" : "e911",
+    "lcsClientDialedByMS" : "219023"
   },
-  "LocationEstimate": {
-    "typeOfShape": "EllipsoidPointWithAltitudeAndUncertaintyEllipsoid",
-    "latitude": 45.907005,
-    "longitude": -99.000227,
-    "altitude": 570,
-    "uncertaintySemiMajorAxis": 24.5,
-    "uncertaintySemiMinorAxis": 11.4,
-    "angleOfMajorAxis": 30.0,
-    "uncertaintyAltitude": 79.5,
-    "confidence": 5
+  "LCSLocationInfo" : {
+    "networkNodeNumber" : 59899180071,
+    "gprsNodeIndicator" : true,
+    "SupportedLCSCapabilitySets" : {
+        "release98_99" : true,
+        "release4" : true,
+        "release5" : true,
+        "release6" : false,
+        "release7" : false
+    },
+    "sgsnName" : "sgsn1B34.mnc019.mcc502.gprs",
+    "sgsnRealm" : "mnc019.mcc502.gprs"
   },
-  "ageOfLocationEstimate": 0,
-  "AdditionalLocationEstimate": {},
-  "CGI": {
-    "mcc": 404,
-    "mnc": 51,
-    "lac": 5000,
-    "ci": 21831
+  "msisdn" : 59898828111,
+  "imsi" : 748017654390127,
+  "imei" : "100714757075079",
+  "LocationEstimate" : {
+    "typeOfShape" : "EllipsoidPoint",
+    "latitude" : -34.905614,
+    "longitude" : -55.042191
   },
-  "GERANPositioningInfo": {},
-  "UTRANPositioningInfo": {},
-  "VelocityEstimate": {},
-  "pseudonymIndicator": "PSEUDONYM_NOT_REQUESTED",
-  "lcsEvent": "EMERGENCY_CALL_ORIGINATION",
-  "moLrShortCircuitIndicator": false,
-  "PeriodicLDRInfo": {},
-  "DeferredMTLRData": {
-    "SupportedLCSCapabilitySets": {},
-    "AdditionalLCSCapabilitySets": {}
+  "ageOfLocationEstimate" : 0,
+  "UtranPositioningData" : {
+    "PositioningDataSet" : {
+      "Item-0" : {
+        "method" : "Mobile Assisted GPS",
+        "usage" : 0
+      },
+      "Item-1" : {
+        "method" : "RTT",
+        "usage" : 4
+      },
+      "Item-2" : {
+        "method" : "OTDOA",
+        "usage" : 3
+      }
+    }
+  },
+  "SAI" : {
+    "mcc" : 748,
+    "mnc" : 1,
+    "lac" : 109,
+    "sac" : 10175
   }
- }'
-....
+}
+----
 
 Again, if you check the SS7 simulator (where the MAP SRILCS, PSL and SLR were sent and responded back), you should be able to see the requests and responses, e.g.
 
 image::images/SS7sim_MAP_LSM_tests.png[]
-
-
 
 .Procedure: Running {this-platform} jDiameter Location Simulator - LTE Location Services Example
 
@@ -584,183 +642,145 @@ Change the working directory to the bin folder in the Simulator's installation d
 
 Execute the jDiameter Location Simulator by issuing the following:
 
-....
+[source,shell]
+----
 java -jar /target/location-server-simulator-1.0.0.jar -r
-....
+----
 
 This will start the Diameter Location Simulator, which should look like this:
 
-....
-2021-04-26 21:20:26,727 INFO  DictionaryImpl - Mobicents Diameter Dictionary loaded in 366ms -- Vendors[12] Commands[88] Types[20] AVPs[871]
-2021-04-26 21:20:26,897 INFO  DictionaryImpl - Mobicents Diameter Dictionary loaded in 169ms -- Vendors[12] Commands[88] Types[20] AVPs[871]
-2021-04-26 21:20:26,901 INFO  SubscriberInformation - Loading subscribers from internal 'resources/subscriber-location-data.json' file.
-2021-04-26 21:20:26,961 INFO  SubscriberInformation - Loaded 18 records from location subscriber file.
-2021-04-26 21:20:26,984 INFO  LocationServerSimulator - Load jDiameter configuration from '/home/fernando/Diameter-LCS-Simulator/extended/location-server-simulator/config-server.xml'
-2021-04-26 21:20:27,165 INFO  StackImpl - (-)(-)(-)(-)(-) Starting Mobicents DIAMETER Stack v1.7.3-SNAPSHOT (-)(-)(-)(-)(-)
-2021-04-26 21:20:27,534 INFO  StackImpl - (-)(-)(-)(-)(-) Started  Mobicents DIAMETER Stack v1.7.3-SNAPSHOT (-)(-)(-)(-)(-)
-2021-04-26 21:20:28,035 INFO  StackCreator - Diameter LocationServerSimulator :: Supporting 0 applications.
-2021-04-26 21:20:28,100 INFO  ManagementImpl - SCTP configuration file path '/home/fernando/Diameter-LCS-Simulator/extended/location-server-simulator/server-management-192.168.1.8.23868_sctp.xml'
-2021-04-26 21:20:28,128 INFO  ServerImpl - SctpServerChannel bound to=[/192.168.1.8:23868]
-2021-04-26 21:20:28,128 INFO  ServerImpl - Started Server=dra.simulator:23868
-2021-04-26 21:20:28,134 INFO  ManagementImpl - Started SCTP Management=server-management-192.168.1.8.23868 WorkerThreads=0 SingleThread=true
-2021-04-26 21:20:28,134 INFO  ManagementImpl - Removing allocated resources: Servers=1, Associations=1
-2021-04-26 21:20:28,138 INFO  SelectorThread - SelectorThread for Management=server-management-192.168.1.8.23868 started.
-2021-04-26 21:20:28,141 INFO  ServerImpl - Stopped Server=dra.simulator:23868
-2021-04-26 21:20:28,151 INFO  ManagementImpl - Created Server=dra.simulator:23868
-2021-04-26 21:20:28,152 ERROR SelectorThread - Error while selecting the ready keys
-java.nio.channels.ClosedChannelException
-	at java.base/java.nio.channels.spi.AbstractSelectableChannel.register(AbstractSelectableChannel.java:206)
-	at java.base/java.nio.channels.SelectableChannel.register(SelectableChannel.java:260)
-	at org.mobicents.protocols.sctp.SelectorThread.run(SelectorThread.java:114)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-2021-04-26 21:20:28,162 INFO  ManagementImpl - Added Association=dra.simulator:23868 of type=SERVER
-2021-04-26 21:20:28,164 INFO  AssociationImpl - Started Association=Association [name=dra.simulator:23868, associationType=SERVER, ipChannelType=SCTP, hostAddress=null, hostPort=0, peerAddress=192.168.1.8, peerPort=23868, serverName=dra.simulator:23868, extraHostAddress=[]]
-2021-04-26 21:20:28,164 INFO  ServerImpl - SctpServerChannel bound to=[/192.168.1.8:23868]
-2021-04-26 21:20:28,165 INFO  ServerImpl - Started Server=dra.simulator:23868
-2021-04-26 21:20:28,169 INFO  LocationServerSimulator - ||==============================================================================||
-2021-04-26 21:20:28,169 INFO  LocationServerSimulator - ||                                                                            	||
-2021-04-26 21:20:28,170 INFO  LocationServerSimulator - ||  Diameter SLh/SLg/Sh LTE/IMS Location Services Simulator (Linux/amd64)
-2021-04-26 21:20:28,170 INFO  LocationServerSimulator - ||                                                        		       	||
-2021-04-26 21:20:28,170 INFO  LocationServerSimulator - ||  Ubuntu OpenJDK 64-Bit Server VM 11.0.10+9-Ubuntu-0ubuntu1.18.04
-2021-04-26 21:20:28,170 INFO  LocationServerSimulator - ||                                                                            	||
-2021-04-26 21:20:28,170 INFO  LocationServerSimulator - ||  Location Server Simulator (aaa://dra.simulator:23868 @ epc.mnc000.mcc000.3gppnetwork.org)
-2021-04-26 21:20:28,170 INFO  LocationServerSimulator - ||                                                                            	||
-2021-04-26 21:20:28,170 INFO  LocationServerSimulator - ||==============================================================================||
-2021-04-26 21:20:28,229 INFO  log - Logging initialized @2186ms to org.eclipse.jetty.util.log.Slf4jLog
-2021-04-26 21:20:28,299 WARN  AbstractConnector - Ignoring deprecated socket close linger time
-2021-04-26 21:20:28,305 INFO  EmbeddedJettyServer - == Spark has ignited ...
-2021-04-26 21:20:28,306 INFO  EmbeddedJettyServer - >> Listening on 0.0.0.0:4567
-2021-04-26 21:20:28,308 INFO  Server - jetty-9.4.12.v20180830; built: 2018-08-30T13:59:14.071Z; git: 27208684755d94a92186989f695db2d7b21ebc51; jvm 11.0.10+9-Ubuntu-0ubuntu1.18.04
-2021-04-26 21:20:28,356 INFO  session - DefaultSessionIdManager workerName=node0
-2021-04-26 21:20:28,356 INFO  session - No SessionScavenger set, using defaults
-2021-04-26 21:20:28,357 INFO  session - node0 Scavenging every 600000ms
-2021-04-26 21:20:28,390 INFO  AbstractConnector - Started ServerConnector@1ab8904b{HTTP/1.1,[http/1.1]}{0.0.0.0:4567}
-2021-04-26 21:20:28,390 INFO  Server - Started @2347ms
-2021-04-26 21:20:50,871 INFO  SelectorThread - Initial receive buffer SO_RCVBUF: 106496 and initial send buffer SO_SNDBUF: 106496
-2021-04-26 21:20:50,872 INFO  SelectorThread - Setting receive buffer SO_RCVBUF: 65535 and setting send buffer SO_SNDBUF: 65535
-2021-04-26 21:20:50,872 INFO  SCTPTransportServer - Connected to {}
-2021-04-26 21:20:50,874 INFO  SelectorThread - Accepted anonymous Association [name=dra.simulator:23868, associationType=ANONYMOUS_SERVER, ipChannelType=SCTP, hostAddress=null, hostPort=0, peerAddress=192.168.1.9, peerPort=38770, serverName=dra.simulator:23868, extraHostAddress=[]]
-2021-04-26 21:20:50,877 INFO  AssociationHandler - New association setup for Association=null with 32 outbound streams, and 32 inbound streams.
+[source,shell]
+----
+2025-06-13 20:02:04,119 WARN  DictionaryImpl - Duplicated AVP Definition for AVP Code: 1645, Vendor-Id: 10415. See TRACE logs for definitions.
+2025-06-13 20:02:04,138 INFO  DictionaryImpl - Mobicents Diameter Dictionary loaded in 130ms -- Vendors[12] Commands[104] Types[20] AVPs[1007]
+2025-06-13 20:02:04,208 WARN  DictionaryImpl - Duplicated AVP Definition for AVP Code: 1645, Vendor-Id: 10415. See TRACE logs for definitions.
+2025-06-13 20:02:04,226 INFO  DictionaryImpl - Mobicents Diameter Dictionary loaded in 88ms -- Vendors[12] Commands[104] Types[20] AVPs[1007]
+2025-06-13 20:02:04,232 INFO  SubscriberInformation - Loading subscribers from internal 'resources/subscriber-location-data.json' file.
+2025-06-13 20:02:04,262 INFO  SubscriberInformation - Loaded 21 records from location subscriber file.
+2025-06-13 20:02:04,267 INFO  LocationServerSimulator - Load jDiameter configuration from '/opt/paic/simulators/Diameter-LCS-Simulator/dra.simulator/location-server-simulator/config-server.xml'
+2025-06-13 20:02:04,307 INFO  StackImpl - (-)(-)(-)(-)(-) Starting Mobicents DIAMETER Stack v1.7.4-SNAPSHOT (-)(-)(-)(-)(-)
+2025-06-13 20:02:04,364 INFO  StackImpl - (-)(-)(-)(-)(-) Started  Mobicents DIAMETER Stack v1.7.4-SNAPSHOT (-)(-)(-)(-)(-)
+2025-06-13 20:02:04,867 INFO  StackCreator - Diameter LocationServerSimulator :: Supporting 0 applications.
+2025-06-13 20:02:04,906 INFO  ManagementImpl - SCTP configuration file path '/opt/paic/simulators/Diameter-LCS-Simulator/dra.simulator/location-server-simulator/server-management-192.168.87.129.23868_sctp.xml'
+2025-06-13 20:02:04,916 INFO  ServerImpl - SctpServerChannel bound to=[/192.168.87.129:23868, /192.168.87.201:23868]
+2025-06-13 20:02:04,917 INFO  ServerImpl - Started Server=dra-ip0:23868
+2025-06-13 20:02:04,919 INFO  ManagementImpl - Started SCTP Management=server-management-192.168.87.129.23868 WorkerThreads=0 SingleThread=true
+2025-06-13 20:02:04,919 INFO  SelectorThread - SelectorThread for Management=server-management-192.168.87.129.23868 started.
+2025-06-13 20:02:04,919 INFO  ManagementImpl - Removing allocated resources: Servers=1, Associations=1
+2025-06-13 20:02:04,922 INFO  ServerImpl - Stopped Server=dra-ip0:23868
+2025-06-13 20:02:04,924 INFO  ManagementImpl - Created Server=dra-ip0:23868
+2025-06-13 20:02:04,924 INFO  ManagementImpl - Added Association=dra-ip0:23868 of type=SERVER
+2025-06-13 20:02:04,924 INFO  AssociationImpl - Started Association=Association [name=dra-ip0:23868, associationType=SERVER, ipChannelType=SCTP, hostAddress=null, hostPort=0, peerAddress=192.168.87.129, peerPort=23868, serverName=dra-ip0:23868, extraHostAddress=[]]
+2025-06-13 20:02:04,925 INFO  ServerImpl - SctpServerChannel bound to=[/192.168.87.129:23868, /192.168.87.201:23868]
+2025-06-13 20:02:04,925 INFO  ServerImpl - Started Server=dra-ip0:23868
+2025-06-13 20:02:04,932 INFO  LocationServerSimulator - ||==============================================================================||
+2025-06-13 20:02:04,932 INFO  LocationServerSimulator - ||                                                                            	||
+2025-06-13 20:02:04,932 INFO  LocationServerSimulator - ||  Diameter SLh/SLg/Sh LTE/IMS Location Services Simulator (Linux/aarch64)
+2025-06-13 20:02:04,932 INFO  LocationServerSimulator - ||                                                        		       	||
+2025-06-13 20:02:04,932 INFO  LocationServerSimulator - ||  Oracle Corporation Java HotSpot(TM) 64-Bit Server VM 11.0.18+9-LTS-195
+2025-06-13 20:02:04,932 INFO  LocationServerSimulator - ||                                                                            	||
+2025-06-13 20:02:04,932 INFO  LocationServerSimulator - ||  Location Server Simulator (aaa://dra.simulator:23868 @ epc.mnc000.mcc000.3gppnetwork.org)
+2025-06-13 20:02:04,932 INFO  LocationServerSimulator - ||                                                                            	||
+2025-06-13 20:02:04,932 INFO  LocationServerSimulator - ||==============================================================================||
+2025-06-13 20:02:04,959 INFO  log - Logging initialized @1141ms to org.eclipse.jetty.util.log.Slf4jLog
+2025-06-13 20:02:05,006 WARN  AbstractConnector - Ignoring deprecated socket close linger time
+2025-06-13 20:02:05,006 INFO  EmbeddedJettyServer - == Spark has ignited ...
+2025-06-13 20:02:05,006 INFO  EmbeddedJettyServer - >> Listening on 0.0.0.0:4567
+2025-06-13 20:02:05,008 INFO  Server - jetty-9.4.12.v20180830; built: 2018-08-30T13:59:14.071Z; git: 27208684755d94a92186989f695db2d7b21ebc51; jvm 11.0.18+9-LTS-195
+2025-06-13 20:02:05,026 INFO  session - DefaultSessionIdManager workerName=node0
+2025-06-13 20:02:05,026 INFO  session - No SessionScavenger set, using defaults
+2025-06-13 20:02:05,026 INFO  session - node0 Scavenging every 660000ms
+2025-06-13 20:02:05,037 INFO  AbstractConnector - Started ServerConnector@30048008{HTTP/1.1,[http/1.1]}{0.0.0.0:4567}
+2025-06-13 20:02:05,037 INFO  Server - Started @1220ms
+2025-06-13 20:02:05,617 INFO  SelectorThread - Initial receive buffer SO_RCVBUF: 106496 and initial send buffer SO_SNDBUF: 106496
+2025-06-13 20:02:05,617 INFO  SelectorThread - Setting receive buffer SO_RCVBUF: 65535 and setting send buffer SO_SNDBUF: 65535
+2025-06-13 20:02:05,618 INFO  SCTPTransportServer - Connected to {}
+2025-06-13 20:02:05,619 INFO  SelectorThread - Accepted anonymous Association [name=dra-ip0:23868, associationType=ANONYMOUS_SERVER, ipChannelType=SCTP, hostAddress=null, hostPort=0, peerAddress=192.168.87.129, peerPort=38841, serverName=dra-ip0:23868, extraHostAddress=[]]
+2025-06-13 20:02:05,620 INFO  AssociationHandler - New association setup for Association=null with 32 outbound streams, and 32 inbound streams.
 
-WARNING: An illegal reflective access operation has occurred
-WARNING: Illegal reflective access by io.netty.util.internal.PlatformDependent0 (file:/home/fernando/Diameter-LCS-Simulator/extended/location-server-simulator/target/lib/netty-all-4.0.36.Final.jar) to field java.nio.Buffer.address
-WARNING: Please consider reporting this to the maintainers of io.netty.util.internal.PlatformDependent0
-WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
-WARNING: All illegal access operations will be denied in a future release
-2021-04-26 21:20:51,317 INFO  PlatformDependent - Your platform does not provide complete low-level API for accessing direct buffers reliably. Unless explicitly requested, heap buffer will always be preferred to avoid potential system unstability.
-2021-04-26 21:20:51,348 WARN  PeerImpl - Processing CER failed, no common application. Message AppIds [[]]
-2021-04-26 21:20:51,354 INFO  AssociationImpl - Sent '284' bytes, association 'dra.simulator:23868', retry count '0', hbh 0x10b32d27, e2e 0xe300000.
-2021-04-26 21:20:51,354 INFO  PeerImpl - SessionId [null] message sent
-2021-04-26 21:20:51,364 INFO  AssociationHandler - Association=null SHUTDOWN
-2021-04-26 21:20:51,365 INFO  AssociationHandler - Shutdown for Association=null
-2021-04-26 21:20:51,365 ERROR AssociationImpl - Rx -1 while trying to read from underlying socket for Association=dra.simulator:23868
-2021-04-26 21:21:02,564 INFO  SelectorThread - Initial receive buffer SO_RCVBUF: 106496 and initial send buffer SO_SNDBUF: 106496
-2021-04-26 21:21:02,564 INFO  SelectorThread - Setting receive buffer SO_RCVBUF: 65535 and setting send buffer SO_SNDBUF: 65535
-2021-04-26 21:21:02,564 INFO  SCTPTransportServer - Connected to {}
-2021-04-26 21:21:02,565 INFO  SelectorThread - Accepted anonymous Association [name=dra.simulator:23868, associationType=ANONYMOUS_SERVER, ipChannelType=SCTP, hostAddress=null, hostPort=0, peerAddress=192.168.1.9, peerPort=38770, serverName=dra.simulator:23868, extraHostAddress=[]]
-2021-04-26 21:21:02,565 INFO  AssociationHandler - New association setup for Association=null with 32 outbound streams, and 32 inbound streams.
-
-2021-04-26 21:21:02,583 WARN  PeerImpl - Processing CER failed, no common application. Message AppIds [[]]
-2021-04-26 21:21:02,584 INFO  PeerImpl - SessionId [null] message sent
-2021-04-26 21:21:02,585 INFO  AssociationImpl - Sent '284' bytes, association 'dra.simulator:23868', retry count '0', hbh 0x10b32d28, e2e 0xe300002.
-2021-04-26 21:21:02,588 INFO  AssociationHandler - Association=null SHUTDOWN
-2021-04-26 21:21:02,594 INFO  AssociationHandler - Shutdown for Association=null
-2021-04-26 21:21:02,595 ERROR AssociationImpl - Rx -1 while trying to read from underlying socket for Association=dra.simulator:23868
-2021-04-26 21:21:13,805 INFO  SelectorThread - Initial receive buffer SO_RCVBUF: 106496 and initial send buffer SO_SNDBUF: 106496
-2021-04-26 21:21:13,805 INFO  SelectorThread - Setting receive buffer SO_RCVBUF: 65535 and setting send buffer SO_SNDBUF: 65535
-2021-04-26 21:21:13,805 INFO  SCTPTransportServer - Connected to {}
-2021-04-26 21:21:13,805 INFO  SelectorThread - Accepted anonymous Association [name=dra.simulator:23868, associationType=ANONYMOUS_SERVER, ipChannelType=SCTP, hostAddress=null, hostPort=0, peerAddress=192.168.1.9, peerPort=38770, serverName=dra.simulator:23868, extraHostAddress=[]]
-2021-04-26 21:21:13,806 INFO  AssociationHandler - New association setup for Association=null with 32 outbound streams, and 32 inbound streams.
-
-2021-04-26 21:21:13,839 INFO  PeerImpl - SessionId [null] message sent
-2021-04-26 21:21:13,839 INFO  AssociationImpl - Sent '284' bytes, association 'dra.simulator:23868', retry count '0', hbh 0x10b32d29, e2e 0xe300004.
-....
+2025-06-13 20:02:05,652 INFO  MutablePeerTableImpl - Message [MessageImpl{commandCode=257, flags=128}] received to peer [aaa://192.168.87.129:38841]
+2025-06-13 20:02:05,652 INFO  MutablePeerTableImpl - Origin-Host in new received message is [aaa://dra:3868]
+2025-06-13 20:02:05,652 INFO  MutablePeerTableImpl - Origin-Realm in new received message is [restcomm.org]
+2025-06-13 20:02:05,652 INFO  MutablePeerTableImpl - dra != aaa://dra:3868
+2025-06-13 20:02:05,652 INFO  MutablePeerTableImpl - Peer with FQDN [aaa://dra:3868] was not found in predefined peer table. Checking at (previously) connected peers table
+2025-06-13 20:02:05,652 INFO  MutablePeerTableImpl - Still haven't found peer for FQDN [aaa://dra:3868]
+2025-06-13 20:02:05,652 INFO  MutablePeerTableImpl - Creating and returning a new Peer Instance for URI [aaa://dra:3868].
+2025-06-13 20:02:05,669 INFO  MutablePeerTableImpl - Created new peer instance [SPeer{Uri=aaa://dra:3868; State=DOWN; con=org.jdiameter.server.impl.io.sctp.SCTPServerConnection@4d7d835a; incCon{aaa://192.168.87.129:38841=org.jdiameter.server.impl.io.sctp.SCTPServerConnection@4d7d835a} }] and adding to peer table
+2025-06-13 20:02:05,669 INFO  MutablePeerTableImpl - Found the realm [restcomm.org] for the new peer [SPeer{Uri=aaa://dra:3868; State=DOWN; con=org.jdiameter.server.impl.io.sctp.SCTPServerConnection@4d7d835a; incCon{aaa://192.168.87.129:38841=org.jdiameter.server.impl.io.sctp.SCTPServerConnection@4d7d835a} }], adding it to it
+2025-06-13 20:02:05,669 INFO  MutablePeerTableImpl - Found the realm [restcomm.org] for the new peer [SPeer{Uri=aaa://dra:3868; State=DOWN; con=org.jdiameter.server.impl.io.sctp.SCTPServerConnection@4d7d835a; incCon{aaa://192.168.87.129:38841=org.jdiameter.server.impl.io.sctp.SCTPServerConnection@4d7d835a} }], adding it to it
+2025-06-13 20:02:05,669 INFO  MutablePeerTableImpl - Found the realm [restcomm.org] for the new peer [SPeer{Uri=aaa://dra:3868; State=DOWN; con=org.jdiameter.server.impl.io.sctp.SCTPServerConnection@4d7d835a; incCon{aaa://192.168.87.129:38841=org.jdiameter.server.impl.io.sctp.SCTPServerConnection@4d7d835a} }], adding it to it
+2025-06-13 20:02:05,669 INFO  MutablePeerTableImpl - Adding Peer[SPeer{Uri=aaa://dra:3868; State=DOWN; con=org.jdiameter.server.impl.io.sctp.SCTPServerConnection@4d7d835a; incCon{aaa://192.168.87.129:38841=org.jdiameter.server.impl.io.sctp.SCTPServerConnection@4d7d835a} }] to PeerTable with size 0
+2025-06-13 20:02:05,669 INFO  MutablePeerTableImpl - Handle [MessageImpl{commandCode=257, flags=128}] message on new peer [SPeer{Uri=aaa://dra:3868; State=DOWN; con=org.jdiameter.server.impl.io.sctp.SCTPServerConnection@4d7d835a; incCon{aaa://192.168.87.129:38841=org.jdiameter.server.impl.io.sctp.SCTPServerConnection@4d7d835a} }]
+2025-06-13 20:02:05,670 INFO  PeerImpl - Processing CER
+2025-06-13 20:02:05,670 INFO  PeerImpl - CER received by current connection, key: [aaa://192.168.87.129:38841] PeerState: [DOWN]
+2025-06-13 20:02:05,670 INFO  PeerImpl - CER result [2001]
+2025-06-13 20:02:05,670 INFO  PeerImpl - Send CEA message
+----
 
 Then, you could issue an HTTP request to the GMLC in order to generate RIR/RIA and PLR/PLA, for example:
 
-....
+[source,shell]
+----
 curl -d "msisdn=573195897489&operation=PLR&clientReferenceNumber=104&lcsLocationType=0&lcsClientName=sip:fer.bloggs@212.123.1.213&lcsClientFormatIndicator=4&lcsClientType=0&token=n4ndO" -X POST 127.0.0.1:8080/restcomm/gmlc/rest
-....
+----
 
 You should then receive the immediate response from the GMLC (responses may vary according to the MSISDN/IMSI provided in the request):
 
-....
+[source,json]
+----
 {
   "network": "LTE",
   "protocol": "Diameter SLh-SLg(ELP)",
-  "operation": "RIR-RIA-PLR-PLA",
+  "operation": "RIR/RIA PLR/PLA",
   "result": "SUCCESS",
-  "clientReferenceNumber": 49790,
-  "lcsReferenceNumber": 1,
+  "clientReferenceNumber": 104,
+  "plrFlags": 4,
   "Routing-Info-Answer": {
     "msisdn": 573195897489,
     "imsi": 732101509580859,
-    "lmsi": "37323133393137313537",
-    "mmeName": "MMEC18.MMEGI8001.MME.EPC.MNC019.MCC502.3GPPNETWORK.ORG",
-    "mmeRealm": "EPC.MNC019.MCC502.3GPPNETWORK.ORG",
-    "sgsnNumber": 5730100028,
-    "sgsnName": "SGSN18.MMEGI8001.MME.EPC.MNC019.MCC502.3GPPNETWORK.ORG",
-    "sgsnRealm": "GPRS.MNC019.MCC502.3GPPNETWORK.ORG",
-    "3GPPAAAServerName": "aaa001",
-    "gmlcAddress": "191.42.21.204"
+    "lmsi": "2731191775",
+    "ServingNode": {
+      "mmeName": "dra.simulator",
+      "mmeRealm": "epc.mnc000.mcc000.3gppnetwork.org",
+      "sgsnNumber": 5730100028,
+      "sgsnName": "dra.simulator",
+      "sgsnRealm": "epc.mnc000.mcc000.3gppnetwork.org",
+      "mscNumber": 5730100003,
+      "3GPPAAAServerName": "aaa001",
+      "lcsCapabilitySets": "release4",
+      "gmlcAddress": "191.42.21.204"
+    },
+    "gmlcAddress": "191.42.21.204",
+    "pprAddress": "192.168.1.20",
+    "riaFlags": 0
   },
   "Provide-Location-Answer": {
     "LocationEstimate": {
       "typeOfShape": "Polygon",
       "numberOfPoints": 4,
       "polygonPoint1": {
-        "latitude": 26.646513,
-        "longitude": 73.492055
+        "latitude": 6.646503,
+        "longitude": -75.49206
       },
       "polygonPoint2": {
-        "latitude": 26.648026,
-        "longitude": 73.495703
+        "latitude": 6.648016,
+        "longitude": -75.495687
       },
       "polygonPoint3": {
-        "latitude": 26.648734,
-        "longitude": 73.495617
+        "latitude": 6.648735,
+        "longitude": -75.495622
       },
       "polygonPoint4": {
-        "latitude": 26.648744,
-        "longitude": 73.495703
+        "latitude": 6.648746,
+        "longitude": -75.495708
       },
       "polygonCentroid": {
-        "latitude": 26.647743,
-        "longitude": 73.494458
+        "latitude": 6.647737,
+        "longitude": -75.494456
       }
     },
+    "accuracyFulfilmentIndicator": "REQUESTED_ACCURACY_FULFILLED",
     "ageOfLocationEstimate": 0,
-    "CGI": {
-      "mcc": 733,
-      "mnc": 233,
-      "lac": 12336,
-      "ci": 12344
-    },
-    "SAI": {
-      "mcc": 733,
-      "mnc": 233,
-      "lac": 12336,
-      "sac": 12344
-    },
-    "ECGI": {
-      "mcc": 733,
-      "mnc": 233,
-      "eNBId": 3158064,
-      "ci": 52,
-      "cellPortionId": 197
-    },
-    "GERANPositioningInfo": {
-      "geranPositioningData": "30",
-      "geranGanssPositioningData": "30"
-    },
-    "UTRANPositioningInfo": {
-      "utranPositioningData": "3831",
-      "utranGanssPositioningData": "343033",
-      "utranAdditionalPositioningData": "30"
-    },
-    "E-UTRANPositioningInfo": {
-      "eUtranPositioningData": "235C6A1911"
-    },
     "VelocityEstimate": {
       "horizontalSpeed": 20,
       "bearing": 0,
@@ -769,16 +789,63 @@ You should then receive the immediate response from the GMLC (responses may vary
       "uncertaintyVerticalSpeed": 0,
       "velocityType": "HorizontalVelocity"
     },
-    "civicAddress": "Calle 2 Sur 20-185, 050022, Medellin, Colombia",
-    "barometricPressure": 1012
+    "EUtranPositioningData": {
+      "GnssPositioningDataSet": {
+        "Item-0": {
+          "method": "UE-Based",
+          "ganssId": "GLONASS",
+          "usage": 4
+        }
+      }
+    },
+    "TargetServingNodeForHandover": {
+      "mmeName": "dra.simulator",
+      "mmeRealm": "epc.mnc000.mcc000.3gppnetwork.org",
+      "sgsnName": "dra.simulator",
+      "sgsnRealm": "epc.mnc000.mcc000.3gppnetwork.org",
+      "sgsnNumber": 5730100028,
+      "3GPPAAAServerName": "aaa001",
+      "mscNumber": 5730100003,
+      "lcsCapabilitySets": "release4",
+      "gmlcAddress": "191.42.21.204"
+    },
+    "plaFlags": 0,
+    "ESMLCCellInfo": {
+      "mcc": 732,
+      "mnc": 103,
+      "eci": 2829413,
+      "eNBId": 11052,
+      "ci": 101,
+      "cellPortionId": 197
+    },
+    "CivicAddress": {
+      "country": "AU",
+      "A1": "NSW",
+      "A3": "Wollongong",
+      "A4": "North Wollongong",
+      "RD": "Flinders",
+      "STS": "Street",
+      "RDBR": "Campbell Street",
+      "LMK": "Gilligan\u0027s Island",
+      "LOC": "Corner",
+      "NAM": "Video Rental Store",
+      "PC": "2500",
+      "ROOM": "Westerns and Classics",
+      "PLC": "store",
+      "POBOX": "Private Box 15"
+    },
+    "BarometricPressure": {
+      "measuredPa": 1012
+    }
   }
 }
-....
+----
 
 You should simultaneously see the following in the Diameter Location Simulator:
 
 HSS:
-....
+[source,shell]
+----
 2021-04-26 21:43:17,836 INFO  SLhReferencePoint - << Received SLh request [MessageImpl{commandCode=8388622, flags=192}]
 2021-04-26 21:43:17,924 INFO  SLhReferencePoint - <> Processing [RIR] Routing-Info-Request for request [MessageImpl{commandCode=8388622, flags=192}] from gmlc@restcomm.org with session-id [gmlc;377;280176704]
 2021-04-26 21:43:17,931 INFO  SLhReferencePoint - <> Generating [RIA] Routing-Info-Answer response data for MSISDN=573195897489, GMLC-Number=598970755909
@@ -795,126 +862,90 @@ HSS:
 2021-04-26 21:43:18,179 INFO  PeerImpl - SessionId [gmlc;377;280176706] message sent
 2021-04-26 21:43:18,180 INFO  AssociationImpl - Sent '788' bytes, association 'dra.simulator:23868', retry count '0', hbh 0x10b32d41, e2e 0xe300064.
 2021-04-26 21:43:18,178 INFO  PeerTableImpl - Message 'answer', sessionId 'gmlc;377;280176706' submitted!
-....
+----
 
 You could generate an LRR/LRA correlated with the previous EPC-MT-LR by issuing the following command in the terminal console (see that the *lcsReferenceNumber* parameter value coincides with the previously received *lcsReferenceNumber* value for the same *msisdn*):
 
-....
-curl -X GET 127.0.0.1:4567/lrr?msisdn=59899077937\&locationEvent=4\&lcsReferenceNumber=1
-....
+[source,shell]
+----
+curl -X GET 127.0.0.1:4567/lrr?msisdn=573195897484\&locationEvent=4\&lcsReferenceNumber=79
+----
 
 An HTTP REST API listening on the appropriate port should receive the JSON responses for each of these actions, e.g.:
 
-....
-api/report received '{
-  "network": "LTE",
-  "protocol": "Diameter SLg (ELP)",
-  "operation": "LRR",
-  "result": "SUCCESS",
-  "clientReferenceNumber": 49790,
-  "lcsReferenceNumber": 1,
-  "msisdn": 573195897489,
-  "imsi": 732101509580859,
-  "imei": "352154090165449",
-  "lcsServiceTypeID": 0,
-  "locationEvent": "MO_LR",
-  "lcsEPSClientName": {
-    "lcsEPSClientNameString": "gmlcCl453",
-    "lcsEPSClientDataFormatIndicator": 3
+[source,json]
+----
+{
+  "network" : "LTE",
+  "protocol" : "Diameter SLg (ELP)",
+  "operation" : "LRR",
+  "result" : "SUCCESS",
+  "clientReferenceNumber" : 1041,
+  "locationEvent" : "DEFERRED_MT_LR_RESPONSE",
+  "LcsEPSClientName" : {
+    "lcsEPSClientNameString" : "sip:fer.bloggs@212.123.1.213",
+    "lcsEPSClientDataFormatIndicator" : 4
   },
-  "LocationEstimate": {
-    "typeOfShape": "Polygon",
-    "numberOfPoints": 4,
-    "polygonPoint1": {
-      "latitude": 26.646513,
-      "longitude": 73.492055
-    },
-    "polygonPoint2": {
-      "latitude": 26.648026,
-      "longitude": 73.495703
-    },
-    "polygonPoint3": {
-      "latitude": 26.648734,
-      "longitude": 73.495617
-    },
-    "polygonPoint4": {
-      "latitude": 26.648744,
-      "longitude": 73.495703
-    },
-    "polygonCentroid": {
-      "latitude": 26.647743,
-      "longitude": 73.494458
+  "imsi" : 732101509580853,
+  "msisdn" : 573195897484,
+  "imei" : "352154090165449",
+  "LocationEstimate" : {
+    "typeOfShape" : "EllipsoidPointWithAltitudeAndUncertaintyEllipsoid",
+    "latitude" : 6.195593,
+    "longitude" : -75.558109,
+    "altitude" : 200,
+    "uncertaintySemiMajorAxis" : 5.1,
+    "uncertaintySemiMinorAxis" : 3.7,
+    "angleOfMajorAxis" : 4.0,
+    "uncertaintyAltitude" : 11.198834,
+    "confidence" : 80
+  },
+  "ageOfLocationEstimate" : 0,
+  "EUtranPositioningData": {
+    "PositioningDataSet": {
+      "Item-0": {
+        "method": "E-CID",
+        "usage": 2
+      },
+      "Item-1": {
+        "method": "OTDOA",
+        "usage": 3
+      },
+      "Item-2": {
+        "method": "U-TDOA",
+        "usage": 4
+      }
     }
   },
-  "ageOfLocationEstimate": 0,
-  "lcsQoSClass": "BEST_EFFORT",
-  "ServingNode": {
-    "mmeName": "MMEC18.MMEGI8001.MME.EPC.MNC019.MCC502.3GPPNETWORK.ORG",
-    "mmeRealm": "EPC.MNC019.MCC502.3GPPNETWORK.ORG",
-    "sgsnName": "SGSN18.MMEGI8001.MME.EPC.MNC019.MCC502.3GPPNETWORK.ORG",
-    "sgsnRealm": "GPRS.MNC019.MCC502.3GPPNETWORK.ORG",
-    "sgsnNumber": 5730100028,
-    "3GPPAAAServerName": "aaa001",
-    "mscNumber": 5730100003,
-    "lcsCapabilitySets": "RELEASE4"
+  "ECGI" : {
+    "mcc" : 732,
+    "mnc" : 123,
+    "eci" : 2829314,
+    "eNBId" : 11052,
+    "ci" : 2
   },
-  "CGI": {
-    "mcc": 733,
-    "mnc": 233,
-    "lac": 12336,
-    "ci": 12344
+  "lcsServiceTypeID" : 0,
+  "pseudonymIndicator" : "PSEUDONYM_NOT_REQUESTED",
+  "lcsQoSClass" : "BEST_EFFORT",
+  "lrrFlags" : 0,
+  "lcsReferenceNumber" : 79,
+  "DeferredMTLRData" : {
+    "deferredLocationType" : "LEAVING_FROM_AREA"
   },
-  "SAI": {
-    "mcc": 733,
-    "mnc": 233,
-    "lac": 12336,
-    "sac": 12344
+  "CivicAddress": {
+    "country": "CO",
+    "A1": "Antioquia",
+    "A3": "Medellín",
+    "A6": "Calle 2 Sur",
+    "HNO": "20185",
+    "FLR": "1403",
+    "PC": "050022"
   },
-  "ECGI": {
-    "mcc": 733,
-    "mnc": 233,
-    "eNBId": 3158064,
-    "ci": 52,
-    "cellPortionId": 197
-  },
-  "GERANPositioningInfo": {
-    "geranPositioningData": "30",
-    "geranGanssPositioningData": "30"
-  },
-  "UTRANPositioningInfo": {
-    "utranPositioningData": "3831",
-    "utranGanssPositioningData": "343033",
-    "utranAdditionalPositioningData": "30"
-  },
-  "E-UTRANPositioningInfo": {
-    "eUtranPositioningData": "235C10192B"
-  },
-  "VelocityEstimate": {
-    "horizontalSpeed": 20,
-    "bearing": 0,
-    "verticalSpeed": 0,
-    "uncertaintyHorizontalSpeed": 0,
-    "uncertaintyVerticalSpeed": 0,
-    "velocityType": "HorizontalVelocity"
-  },
-  "pseudonymIndicator": "PSEUDONYM_NOT_REQUESTED",
-  "PeriodicLDRInfo": {
-    "reportingAmount": 5,
-    "reportingInterval": 30
-  },
-  "DeferredMTLRData": {
-    "deferredLocationType": "MOTION_EVENT",
-    "terminationCause": "CONGESTION",
-    "ServingNode": {}
-  },
-  "DelayedLocationReportingData": {
-    "terminationCause": "PRIVACY_VIOLATION",
-    "ServingNode": {}
-  },
-  "civicAddress": "Calle 2 Sur 20-185, 050022, Medellin, Colombia",
-  "barometricPressure": 1012
- }'
-....
+  "BarometricPressure" : {
+    "measuredPa" : 123091
+  }
+}
+----
 
 You should simultaneously see the following in the Diameter Location Simulator (MME):
 
@@ -929,15 +960,16 @@ You should simultaneously see the following in the Diameter Location Simulator (
 == Running the Shell
 
 You must start the Shell client and connect to the managed instance prior to executing commands to configure the Gateway.
-Shell can be started by issuing the following command from [path]_Extended-GMLC-<version>/wildfly-10.1.0.Final/bin_ directory:
+Shell can be started by issuing the following command from [path]_Extended-GMLC-<version>/wildfly-24.0.1.Final/bin_ directory:
 
-[source]
+[source,shell]
 ----
 [$] ./ss7-cli.sh
 ----
 
 Once console starts, it will print following information and await further commands:
 
+[source,shell]
 ----
 version=7.4.0-102,name=Restcomm jSS7 CLI,prefix=restcomm,vendor=PAiC
 ----
@@ -956,9 +988,9 @@ You can connect to a new instance by entering the IP:Port values and then login 
 {this-platform} {this-application} GUI Management Security is based on the JBoss Security Framework.
 
 As of now, there is basic authentication offered (which is based on the JBoss Security framework). When you try to start the Web Console, you will be prompted to enter login credentials.
-These credentials can be configured in the files [path]_jmx-roles.properties_ and [path]_jmx-users.properties_ located at [path]_Extended-GMLC-<version><version>/wildfly-10.1.0.Final/standalone/configuration/_.
+These credentials can be configured in the files [path]_jmx-roles.properties_ and [path]_jmx-users.properties_ located at [path]_Extended-GMLC-<version><version>/wildfly-24.0.1.Final/standalone/configuration/_.
 
 For detailed instructions and to know more about Wildfly user configuration please refer to official Wildfly 10 guide https://docs.jboss.org/author/display/WFLY10/add-userutility[here].
 
 NOTE: Default user-id and password for GUI Management Console is admin and admin.
-You can change the user-id and password in files  [path]_jmx-roles.properties_ and [path]_jmx-users.properties_  located at [path]_Extended-GMLC-<version>/wildfly-10.1.0.Final/standalone/configuration/_
+You can change the user-id and password in files  [path]_jmx-roles.properties_ and [path]_jmx-users.properties_  located at [path]_Extended-GMLC-<version>/wildfly-24.0.1.Final/standalone/configuration/_

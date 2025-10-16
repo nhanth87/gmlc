@@ -57,13 +57,11 @@ public class ShGeodeticInformation {
   }
 
   public byte[] getGeodeticInfoBytes(String geoInfo) {
-    byte[] bytes = Base64.getDecoder().decode(geoInfo);
-    return bytes;
+    return Base64.getDecoder().decode(geoInfo);
   }
 
   public GeodeticInformation decodeGeodeticInfoBytes(byte[] geoInfoBytes) {
-    GeodeticInformation geodeticInformation = new GeodeticInformationImpl(geoInfoBytes);
-    return geodeticInformation;
+    return new GeodeticInformationImpl(geoInfoBytes);
   }
 
   @Override

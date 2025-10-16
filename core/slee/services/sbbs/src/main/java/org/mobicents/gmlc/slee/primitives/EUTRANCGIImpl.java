@@ -2,6 +2,7 @@ package org.mobicents.gmlc.slee.primitives;
 
 import javolution.xml.XMLFormat;
 import javolution.xml.stream.XMLStreamException;
+
 import org.mobicents.protocols.asn.AsnInputStream;
 import org.mobicents.protocols.asn.AsnOutputStream;
 import org.restcomm.protocols.ss7.map.api.MAPException;
@@ -9,7 +10,6 @@ import org.restcomm.protocols.ss7.map.api.MAPParsingComponentException;
 import org.restcomm.protocols.ss7.map.primitives.OctetStringBase;
 import org.restcomm.protocols.ss7.map.primitives.TbcdString;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 
 /**
@@ -258,16 +258,27 @@ public class EUTRANCGIImpl extends OctetStringBase implements EUTRANCGI {
 
     @Override
     public void read(javolution.xml.XMLFormat.InputElement xml, EUTRANCGIImpl eUtranCgi) throws XMLStreamException {
-      String s = xml.getAttribute(DATA, DEFAULT_VALUE);
-      if (s != null) {
-        eUtranCgi.data = DatatypeConverter.parseHexBinary(s);
+      int mcc = xml.getAttribute(MCC, DEFAULT_INT_VALUE);
+      int mnc = xml.getAttribute(MNC, DEFAULT_INT_VALUE);
+      int eci = xml.getAttribute(ECI, DEFAULT_INT_VALUE);
+
+      try {
+        eUtranCgi.setData(mcc, mnc, eci);
+      } catch (MAPException e) {
+        throw new XMLStreamException("MAPException when deserializing EUTRANCGIImpl", e);
       }
     }
 
     @Override
     public void write(EUTRANCGIImpl eUtranCgi, javolution.xml.XMLFormat.OutputElement xml) throws XMLStreamException {
-      if (eUtranCgi.data != null) {
-        xml.setAttribute(DATA, DatatypeConverter.printHexBinary(eUtranCgi.data));
+      try {
+        xml.setAttribute(MCC, eUtranCgi.getMCC());
+        xml.setAttribute(MNC, eUtranCgi.getMNC());
+        xml.setAttribute(ECI, eUtranCgi.getEci());
+        xml.setAttribute(ENB, eUtranCgi.getENodeBId());
+        xml.setAttribute(CI, eUtranCgi.getCi());
+      } catch (MAPException e) {
+        throw new XMLStreamException("MAPException when serializing EUTRANCGIImpl", e);
       }
     }
   };

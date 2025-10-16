@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 //import java.util.concurrent.locks.StampedLock;
 //import java.util.HashMap;
@@ -134,9 +135,9 @@ public class Transaction {
    */
 
   public List<Long> getMappedDialogs(Long transaction) {
-    ArrayList<Long> dialogs = new ArrayList<Long>();
+    ArrayList<Long> dialogs = new ArrayList<>();
     for (int dialog = 0; dialog < availableDialogs; dialog++) {
-      if (dialogTransactions[dialog] == transaction)
+      if (Objects.equals(dialogTransactions[dialog], transaction))
         dialogs.add((long) dialog);
     }
     return dialogs;

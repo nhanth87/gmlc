@@ -15,7 +15,7 @@
 	<property name="jboss.modules.path" value="${jboss.home}/modules/system/layers/base" />
 	<property name="jboss.standalone.path" value="${jboss.home}/standalone" />
 	<property name="restcomm-gmlc.path" value="${jboss.modules.path}/org/mobicents/gmlc/bootstrap" />
-	
+
 	<property name="jss7.path" value="${jboss.home}/../extra/restcomm-ss7/ss7-wildfly"/>
 
 	<condition property="file_url" value="file:/">
@@ -50,10 +50,10 @@
 		<!-- Updating of subsystem SS7-WildFly with needed by GMLC stack set -->
 		<xmltask source="${jboss.standalone.path}/configuration/standalone.xml" dest="${jboss.standalone.path}/configuration/standalone.xml">
 			<remove path="/:server/:profile/*[local-name()='subsystem'][*[local-name()='mbean'][namespace-uri()='urn:org.restcomm:ss7-wildfly:1.0'][@reflection]]" />
-        	<insert path="/:server/:profile/*[local-name()='subsystem'][last()]" position="after" file="wildfly-jss7-subsystem.txt" />
-    	</xmltask>
+			<insert path="/:server/:profile/*[local-name()='subsystem'][last()]" position="after" file="wildfly-jss7-subsystem.txt" />
+		</xmltask>
 
-    	<!-- Adding of subsystem gmlc-extensions -->
+		<!-- Adding of subsystem gmlc-extensions -->
 		<xmltask source="${jboss.standalone.path}/configuration/standalone.xml" dest="${jboss.standalone.path}/configuration/standalone.xml">
 			<remove path="/:server/:profile/*[local-name()='subsystem'][*[local-name()='mbean'][namespace-uri()='urn:org.mobicents:gmlc-extensions:1.0'][@reflection]]" />
 			<insert path="/:server/:profile/*[local-name()='subsystem'][last()]" position="after" file="wildfly-gmlc-subsystem.txt" />
@@ -76,6 +76,75 @@
 					   flags="g"
 					   replace="\1"/>
 
+		<!-- WildFly 24.X.X + includes a security module generating this configuration twice, removing one of them -->
+		<replace casesensitive="false"
+				 file="${jboss.standalone.path}/configuration/standalone.xml">
+			<replacetoken><![CDATA[<realm name="local" role-mapper="super-user-mapper"/>
+                </security-domain>
+                <security-domain xmlns="urn:jboss:domain:security:1.2" cache-type="default" name="jmx-console">
+                    <authentication>
+                        <login-module code="org.jboss.security.auth.spi.UsersRolesLoginModule" flag="required">
+                            <module-option name="usersProperties" value="${jboss.server.config.dir}/jmx-users.properties"/>
+                            <module-option name="rolesProperties" value="${jboss.server.config.dir}/jmx-roles.properties"/>
+                        </login-module>
+                    </authentication>
+                </security-domain>]]></replacetoken>
+			<replacevalue><![CDATA[<realm name="local" role-mapper="super-user-mapper"/>
+                </security-domain>]]></replacevalue>
+		</replace>
+
+		<replace casesensitive="false"
+				 file="${jboss.standalone.path}/configuration/standalone.xml">
+			<replacetoken><![CDATA[<extension xmlns="urn:jboss:domain:4.2" module="org.restcomm.ss7.extension"/>]]></replacetoken>
+			<replacevalue><![CDATA[<extension module="org.restcomm.ss7.extension"/>]]></replacevalue>
+		</replace>
+
+		<replace casesensitive="false"
+				 file="${jboss.standalone.path}/configuration/standalone.xml">
+			<replacetoken><![CDATA[<subsystem xmlns="urn:jboss:domain:logging:8.0">
+            <console-handler name="CONSOLE">
+                <level name="INFO"/>
+                <formatter>
+                    <named-formatter name="COLOR-PATTERN"/>
+                </formatter>
+            </console-handler>
+            <periodic-rotating-file-handler autoflush="true" name="FILE">
+                <formatter>
+                    <named-formatter name="PATTERN"/>
+                </formatter>
+                <file path="server.log" relative-to="jboss.server.log.dir"/>
+                <suffix value=".yyyy-MM-dd"/>
+                <append value="true"/>
+            </periodic-rotating-file-handler>
+            <logger category="com.arjuna">
+                <level name="WARN"/>
+            </logger>
+            <logger category="io.jaegertracing.Configuration">
+                <level name="WARN"/>
+            </logger>
+            <logger category="org.jboss.as.config">
+                <level name="DEBUG"/>
+            </logger>
+            <logger category="sun.rmi">
+                <level name="WARN"/>
+            </logger>
+            <root-logger>
+                <level name="INFO"/>
+                <handlers>
+                    <handler name="CONSOLE"/>
+                    <handler name="FILE"/>
+                </handlers>
+            </root-logger>
+            <formatter name="PATTERN">
+                <pattern-formatter pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"/>
+            </formatter>
+            <formatter name="COLOR-PATTERN">
+                <pattern-formatter pattern="%K{level}%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"/>
+            </formatter>
+        </subsystem>]]></replacetoken>
+			<replacevalue><![CDATA[]]></replacevalue>
+		</replace>
+
 		<!-- Copy GMLC Modules -->
 		<copy overwrite="true" todir="${restcomm-gmlc.path}">
 			<fileset dir="${basedir}/module">
@@ -84,12 +153,9 @@
 		</copy>
 
 	</target>
-	
+
 	<target name="deploy-all" depends="deploy">
-		<!--<ant antfile="${smpp-extensions.path}/build.xml" target="deploy" inheritAll="false">
-			<property name="jboss.home" value="${jboss.home}" />
-		</ant>-->
-		<ant antfile="${jss7.path}/build.xml" target="deploy" inheritAll="false">
+		<ant antfile="${basedir}/build.xml" target="deploy" inheritAll="false">
 			<property name="jboss.home" value="${jboss.home}" />
 		</ant>
 	</target>
@@ -119,12 +185,12 @@
 		<xmltask source="${jboss.standalone.path}/configuration/standalone.xml" dest="${jboss.standalone.path}/configuration/standalone.xml">
 			<remove path="/:server/:profile/*[local-name()='subsystem'][*[namespace-uri()='urn:jboss:domain:logging:3.0']]" />
 		</xmltask>
-		
+
 		<delete dir="${restcomm-gmlc.path}" />
 	</target>
-	
+
 	<target name="undeploy-all" depends="undeploy">
-		<ant antfile="${jss7.path}/build.xml" target="undeploy" inheritAll="false">
+		<ant antfile="${basedir}/build.xml" target="undeploy" inheritAll="false">
 			<property name="jboss.home" value="${jboss.home}" />
 		</ant>
 	</target>

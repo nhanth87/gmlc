@@ -55,13 +55,11 @@ public class ShLocationAreaId {
     }
 
     public byte[] getLAIFixedLengthBytes(String laiInfo) {
-        byte[] bytes = Base64.getDecoder().decode(laiInfo);
-        return bytes;
+        return Base64.getDecoder().decode(laiInfo);
     }
 
     public LAIFixedLength decodeLAIFixedLengthBytes(byte[] laiBytes) {
-        LAIFixedLength laiFixedLength = new LAIFixedLengthImpl(laiBytes);
-        return laiFixedLength;
+        return new LAIFixedLengthImpl(laiBytes);
         
     }
 

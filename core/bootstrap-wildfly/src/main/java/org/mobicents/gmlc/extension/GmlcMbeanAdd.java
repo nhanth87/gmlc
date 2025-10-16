@@ -1,10 +1,12 @@
 package org.mobicents.gmlc.extension;
 
-import org.jboss.as.controller.*;
+import org.jboss.as.controller.AbstractAddStepHandler;
+import org.jboss.as.controller.OperationContext;
+import org.jboss.as.controller.OperationFailedException;
+import org.jboss.as.controller.PathAddress;
+import org.jboss.as.controller.SimpleAttributeDefinition;
+import org.jboss.as.controller.registry.Resource;
 import org.jboss.dmr.ModelNode;
-import org.jboss.msc.service.ServiceController;
-
-import java.util.List;
 
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
 import static org.mobicents.gmlc.extension.GmlcMbeanDefinition.MBEAN_ATTRIBUTES;
@@ -28,10 +30,7 @@ class GmlcMbeanAdd extends AbstractAddStepHandler {
     }
   }
 
-  @Override
-  protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
-                                ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
-      throws OperationFailedException {
+  protected void performRuntime(OperationContext context, ModelNode operation, Resource resource) {
 
     final PathAddress address = PathAddress.pathAddress(operation.get(OP_ADDR));
     final String mbeanName = address.getLastElement().getValue();

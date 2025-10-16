@@ -9,10 +9,10 @@ public class GeographicHelper {
 
     /**
      * Function to calculate the area of a polygon, according to the algorithm
-     * defined at http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/
+     * defined at <a href="http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/">...</a>
      *
      * @param polygonPoints array of points in the polygon
-     * @return              area of the polygon defined by pgPoints
+     * @return area of the polygon defined by pgPoints
      */
     public static double polygonArea(Point2D[] polygonPoints) {
         int i, j, n = polygonPoints.length;
@@ -29,10 +29,10 @@ public class GeographicHelper {
 
     /**
      * Function to calculate the center of mass for a given polygon, according
-     * to the algorithm defined at http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/
+     * to the algorithm defined at <a href="http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/">...</a>
      *
      * @param polygonPoints array of points in the polygon
-     * @return              point that is the center of mass of the polygon (centroid)
+     * @return point that is the center of mass of the polygon (centroid)
      */
     public static Point2D polygonCentroid(Point2D[] polygonPoints) {
         double cX = 0, cY = 0;
@@ -40,7 +40,7 @@ public class GeographicHelper {
         Point2D centroid = new Point2D.Double();
         int i, j, n = polygonPoints.length;
 
-        double factor = 0;
+        double factor;
         for (i = 0; i < n; i++) {
             j = (i + 1) % n;
             factor = (polygonPoints[i].getX() * polygonPoints[j].getY() - polygonPoints[j].getX() * polygonPoints[i].getY());
@@ -96,7 +96,7 @@ public class GeographicHelper {
         //String degrees = "\\u00b0";
         String degrees = "º";
         String minutes = "'";
-        Boolean isWGS84;
+        boolean isWGS84;
         Boolean pattern1 = coordinates.matches("[NWSE]{1}\\d{1,3}\\s\\d{1,2}\\s\\d{1,2}\\.\\d{1,2}$");
         Boolean pattern2 = coordinates.matches("\\d{1,3}\\s\\d{1,2}\\s\\d{1,2}\\.\\d{1,2}[NWSE]{1}$");
         Boolean pattern3 = coordinates.matches("\\d{1,3}[" + degrees + "]\\d{1,3}[" + minutes + "]\\d{1,2}\\.\\d{1,2}["
