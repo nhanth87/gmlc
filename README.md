@@ -1,5 +1,4 @@
 # GMLC – Gateway Mobile Location Center (Open Source Version)
-============
 
 ##  Introduction to PAiCore Technologies GMLC
 
