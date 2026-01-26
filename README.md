@@ -1,6 +1,6 @@
 # GMLC – Gateway Mobile Location Center (Open Source Version)
 
-##  Introduction to PAiCore Technologies GMLC
+##  Introduction to PAiCore Technology GMLC
 
 The Gateway Mobile Location Centre empowers telecom operators to offer efficient and highly accurate **Location-Based Services (LBS)** for mobile subscribers roaming across either legacy GSM or UMTS/HSPA+ networks, or Next Generation Networks like LTE/LTE-Advanced/LTE-Advanced Pro and 5G NR, without relying on smartphone apps or an internet connection. 
 
