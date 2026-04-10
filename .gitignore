@@ -142,3 +142,6 @@ docs/sources-telscale/src/
 core/bootstrap/${env.JBOSS_HOME}/
 core/oam/cli/${env.JBOSS_HOME}/
 core/slee/services/du/${env.JBOSS_HOME}/
+
+#ignore .minimax folder
+.minimax/
