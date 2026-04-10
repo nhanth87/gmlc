@@ -335,7 +335,7 @@
         <echo message="Diameter SLg RA deployed"/>
         
         <!-- Diameter SLh RA (Subscriber Routing) -->
-        <copy file="${diameter.dir}/diameter-slh/du/target/diameter-restcomm-slee-ra-diameter-slh-ra-du-7.4.4.jar"
+        <copy file="${diameter.dir}/diameter-slh/du/target/diameter-restcomm-slee-ra-diameter-slh-ra-du-${diameter.version}.jar"
               todir="${deploy.dir}"
               overwrite="true"
               failonerror="false"/>
@@ -395,7 +395,7 @@
         
         <!-- Download and extract WildFly if not already done -->
         <mkdir dir="${release.dir}"/>
-        <get src="https://github.com/wildfly/wildfly/releases/download/24.0.1.Final/wildfly-24.0.1.Final.zip" 
+        <get src="https://download.jboss.org/wildfly/24.0.1.Final/wildfly-24.0.1.Final.zip" 
              dest="${release.dir}/wildfly-24.0.1.Final.zip" 
              usetimestamp="true"
              ignoreerrors="true"/>
