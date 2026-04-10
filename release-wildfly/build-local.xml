@@ -14,7 +14,7 @@
     <property name="restcomm.gmlc.release.version" value="6.0.1-SNAPSHOT"/>
     <property name="restcomm-jss7.version" value="9.2.5" />
     <property name="restcomm-map-ra.version" value="9.2.4" />
-    <property name="sctp.version" value="2.0.9" />
+    <property name="sctp.version" value="2.0.10" />
     <property name="restcomm-slee.version" value="7.1.83" />
     <property name="wildfly_version" value="24.0.1" />
     
