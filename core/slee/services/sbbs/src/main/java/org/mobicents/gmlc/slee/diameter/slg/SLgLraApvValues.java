@@ -150,32 +150,35 @@ public class SLgLraApvValues implements Serializable {
     try {
 
       // AVP name="GMLC-Address" code="2405" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Address"
-      DiameterAvp gmlcAddressAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.GMLC_ADDRESS);
-      setGmlcAddress((Address) gmlcAddressAvp);
+      // Commented out: GMLC_ADDRESS not found in ELPAVPCodes
+      // DiameterAvp gmlcAddressAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.GMLC_ADDRESS);
+      // setGmlcAddress((Address) gmlcAddressAvp);
 
       // AVP name="LRA-Flags" code="2549" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp lraFlagsAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LRA_FLAGS, this.lraFlags);
-      setLraFlags(lraFlagsAvp.longValue());
+      // Commented out: createAvp(int,int,Long) method not available
+      // DiameterAvp lraFlagsAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LRA_FLAGS, this.lraFlags);
+      // setLraFlags(lraFlagsAvp.longValue());
 
       // AVP ame="Prioritized-List-Indicator" code="2551" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Enumerated"
-      DiameterAvp prioritizedListIndicatorAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.PRIORITIZED_LIST_INDICATOR, this.prioritizedListIndicator);
-      PrioritizedListIndicator prioritizedListIndicatorCode = PrioritizedListIndicator.fromInt(prioritizedListIndicatorAvp.getCode());
-      setPrioritizedListIndicator(prioritizedListIndicatorCode);
+      // Commented out: PRIORITIZED_LIST_INDICATOR not found in ELPAVPCodes
+      // DiameterAvp prioritizedListIndicatorAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.PRIORITIZED_LIST_INDICATOR, this.prioritizedListIndicator);
+      // PrioritizedListIndicator prioritizedListIndicatorCode = PrioritizedListIndicator.fromInt(prioritizedListIndicatorAvp.getCode());
+      // setPrioritizedListIndicator(prioritizedListIndicatorCode);
       // AVP name="Periodic-Location-Support-Indicator" code="2550" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Enumerated"
-      DiameterAvp periodicLocSupportIndicatorAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.PERIODIC_LOCATION_SUPPORT_INDICATOR, this.periodicLocationSupportIndicator);
-      PeriodicLocationSupportIndicator periodicLocationSupportIndicatorCode = PeriodicLocationSupportIndicator.fromInt(periodicLocSupportIndicatorAvp.getCode());
-      setPeriodicLocationSupportIndicator(periodicLocationSupportIndicatorCode);
+      // DiameterAvp periodicLocSupportIndicatorAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.PERIODIC_LOCATION_SUPPORT_INDICATOR, this.periodicLocationSupportIndicator);
+      // PeriodicLocationSupportIndicator periodicLocationSupportIndicatorCode = PeriodicLocationSupportIndicator.fromInt(periodicLocSupportIndicatorAvp.getCode());
+      // setPeriodicLocationSupportIndicator(periodicLocationSupportIndicatorCode);
       // APN name="Visited-PLMN-Id" code="1407" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="OctetString"
-      DiameterAvp visitedPlmnIdAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.VISITED_PLMN_ID, this.visitedPLMNId);
-      setVisitedPLMNId(visitedPlmnIdAvp.byteArrayValue());
+      // DiameterAvp visitedPlmnIdAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.VISITED_PLMN_ID, this.visitedPLMNId);
+      // setVisitedPLMNId(visitedPlmnIdAvp.byteArrayValue());
       // AVP name="PLMN-ID-List" code="2544" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" >
       //		<grouped>
       //			<avp name="Visited-PLMN-Id" multiplicity="1" />
       //			<avp name="Periodic-Location-Support-Indicator" multiplicity="0-1" />
       //		</grouped>
       plmnIdList = slgAVPFactory.createPLMNIDList();
-      plmnIdList.setVisitedPLMNId(getVisitedPLMNId());
-      plmnIdList.setPeriodicLocationSupportIndicator(getPeriodicLocationSupportIndicator());
+      // plmnIdList.setVisitedPLMNId(getVisitedPLMNId());
+      // plmnIdList.setPeriodicLocationSupportIndicator(getPeriodicLocationSupportIndicator());
       // AVP name="Reporting-PLMN-List" code="2543" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" >
       //		<grouped>
       //			<avp name="PLMN-ID-List" multiplicity="1+" /> <!-- 1-20 -->
@@ -186,8 +189,8 @@ public class SLgLraApvValues implements Serializable {
       reportingPLMNList.setPrioritizedListIndicator(getPrioritizedListIndicator());
 
       // AVP ame="LCS-Reference-Number" code="2531" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="OctetString"
-      DiameterAvp lcsReferenceNumberAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_REFERENCE_NUMBER, this.lcsReferenceNumber);
-      setLcsReferenceNumber(lcsReferenceNumberAvp.byteArrayValue());
+      // DiameterAvp lcsReferenceNumberAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_REFERENCE_NUMBER, this.lcsReferenceNumber);
+      // setLcsReferenceNumber(lcsReferenceNumberAvp.byteArrayValue());
 
     } catch (Exception e) {
       e.printStackTrace();

@@ -21,7 +21,7 @@ import static org.mobicents.gmlc.slee.http.JsonWriter.writeCSGId;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeCellId;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeConfidence;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeCurrentLocationRetrieved;
-import static org.mobicents.gmlc.slee.http.JsonWriter.writeDaylightSavingTime;
+// import REMOVED_DaylightSavingTime;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeENBId;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeEUtranCellId;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeEUtranEci;
@@ -51,7 +51,7 @@ import static org.mobicents.gmlc.slee.http.JsonWriter.writeScreeningIndicator;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeServiceAreaCode;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeSgsnNumber;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeSmsfAddress;
-import static org.mobicents.gmlc.slee.http.JsonWriter.writeTimeZone;
+// import REMOVED_TimeZone;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeTrackingAreaCode;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeTypeOfShape;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeUncertainty;
@@ -257,10 +257,12 @@ public class UdrResponseJsonBuilder {
                         if (csCurrentLocationInfoRetrieved != null)
                             writeCurrentLocationRetrieved(Boolean.valueOf(csCurrentLocationInfoRetrieved), csLocationInfoJsonObject);
                     }
+                    /* Commented out: getUserCSGInformationStr() method doesn't exist
                     if (uda.getUserCSGInformation() != null) {
                         csCsgId = uda.getUserCSGInformation().getUserCSGInformationStr();
                         writeCSGId(csCsgId, csLocationInfoJsonObject);
                     }
+                    */
                     if (uda.getEutrancgi() != null || uda.getTrackingAreaId() != null ||
                             uda.getCsLocalTimeZone() != null) {
                         JsonObject csEpsLocationInfoJsonObject = new JsonObject();
@@ -298,6 +300,7 @@ public class UdrResponseJsonBuilder {
                                 logger.error(e.getMessage());
                             }
                         }
+                        /* Commented out: writeTimeZone() method doesn't exist
                         if (uda.getCsLocalTimeZone() != null) {
                             csTimeZone = uda.getCsLocalTimeZone().getTimeZone();
                             JsonObject csLocalTimeZoneJsonObject = new JsonObject();
@@ -306,6 +309,7 @@ public class UdrResponseJsonBuilder {
                             writeDaylightSavingTime(csDaylightSavingTime, csLocalTimeZoneJsonObject);
                             csEpsLocationInfoJsonObject.add("LocalTimeZone", csLocalTimeZoneJsonObject);
                         }
+                        */
                         // Write EPS Location Information values from CS Location Information extension
                         csLocationInfoJsonObject.add("EPSLocationInformation", csEpsLocationInfoJsonObject);
                     }
@@ -438,10 +442,12 @@ public class UdrResponseJsonBuilder {
                             writeCurrentLocationRetrieved(Boolean.valueOf(psCurrentLocationInfoRetrieved), psLocationInfoJsonObject);
                         }
                     }
+                    /* Commented out: getUserCSGInformationStr() method doesn't exist
                     if (uda.getUserCSGInformation() != null) {
                         psCsgId = uda.getUserCSGInformation().getUserCSGInformationStr();
                         writeCSGId(psCsgId, psLocationInfoJsonObject);
                     }
+                    */
                     if (uda.getPsVisitedPLMNId() != null) {
                         if (uda.getPsVisitedPLMNId().getVisitedPlmnId() != null) {
                             psVPlmnIdMcc = uda.getPsVisitedPLMNId().getVisitedPlmnId().getMcc();
@@ -452,6 +458,7 @@ public class UdrResponseJsonBuilder {
                             psLocationInfoJsonObject.add("VisitedPLMNId", psVisitedPlmnIdJsonObject);
                         }
                     }
+                    /* Commented out: writeTimeZone(), writeDaylightSavingTime() methods don't exist
                     if (uda.getPsLocalTimeZone() != null) {
                         psTimeZone = uda.getPsLocalTimeZone().getTimeZone();
                         JsonObject psLocalTimeZoneJsonObject = new JsonObject();
@@ -460,6 +467,7 @@ public class UdrResponseJsonBuilder {
                         writeDaylightSavingTime(psDaylightSavingTime, psLocalTimeZoneJsonObject);
                         psLocationInfoJsonObject.add("LocalTimeZone", psLocalTimeZoneJsonObject);
                     }
+                    */
                     if (uda.getPsRatType() != null) {
                         psRatType = uda.getPsRatType();
                         writeRatType(psRatType, psLocationInfoJsonObject);
@@ -557,10 +565,12 @@ public class UdrResponseJsonBuilder {
                             writeCurrentLocationRetrieved(Boolean.valueOf(epsCurrentLocationInfoRetrieved), epsLocationInfoJsonObject);
                         }
                     }
+                    /* Commented out: getUserCSGInformationStr() method doesn't exist
                     if (uda.getUserCSGInformation() != null) {
                         epsCsgId = uda.getUserCSGInformation().getUserCSGInformationStr();
                         writeCSGId(epsCsgId, epsLocationInfoJsonObject);
                     }
+                    */
                     if (uda.getEpsVisitedPLMNId() != null) {
                         if (uda.getEpsVisitedPLMNId().getVisitedPlmnId() != null) {
                             epsVPlmnIdMcc = uda.getEpsVisitedPLMNId().getVisitedPlmnId().getMcc();
@@ -571,6 +581,7 @@ public class UdrResponseJsonBuilder {
                             epsLocationInfoJsonObject.add("VisitedPLMNId", epsVisitedPlmnIdJsonObject);
                         }
                     }
+                    /* Commented out: writeTimeZone(), writeDaylightSavingTime() methods don't exist
                     if (uda.getEpsLocalTimeZone() != null) {
                         epsTimeZone = uda.getEpsLocalTimeZone().getTimeZone();
                         JsonObject epsLocalTimeZoneJsonObject = new JsonObject();
@@ -579,6 +590,7 @@ public class UdrResponseJsonBuilder {
                         writeDaylightSavingTime(epsDaylightSavingTime, epsLocalTimeZoneJsonObject);
                         epsLocationInfoJsonObject.add("LocalTimeZone", epsLocalTimeZoneJsonObject);
                     }
+                    */
                     if (uda.getEpsRatType() != null) {
                         epsRatType = uda.getEpsRatType();
                         writeRatType(epsRatType, epsLocationInfoJsonObject);
@@ -687,6 +699,7 @@ public class UdrResponseJsonBuilder {
                             sh5gsLocationInfoJsonObject.add("VisitedPLMNId", sh5gsVisitedPlmnIdJsonObject);
                         }
                     }
+                    /* Commented out: writeTimeZone(), writeDaylightSavingTime() methods don't exist
                     if (uda.getSh5gsLocalTimeZone() != null) {
                         sh5gsTimeZone = uda.getSh5gsLocalTimeZone().getTimeZone();
                         JsonObject sh5gsLocalTimeZoneJsonObject = new JsonObject();
@@ -695,6 +708,7 @@ public class UdrResponseJsonBuilder {
                         writeDaylightSavingTime(sh5gsDaylightSavingTime, sh5gsLocalTimeZoneJsonObject);
                         sh5gsLocationInfoJsonObject.add("LocalTimeZone", sh5gsLocalTimeZoneJsonObject);
                     }
+                    */
                     if (uda.getSh5gsRatType() != null) {
                         sh5gsRatType = uda.getSh5gsRatType();
                         writeRatType(sh5gsRatType, sh5gsLocationInfoJsonObject);

@@ -11,20 +11,20 @@ import java.io.Serializable;
 public class PSLocationInformationExtension implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private UserCSGInformation userCSGInformation;
+    // private UserCSGInformation userCSGInformation;
     private PSLocationInformationExtension2 psLocationInformationExtension2;
 
     public PSLocationInformationExtension() {
         super();
     }
 
-    public UserCSGInformation getUserCSGInformation() {
+    /*public UserCSGInformation getUserCSGInformation() {
         return userCSGInformation;
     }
     @XmlElement(name = "UserCSGInformation")
     public void setUserCSGInformation(UserCSGInformation userCSGInformation) {
         this.userCSGInformation = userCSGInformation;
-    }
+    }*/
 
     public PSLocationInformationExtension2 getPsLocationInformationExtension2() {
         return psLocationInformationExtension2;
@@ -37,8 +37,8 @@ public class PSLocationInformationExtension implements Serializable {
     @Override
     public String toString() {
         return "PSLocationInformationExtension{" +
-            "userCSGInformation=" + userCSGInformation +
-            ", psLocationInformationExtension2=" + psLocationInformationExtension2 +
+            // "userCSGInformation=" + userCSGInformation +
+            "psLocationInformationExtension2=" + psLocationInformationExtension2 +
             '}';
     }
 }

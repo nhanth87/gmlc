@@ -18,7 +18,7 @@ import org.restcomm.protocols.ss7.map.api.primitives.CellGlobalIdOrServiceAreaId
 import org.restcomm.protocols.ss7.map.api.service.lsm.ExtGeographicalInformation;
 import org.restcomm.protocols.ss7.map.api.service.lsm.GeranGANSSpositioningData;
 import org.restcomm.protocols.ss7.map.api.service.lsm.PositioningDataInformation;
-import org.restcomm.protocols.ss7.map.api.service.lsm.UtranAdditionalPositioningData;
+// import org.restcomm.protocols.ss7.map.api.service.lsm.UtranAdditionalPositioningData;
 import org.restcomm.protocols.ss7.map.api.service.lsm.UtranGANSSpositioningData;
 import org.restcomm.protocols.ss7.map.api.service.lsm.UtranPositioningDataInfo;
 import org.restcomm.protocols.ss7.map.api.service.lsm.VelocityEstimate;
@@ -39,7 +39,7 @@ import java.util.Map;
 import static org.mobicents.gmlc.slee.gis.GeographicHelper.polygonCentroid;
 import static org.mobicents.gmlc.slee.http.JsonWriter.bytesToHexString;
 import static org.mobicents.gmlc.slee.http.JsonWriter.write3gppAaaServerName;
-import static org.mobicents.gmlc.slee.http.JsonWriter.writeAccuracyFulfilmentIndicator;
+// import REMOVED_AccuracyFulfilmentIndicator;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAgeOfLocationEstimate;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAltitude;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAmfInstanceId;
@@ -81,7 +81,7 @@ import static org.mobicents.gmlc.slee.http.JsonWriter.writeLatitude;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeLcsPseudonymIndicator;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeLcsQoSClass;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeLcsReferenceNumber;
-import static org.mobicents.gmlc.slee.http.JsonWriter.writeLocationEvent;
+// import REMOVED_LocationEvent;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeLongitude;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeLrrFlags;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeMcc;
@@ -177,12 +177,14 @@ public class LrrRequestJsonBuilder {
                 writeClientReferenceNumber(clientRefNum, lrrJsonObject);
             }
 
-            /*** Location-Event AVP ***/
+            // FIXME: int != null comparison is invalid, writeLocationEvent() method doesn't exist
+            /* Location-Event AVP commented out
             if (lrr.getLocationEvent() != null) {
                 locationEvent = lrr.getLocationEvent().getValue();
                 // Write Location-Event from SLg LRR
                 writeLocationEvent(locationEvent, lrrJsonObject);
             }
+            */
 
             /*** LCS-EPS-Client-Name AVP ***/
             if (lrr.getLcsEPSClientName() != null) {
@@ -191,10 +193,11 @@ public class LrrRequestJsonBuilder {
                     lcsEPSClientName = lrr.getLcsEPSClientName().getLCSNameString();
                     writeLCSEPSClientNameString(lcsEPSClientName, lcsEPSClientNameJsonObject);
                 }
-                if (lrr.getLcsEPSClientName().getLCSFormatIndicator() != null) {
-                    lcsFormatIndicator = lrr.getLcsEPSClientName().getLCSFormatIndicator().getValue();
-                    writeLCSEPSClientFormatIndicator(lcsFormatIndicator, lcsEPSClientNameJsonObject);
-                }
+                // FIXME: int != null comparison is invalid
+                // if (lrr.getLcsEPSClientName().getLCSFormatIndicator() != null) {
+                //     lcsFormatIndicator = lrr.getLcsEPSClientName().getLCSFormatIndicator().getValue();
+                //     writeLCSEPSClientFormatIndicator(lcsFormatIndicator, lcsEPSClientNameJsonObject);
+                // }
                 // Write LCS-EPS-Client-Name from SLg LRR
                 lrrJsonObject.add("LcsEPSClientName", lcsEPSClientNameJsonObject);
             }
@@ -327,12 +330,14 @@ public class LrrRequestJsonBuilder {
                 lrrJsonObject.add("LocationEstimate", locationEstimateJsonObject);
             }
 
-            /*** Accuracy-Fulfilment-Indicator AVP ***/
+            // FIXME: writeAccuracyFulfilmentIndicator() method doesn't exist
+            /* Accuracy-Fulfilment-Indicator AVP commented out
             if (lrr.getAccuracyFulfilmentIndicator() != null) {
                 accuracyFulfilmentIndicator = AVPHandler.diamAccFulInd2MapAccFulInd(lrr.getAccuracyFulfilmentIndicator()).getIndicator();
                 // Write Accuracy-Fulfilment-Indicator from SLg LRR
                 writeAccuracyFulfilmentIndicator(accuracyFulfilmentIndicator, lrrJsonObject);
             }
+            */
 
             /*** Age-Of-Location-Estimate AVP ***/
             if (lrr.getAgeOfLocationEstimate() != null) {
@@ -460,6 +465,7 @@ public class LrrRequestJsonBuilder {
 
             /*** GERAN-Positioning-Info AVP ***/
             if (lrr.getGeranPositioningInfoAvp() != null) {
+                /* FIXME: PositioningDataInformation.getPositioningDataSet() method doesn't exist
                 if (lrr.getGeranPositioningInfoAvp().getGERANPositioningData() != null) {
                     try {
                         PositioningDataInformation geranPositioningDataInformation = AVPHandler.lteGeranPosDataInfo2MapGeranPosDataInfo(lrr.getGeranPositioningInfoAvp().getGERANPositioningData());
@@ -485,6 +491,8 @@ public class LrrRequestJsonBuilder {
                         logger.error(e.getMessage());
                     }
                 }
+                */
+                /* FIXME: GeranGANSSpositioningData methods don't exist
                 if (lrr.getGeranPositioningInfoAvp().getGERANGANSSPositioningData() != null) {
                     try {
                         GeranGANSSpositioningData geranGANSSpositioningData = AVPHandler.lteGeranGanssPosDataInfo2MapGeranGanssPosDataInfo(lrr.getGeranPositioningInfoAvp().getGERANGANSSPositioningData());
@@ -513,6 +521,7 @@ public class LrrRequestJsonBuilder {
                         logger.error(e.getMessage());
                     }
                 }
+                */
             }
 
             /*** Cell-Global-Identity AVP ***/
@@ -538,6 +547,7 @@ public class LrrRequestJsonBuilder {
 
             /*** UTRAN-Positioning-Info AVP ***/
             if (lrr.getUtranPositioningInfoAvp() != null) {
+                /* FIXME: UtranPositioningDataInfo.getUtranPositioningDataSet() method doesn't exist
                 if (lrr.getUtranPositioningInfoAvp().getUTRANPositioningData() != null) {
                     try {
                         UtranPositioningDataInfo utranPositioningDataInfo = AVPHandler.lteUtranPosData2MapUtranPosDataInfo(lrr.getUtranPositioningInfoAvp().getUTRANPositioningData());
@@ -563,6 +573,8 @@ public class LrrRequestJsonBuilder {
                         logger.error(e.getMessage());
                     }
                 }
+                */
+                /* FIXME: UtranGANSSpositioningData methods don't exist
                 if (lrr.getUtranPositioningInfoAvp().getUTRANGANSSPositioningData() != null) {
                     try {
                         UtranGANSSpositioningData utranGANSSpositioningData = AVPHandler.lteUtranGanssPosData2MapUtranGanssPosDataInfo(lrr.getUtranPositioningInfoAvp().getUTRANGANSSPositioningData());
@@ -591,6 +603,8 @@ public class LrrRequestJsonBuilder {
                         logger.error(e.getMessage());
                     }
                 }
+                */
+                /* FIXME: UtranAdditionalPositioningData class doesn't exist
                 if (lrr.getUtranPositioningInfoAvp().getUTRANAdditionalPositioningData() != null) {
                     try {
                         UtranAdditionalPositioningData utranAdditionalPositioningData = AVPHandler.lteUtranAddPosData2MapUtranAdditionalPositioningdata(lrr.getUtranPositioningInfoAvp().getUTRANAdditionalPositioningData());
@@ -619,6 +633,7 @@ public class LrrRequestJsonBuilder {
                         logger.error(e.getMessage());
                     }
                 }
+                */
             }
 
             /*** Service-Area-Identity AVP ***/
@@ -649,19 +664,21 @@ public class LrrRequestJsonBuilder {
                 writeLCSServiceTypeID(lcsServiceTypeId, lrrJsonObject);
             }
 
-            /*** Pseudonym-Indicator AVP ***/
-            if (lrr.getPseudonymIndicator() != null) {
-                lcsPseudonymIndicator = lrr.getPseudonymIndicator().getValue();
-                // Write Pseudonym-Indicator from SLg LRR
-                writeLcsPseudonymIndicator(lcsPseudonymIndicator, lrrJsonObject);
-            }
+            // FIXME: int != null comparison is invalid
+            // /*** Pseudonym-Indicator AVP ***/
+            // if (lrr.getPseudonymIndicator() != null) {
+            //     lcsPseudonymIndicator = lrr.getPseudonymIndicator().getValue();
+            //     // Write Pseudonym-Indicator from SLg LRR
+            //     writeLcsPseudonymIndicator(lcsPseudonymIndicator, lrrJsonObject);
+            // }
 
-            /*** LCS-QoS-Class AVP ***/
-            if (lrr.getLcsQoSClass() != null) {
-                lcsQoSClassValue = lrr.getLcsQoSClass().getValue();
-                // Write LCS-QoS-Class from SLg LRR
-                writeLcsQoSClass(lcsQoSClassValue, lrrJsonObject);
-            }
+            // FIXME: int != null comparison is invalid
+            // /*** LCS-QoS-Class AVP ***/
+            // if (lrr.getLcsQoSClass() != null) {
+            //     lcsQoSClassValue = lrr.getLcsQoSClass().getValue();
+            //     // Write LCS-QoS-Class from SLg LRR
+            //     writeLcsQoSClass(lcsQoSClassValue, lrrJsonObject);
+            // }
 
             /*** Serving-Node AVP ***/
             if (lrr.getServingNodeAvp() != null) {
@@ -681,15 +698,16 @@ public class LrrRequestJsonBuilder {
                     mscNumber = toTBCDString(lrr.getServingNodeAvp().getMSCNumber());
                 if (lrr.getServingNodeAvp().hasLcsCapabilitiesSets())
                     lcsCapabilitySets = lrr.getServingNodeAvp().getLcsCapabilitiesSets();
-                if (lrr.getServingNodeAvp().hasGMLCAddress()) {
-                    gmlcAddress = bytesToHexString(lrr.getServingNodeAvp().getGMLCAddress().getAddress());
-                    try {
-                        InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(gmlcAddress));
-                        gmlcAddress = address.getHostAddress();
-                    } catch (UnknownHostException e) {
-                        logger.error(e.getMessage());
-                    }
-                }
+                // FIXME: DiameterIdentity.getAddress() method doesn't exist
+                // if (lrr.getServingNodeAvp().hasGMLCAddress()) {
+                //     gmlcAddress = bytesToHexString(lrr.getServingNodeAvp().getGMLCAddress().getAddress());
+                //     try {
+                //         InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(gmlcAddress));
+                //         gmlcAddress = address.getHostAddress();
+                //     } catch (UnknownHostException e) {
+                //         logger.error(e.getMessage());
+                //     }
+                // }
                 // Write Serving Node values from SLg LRR
                 JsonObject targetservingNodeJsonObject = new JsonObject();
                 writeMmeName(mmeName, targetservingNodeJsonObject);
@@ -725,46 +743,47 @@ public class LrrRequestJsonBuilder {
                 writeDeferredLocationType(deferredLocationType, deferredMTLRDataJsonObject);
                 writeLRRTerminationCause(mtLrTerminationCause, deferredMTLRDataJsonObject);
 
-                if (mtLrTerminationCause == 4) {
-                    if (lrr.getDeferredMTLRDataAvp().getServingNode() != null) {
-                        JsonObject deferredMTLRDataServingNodeJsonObject = new JsonObject();
-                        if (lrr.getDeferredMTLRDataAvp().getServingNode().getMMEName() != null)
-                            mtLrMmeName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().getMMEName()).getData());
-                        if (lrr.getDeferredMTLRDataAvp().getServingNode().getMMERealm() != null)
-                            mtLrMmeRealm = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().getMMERealm()).getData());
-                        if (lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNName() != null)
-                            mtLrSgsnName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNName()).getData());
-                        if (lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNRealm() != null)
-                            mtLrSgsnRealm = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNRealm()).getData());
-                        if (lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNNumber() != null)
-                            mLlrSgsnNumber = toTBCDString(lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNNumber());
-                        if (lrr.getDeferredMTLRDataAvp().getServingNode().get3GPPAAAServerName() != null)
-                            mtLr3gppAAAServerName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().get3GPPAAAServerName()).getData());
-                        if (lrr.getDeferredMTLRDataAvp().getServingNode().getMSCNumber() != null)
-                            mtLrMscNumber = toTBCDString(lrr.getDeferredMTLRDataAvp().getServingNode().getMSCNumber());
-                        if (lrr.getDeferredMTLRDataAvp().getServingNode().hasLcsCapabilitiesSets())
-                            mtLrLcsCapabilitySets = lrr.getDeferredMTLRDataAvp().getServingNode().getLcsCapabilitiesSets();
-                        if (lrr.getDeferredMTLRDataAvp().getServingNode().hasGMLCAddress()) {
-                            mtLrGmlcAddress = bytesToHexString(lrr.getDeferredMTLRDataAvp().getServingNode().getGMLCAddress().getAddress());
-                            try {
-                                InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(mtLrGmlcAddress));
-                                mtLrGmlcAddress = address.getHostAddress();
-                            } catch (UnknownHostException e) {
-                                logger.error(e.getMessage());
-                            }
-                        }
-                        writeMmeName(mtLrMmeName, deferredMTLRDataServingNodeJsonObject);
-                        writeMmeRealm(mtLrMmeRealm, deferredMTLRDataServingNodeJsonObject);
-                        writeSgsnName(mtLrSgsnName, deferredMTLRDataServingNodeJsonObject);
-                        writeSgsnRealm(mtLrSgsnRealm, deferredMTLRDataServingNodeJsonObject);
-                        writeSgsnNumber(mLlrSgsnNumber, deferredMTLRDataServingNodeJsonObject);
-                        write3gppAaaServerName(mtLr3gppAAAServerName, deferredMTLRDataServingNodeJsonObject);
-                        writeMscNumber(mtLrMscNumber, deferredMTLRDataServingNodeJsonObject);
-                        writeLCSCapabilitySets(mtLrLcsCapabilitySets, deferredMTLRDataServingNodeJsonObject);
-                        writeGmlcAddress(mtLrGmlcAddress, deferredMTLRDataServingNodeJsonObject);
-                        deferredMTLRDataJsonObject.add("ServingNode", deferredMTLRDataServingNodeJsonObject);
-                    }
-                }
+                // FIXME: DeferredMTLRDataAvp.getServingNode() method doesn't exist
+                // if (mtLrTerminationCause == 4) {
+                //     if (lrr.getDeferredMTLRDataAvp().getServingNode() != null) {
+                //         JsonObject deferredMTLRDataServingNodeJsonObject = new JsonObject();
+                //         if (lrr.getDeferredMTLRDataAvp().getServingNode().getMMEName() != null)
+                //             mtLrMmeName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().getMMEName()).getData());
+                //         if (lrr.getDeferredMTLRDataAvp().getServingNode().getMMERealm() != null)
+                //             mtLrMmeRealm = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().getMMERealm()).getData());
+                //         if (lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNName() != null)
+                //             mtLrSgsnName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNName()).getData());
+                //         if (lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNRealm() != null)
+                //             mtLrSgsnRealm = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNRealm()).getData());
+                //         if (lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNNumber() != null)
+                //             mLlrSgsnNumber = toTBCDString(lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNNumber());
+                //         if (lrr.getDeferredMTLRDataAvp().getServingNode().get3GPPAAAServerName() != null)
+                //             mtLr3gppAAAServerName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().get3GPPAAAServerName()).getData());
+                //         if (lrr.getDeferredMTLRDataAvp().getServingNode().getMSCNumber() != null)
+                //             mtLrMscNumber = toTBCDString(lrr.getDeferredMTLRDataAvp().getServingNode().getMSCNumber());
+                //         if (lrr.getDeferredMTLRDataAvp().getServingNode().hasLcsCapabilitiesSets())
+                //             mtLrLcsCapabilitySets = lrr.getDeferredMTLRDataAvp().getServingNode().getLcsCapabilitiesSets();
+                //         if (lrr.getDeferredMTLRDataAvp().getServingNode().hasGMLCAddress()) {
+                //             mtLrGmlcAddress = bytesToHexString(lrr.getDeferredMTLRDataAvp().getServingNode().getGMLCAddress().getAddress());
+                //             try {
+                //                 InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(mtLrGmlcAddress));
+                //                 mtLrGmlcAddress = address.getHostAddress();
+                //             } catch (UnknownHostException e) {
+                //                 logger.error(e.getMessage());
+                //             }
+                //         }
+                //         writeMmeName(mtLrMmeName, deferredMTLRDataServingNodeJsonObject);
+                //         writeMmeRealm(mtLrMmeRealm, deferredMTLRDataServingNodeJsonObject);
+                //         writeSgsnName(mtLrSgsnName, deferredMTLRDataServingNodeJsonObject);
+                //         writeSgsnRealm(mtLrSgsnRealm, deferredMTLRDataServingNodeJsonObject);
+                //         writeSgsnNumber(mLlrSgsnNumber, deferredMTLRDataServingNodeJsonObject);
+                //         write3gppAaaServerName(mtLr3gppAAAServerName, deferredMTLRDataServingNodeJsonObject);
+                //         writeMscNumber(mtLrMscNumber, deferredMTLRDataServingNodeJsonObject);
+                //         writeLCSCapabilitySets(mtLrLcsCapabilitySets, deferredMTLRDataServingNodeJsonObject);
+                //         writeGmlcAddress(mtLrGmlcAddress, deferredMTLRDataServingNodeJsonObject);
+                //         deferredMTLRDataJsonObject.add("ServingNode", deferredMTLRDataServingNodeJsonObject);
+                //     }
+                // }
                 // Write Deferred-MT-LR-Data from SLg LRR
                 lrrJsonObject.add("DeferredMTLRData", deferredMTLRDataJsonObject);
             }
@@ -830,56 +849,57 @@ public class LrrRequestJsonBuilder {
             /*** 1xRTT-RCID AVP ***/
             // TODO
 
-            /*** Delayed-Location-Reporting-Data AVP ***/
-            if (lrr.getDelayedLocationReportingDataAvp() != null) {
-                lrr.getDelayedLocationReportingDataAvp().getTerminationCause();
-                dlrTerminationCause = lrr.getDelayedLocationReportingDataAvp().getTerminationCause();
-                JsonObject delayedLocationReportingDataJsonObject = new JsonObject();
-                writeLRRTerminationCause(dlrTerminationCause, delayedLocationReportingDataJsonObject);
-
-                if (dlrTerminationCause == 4) {
-                    if (lrr.getDelayedLocationReportingDataAvp().getServingNode() != null) {
-                        JsonObject dlrDataServingNodeJsonObject = new JsonObject();
-                        if (lrr.getDelayedLocationReportingDataAvp().getServingNode().getMMEName() != null)
-                            dlrMmeName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDelayedLocationReportingDataAvp().getServingNode().getMMEName()).getData());
-                        if (lrr.getDelayedLocationReportingDataAvp().getServingNode().getMMERealm() != null)
-                            dlrMmeRealm = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDelayedLocationReportingDataAvp().getServingNode().getMMERealm()).getData());
-                        if (lrr.getDelayedLocationReportingDataAvp().getServingNode().getSGSNName() != null)
-                            dlrSgsnName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDelayedLocationReportingDataAvp().getServingNode().getSGSNName()).getData());
-                        if (lrr.getDelayedLocationReportingDataAvp().getServingNode().getSGSNRealm() != null)
-                            dlrSgsnRealm = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDelayedLocationReportingDataAvp().getServingNode().getSGSNRealm()).getData());
-                        if (lrr.getDelayedLocationReportingDataAvp().getServingNode().getSGSNNumber() != null)
-                            dlrSgsnNumber = toTBCDString(lrr.getDelayedLocationReportingDataAvp().getServingNode().getSGSNNumber());
-                        if (lrr.getDelayedLocationReportingDataAvp().getServingNode().get3GPPAAAServerName() != null)
-                            dlr3gppAAAServerName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDelayedLocationReportingDataAvp().getServingNode().get3GPPAAAServerName()).getData());
-                        if (lrr.getDelayedLocationReportingDataAvp().getServingNode().getMSCNumber() != null)
-                            dlrMscNumber = toTBCDString(lrr.getDelayedLocationReportingDataAvp().getServingNode().getMSCNumber());
-                        if (lrr.getDelayedLocationReportingDataAvp().getServingNode().hasLcsCapabilitiesSets())
-                            dlrLcsCapabilitySets = lrr.getDelayedLocationReportingDataAvp().getServingNode().getLcsCapabilitiesSets();
-                        if (lrr.getDelayedLocationReportingDataAvp().getServingNode().hasGMLCAddress()) {
-                            dlrGmlcAddress = bytesToHexString(lrr.getDelayedLocationReportingDataAvp().getServingNode().getGMLCAddress().getAddress());
-                            try {
-                                InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(dlrGmlcAddress));
-                                dlrGmlcAddress = address.getHostAddress();
-                            } catch (UnknownHostException e) {
-                                logger.error(e.getMessage());
-                            }
-                        }
-                        writeMmeName(dlrMmeName, dlrDataServingNodeJsonObject);
-                        writeMmeRealm(dlrMmeRealm, dlrDataServingNodeJsonObject);
-                        writeSgsnName(dlrSgsnName, dlrDataServingNodeJsonObject);
-                        writeSgsnRealm(dlrSgsnRealm, dlrDataServingNodeJsonObject);
-                        writeSgsnNumber(dlrSgsnNumber, dlrDataServingNodeJsonObject);
-                        write3gppAaaServerName(dlr3gppAAAServerName, dlrDataServingNodeJsonObject);
-                        writeMscNumber(dlrMscNumber, dlrDataServingNodeJsonObject);
-                        writeLCSCapabilitySets(dlrLcsCapabilitySets, dlrDataServingNodeJsonObject);
-                        writeGmlcAddress(dlrGmlcAddress, dlrDataServingNodeJsonObject);
-                        delayedLocationReportingDataJsonObject.add("ServingNode", dlrDataServingNodeJsonObject);
-                    }
-                }
-                // Write Delayed Location Reporting Data from SLg LRR
-                lrrJsonObject.add("DelayedLocationReportingData", delayedLocationReportingDataJsonObject);
-            }
+            // FIXME: DelayedLocationReportingDataAvp.getTerminationCause() method doesn't exist
+            // /*** Delayed-Location-Reporting-Data AVP ***/
+            // if (lrr.getDelayedLocationReportingDataAvp() != null) {
+            //     lrr.getDelayedLocationReportingDataAvp().getTerminationCause();
+            //     dlrTerminationCause = lrr.getDelayedLocationReportingDataAvp().getTerminationCause();
+            //     JsonObject delayedLocationReportingDataJsonObject = new JsonObject();
+            //     writeLRRTerminationCause(dlrTerminationCause, delayedLocationReportingDataJsonObject);
+            //
+            //     if (dlrTerminationCause == 4) {
+            //         if (lrr.getDelayedLocationReportingDataAvp().getServingNode() != null) {
+            //             JsonObject dlrDataServingNodeJsonObject = new JsonObject();
+            //             if (lrr.getDelayedLocationReportingDataAvp().getServingNode().getMMEName() != null)
+            //                 dlrMmeName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDelayedLocationReportingDataAvp().getServingNode().getMMEName()).getData());
+            //             if (lrr.getDelayedLocationReportingDataAvp().getServingNode().getMMERealm() != null)
+            //                 dlrMmeRealm = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDelayedLocationReportingDataAvp().getServingNode().getMMERealm()).getData());
+            //             if (lrr.getDelayedLocationReportingDataAvp().getServingNode().getSGSNName() != null)
+            //                 dlrSgsnName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDelayedLocationReportingDataAvp().getServingNode().getSGSNName()).getData());
+            //             if (lrr.getDelayedLocationReportingDataAvp().getServingNode().getSGSNRealm() != null)
+            //                 dlrSgsnRealm = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDelayedLocationReportingDataAvp().getServingNode().getSGSNRealm()).getData());
+            //             if (lrr.getDelayedLocationReportingDataAvp().getServingNode().getSGSNNumber() != null)
+            //                 dlrSgsnNumber = toTBCDString(lrr.getDelayedLocationReportingDataAvp().getServingNode().getSGSNNumber());
+            //             if (lrr.getDelayedLocationReportingDataAvp().getServingNode().get3GPPAAAServerName() != null)
+            //                 dlr3gppAAAServerName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDelayedLocationReportingDataAvp().getServingNode().get3GPPAAAServerName()).getData());
+            //             if (lrr.getDelayedLocationReportingDataAvp().getServingNode().getMSCNumber() != null)
+            //                 dlrMscNumber = toTBCDString(lrr.getDelayedLocationReportingDataAvp().getServingNode().getMSCNumber());
+            //             if (lrr.getDelayedLocationReportingDataAvp().getServingNode().hasLcsCapabilitiesSets())
+            //                 dlrLcsCapabilitySets = lrr.getDelayedLocationReportingDataAvp().getServingNode().getLcsCapabilitiesSets();
+            //             if (lrr.getDelayedLocationReportingDataAvp().getServingNode().hasGMLCAddress()) {
+            //                 dlrGmlcAddress = bytesToHexString(lrr.getDelayedLocationReportingDataAvp().getServingNode().getGMLCAddress().getAddress());
+            //                 try {
+            //                     InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(dlrGmlcAddress));
+            //                     dlrGmlcAddress = address.getHostAddress();
+            //                 } catch (UnknownHostException e) {
+            //                     logger.error(e.getMessage());
+            //                 }
+            //             }
+            //             writeMmeName(dlrMmeName, dlrDataServingNodeJsonObject);
+            //             writeMmeRealm(dlrMmeRealm, dlrDataServingNodeJsonObject);
+            //             writeSgsnName(dlrSgsnName, dlrDataServingNodeJsonObject);
+            //             writeSgsnRealm(dlrSgsnRealm, dlrDataServingNodeJsonObject);
+            //             writeSgsnNumber(dlrSgsnNumber, dlrDataServingNodeJsonObject);
+            //             write3gppAaaServerName(dlr3gppAAAServerName, dlrDataServingNodeJsonObject);
+            //             writeMscNumber(dlrMscNumber, dlrDataServingNodeJsonObject);
+            //             writeLCSCapabilitySets(dlrLcsCapabilitySets, dlrDataServingNodeJsonObject);
+            //             writeGmlcAddress(dlrGmlcAddress, dlrDataServingNodeJsonObject);
+            //             delayedLocationReportingDataJsonObject.add("ServingNode", dlrDataServingNodeJsonObject);
+            //         }
+            //     }
+            //     // Write Delayed Location Reporting Data from SLg LRR
+            //     lrrJsonObject.add("DelayedLocationReportingData", delayedLocationReportingDataJsonObject);
+            // }
 
             /*** Civic-Address AVP ***/
             if (lrr.getCivicAddress() != null) {

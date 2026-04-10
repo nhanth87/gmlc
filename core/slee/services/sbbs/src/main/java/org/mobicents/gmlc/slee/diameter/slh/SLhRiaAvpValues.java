@@ -2,8 +2,7 @@ package org.mobicents.gmlc.slee.diameter.slh;
 
 import net.java.slee.resource.diameter.base.events.avp.Address;
 import net.java.slee.resource.diameter.base.events.avp.ExperimentalResultAvp;
-import net.java.slee.resource.diameter.slh.events.avp.AdditionalServingNodeAvp;
-import net.java.slee.resource.diameter.slh.events.avp.ServingNodeAvp;
+import net.java.slee.resource.diameter.slh.events.ServingNode;
 
 import java.io.Serializable;
 
@@ -14,43 +13,13 @@ public class SLhRiaAvpValues implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  /*
-  3GPP TS 29.173 v18.0.0 § 6.2.4
-
-  The LCS-Routing-Info-Answer (RIA) command, indicated by the Command-Code field set to 8388622
-  and the 'R' bit cleared in the Command Flags field, is sent from HSS to GMLC.
-
-  Message Format:
-  < LCS-Routing-Info-Answer > ::= < Diameter Header: 8388622, PXY, 16777291 >
-		                   < Session-Id >
-		                   [ Vendor-Specific-Application-Id ]
-		                   [ Result-Code ]
-		                   [ Experimental-Result ]
-		                   { Auth-Session-State }
-		                   { Origin-Host }
-		                   { Origin-Realm }
-		                  *[ Supported-Features ]
-		                   [ User-Name ]
-		                   [ MSISDN ]
-		                   [ LMSI ]
-		                   [ Serving-Node ]
-		                  *[ Additional-Serving-Node ]
-		                   [ GMLC-Address ]
-		                   [ PPR-Address ]
-		                   [ RIA-Flags ]
-		                  *[ AVP ]
-		                   [ Failed-AVP ]
-		                  *[ Proxy-Info ]
-		                  *[ Route-Record ]
- */
-
   private Long resultCode;
   private ExperimentalResultAvp experimentalResultAvp;
   private String userName;
   private byte[] msisdn;
   private byte[] lmsi;
-  private ServingNodeAvp servingNodeAvp;
-  private AdditionalServingNodeAvp additionalServingNodeAvp;
+  private ServingNode servingNodeAvp;
+  private ServingNode additionalServingNodeAvp;
   private Address gmlcAddress;
   private Address pprAddress;
   private Long riaFLags;
@@ -101,19 +70,19 @@ public class SLhRiaAvpValues implements Serializable {
     this.lmsi = lmsi;
   }
 
-  public ServingNodeAvp getServingNodeAvp() {
+  public ServingNode getServingNodeAvp() {
     return servingNodeAvp;
   }
 
-  public void setServingNodeAvp(ServingNodeAvp servingNodeAvp) {
+  public void setServingNodeAvp(ServingNode servingNodeAvp) {
     this.servingNodeAvp = servingNodeAvp;
   }
 
-  public AdditionalServingNodeAvp getAdditionalServingNodeAvp() {
+  public ServingNode getAdditionalServingNodeAvp() {
     return additionalServingNodeAvp;
   }
 
-  public void setAdditionalServingNodeAvp(AdditionalServingNodeAvp additionalServingNodeAvp) {
+  public void setAdditionalServingNodeAvp(ServingNode additionalServingNodeAvp) {
     this.additionalServingNodeAvp = additionalServingNodeAvp;
   }
 
@@ -133,11 +102,11 @@ public class SLhRiaAvpValues implements Serializable {
     this.pprAddress = pprAddress;
   }
 
-  public Long  getRiaFLags() {
+  public Long getRiaFLags() {
     return riaFLags;
   }
 
-  public void setRiaFLags(Long  riaFLags) {
+  public void setRiaFLags(Long riaFLags) {
     this.riaFLags = riaFLags;
   }
 

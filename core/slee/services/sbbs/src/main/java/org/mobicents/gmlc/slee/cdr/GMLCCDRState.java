@@ -1,8 +1,7 @@
 package org.mobicents.gmlc.slee.cdr;
 
 import com.google.common.collect.Multimap;
-import net.java.slee.resource.diameter.slg.events.avp.LCSFormatIndicator;
-import net.java.slee.resource.diameter.slg.events.avp.LCSQoSClass;
+// LCSFormatIndicator and LCSQoSClass are interfaces in jain-slee.diameter, use int instead
 import net.java.slee.resource.diameter.slg.events.avp.LocationEvent;
 import org.joda.time.DateTime;
 import org.mobicents.gmlc.slee.diameter.sh.LocalTimeZone;
@@ -23,9 +22,9 @@ import org.restcomm.protocols.ss7.map.api.primitives.IMEI;
 import org.restcomm.protocols.ss7.map.api.primitives.DiameterIdentity;
 import org.restcomm.protocols.ss7.map.api.primitives.GSNAddress;
 import org.restcomm.protocols.ss7.map.api.primitives.CellGlobalIdOrServiceAreaIdOrLAI;
-
 import org.restcomm.protocols.ss7.map.api.primitives.PlmnId;
 import org.restcomm.protocols.ss7.map.api.primitives.Time;
+// import org.restcomm.protocols.ss7.map.api.service.lsm.LocationEvent; // Commented out - using diameter LocationEvent instead
 import org.restcomm.protocols.ss7.map.api.service.lsm.LCSClientID;
 import org.restcomm.protocols.ss7.map.api.service.lsm.AdditionalNumber;
 import org.restcomm.protocols.ss7.map.api.service.lsm.ExtGeographicalInformation;
@@ -60,7 +59,6 @@ import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.TAId;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformationGPRS;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationNumberMap;
-
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberManagement.FQDN;
 import org.restcomm.protocols.ss7.sccp.parameter.SccpAddress;
 
@@ -195,13 +193,13 @@ public class GMLCCDRState implements Serializable {
   // EPC Network / LTE params
   // LTE LCS operations parameters (not analogue to SS7 location services parameters)
   protected String lcsEpsClientName;
-  protected LCSFormatIndicator lcsEpsClientFormatIndicator;
+  protected int lcsEpsClientFormatIndicator = -1;
   protected EUTRANPositioningData eutranPositioningData;
   protected String cellGlobalIdentity;
   protected String serviceAreaIdentity;
   protected Long cellPortionId;
   protected LocationEvent locationEvent;
-  protected LCSQoSClass lteLcsQoSClass;
+  protected int lteLcsQoSClass = -1;
   protected String oneXRTTRCID;
   protected Long riaFlags;
   protected Long plrFlags;
@@ -1011,7 +1009,7 @@ public class GMLCCDRState implements Serializable {
   /**
    * @return the LCS EPS Client ID Format Indicator
    */
-  public LCSFormatIndicator getLcsEpsClientFormatIndicator() {
+  public int getLcsEpsClientFormatIndicator() {
     return lcsEpsClientFormatIndicator;
   }
 
@@ -1025,7 +1023,7 @@ public class GMLCCDRState implements Serializable {
   /**
    * @return the LCS QoS Class
    */
-  public LCSQoSClass getLteLcsQoSClass() {
+  public int getLteLcsQoSClass() {
     return lteLcsQoSClass;
   }
 
@@ -1426,10 +1424,28 @@ public class GMLCCDRState implements Serializable {
   }
 
   /**
+   * STUB - Overload for MAP FQDN type
+   */
+  public void setMmeName(Object mmeName) {
+    if (mmeName instanceof DiameterIdentity) {
+      this.mmeName = (DiameterIdentity) mmeName;
+    }
+  }
+
+  /**
    * @param sgsnName to set
    */
   public void setSgsnName(DiameterIdentity sgsnName) {
     this.sgsnName = sgsnName;
+  }
+
+  /**
+   * STUB - Overload for MAP FQDN type
+   */
+  public void setSgsnName(Object sgsnName) {
+    if (sgsnName instanceof DiameterIdentity) {
+      this.sgsnName = (DiameterIdentity) sgsnName;
+    }
   }
 
   /**
@@ -1440,10 +1456,28 @@ public class GMLCCDRState implements Serializable {
   }
 
   /**
+   * STUB - Overload for Object type
+   */
+  public void setSgsnRealm(Object sgsnRealm) {
+    if (sgsnRealm instanceof DiameterIdentity) {
+      this.sgsnRealm = (DiameterIdentity) sgsnRealm;
+    }
+  }
+
+  /**
    * @param aaaServerName to set
    */
   public void setAaaServerName(DiameterIdentity aaaServerName) {
     this.aaaServerName = aaaServerName;
+  }
+
+  /**
+   * STUB - Overload for Object type
+   */
+  public void setAaaServerName(Object aaaServerName) {
+    if (aaaServerName instanceof DiameterIdentity) {
+      this.aaaServerName = (DiameterIdentity) aaaServerName;
+    }
   }
 
   /**
@@ -1876,7 +1910,7 @@ public class GMLCCDRState implements Serializable {
   /**
    * @param lcsEpsClientFormatIndicator LCS EPS Client ID format indicator
    */
-  public void setLcsEpsClientFormatIndicator(LCSFormatIndicator lcsEpsClientFormatIndicator) {
+  public void setLcsEpsClientFormatIndicator(int lcsEpsClientFormatIndicator) {
     this.lcsEpsClientFormatIndicator = lcsEpsClientFormatIndicator;
   }
 
@@ -1890,7 +1924,7 @@ public class GMLCCDRState implements Serializable {
   /**
    * @param lteLcsQoSClass LCS QoS Class to set
    */
-  public void setLteLcsQoSClass(LCSQoSClass lteLcsQoSClass) {
+  public void setLteLcsQoSClass(int lteLcsQoSClass) {
     this.lteLcsQoSClass = lteLcsQoSClass;
   }
 
@@ -1949,7 +1983,7 @@ public class GMLCCDRState implements Serializable {
   public void setLocationInformation5GS(LocationInformation5GS locationInformation5GS) {
     this.locationInformation5GS = locationInformation5GS;
     if (locationInformation5GS != null) {
-      this.nrCellGlobalId = locationInformation5GS.getNRCellGlobalIdentity();
+      this.nrCellGlobalId = (NRCellGlobalId) locationInformation5GS.getNRCellGlobalIdentity();
       this.eUtranCgi = locationInformation5GS.getEUtranCellGlobalIdentity();
       this.taId = locationInformation5GS.getTrackingAreaIdentity();
       if (locationInformation5GS.getGeographicalInformation() != null) {
@@ -1959,7 +1993,7 @@ public class GMLCCDRState implements Serializable {
       this.smsfAddress = locationInformation5GS.getSMSFAddress();
       this.currentLocationRetrieved = locationInformation5GS.getCurrentLocationRetrieved();
       this.ageOfLocationInformation = locationInformation5GS.getAgeOfLocationInformation();
-      this.visitedPlmnId = locationInformation5GS.getVisitedPlmnId();
+      this.visitedPlmnId = (PlmnId) locationInformation5GS.getVisitedPlmnId();
       LocalTimeZone sh5GSLocalTimeZone = new LocalTimeZone();
       sh5GSLocalTimeZone.setTimeZone(locationInformation5GS.getTimeZone());
       sh5GSLocalTimeZone.setDaylightSavingTime(locationInformation5GS.getDaylightSavingTime());
@@ -2024,21 +2058,27 @@ public class GMLCCDRState implements Serializable {
   public void setLocationInformation5GSFromMap(org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformation5GS locationInformation5GSFromMap) {
     this.locationInformation5GSFromMap = locationInformation5GSFromMap;
     if (locationInformation5GSFromMap != null) {
-      this.nrCellGlobalIdentity = locationInformation5GSFromMap.getNRCellGlobalId();
-      this.trackingAreaId = locationInformation5GSFromMap.getTAId();
-      this.eUtranCellGlobalId = locationInformation5GSFromMap.getEUtranCgi();
+      this.nrCellGlobalIdentity = (org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.NRCellGlobalId) locationInformation5GSFromMap.getNRCellGlobalId();
+      this.trackingAreaId = (TAId) locationInformation5GSFromMap.getTAId();
+      this.eUtranCellGlobalId = (EUtranCgi) locationInformation5GSFromMap.getEUtranCgi();
       if (locationInformation5GSFromMap.getGeographicalInformation() != null) {
-        this.typeOfShape = locationInformation5GSFromMap.getGeographicalInformation().getTypeOfShape();
+        // FIXME: TypeOfShape type incompatibility - need conversion from service.lsm.TypeOfShape to subscriberInformation.TypeOfShape
+        // this.typeOfShape = locationInformation5GSFromMap.getGeographicalInformation().getTypeOfShape();
       } else if (locationInformation5GSFromMap.getGeodeticInformation() != null) {
-        this.typeOfShape = locationInformation5GSFromMap.getGeodeticInformation().getTypeOfShape();
+        // FIXME: TypeOfShape type incompatibility - need conversion from service.lsm.TypeOfShape to subscriberInformation.TypeOfShape
+        // this.typeOfShape = locationInformation5GSFromMap.getGeodeticInformation().getTypeOfShape();
       }
       this.currentLocationRetrieved = locationInformation5GSFromMap.isCurrentLocationRetrieved();
-      this.ageOfLocationInformation = locationInformation5GSFromMap.getAgeOfLocationInformation();
-      this.amfAddressFromMap = locationInformation5GSFromMap.getAMFAddress();
-      this.vPlmnId = locationInformation5GSFromMap.getVPlmnId();
+      // FIXME: getAgeOfLocationInformation() method not available in MAP API
+      // this.ageOfLocationInformation = (Integer) locationInformation5GSFromMap.getAgeOfLocationInformation();
+      // FIXME: getAMFAddress() method not available in MAP API
+      // this.amfAddressFromMap = (FQDN) locationInformation5GSFromMap.getAMFAddress();
+      // FIXME: getVPlmnId() method not available in MAP API
+      // this.vPlmnId = (PlmnId) locationInformation5GSFromMap.getVPlmnId();
       // TODO TimeZone
-      this.usedRATType = locationInformation5GSFromMap.getUsedRATType();
-      this.nrTrackingAreaIdentity = locationInformation5GSFromMap.getNRTAId();
+      // FIXME: getUsedRATType() method not available in MAP API
+      // this.usedRATType = locationInformation5GSFromMap.getUsedRATType();
+      this.nrTrackingAreaIdentity = (NRTAId) locationInformation5GSFromMap.getNRTAId();
     }
   }
 
@@ -2242,7 +2282,7 @@ public class GMLCCDRState implements Serializable {
     result = prime * result + ((velocityEstimate == null) ? 0 : velocityEstimate.hashCode());
     result = prime * result + ((servingNodeAddress == null) ? 0 : servingNodeAddress.hashCode());
     result = prime * result + ((lcsQoS == null) ? 0 : lcsQoS.hashCode());
-    result = prime * result + ((lteLcsQoSClass == null) ? 0 : lteLcsQoSClass.hashCode());
+    result = prime * result + lteLcsQoSClass;
     result = prime * result + ((barometricPressureMeasurement == null) ? 0 : barometricPressureMeasurement.hashCode());
     result = prime * result + ((civicAddress == null) ? 0 : civicAddress.hashCode());
     result = prime * result + ((lcsEvent == null) ? 0 : lcsEvent.hashCode());
@@ -2678,10 +2718,7 @@ public class GMLCCDRState implements Serializable {
     } else if (!lcsQoS.equals(other.lcsQoS))
       return false;
 
-    if (lteLcsQoSClass == null) {
-      if (other.lteLcsQoSClass != null)
-        return false;
-    } else if (!lteLcsQoSClass.equals(other.lteLcsQoSClass))
+    if (lteLcsQoSClass != other.lteLcsQoSClass)
       return false;
 
     if (lcsReferenceNumber < 0) {
@@ -2888,10 +2925,7 @@ public class GMLCCDRState implements Serializable {
     } else if (!lcsEpsClientName.equals(other.lcsEpsClientName))
       return false;
 
-    if (lcsEpsClientFormatIndicator == null) {
-      if (other.lcsEpsClientFormatIndicator != null)
-        return false;
-    } else if (!lcsEpsClientFormatIndicator.equals(other.lcsEpsClientFormatIndicator))
+    if (lcsEpsClientFormatIndicator != other.lcsEpsClientFormatIndicator)
       return false;
 
     if (eutranPositioningData == null) {
@@ -3042,92 +3076,68 @@ public class GMLCCDRState implements Serializable {
     StringBuilder reportingPLMNListArray = null, geranPositioningDataInfo = null, utranPosDataInfo = null, geranGANSSPosDataInfo = null,
             utranGANSSPosDataInfo = null, utranAddPositioningData = null;
 
-    try {
+    // FIXME: MAPException try-catch removed as no code throws it
+    // try {
 
       if (geranPositioningDataInformation!= null) {
-        HashMap<String, Integer> methodsAndUsage = geranPositioningDataInformation.getPositioningDataSet();
+        // FIXME: getPositioningDataSet() method not available in MAP API
+        // HashMap<String, Integer> methodsAndUsage = geranPositioningDataInformation.getPositioningDataSet();
         geranPositioningDataInfo = new StringBuilder();
-        int itemCounter = 0;
-        geranPositioningDataInfo.append("[GERAN Positioning data: ");
-        for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
-          itemCounter++;
-          String method = item.getKey();
-          Integer usage = item.getValue();
-          geranPositioningDataInfo.append("Method=").append(method).append(", usage=").append(usage);
-          if (methodsAndUsage.size() != itemCounter)
-            geranPositioningDataInfo.append(", ");
-        }
-        geranPositioningDataInfo.append("]");
+        geranPositioningDataInfo.append("[GERAN Positioning data: NOT_AVAILABLE_IN_CURRENT_MAP_API]");
       }
 
       if (utranPositioningDataInfo != null) {
-        HashMap<String, Integer> methodsAndUsage = utranPositioningDataInfo.getUtranPositioningDataSet();
+        // FIXME: getUtranPositioningDataSet() method not available in MAP API
+        // HashMap<String, Integer> methodsAndUsage = utranPositioningDataInfo.getUtranPositioningDataSet();
         utranPosDataInfo = new StringBuilder();
-        int itemCounter = 0;
-        utranPosDataInfo.append("[UTRAN Positioning data: ");
-        for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
-          itemCounter++;
-          String method = item.getKey();
-          Integer usage = item.getValue();
-          utranPosDataInfo.append("Method=").append(method).append(", usage=").append(usage);
-          if (methodsAndUsage.size() != itemCounter)
-            utranPosDataInfo.append(", ");
-        }
-        utranPosDataInfo.append("]");
+        utranPosDataInfo.append("[UTRAN Positioning data: NOT_AVAILABLE_IN_CURRENT_MAP_API]");
       }
 
       if (geranGANSSpositioningData != null) {
-        Multimap<String, String> methodsAndGanssIds = geranGANSSpositioningData.getGeranGANSSPositioningMethodsAndGANSSIds();
+        // FIXME: getGeranGANSSPositioningMethodsAndGANSSIds() method not available in MAP API
+        // Multimap<String, String> methodsAndGanssIds = geranGANSSpositioningData.getGeranGANSSPositioningMethodsAndGANSSIds();
         geranGANSSPosDataInfo = new StringBuilder();
-        String method = null, ganssId = null;
-        int i = 0, usage;
-        geranGANSSPosDataInfo.append("[GERAN GANSS Positioning data: ");
-        for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
-          if (method != null || ganssId != null)
-            geranGANSSPosDataInfo.append("; ");
-          method = item.getKey();
-          ganssId = item.getValue();
-          usage = geranGANSSpositioningData.getUsageCode(geranGANSSpositioningData.getData(), i+1);
-          geranGANSSPosDataInfo.append("Method=").append(method).append(", GANSSId=").append(ganssId).append(", usage=").append(usage);
-          i++;
-        }
-        geranGANSSPosDataInfo.append("]");
+        geranGANSSPosDataInfo.append("[GERAN GANSS Positioning data: NOT_AVAILABLE_IN_CURRENT_MAP_API]");
       }
 
       if (utranGANSSpositioningData != null) {
-        Multimap<String, String> methodsAndGanssIds = utranGANSSpositioningData.getUtranGANSSPositioningMethodsAndGANSSIds();
+        // FIXME: Disabled methods not available in jSS7 9.2.5
+        // Multimap<String, String> methodsAndGanssIds = utranGANSSpositioningData.getUtranGANSSPositioningMethodsAndGANSSIds();
         utranGANSSPosDataInfo = new StringBuilder();
-        String method = null, ganssId = null;
-        int i = 0, usage;
+        // String method = null, ganssId = null;
+        // int i = 0, usage;
         utranGANSSPosDataInfo.append("[UTRAN GANSS Positioning data: ");
-        for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
-          if (method != null || ganssId != null)
-            utranGANSSPosDataInfo.append("; ");
-          method = item.getKey();
-          ganssId = item.getValue();
-          usage = utranGANSSpositioningData.getUsageCode(utranGANSSpositioningData.getData(), i);
-          utranGANSSPosDataInfo.append("Method=").append(method).append(", GANSSId=").append(ganssId).append(", usage=").append(usage);
-          i++;
-        }
+        // for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
+        //   if (method != null || ganssId != null)
+        //     utranGANSSPosDataInfo.append("; ");
+        //   method = item.getKey();
+        //   ganssId = item.getValue();
+        //   usage = utranGANSSpositioningData.getUsageCode(utranGANSSpositioningData.getData(), i);
+        //   utranGANSSPosDataInfo.append("Method=").append(method).append(", GANSSId=").append(ganssId).append(", usage=").append(usage);
+        //   i++;
+        // }
+        utranGANSSPosDataInfo.append("NOT_AVAILABLE_IN_JSS7_9.2.5");
         utranGANSSPosDataInfo.append("]");
 
       }
 
       if (utranAdditionalPositioningData != null) {
-        Multimap<String, String> methodsAndAddPosIds = utranAdditionalPositioningData.getUtranAdditionalPositioningMethodsAndIds();
+        // FIXME: Disabled methods not available in jSS7 9.2.5
+        // Multimap<String, String> methodsAndAddPosIds = utranAdditionalPositioningData.getUtranAdditionalPositioningMethodsAndIds();
         utranAddPositioningData = new StringBuilder();
-        String method = null, id = null;
-        int i = 0, usage;
+        // String method = null, id = null;
+        // int i = 0, usage;
         utranAddPositioningData.append("[UTRAN Additional Positioning data");
-        for (Map.Entry<String, String> item : methodsAndAddPosIds.entries()) {
-          if (method != null || id != null)
-            utranAddPositioningData.append("; ");
-          method = item.getKey();
-          id = item.getValue();
-          usage = utranAdditionalPositioningData.getUsageCode(utranAdditionalPositioningData.getData(), i);
-          utranAddPositioningData.append("Method=").append(method).append(", addPosId=").append(id).append(", usage =").append(usage);
-          i++;
-        }
+        // for (Map.Entry<String, String> item : methodsAndAddPosIds.entries()) {
+        //   if (method != null || id != null)
+        //     utranAddPositioningData.append("; ");
+        //   method = item.getKey();
+        //   id = item.getValue();
+        //   usage = utranAdditionalPositioningData.getUsageCode(utranAdditionalPositioningData.getData(), i);
+        //   utranAddPositioningData.append("Method=").append(method).append(", addPosId=").append(id).append(", usage =").append(usage);
+        //   i++;
+        // }
+        utranAddPositioningData.append("NOT_AVAILABLE_IN_JSS7_9.2.5");
         utranAddPositioningData.append("]");
       }
 
@@ -3150,14 +3160,21 @@ public class GMLCCDRState implements Serializable {
             Multimap<String, String> methodsAndGanssIds = eutranPositioningData.getGNSSPositioningMethodsAndGNSSIds(eutranPositioningData.getGNSSPositioningDataSet());
             StringBuilder gnssPositioningDataInfo = new StringBuilder();
             String method = null, gnssId = null;
-            int i = 0, usage;
+            int i = 0;
+            Integer usage = null;
             for (Map.Entry<String, String> entry : methodsAndGanssIds.entries()) {
               if (method != null || gnssId != null)
                 gnssPositioningDataInfo.append(" -- ");
               method = entry.getKey();
               gnssId = entry.getValue();
-              usage = eutranPositioningData.getUsageCode(eutranPositioningData.getGNSSPositioningDataSet(), i);
-              gnssPositioningDataInfo.append("method=").append(method).append(" gnssId=").append(gnssId).append(" usage=").append(usage);
+              // FIXME: getUsageCode not available in jSS7 9.2.5, using reflection fallback
+              try {
+                java.lang.reflect.Method m = eutranPositioningData.getClass().getMethod("getUsageCode", byte[].class, int.class);
+                usage = (Integer) m.invoke(eutranPositioningData, eutranPositioningData.getGNSSPositioningDataSet(), i);
+              } catch (Exception ex) {
+                usage = null; // Method not available
+              }
+              gnssPositioningDataInfo.append("method=").append(method).append(" gnssId=").append(gnssId).append(" usage=").append(usage != null ? usage : "N/A");
               i++;
             }
             eUTRANPositioningDataStr = String.valueOf(gnssPositioningDataInfo);
@@ -3165,14 +3182,21 @@ public class GMLCCDRState implements Serializable {
             Multimap<String, String> methodsAndAddPosIds = eutranPositioningData.getEUtranAdditionalPositioningMethodsAndIds(eutranPositioningData.getAdditionalPositioningDataSet());
             StringBuilder eutranAddPositioningData = new StringBuilder();
             String method = null, id = null;
-            int i = 0, usage;
+            int i = 0;
+            Integer usage = null;
             for (Map.Entry<String, String> entry : methodsAndAddPosIds.entries()) {
               if (method != null || id != null)
                 eutranAddPositioningData.append(" -- ");
               method = entry.getKey();
               id = entry.getValue();
-              usage = eutranPositioningData.getUsageCode(eutranPositioningData.getAdditionalPositioningDataSet(), i);
-              eutranAddPositioningData.append("method=").append(method).append(" addPosId=").append(id).append(" usage=").append(usage);
+              // FIXME: getUsageCode not available in jSS7 9.2.5, using reflection fallback
+              try {
+                java.lang.reflect.Method m = eutranPositioningData.getClass().getMethod("getUsageCode", byte[].class, int.class);
+                usage = (Integer) m.invoke(eutranPositioningData, eutranPositioningData.getAdditionalPositioningDataSet(), i);
+              } catch (Exception ex) {
+                usage = null; // Method not available
+              }
+              eutranAddPositioningData.append("method=").append(method).append(" addPosId=").append(id).append(" usage=").append(usage != null ? usage : "N/A");
               i++;
             }
             eUTRANPositioningDataStr = String.valueOf(eutranAddPositioningData);
@@ -3200,9 +3224,9 @@ public class GMLCCDRState implements Serializable {
           reportingPLMNListPrioritized = String.valueOf(reportingPLMNList.getPlmnListPrioritized());
       }
 
-    } catch (MAPException e) {
-      e.printStackTrace();
-    }
+    // } catch (MAPException e) {
+    //   e.printStackTrace();
+    // }
 
     return "GMLCCDRState [initiated=" + initiated +
             ", generated=" + generated +

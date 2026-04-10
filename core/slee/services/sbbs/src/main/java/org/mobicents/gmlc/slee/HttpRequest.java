@@ -2,9 +2,9 @@ package org.mobicents.gmlc.slee;
 
 import net.java.slee.resource.diameter.slg.events.avp.*;
 import org.jdiameter.api.Avp;
-import org.mobicents.slee.resource.diameter.slg.events.avp.*;
+// import org.mobicents.slee.resource.diameter.slg.events.avp.*;
 import org.restcomm.protocols.ss7.map.api.service.lsm.*;
-import org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoSClass;
+// import org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoSClass;
 import org.restcomm.protocols.ss7.map.api.service.lsm.OccurrenceInfo;
 import org.restcomm.protocols.ss7.map.api.service.lsm.ResponseTime;
 import org.restcomm.protocols.ss7.map.service.lsm.*;
@@ -42,8 +42,8 @@ public class HttpRequest implements Serializable {
     public LCSQoS lcsQoS;
     public AreaDefinition areaDefinition;
     public OccurrenceInfo occurrenceInfo;
-    public AreaEventInfo areaEventInfo;
-    public PeriodicLDRInfo periodicLDRInfo;
+    // public AreaEventInfo areaEventInfo;
+    // public PeriodicLDRInfo periodicLDRInfo;
     public String slrCallbackUrl;
     public String psi;
     public String httpResponseType;
@@ -61,14 +61,14 @@ public class HttpRequest implements Serializable {
     public Integer lteVerticalCoordinateRequested;
     public Integer lteResponseTime;
     public Long lteServiceTypeId;
-    public LCSQoSAvp lteLcsQoS = new LCSQoSAvpImpl(Avp.LCS_QOS, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
+    // public LCSQoSAvp lteLcsQoS = new LCSQoSAvpImpl(Avp.LCS_QOS, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
     public Integer lteAreaOccurrenceInfo;
-    public AreaEventInfoAvp lteAreaEventInfo = new AreaEventInfoAvpImpl(Avp.AREA_EVENT_INFO, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
+    // public AreaEventInfoAvp lteAreaEventInfo = new AreaEventInfoAvpImpl(Avp.AREA_EVENT_INFO, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
     public Integer lteMotionOccurrenceInfo;
-    public MotionEventInfoAvp lteMotionEventInfo = new MotionEventInfoAvpImpl(Avp.MOTION_EVENT_INFO, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
-    public PeriodicLDRInfoAvp ltePeriodicLDRInfo = new PeriodicLDRInfoAvpImpl(Avp.PERIODIC_LDR_INFORMATION, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
-    public AreaAvp area = new AreaAvpImpl(Avp.AREA, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
-    public AdditionalAreaAvp additionalArea = new AdditionalAreaAvpImpl(Avp.ADDITIONAL_AREA, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
+    // public MotionEventInfoAvp lteMotionEventInfo = new MotionEventInfoAvpImpl(Avp.MOTION_EVENT_INFO, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
+    // public PeriodicLDRInfoAvp ltePeriodicLDRInfo = new PeriodicLDRInfoAvpImpl(Avp.PERIODIC_LDR_INFORMATION, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
+    // public AreaAvp area = new AreaAvpImpl(Avp.AREA, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
+    // public AdditionalAreaAvp additionalArea = new AdditionalAreaAvpImpl(Avp.ADDITIONAL_AREA, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
     public String lteLrrCallbackUrl;
 
     public HttpRequest(HttpRequestType httpRequestType, String msisdnAddress, String imsiData, String imsPublicId, String operation, String domain,
@@ -118,12 +118,12 @@ public class HttpRequest implements Serializable {
                         responseTime = new ResponseTimeImpl(responseTimeCategory);
                     }
                     velocityRequest = velocityRequested;
-                    LCSQoSClass qosClass = null;
-                    if (lcsQosClass != null) {
-                        qosClass = LCSQoSClass.valueOf(String.valueOf(lcsQosClass.intValue()));
-                    }
-                    if (horizontalAccuracy != null && verticalAccuracy != null && verticalCoordinateRequest != null && responseTime != null)
-                        lcsQoS = new LCSQoSImpl(horizontalAccuracy, verticalAccuracy, verticalCoordinateRequest, responseTime, null, velocityRequest, qosClass);
+                    // LCSQoSClass qosClass = null;
+                    // if (lcsQosClass != null) {
+                    //     qosClass = LCSQoSClass.valueOf(String.valueOf(lcsQosClass.intValue()));
+                    // }
+                    // if (horizontalAccuracy != null && verticalAccuracy != null && verticalCoordinateRequest != null && responseTime != null)
+                    //     lcsQoS = new LCSQoSImpl(horizontalAccuracy, verticalAccuracy, verticalCoordinateRequest, responseTime, null, velocityRequest, qosClass);
                     if (areaType != null) {
                         try {
                             ArrayList<Area> areaArrayList = new ArrayList<>();
@@ -152,17 +152,17 @@ public class HttpRequest implements Serializable {
                                 } else {
                                     occurrenceInfo = OccurrenceInfo.oneTimeEvent;
                                 }
-                                if (areaIntervalTime != null)
-                                    areaEventInfo = new AreaEventInfoImpl(areaDefinition, occurrenceInfo, areaIntervalTime);
+                                // if (areaIntervalTime != null)
+                                //     areaEventInfo = new AreaEventInfoImpl(areaDefinition, occurrenceInfo, areaIntervalTime);
                             }
                         } catch (Exception e) {
                             logger.warning(String.format("Error while creating AreaEventInfo from HttpRequest:" + e));
                         }
                     }
-                    if (periodicReportingAmount != null && periodicReportingInterval != null) {
-                        // FIXME with ReportingOptionMilliseconds
-                        periodicLDRInfo = new PeriodicLDRInfoImpl(periodicReportingAmount, periodicReportingInterval, null);
-                    }
+                    // if (periodicReportingAmount != null && periodicReportingInterval != null) {
+                    //     // FIXME with ReportingOptionMilliseconds
+                    //     periodicLDRInfo = new PeriodicLDRInfoImpl(periodicReportingAmount, periodicReportingInterval, null);
+                    // }
                     slrCallbackUrl = callbackUrl;
                 }
 
@@ -182,38 +182,40 @@ public class HttpRequest implements Serializable {
                         lteHorizontalAccuracy = Long.valueOf(horAccuracy);
                     if (vertAccuracy != null)
                         lteVerticalAccuracy = Long.valueOf(vertAccuracy);
-                    if (verticalCoordinateReq != null && verticalCoordinateReq.equalsIgnoreCase("false")) {
-                        lteVerticalCoordinateRequested = VerticalRequested._VERTICAL_COORDINATE_IS_NOT_REQUESTED; // VERTICAL_COORDINATE_IS_NOT REQUESTED (0)
-                    } else {
-                        lteVerticalCoordinateRequested = VerticalRequested._VERTICAL_COORDINATE_IS_REQUESTED; // VERTICAL_COORDINATE_IS_REQUESTED (1)
-                    }
-                    if (responseTimeCategoryValue != null && responseTimeCategoryValue.equalsIgnoreCase("tolerant")) {
-                        lteResponseTime = net.java.slee.resource.diameter.slg.events.avp.ResponseTime._DELAY_TOLERANT; // DELAY_TOLERANT (1)
-                    } else {
-                        lteResponseTime = net.java.slee.resource.diameter.slg.events.avp.ResponseTime._LOW_DELAY; // LOW_DELAY (0)
-                    }
-                    lteLcsQoS.setResponseTime(net.java.slee.resource.diameter.slg.events.avp.ResponseTime.fromInt(lteResponseTime));
+                    // if (verticalCoordinateReq != null && verticalCoordinateReq.equalsIgnoreCase("false")) {
+                    //     lteVerticalCoordinateRequested = VerticalRequested._VERTICAL_COORDINATE_IS_NOT_REQUESTED;
+                    // } else {
+                    //     lteVerticalCoordinateRequested = VerticalRequested._VERTICAL_COORDINATE_IS_REQUESTED;
+                    // }
+                    // if (responseTimeCategoryValue != null && responseTimeCategoryValue.equalsIgnoreCase("tolerant")) {
+                    //     lteResponseTime = net.java.slee.resource.diameter.slg.events.avp.ResponseTime._DELAY_TOLERANT;
+                    // } else {
+                    //     lteResponseTime = net.java.slee.resource.diameter.slg.events.avp.ResponseTime._LOW_DELAY;
+                    // }
+                    // lteLcsQoS.setResponseTime(net.java.slee.resource.diameter.slg.events.avp.ResponseTime.fromInt(lteResponseTime));
+                    /* DIAMETER AVP DISABLED
                     if (lteHorizontalAccuracy != null)
                         lteLcsQoS.setHorizontalAccuracy(lteHorizontalAccuracy);
                     if (lteVerticalAccuracy != null)
                         lteLcsQoS.setVerticalAccuracy(lteVerticalAccuracy);
-                    if (lteVerticalCoordinateRequested != null)
-                        lteLcsQoS.setVerticalRequested(VerticalRequested.fromInt(lteVerticalCoordinateRequested));
-                    if (lcsQosClass != null)
-                        lteLcsQoS.setLCSQoSClass(net.java.slee.resource.diameter.slg.events.avp.LCSQoSClass.fromInt(lcsQosClass));
-                    if (areaType != null) {
-                        area.setAreaType(Long.parseLong(areaType));
-                    }
-                    if (areaId != null)
-                        area.setAreaIdentification(areaId.getBytes());
-                    if (addAreaT != null)
-                        additionalArea.setAreaType(Long.parseLong(addAreaT));
-                    if (addAreaId != null)
-                        additionalArea.setAreaIdentification(addAreaId.getBytes());
-                    AreaDefinitionAvp areaDefinition = new AreaDefinitionAvpImpl(Avp.AREA_DEFINITION, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
-                    areaDefinition.setArea(area);
-                    areaDefinition.setAdditionalArea(additionalArea);
-                    if (areaOccurrenceInfo != null && areaOccurrenceInfo.equalsIgnoreCase("multiple")) {
+                    */
+                    // if (lteVerticalCoordinateRequested != null)
+                    //     lteLcsQoS.setVerticalRequested(VerticalRequested.fromInt(lteVerticalCoordinateRequested));
+                    // if (lcsQosClass != null)
+                    //     lteLcsQoS.setLCSQoSClass(net.java.slee.resource.diameter.slg.events.avp.LCSQoSClass.fromInt(lcsQosClass));
+                    // if (areaType != null) {
+                    //     area.setAreaType(Long.parseLong(areaType));
+                    // }
+                    // if (areaId != null)
+                    //     area.setAreaIdentification(areaId.getBytes());
+                    // if (addAreaT != null)
+                    //     additionalArea.setAreaType(Long.parseLong(addAreaT));
+                    // if (addAreaId != null)
+                    //     additionalArea.setAreaIdentification(addAreaId.getBytes());
+                    // AreaDefinitionAvp areaDefinition = new AreaDefinitionAvpImpl(Avp.AREA_DEFINITION, MobileCoreNetworkInterfaceSbb.TGPP_VENDOR_ID, 0, 0, new byte[]{});
+                    // areaDefinition.setArea(area);
+                    // areaDefinition.setAdditionalArea(additionalArea);
+                    /*if (areaOccurrenceInfo != null && areaOccurrenceInfo.equalsIgnoreCase("multiple")) {
                         lteAreaOccurrenceInfo = net.java.slee.resource.diameter.slg.events.avp.OccurrenceInfo._MULTIPLE_TIME_EVENT; // MULTIPLE_TIME_EVENT (1)
                     } else {
                         lteAreaOccurrenceInfo = net.java.slee.resource.diameter.slg.events.avp.OccurrenceInfo._ONE_TIME_EVENT; // ONE_TIME_EVENT (0)
@@ -248,12 +250,13 @@ public class HttpRequest implements Serializable {
                     if (motionReportingDuration != null)
                         lteMotionEventInfo.setReportDuration(motionReportingDuration);
                     if (motionRepLocReqs != null)
-                        lteMotionEventInfo.setReportingLocationRequirements(motionRepLocReqs);
+                        lteMotionEventInfo.setReportingLocationRequirements(motionRepLocReqs);*/
 
+                    /* DIAMETER AVP DISABLED
                     if (periodicReportingAmount != null && periodicReportingInterval != null) {
                         ltePeriodicLDRInfo.setReportingAmount(periodicReportingAmount);
                         ltePeriodicLDRInfo.setReportingInterval(periodicReportingInterval);
-                    }
+                    }*/
                     lteLrrCallbackUrl = callbackUrl;
                 }
 

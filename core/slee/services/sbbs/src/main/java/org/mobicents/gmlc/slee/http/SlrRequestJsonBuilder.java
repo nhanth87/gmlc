@@ -31,7 +31,7 @@ import static org.mobicents.gmlc.slee.gis.GeographicHelper.polygonCentroid;
 import static org.mobicents.gmlc.slee.http.JsonWriter.bytesToHexString;
 import static org.mobicents.gmlc.slee.http.JsonWriter.write3gppAaaServerName;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAaaServerName;
-import static org.mobicents.gmlc.slee.http.JsonWriter.writeAccuracyFulfilmentIndicator;
+// import REMOVED_AccuracyFulfilmentIndicator;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAdditionalLCSCapabilitySets;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAdditionalNetworkNodeNumber;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAgeOfLocationEstimate;
@@ -43,7 +43,7 @@ import static org.mobicents.gmlc.slee.http.JsonWriter.writeCellId;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeCivicAddress;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeClientReferenceNumber;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeConfidence;
-import static org.mobicents.gmlc.slee.http.JsonWriter.writeDeferredLocationEventType;
+// import REMOVED_LocationEvent;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeGeranGanssPositioningGanssId;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeGeranGanssPositioningMethod;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeGeranGanssPositioningUsage;
@@ -540,6 +540,7 @@ public class SlrRequestJsonBuilder {
             /*** deferredmt-lrData [9] Deferredmt-lrData OPTIONAL ***/
             if (slrReq.getDeferredmtlrData() != null) {
                 JsonObject deferredMTLRDataJsonObject = new JsonObject();
+                /*
                 // Deferred Location Event Type
                 if (slrReq.getDeferredmtlrData().getDeferredLocationEventType() != null) {
                     boolean enteringArea = slrReq.getDeferredmtlrData().getDeferredLocationEventType().getEnteringIntoArea();
@@ -616,6 +617,7 @@ public class SlrRequestJsonBuilder {
                     }
                     deferredMTLRDataJsonObject.add("ServingNode", deferredMTLRDataServingNodeJsonObject);
                 }
+                */
                 slrJsonObject.add("DeferredMTLRData", deferredMTLRDataJsonObject);
             }
 
@@ -628,99 +630,107 @@ public class SlrRequestJsonBuilder {
                 writeLcsReferenceNumber(lcsReferenceNumber, slrJsonObject);
             }
 
-            /*** geranPositioningData [11] PositioningDataInformation OPTIONAL ***/
-            if (slrReq.getGeranPositioningDataInformation() != null) {
-                JsonObject slrGeranPosInfoDataSetJsonObject = new JsonObject();
-                JsonObject slrGeranPosInfoJsonObject = new JsonObject();
-                HashMap<String, Integer> methodsAndUsage = slrReq.getGeranPositioningDataInformation().getPositioningDataSet();
-                JsonObject[] slrGeranPosInfoMethodAndUsage = new JsonObject[methodsAndUsage.size()];
-                int itemIndex = 0;
-                for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
-                    String property = "Item-" + itemIndex;
-                    String method = item.getKey();
-                    Integer usage = item.getValue();
-                    slrGeranPosInfoMethodAndUsage[itemIndex] = new JsonObject();
-                    slrGeranPosInfoDataSetJsonObject.add(property, slrGeranPosInfoMethodAndUsage[itemIndex]);
-                    writeGeranPositioningMethod(method, slrGeranPosInfoMethodAndUsage[itemIndex]);
-                    writeGeranPositioningUsage(usage, slrGeranPosInfoMethodAndUsage[itemIndex]);
-                    itemIndex++;
-                }
-                slrGeranPosInfoJsonObject.add("PositioningDataSet", slrGeranPosInfoDataSetJsonObject);
-                // Write GERAN Positioning Info values from SLR
-                slrJsonObject.add("GeranPositioningData", slrGeranPosInfoJsonObject);
-            }
+            // /*
+            // /*** geranPositioningData [11] PositioningDataInformation OPTIONAL ***/
+            // if (slrReq.getGeranPositioningDataInformation() != null) {
+            //     JsonObject slrGeranPosInfoDataSetJsonObject = new JsonObject();
+            //     JsonObject slrGeranPosInfoJsonObject = new JsonObject();
+            //     HashMap<String, Integer> methodsAndUsage = slrReq.getGeranPositioningDataInformation().getPositioningDataSet();
+            //     JsonObject[] slrGeranPosInfoMethodAndUsage = new JsonObject[methodsAndUsage.size()];
+            //     int itemIndex = 0;
+            //     for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
+            //         String property = "Item-" + itemIndex;
+            //         String method = item.getKey();
+            //         Integer usage = item.getValue();
+            //         slrGeranPosInfoMethodAndUsage[itemIndex] = new JsonObject();
+            //         slrGeranPosInfoDataSetJsonObject.add(property, slrGeranPosInfoMethodAndUsage[itemIndex]);
+            //         writeGeranPositioningMethod(method, slrGeranPosInfoMethodAndUsage[itemIndex]);
+            //         writeGeranPositioningUsage(usage, slrGeranPosInfoMethodAndUsage[itemIndex]);
+            //         itemIndex++;
+            //     }
+            //     slrGeranPosInfoJsonObject.add("PositioningDataSet", slrGeranPosInfoDataSetJsonObject);
+            //     // Write GERAN Positioning Info values from SLR
+            //     slrJsonObject.add("GeranPositioningData", slrGeranPosInfoJsonObject);
+            // }
+            // */
 
-            /*** utranPositioningData [12] UtranPositioningDataInfo OPTIONAL ***/
-            if (slrReq.getUtranPositioningDataInfo() != null) {
-                JsonObject slrUtranPosInfoDataSetJsonObject = new JsonObject();
-                JsonObject slrUtranPosInfoJsonObject = new JsonObject();
-                HashMap<String, Integer> methodsAndUsage = slrReq.getUtranPositioningDataInfo().getUtranPositioningDataSet();
-                JsonObject[] slrUtranPosInfoMethodAndUsage = new JsonObject[methodsAndUsage.size()];
-                int itemIndex = 0;
-                for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
-                    String property = "Item-" + itemIndex;
-                    String method = item.getKey();
-                    Integer usage = item.getValue();
-                    slrUtranPosInfoMethodAndUsage[itemIndex] = new JsonObject();
-                    slrUtranPosInfoDataSetJsonObject.add(property, slrUtranPosInfoMethodAndUsage[itemIndex]);
-                    writeUtranPositioningMethod(method, slrUtranPosInfoMethodAndUsage[itemIndex]);
-                    writeUtranPositioningUsage(usage, slrUtranPosInfoMethodAndUsage[itemIndex]);
-                    itemIndex++;
-                }
-                slrUtranPosInfoJsonObject.add("PositioningDataSet", slrUtranPosInfoDataSetJsonObject);
-                // Write GERAN Positioning Info values from SLR
-                slrJsonObject.add("UtranPositioningData", slrUtranPosInfoJsonObject);
-            }
+            // /*
+            // /*** utranPositioningData [12] UtranPositioningDataInfo OPTIONAL ***/
+            // if (slrReq.getUtranPositioningDataInfo() != null) {
+            //     JsonObject slrUtranPosInfoDataSetJsonObject = new JsonObject();
+            //     JsonObject slrUtranPosInfoJsonObject = new JsonObject();
+            //     HashMap<String, Integer> methodsAndUsage = slrReq.getUtranPositioningDataInfo().getUtranPositioningDataSet();
+            //     JsonObject[] slrUtranPosInfoMethodAndUsage = new JsonObject[methodsAndUsage.size()];
+            //     int itemIndex = 0;
+            //     for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
+            //         String property = "Item-" + itemIndex;
+            //         String method = item.getKey();
+            //         Integer usage = item.getValue();
+            //         slrUtranPosInfoMethodAndUsage[itemIndex] = new JsonObject();
+            //         slrUtranPosInfoDataSetJsonObject.add(property, slrUtranPosInfoMethodAndUsage[itemIndex]);
+            //         writeUtranPositioningMethod(method, slrUtranPosInfoMethodAndUsage[itemIndex]);
+            //         writeUtranPositioningUsage(usage, slrUtranPosInfoMethodAndUsage[itemIndex]);
+            //         itemIndex++;
+            //     }
+            //     slrUtranPosInfoJsonObject.add("PositioningDataSet", slrUtranPosInfoDataSetJsonObject);
+            //     // Write GERAN Positioning Info values from SLR
+            //     slrJsonObject.add("UtranPositioningData", slrUtranPosInfoJsonObject);
+            // }
+            // */
 
-            /*** cellIdOrSai [13] CellGlobalIdOrServiceAreaIdOrLAI OPTIONAL ***/
-            if (slrReq.getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
-                JsonObject slrCGIorSAIorLAIJsonObject = new JsonObject();
-                /*** LAI fixed length ***/
-                if (slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
-                    mcc = slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC();
-                    mnc = slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC();
-                    lac = slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac();
-                }
-                /*** CGI or SAI fixed length ***/
-                if (slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
-                    mcc = slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
-                    mnc = slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC();
-                    lac = slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
-                    ciOrSac = slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
-                }
-                writeMcc(mcc, slrCGIorSAIorLAIJsonObject);
-                writeMnc(mnc, slrCGIorSAIorLAIJsonObject);
-                writeLac(lac, slrCGIorSAIorLAIJsonObject);
-                if (!slrReq.getSaiPresent()) {
-                    if (ciOrSac >= -1) {
-                        writeCellId(ciOrSac, slrCGIorSAIorLAIJsonObject);
-                        slrJsonObject.add("CGI", slrCGIorSAIorLAIJsonObject);
-                    } else {
-                        if (lac >= -1)
-                            slrJsonObject.add("LAI", slrCGIorSAIorLAIJsonObject);
-                    }
-                } else {
-                    if (ciOrSac >= -1) {
-                        writeServiceAreaCode(ciOrSac, slrCGIorSAIorLAIJsonObject);
-                        slrJsonObject.add("SAI", slrCGIorSAIorLAIJsonObject);
-                    } else {
-                        if (lac >= -1)
-                            slrJsonObject.add("LAI", slrCGIorSAIorLAIJsonObject);
-                    }
-                }
-            }
+            // /*
+            // /*** cellIdOrSai [13] CellGlobalIdOrServiceAreaIdOrLAI OPTIONAL ***/
+            // if (slrReq.getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
+            //     JsonObject slrCGIorSAIorLAIJsonObject = new JsonObject();
+            //     /*** LAI fixed length ***/
+            //     if (slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
+            //         mcc = slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC();
+            //         mnc = slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC();
+            //         lac = slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac();
+            //     }
+            //     /*** CGI or SAI fixed length ***/
+            //     if (slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
+            //         mcc = slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
+            //         mnc = slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC();
+            //         lac = slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
+            //         ciOrSac = slrReq.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
+            //     }
+            //     writeMcc(mcc, slrCGIorSAIorLAIJsonObject);
+            //     writeMnc(mnc, slrCGIorSAIorLAIJsonObject);
+            //     writeLac(lac, slrCGIorSAIorLAIJsonObject);
+            //     if (!slrReq.getSaiPresent()) {
+            //         if (ciOrSac >= -1) {
+            //             writeCellId(ciOrSac, slrCGIorSAIorLAIJsonObject);
+            //             slrJsonObject.add("CGI", slrCGIorSAIorLAIJsonObject);
+            //         } else {
+            //             if (lac >= -1)
+            //                 slrJsonObject.add("LAI", slrCGIorSAIorLAIJsonObject);
+            //         }
+            //     } else {
+            //         if (ciOrSac >= -1) {
+            //             writeServiceAreaCode(ciOrSac, slrCGIorSAIorLAIJsonObject);
+            //             slrJsonObject.add("SAI", slrCGIorSAIorLAIJsonObject);
+            //         } else {
+            //             if (lac >= -1)
+            //                 slrJsonObject.add("LAI", slrCGIorSAIorLAIJsonObject);
+            //         }
+            //     }
+            // }
+            // */
 
-            /*** h-gmlc-Address [14] GSN-Address OPTIONAL ***/
-            if (slrReq.gethGmlcAddress() != null) {
-                String hGmlcAddress = bytesToHexString(slrReq.gethGmlcAddress().getGSNAddressData());
-                try {
-                    InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(hGmlcAddress));
-                    hGmlcAddress = address.getHostAddress();
-                } catch (UnknownHostException e) {
-                    logger.error(e.getMessage());
-                }
-                writeHGmlcAddress(hGmlcAddress, slrJsonObject);
-            }
+            // /*
+            // /*** h-gmlc-Address [14] GSN-Address OPTIONAL ***/
+            // if (slrReq.gethGmlcAddress() != null) {
+            //     String hGmlcAddress = bytesToHexString(slrReq.gethGmlcAddress().getGSNAddressData());
+            //     try {
+            //         InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(hGmlcAddress));
+            //         hGmlcAddress = address.getHostAddress();
+            //     } catch (UnknownHostException e) {
+            //         logger.error(e.getMessage());
+            //     }
+            //     writeHGmlcAddress(hGmlcAddress, slrJsonObject);
+            // }
+            // */
 
             /*** lcsServiceTypeID [15] LCSServiceTypeID OPTIONAL ***/
             if (slrReq.getLcsServiceTypeID() != null) {
@@ -736,9 +746,11 @@ public class SlrRequestJsonBuilder {
             }
 
             /*** accuracyFulfilmentIndicator [19] AccuracyFulfilmentIndicator OPTIONAL ***/
+            /* Commented out: writeAccuracyFulfilmentIndicator() method doesn't exist
             if (slrReq.getAccuracyFulfilmentIndicator() != null) {
                 writeAccuracyFulfilmentIndicator(slrReq.getAccuracyFulfilmentIndicator().getIndicator(), slrJsonObject);
             }
+            */
 
             /*** velocityEstimate [20] VelocityEstimate OPTIONAL ***/
             if (slrReq.getVelocityEstimate() != null) {
@@ -780,6 +792,7 @@ public class SlrRequestJsonBuilder {
                 writeMoLrShortCircuitIndicator(slrReq.isMoLrShortCircuitIndicator(), slrJsonObject);
 
             /*** geranGANSSpositioningData [24] GeranGANSSpositioningData OPTIONAL ***/
+            /* Commented out: GeranGANSSpositioningData methods don't exist
             if (slrReq.getGeranGANSSpositioningData() != null) {
                 JsonObject slrGeranGanssPosInfoDataSetJsonObject = new JsonObject();
                 JsonObject slrGeranGanssInfoJsonObject = new JsonObject();
@@ -803,8 +816,10 @@ public class SlrRequestJsonBuilder {
                 // Write GERAN GANSS Positioning Info values from SLR
                 slrJsonObject.add("GeranGANSSPositioningData", slrGeranGanssInfoJsonObject);
             }
+            */
 
             /*** utranGANSSpositioningData [25] UtranGANSSpositioningData OPTIONAL ***/
+            /* Commented out: UtranGANSSpositioningData methods don't exist
             if (slrReq.getUtranGANSSpositioningData() != null) {
                 JsonObject slrUtranGanssPosInfoDataSetJsonObject = new JsonObject();
                 JsonObject slrUtranGanssInfoJsonObject = new JsonObject();
@@ -828,6 +843,7 @@ public class SlrRequestJsonBuilder {
                 // Write UTRAN GANSS Positioning Info values from SLR
                 slrJsonObject.add("UtranGANSSPositioningData", slrUtranGanssInfoJsonObject);
             }
+            */
 
             /*** targetServingNodeForHandover [26] ServingNodeAddress OPTIONAL ***/
             if (slrReq.getTargetServingNodeForHandover() != null) {
@@ -849,6 +865,7 @@ public class SlrRequestJsonBuilder {
             }
 
             /*** utranAdditionalPositioningData  [27] UtranAdditionalPositioningData OPTIONAL ***/
+            /* Commented out: UtranAdditionalPositioningData methods don't exist
             if (slrReq.getUtranAdditionalPositioningData() != null) {
                 JsonObject slrUtranAddPosInfoDataSetJsonObject = new JsonObject();
                 JsonObject slrUtranAddInfoJsonObject = new JsonObject();
@@ -872,6 +889,7 @@ public class SlrRequestJsonBuilder {
                 // Write UTRAN Positioning Info values from PSL
                 slrJsonObject.add("UtranAdditionalPositioningData", slrUtranAddInfoJsonObject);
             }
+            */
 
             /*** utranBaroPressureMeas [28] UtranBaroPressureMeas OPTIONAL ***/
             if (slrReq.getUtranBaroPressureMeas() != null) {

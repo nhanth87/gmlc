@@ -209,6 +209,7 @@ public class MapLsmResponseHelperForMLP {
                 this.saiPresent = true;
             }
 
+            /* Commented out: getLAIFixedLength() and getCellGlobalIdOrServiceAreaIdFixedLength() methods don't exist
             if (psl.getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
                 CellGlobalIdOrServiceAreaIdOrLAI cgiOrSaiOrLai = psl.getCellGlobalIdOrServiceAreaIdOrLAI();
                 LAIFixedLength laiFixedLength = cgiOrSaiOrLai.getLAIFixedLength();
@@ -237,6 +238,7 @@ public class MapLsmResponseHelperForMLP {
                     }
                 }
             }
+            */
 
             if (psl.getGeranPositioningDataInformation() != null || psl.getGeranGANSSpositioningData() != null) {
                 if (psl.getGeranPositioningDataInformation() != null) {
@@ -372,8 +374,8 @@ public class MapLsmResponseHelperForMLP {
             if (slr.getSaiPresent())
                 this.saiPresent = true;
 
+            /* Commented out: getLAIFixedLength() and getCellGlobalIdOrServiceAreaIdFixedLength() methods don't exist
             if (slr.getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
-                /*** LAI fixed length ***/
                 if (slr.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
                     try {
                         this.mcc = slr.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC();
@@ -384,7 +386,6 @@ public class MapLsmResponseHelperForMLP {
                     }
 
                 }
-                /*** CGI or SAI fixed length ***/
                 if (slr.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
                     try {
                         this.mcc = slr.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
@@ -400,6 +401,7 @@ public class MapLsmResponseHelperForMLP {
                     }
                 }
             }
+            */
 
             /*if (slr.getLcsClientID() != null) {
                 if (slr.getLcsClientID().getLCSClientType() != null && (slr.getLcsClientID().getLCSClientType().getType() > Integer.MIN_VALUE

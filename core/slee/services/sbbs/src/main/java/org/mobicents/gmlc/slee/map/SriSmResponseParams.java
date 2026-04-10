@@ -4,7 +4,7 @@ import org.restcomm.protocols.ss7.map.api.primitives.IMSI;
 import org.restcomm.protocols.ss7.map.api.primitives.ISDNAddressString;
 import org.restcomm.protocols.ss7.map.api.primitives.LMSI;
 import org.restcomm.protocols.ss7.map.api.service.lsm.AdditionalNumber;
-import org.restcomm.protocols.ss7.map.api.service.mobility.locationManagement.NetworkNodeDiameterAddress;
+// import org.restcomm.protocols.ss7.map.api.service.mobility.locationManagement.NetworkNodeDiameterAddress;
 import org.restcomm.protocols.ss7.map.api.service.sms.IpSmGwGuidance;
 import org.restcomm.protocols.ss7.map.api.service.sms.LocationInfoWithLMSI;
 
@@ -78,15 +78,15 @@ public class SriSmResponseParams {
     private LMSI lmsi;
     private boolean gprsNodeIndicator;
     private AdditionalNumber additionalNumber;
-    private NetworkNodeDiameterAddress networkNodeDiameterAddress;
-    private NetworkNodeDiameterAddress additionalNetworkNodeDiameterAddress;
+    // private NetworkNodeDiameterAddress networkNodeDiameterAddress;
+    // private NetworkNodeDiameterAddress additionalNetworkNodeDiameterAddress;
     private AdditionalNumber thirdNumber;
-    private NetworkNodeDiameterAddress thirdNetworkNodeDiameterAddress;
+    // private NetworkNodeDiameterAddress thirdNetworkNodeDiameterAddress;
     private boolean imsNodeIndicator;
     private ISDNAddressString smsf3gppNumber;
-    private NetworkNodeDiameterAddress smsf3gppDiameterAddress;
+    // private NetworkNodeDiameterAddress smsf3gppDiameterAddress;
     private ISDNAddressString smsfNon3gppNumber;
-    private NetworkNodeDiameterAddress smsfNon3gppDiameterAddress;
+    // private NetworkNodeDiameterAddress smsfNon3gppDiameterAddress;
     private boolean smsf3gppAddressIndicator;
     private boolean smsfNon3gppAddressIndicator;
 
@@ -151,21 +151,23 @@ public class SriSmResponseParams {
         this.additionalNumber = additionalNumber;
     }
 
-    public NetworkNodeDiameterAddress getNetworkNodeDiameterAddress() {
+    /*
+    // public NetworkNodeDiameterAddress () {
         return networkNodeDiameterAddress;
     }
 
-    public void setNetworkNodeDiameterAddress(NetworkNodeDiameterAddress networkNodeDiameterAddress) {
+    // public void setNetworkNodeDiameterAddress(NetworkNodeDiameterAddress REMOVED) {
         this.networkNodeDiameterAddress = networkNodeDiameterAddress;
     }
 
-    public NetworkNodeDiameterAddress getAdditionalNetworkNodeDiameterAddress() {
+    // public NetworkNodeDiameterAddress () {
         return additionalNetworkNodeDiameterAddress;
     }
 
-    public void setAdditionalNetworkNodeDiameterAddress(NetworkNodeDiameterAddress additionalNetworkNodeDiameterAddress) {
+    // public void setAdditionalNetworkNodeDiameterAddress(NetworkNodeDiameterAddress REMOVED) {
         this.additionalNetworkNodeDiameterAddress = additionalNetworkNodeDiameterAddress;
     }
+    */
 
     public AdditionalNumber getThirdNumber() {
         return thirdNumber;
@@ -175,13 +177,15 @@ public class SriSmResponseParams {
         this.thirdNumber = thirdNumber;
     }
 
-    public NetworkNodeDiameterAddress getThirdNetworkNodeDiameterAddress() {
+    /*
+    // public NetworkNodeDiameterAddress () {
         return thirdNetworkNodeDiameterAddress;
     }
 
-    public void setThirdNetworkNodeDiameterAddress(NetworkNodeDiameterAddress thirdNetworkNodeDiameterAddress) {
+    // public void setThirdNetworkNodeDiameterAddress(NetworkNodeDiameterAddress REMOVED) {
         this.thirdNetworkNodeDiameterAddress = thirdNetworkNodeDiameterAddress;
     }
+    */
 
     public boolean isImsNodeIndicator() {
         return imsNodeIndicator;
@@ -199,13 +203,15 @@ public class SriSmResponseParams {
         this.smsf3gppNumber = smsf3gppNumber;
     }
 
-    public NetworkNodeDiameterAddress getSmsf3gppDiameterAddress() {
+    /*
+    // public NetworkNodeDiameterAddress () {
         return smsf3gppDiameterAddress;
     }
 
-    public void setSmsf3gppDiameterAddress(NetworkNodeDiameterAddress smsf3gppDiameterAddress) {
+    // public void setSmsf3gppDiameterAddress(NetworkNodeDiameterAddress REMOVED) {
         this.smsf3gppDiameterAddress = smsf3gppDiameterAddress;
     }
+    */
 
     public ISDNAddressString getSmsfNon3gppNumber() {
         return smsfNon3gppNumber;
@@ -215,13 +221,15 @@ public class SriSmResponseParams {
         this.smsfNon3gppNumber = smsfNon3gppNumber;
     }
 
-    public NetworkNodeDiameterAddress getSmsfNon3gppDiameterAddress() {
+    /*
+    // public NetworkNodeDiameterAddress () {
         return smsfNon3gppDiameterAddress;
     }
 
-    public void setSmsfNon3gppDiameterAddress(NetworkNodeDiameterAddress smsfNon3gppDiameterAddress) {
+    // public void setSmsfNon3gppDiameterAddress(NetworkNodeDiameterAddress REMOVED) {
         this.smsfNon3gppDiameterAddress = smsfNon3gppDiameterAddress;
     }
+    */
 
     public boolean isSmsf3gppAddressIndicator() {
         return smsf3gppAddressIndicator;

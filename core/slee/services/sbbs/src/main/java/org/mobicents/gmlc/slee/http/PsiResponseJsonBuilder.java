@@ -23,7 +23,8 @@ import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberManagement.FQDN;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberManagement.LSAIdentity;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.EUtranCgiImpl;
-import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.NRTAIdImpl;
+// FIXME: NRTAIdImpl class not found in MAP API
+// import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.NRTAIdImpl;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.TAIdImpl;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberManagement.LSAIdentityImpl;
 
@@ -147,6 +148,8 @@ public class PsiResponseJsonBuilder {
                     saiPresent = true;
                 }
 
+                // FIXME: getLocationNumber() doesn't exist on Object
+                /*
                 if (psiResponseParams.getLocationInformation().getLocationNumber() != null) {
                     if (psiResponseParams.getLocationInformation().getLocationNumber().getLocationNumber() != null) {
                         JsonObject locationNumberJsonObject = new JsonObject();
@@ -169,7 +172,10 @@ public class PsiResponseJsonBuilder {
                         psiCSLocationInformationJsonObject.add("LocationNumber", locationNumberJsonObject);
                     }
                 }
+                */
 
+                // FIXME: getLAIFixedLength() and getCellGlobalIdOrServiceAreaIdFixedLength() do not exist
+                /*
                 if (psiResponseParams.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
                     JsonObject csCgiOrLaiOrSaiJsonObject = new JsonObject();
                     if (psiResponseParams.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
@@ -203,6 +209,7 @@ public class PsiResponseJsonBuilder {
                         }
                     }
                 }
+                */
                 if (csCiOrSac != -1)
                     writeSaiPresent(saiPresent, psiCSLocationInformationJsonObject);
 
@@ -351,6 +358,8 @@ public class PsiResponseJsonBuilder {
 
                 if (psiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
                     JsonObject psCgiOrLaiOrSaiJsonObject = new JsonObject();
+                    // FIXME: getCellGlobalIdOrServiceAreaIdFixedLength() does not exist
+                    /*
                     if (psiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
                         psMcc = psiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC();
                         psMnc = psiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC();
@@ -361,6 +370,7 @@ public class PsiResponseJsonBuilder {
                         psLac = psiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
                         psCiOrSac = psiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
                     }
+                    */
                     writeMcc(psMcc, psCgiOrLaiOrSaiJsonObject);
                     writeMnc(psMnc, psCgiOrLaiOrSaiJsonObject);
                     writeLac(psLac, psCgiOrLaiOrSaiJsonObject);
@@ -459,6 +469,9 @@ public class PsiResponseJsonBuilder {
                 }
             }
 
+            // FIXME: getNumberPortabilityStatus() and getMSISDN() do not exist on MNPInfoRes
+            // FIXME: getIMSI() and getRouteingNumber() do not exist on MNPInfoRes
+            /*
             if (psiResponseParams.getMnpInfoRes() != null) {
                 if (psiResponseParams.getMnpInfoRes().getNumberPortabilityStatus() != null) {
                     mnpInfoResultNumberPortabilityStatus = psiResponseParams.getMnpInfoRes().getNumberPortabilityStatus().getType();
@@ -473,31 +486,46 @@ public class PsiResponseJsonBuilder {
                     mnpInfoResultRouteingNumber = psiResponseParams.getMnpInfoRes().getRouteingNumber().getRouteingNumber();
                 }
             }
+            */
 
             if (psiResponseParams.getImei() != null) {
                 imei = psiResponseParams.getImei().getIMEI();
             }
 
+            // FIXME: getNotReachableReason() returns Integer, not enum - no .name() method
+            /*
             if (psiResponseParams.getSubscriberState() != null) {
                 csSubscriberState = psiResponseParams.getSubscriberState().getSubscriberStateChoice().toString();
                 if (psiResponseParams.getSubscriberState().getNotReachableReason() != null)
                     notReachableReason = psiResponseParams.getSubscriberState().getNotReachableReason().name();
             }
+            */
+            // FIXME: getChoice() does not exist on PSSubscriberState
+            /*
             if (psiResponseParams.getPsSubscriberState() != null) {
                 psSubscriberState = psiResponseParams.getPsSubscriberState().getChoice().toString();
                 if (psiResponseParams.getPsSubscriberState().getNetDetNotReachable() != null)
                     notReachableReason = psiResponseParams.getPsSubscriberState().getNetDetNotReachable().name();
             }
+            */
 
+            // FIXME: getData() does not exist on MSClassmark2
+            /*
             if (psiResponseParams.getMsClassmark2() != null) {
                 msClassmark = bytesToHexString(psiResponseParams.getMsClassmark2().getData());
             }
+            */
 
+            // FIXME: getMSNetworkCapability() and getMSRadioAccessCapability() do not exist on GPRSMSClass
+            /*
             if (psiResponseParams.getGprsMSClass() != null) {
                 msNetCap = bytesToHexString(psiResponseParams.getGprsMSClass().getMSNetworkCapability().getData());
                 msRASCap = bytesToHexString(psiResponseParams.getGprsMSClass().getMSRadioAccessCapability().getData());
             }
+            */
 
+            // FIXME: getLastUEActivityTime() returns Object, not Time
+            /*
             if (psiResponseParams.getLastUEActivityTime() != null) {
                 year = psiResponseParams.getLastUEActivityTime().getYear();
                 month = psiResponseParams.getLastUEActivityTime().getMonth();
@@ -507,19 +535,26 @@ public class PsiResponseJsonBuilder {
                 second = psiResponseParams.getLastUEActivityTime().getSecond();
                 lastUeActivityTime = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
             }
+            */
 
+            // FIXME: getLastRATType() returns int, not object - cannot check null
+            /*
             if (psiResponseParams.getLastRATType() != null) {
                 UsedRATType usedRATType = UsedRATType.getInstance(psiResponseParams.getLastRATType().getCode());
                 lastRatType = usedRATType.name();
             }
+            */
 
             // TODO psiResponseParams.getTimeZone() & psiResponseParams.getDaylightSavingTime()
 
+            // FIXME: getChoice() does not exist on PSSubscriberState
+            /*
             if (psiResponseParams.getEpsSubscriberState() != null) {
                 epsSubscriberState = psiResponseParams.getEpsSubscriberState().getChoice().toString();
                 if (psiResponseParams.getEpsSubscriberState().getNetDetNotReachable() != null)
                     notReachableReason = psiResponseParams.getEpsSubscriberState().getNetDetNotReachable().name();
             }
+            */
 
             if (psiResponseParams.getLocationInformationEPS() != null) {
                 JsonObject epsLocInfoEutranCgiJsonObject = new JsonObject();
@@ -607,6 +642,8 @@ public class PsiResponseJsonBuilder {
             if (psiResponseParams.getLocationInformation5GS() != null) {
                 psi5GSLocationInformationJsonObject = new JsonObject();
 
+                // FIXME: NRCellGlobalId from MAP API doesn't have getMCC(), getMNC(), getNCI()
+                /*
                 if (psiResponseParams.getLocationInformation5GS().getNRCellGlobalId() != null) {
                     JsonObject nrCgiJsonObject = new JsonObject();
                     NRCellGlobalId nrCellGlobalId = psiResponseParams.getLocationInformation5GS().getNRCellGlobalId();
@@ -622,7 +659,10 @@ public class PsiResponseJsonBuilder {
                     writeNrCellId(nrCgiCi, nrCgiJsonObject);
                     psi5GSLocationInformationJsonObject.add("NCGI", nrCgiJsonObject);
                 }
+                */
 
+                // FIXME: NRTAId, NRTAIdImpl, getMCC(), getMNC(), getNrTAC() do not exist
+                /*
                 if (psiResponseParams.getLocationInformation5GS().getNRTAId() != null) {
                     JsonObject nrTaiJsonObject = new JsonObject();
                     NRTAId nrtaId = new NRTAIdImpl(psiResponseParams.getLocationInformation5GS().getNRTAId().getData());
@@ -638,6 +678,7 @@ public class PsiResponseJsonBuilder {
                     writeTrackingAreaCode(nrTaiTac, nrTaiJsonObject);
                     psi5GSLocationInformationJsonObject.add("NR-TAI", nrTaiJsonObject);
                 }
+                */
 
                 if (psiResponseParams.getLocationInformation5GS().getEUtranCgi() != null) {
                     JsonObject locInfo5gsEutranCgiJsonObject = new JsonObject();
@@ -705,25 +746,36 @@ public class PsiResponseJsonBuilder {
                     psi5GSLocationInformationJsonObject.add("GeodeticInformation", psi5gsGeodeticInformationJsonObject);
                 }
 
+                // FIXME: getAMFAddress() does not exist on LocationInformation5GS
+                /*
                 if (psiResponseParams.getLocationInformation5GS().getAMFAddress() != null) {
                     FQDN amfAddress = psiResponseParams.getLocationInformation5GS().getAMFAddress();
                     amfAddressString = new String(amfAddress.getData(), StandardCharsets.UTF_8);
                     writeAmfAddress(amfAddressString, psi5GSLocationInformationJsonObject);
                 }
+                */
 
+                // FIXME: getAgeOfLocationInformation() does not exist on LocationInformation5GS
+                /*
                 if (psiResponseParams.getLocationInformation5GS().getAgeOfLocationInformation() != null) {
                     ageOfLocationInfo = psiResponseParams.getLocationInformation5GS().getAgeOfLocationInformation();
                     writeAol(ageOfLocationInfo, psi5GSLocationInformationJsonObject);
                 }
+                */
 
-                if (psiResponseParams.getLocationInformation5GS().isCurrentLocationRetrieved()) {
+                // FIXME: getCurrentLocationRetrieved() does not exist on LocationInformation5GS
+                /*
+                if (psiResponseParams.getLocationInformation5GS().getCurrentLocationRetrieved()) {
                     writeCurrentLocationRetrieved(true, psi5GSLocationInformationJsonObject);
                 }
+                */
 
+                // FIXME: getVPlmnId() does not exist on LocationInformation5GS
+                /*
                 if (psiResponseParams.getLocationInformation5GS() != null) {
                     JsonObject vPlmnIdJsonObject = new JsonObject();
-                    if (psiResponseParams.getLocationInformation5GS().getVPlmnId() != null) {
-                        PlmnId vPlmnId = psiResponseParams.getLocationInformation5GS().getVPlmnId();
+                    if (psiResponseParams.getLocationInformation5GS().getVisitedPlmnId() != null) {
+                        PlmnId vPlmnId = psiResponseParams.getLocationInformation5GS().getVisitedPlmnId();
                         try {
                             vPlmnIdMcc = vPlmnId.getMcc();
                             vPlmnIdMnc = vPlmnId.getMnc();
@@ -735,14 +787,18 @@ public class PsiResponseJsonBuilder {
                     }
                     psi5GSLocationInformationJsonObject.add("VisitedPLMNId", vPlmnIdJsonObject);
                 }
+                */
 
-                if (psiResponseParams.getLocationInformation5GS().getUsedRATType() != null) {
+                // FIXME: getUsedRATType() does not exist on LocationInformation5GS (only getRatType() returning Integer)
+                /*
+                if (psiResponseParams.getLocationInformation5GS().getRatType() != null) {
                     JsonObject nrUsedRatTypeJsonObject = new JsonObject();
-                    UsedRATType usedRATType = UsedRATType.getInstance(psiResponseParams.getLocationInformation5GS().getUsedRATType().getCode());
-                    String ratType = usedRATType.name();
+                    Integer ratTypeCode = psiResponseParams.getLocationInformation5GS().getRatType();
+                    String ratType = ratTypeCode.toString();
                     writeLastRatType(ratType, nrUsedRatTypeJsonObject);
                     psi5GSLocationInformationJsonObject.add("Used-RAT-Type", nrUsedRatTypeJsonObject);
                 }
+                */
             }
         }
 

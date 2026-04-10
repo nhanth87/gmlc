@@ -3,13 +3,13 @@ package org.mobicents.gmlc.slee.cdr;
 import net.java.slee.resource.diameter.base.events.ErrorAnswer;
 import net.java.slee.resource.diameter.base.events.avp.DiameterIdentity;
 import net.java.slee.resource.diameter.sh.events.UserDataAnswer;
-import net.java.slee.resource.diameter.slg.events.LocationReportRequest;
+// import net.java.slee.resource.diameter.slg.events.LocationReportRequest;
 import net.java.slee.resource.diameter.slg.events.ProvideLocationAnswer;
 import net.java.slee.resource.diameter.slh.events.LCSRoutingInfoAnswer;
 import org.joda.time.DateTime;
 import org.mobicents.gmlc.slee.LocationRequestParams;
-import org.mobicents.gmlc.slee.supl.NetworkInitiatedSuplLocation;
-import org.mobicents.gmlc.slee.supl.SuplResponseHelperForMLP;
+// import org.mobicents.gmlc.slee.supl.NetworkInitiatedSuplLocation;
+// import org.mobicents.gmlc.slee.supl.SuplResponseHelperForMLP;
 import org.restcomm.protocols.ss7.map.api.MAPDialog;
 import org.restcomm.protocols.ss7.map.api.primitives.AddressNature;
 import org.restcomm.protocols.ss7.map.api.primitives.IMSI;
@@ -21,8 +21,10 @@ import org.restcomm.protocols.ss7.map.api.service.lsm.MAPDialogLsm;
 import org.restcomm.protocols.ss7.map.api.service.lsm.ProvideSubscriberLocationResponse;
 import org.restcomm.protocols.ss7.map.api.service.lsm.SendRoutingInfoForLCSResponse;
 import org.restcomm.protocols.ss7.map.api.service.lsm.SubscriberLocationReportRequest;
+// import REMOVED_LocationReportRequest;
 import org.restcomm.protocols.ss7.map.api.service.mobility.MAPDialogMobility;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.AnyTimeInterrogationResponse;
+import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformationGPRS;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.ProvideSubscriberInfoResponse;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.SubscriberInfo;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.TypeOfShape;
@@ -74,10 +76,11 @@ public class CDRCreationHelper {
                         nnn = mapDialogMobility.getRemoteAddress().getGlobalTitle().getDigits();
                 }
             } else if (subscriberInfo.getLocationInformationGPRS() != null) {
-                if (subscriberInfo.getLocationInformationGPRS().getSGSNNumber() != null) {
+                LocationInformationGPRS locInfoGprs = (LocationInformationGPRS) subscriberInfo.getLocationInformationGPRS();
+                if (locInfoGprs.getSGSNNumber() != null) {
                     gmlcCdrState.init(mapDialogMobility.getLocalDialogId(), mapDialogMobility.getReceivedDestReference(), mapDialogMobility.getReceivedOrigReference(),
-                        subscriberInfo.getLocationInformationGPRS().getSGSNNumber(), mapDialogMobility.getLocalAddress(), mapDialogMobility.getRemoteAddress());
-                    nnn = subscriberInfo.getLocationInformationGPRS().getSGSNNumber().getAddress();
+                        locInfoGprs.getSGSNNumber(), mapDialogMobility.getLocalAddress(), mapDialogMobility.getRemoteAddress());
+                    nnn = locInfoGprs.getSGSNNumber().getAddress();
                 } else {
                     gmlcCdrState.init(mapDialogMobility.getLocalDialogId(), mapDialogMobility.getReceivedDestReference(), mapDialogMobility.getReceivedOrigReference(),
                         null, mapDialogMobility.getLocalAddress(), mapDialogMobility.getRemoteAddress());
@@ -161,10 +164,11 @@ public class CDRCreationHelper {
                         nnn = mapDialogMobility.getRemoteAddress().getGlobalTitle().getDigits();
                 }
             } else if (subscriberInfo.getLocationInformationGPRS() != null) {
-                if (subscriberInfo.getLocationInformationGPRS().getSGSNNumber() != null) {
+                LocationInformationGPRS locInfoGprs = (LocationInformationGPRS) subscriberInfo.getLocationInformationGPRS();
+                if (locInfoGprs.getSGSNNumber() != null) {
                     gmlcCdrState.init(mapDialogMobility.getLocalDialogId(), mapDialogMobility.getReceivedDestReference(), mapDialogMobility.getReceivedOrigReference(),
-                        subscriberInfo.getLocationInformationGPRS().getSGSNNumber(), mapDialogMobility.getLocalAddress(), mapDialogMobility.getRemoteAddress());
-                    nnn = subscriberInfo.getLocationInformationGPRS().getSGSNNumber().getAddress();
+                        locInfoGprs.getSGSNNumber(), mapDialogMobility.getLocalAddress(), mapDialogMobility.getRemoteAddress());
+                    nnn = locInfoGprs.getSGSNNumber().getAddress();
                 } else {
                     gmlcCdrState.init(mapDialogMobility.getLocalDialogId(), mapDialogMobility.getReceivedDestReference(), mapDialogMobility.getReceivedOrigReference(),
                         null, mapDialogMobility.getLocalAddress(), mapDialogMobility.getRemoteAddress());
@@ -266,7 +270,7 @@ public class CDRCreationHelper {
     }
 
     public static GMLCCDRState slhSlgCdrInitializer(ActivityContextInterface aci, CDRInterface cdrInterface,
-                                                 LCSRoutingInfoAnswer riaEvent, ProvideLocationAnswer plaEvent, LocationReportRequest lrrEvent,
+                                                 LCSRoutingInfoAnswer riaEvent, ProvideLocationAnswer plaEvent, // LocationReportRequest lrrEvent,
                                                  DiameterIdentity originHost, DiameterIdentity originRealm,
                                                  DiameterIdentity gmlcHost, DiameterIdentity gmlcRealm) {
         GMLCCDRState gmlcCdrState = cdrInterface.getState();
@@ -278,10 +282,12 @@ public class CDRCreationHelper {
                 logger.fine("\nonProvideLocationAnswer: CDR state is NOT initialized: " + gmlcCdrState + ", initiating\n");
                 gmlcCdrState.init(plaEvent.getSessionId(), originHost, originRealm, gmlcHost, gmlcRealm);
             }
+            /*
             else if (lrrEvent != null) {
                 logger.fine("\nonLocationReportRequest: CDR state is NOT initialized: " + gmlcCdrState + ", initiating\n");
                 gmlcCdrState.init(lrrEvent.getSessionId(), originHost, originRealm, gmlcHost, gmlcRealm);
             }
+            */
             gmlcCdrState.setDialogEndTime(DateTime.now());
             cdrInterface.setState(gmlcCdrState);
             // attach, in case impl wants to use more of dialog.
@@ -348,6 +354,8 @@ public class CDRCreationHelper {
         return gmlcCdrState;
     }
 
+    // SUPL DISABLED
+    /*
     public static void updateSuplCdrState(GMLCCDRState gmlcCdrState, SuplResponseHelperForMLP suplResponseHelperForMLP,
                                           NetworkInitiatedSuplLocation networkInitiatedSuplLocation, Integer transactionId) {
         try {
@@ -488,6 +496,7 @@ public class CDRCreationHelper {
             e.printStackTrace();
         }
     }
+    */
 
     public static class GmlcCdrStateString {
         GMLCCDRState gmlcCdrState;

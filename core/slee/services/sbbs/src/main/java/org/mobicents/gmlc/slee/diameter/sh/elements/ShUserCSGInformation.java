@@ -1,6 +1,6 @@
 package org.mobicents.gmlc.slee.diameter.sh.elements;
 
-import net.java.slee.resource.diameter.sh.events.avp.userdata.UserCSGInformation;
+// import net.java.slee.resource.diameter.sh.events.avp.userdata.UserCSGInformation;
 import java.util.Base64;
 
 import java.nio.charset.StandardCharsets;
@@ -14,27 +14,30 @@ public class ShUserCSGInformation {
   private static final String CSG_ID = "CSGId";
 
   private String userCSGInformationStr;
-  private UserCSGInformation userCSGInformation;
+  // private UserCSGInformation userCSGInformation;
 
+  /*
   public ShUserCSGInformation(String userCGId, UserCSGInformation userCSGInformation) {
     this.userCSGInformation = userCSGInformation;
   }
 
-
   public ShUserCSGInformation(UserCSGInformation userCSGInformation) {
     this.userCSGInformation = userCSGInformation;
   }
+  */
 
   public ShUserCSGInformation() {
   }
 
-  public UserCSGInformation getUserCSGInformation() {
+  /*
+  // public UserCSGInformation () {
     return userCSGInformation;
   }
 
-  public void setUserCSGInformation(UserCSGInformation userCSGInformation) {
+  // public void setUserCSGInformation(UserCSGInformation REMOVED) {
     this.userCSGInformation = userCSGInformation;
   }
+  */
 
   public String getUserCSGInformationStr() {
     return userCSGInformationStr;

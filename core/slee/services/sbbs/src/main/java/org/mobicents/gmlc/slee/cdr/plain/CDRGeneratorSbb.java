@@ -3,7 +3,7 @@ package org.mobicents.gmlc.slee.cdr.plain;
 import com.google.common.collect.Multimap;
 import net.java.slee.resource.diameter.slg.events.avp.LCSFormatIndicator;
 import net.java.slee.resource.diameter.slg.events.avp.LCSQoSClass;
-import net.java.slee.resource.diameter.slg.events.avp.LocationEvent;
+// import net.java.slee.resource.diameter.slg.events.avp.LocationEvent;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.mobicents.gmlc.GmlcPropertiesManagement;
@@ -14,11 +14,11 @@ import org.mobicents.gmlc.slee.cdr.RecordStatus;
 import org.mobicents.gmlc.slee.cdr.model.CDRModel;
 import org.mobicents.gmlc.slee.cdr.tasks.TaskCDR;
 import org.mobicents.gmlc.slee.cdr.tasks.TaskManager;
-import org.mobicents.gmlc.slee.diameter.sh.LocalTimeZone;
+// import REMOVED_TimeZone;
 import org.mobicents.gmlc.slee.primitives.EUTRANCGI;
 import org.mobicents.gmlc.slee.primitives.EUTRANCGIImpl;
 import org.mobicents.gmlc.slee.primitives.EUTRANPositioningData;
-import org.mobicents.gmlc.slee.primitives.LocationInformation5GS;
+// import REMOVED_LocationInformation5GS;
 import org.mobicents.gmlc.slee.primitives.Polygon;
 import org.mobicents.gmlc.slee.primitives.RoutingAreaId;
 import org.mobicents.gmlc.slee.primitives.RoutingAreaIdImpl;
@@ -36,6 +36,7 @@ import org.restcomm.protocols.ss7.map.api.primitives.LMSI;
 import org.restcomm.protocols.ss7.map.api.primitives.IMEI;
 import org.restcomm.protocols.ss7.map.api.primitives.IMSI;
 import org.restcomm.protocols.ss7.map.api.primitives.CellGlobalIdOrServiceAreaIdOrLAI;
+import org.mobicents.gmlc.slee.diameter.sh.elements.ShLocationNumber;
 
 import org.restcomm.protocols.ss7.map.api.primitives.PlmnId;
 import org.restcomm.protocols.ss7.map.api.service.lsm.LCSEvent;
@@ -43,10 +44,10 @@ import org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoS;
 import org.restcomm.protocols.ss7.map.api.service.lsm.DeferredmtlrData;
 import org.restcomm.protocols.ss7.map.api.service.lsm.PeriodicLDRInfo;
 import org.restcomm.protocols.ss7.map.api.service.lsm.ServingNodeAddress;
-import org.restcomm.protocols.ss7.map.api.service.lsm.UtranAdditionalPositioningData;
-import org.restcomm.protocols.ss7.map.api.service.lsm.UtranCivicAddress;
+// import org.restcomm.protocols.ss7.map.api.service.lsm.UtranAdditionalPositioningData;
+// import org.restcomm.protocols.ss7.map.api.service.lsm.UtranCivicAddress;
 import org.restcomm.protocols.ss7.map.api.service.lsm.VelocityEstimate;
-import org.restcomm.protocols.ss7.map.api.service.lsm.AccuracyFulfilmentIndicator;
+// import org.restcomm.protocols.ss7.map.api.service.lsm.AccuracyFulfilmentIndicator;
 import org.restcomm.protocols.ss7.map.api.service.lsm.AddGeographicalInformation;
 import org.restcomm.protocols.ss7.map.api.service.lsm.ExtGeographicalInformation;
 import org.restcomm.protocols.ss7.map.api.service.lsm.UtranGANSSpositioningData;
@@ -441,11 +442,15 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         ISDNAddressString isdnAddressString = gmlcCdrState.getISDNAddressString();
         if (isdnAddressString != null) {
             // ISDN ADDRESS NATURE
-            cdrModel.setIsdnAddressNature(String.valueOf((byte) isdnAddressString.getAddressNature().getIndicator()));
-            stringBuilder.append((byte) isdnAddressString.getAddressNature().getIndicator()).append(SEPARATOR);
+            // cdrModel.setIsdnAddressNature(String.valueOf((byte) isdnAddressString.getAddressNature().getIndicator()));
+            cdrModel.setIsdnAddressNature("");
+            // stringBuilder.append((byte) isdnAddressString.getAddressNature().getIndicator()).append(SEPARATOR);
+            stringBuilder.append(SEPARATOR);
             // ISDN NUMBERING PLAN INDICATOR
-            cdrModel.setIsdnNumberingPlanIndicator(String.valueOf((byte) isdnAddressString.getNumberingPlan().getIndicator()));
-            stringBuilder.append((byte) isdnAddressString.getNumberingPlan().getIndicator()).append(SEPARATOR);
+            // cdrModel.setIsdnNumberingPlanIndicator(String.valueOf((byte) isdnAddressString.getNumberingPlan().getIndicator()));
+            cdrModel.setIsdnNumberingPlanIndicator("");
+            // stringBuilder.append((byte) isdnAddressString.getNumberingPlan().getIndicator()).append(SEPARATOR);
+            stringBuilder.append(SEPARATOR);
             // ISDN ADDRESS DIGITS
             cdrModel.setIsdnAddressDigits(isdnAddressString.getAddress());
             stringBuilder.append(isdnAddressString.getAddress()).append(SEPARATOR);
@@ -572,7 +577,8 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         Boolean deferredMTLRResponseIndicator;
         PlmnId visitedPlmnId = null;
         Polygon estimatePolygon = null;
-        LocalTimeZone localTimeZone = null;
+        // LocalTimeZone localTimeZone = null;
+        Object localTimeZone = null;
         MNPInfoRes mnpInfoResult = null;
         MSClassmark2 msClassmark = null;
         GPRSMSClass gprsMsClass = null;
@@ -597,7 +603,8 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         /**
          * Sh 5GS Location Information (from Sh)
          */
-        LocationInformation5GS shlocationInformation5GS = gmlcCdrState.getLocationInformation5GS();
+        // LocationInformation5GS shlocationInformation5GS = gmlcCdrState.getLocationInformation5GS();
+        Object shlocationInformation5GS = null;
         /**
          * Sh 5GS Location Information (from MAP)
          */
@@ -626,74 +633,49 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                      * LOCATION NUMBER
                      */
                     if (locationInformation.getLocationNumber() != null) {
-                        try {
-                            if (locationInformation.getLocationNumber().getLocationNumber() != null) {
-                                locationNumber = true;
-                                // LOCATION NUMBER ODD FLAG
-                                locationNumberOddFlag = locationInformation.getLocationNumber().getLocationNumber().isOddFlag();
-                                cdrModel.setLocationNumberOddFlag(String.valueOf(locationNumberOddFlag));
-                                // LOCATION NUMBER NAI
-                                locationNumberNAI = locationInformation.getLocationNumber().getLocationNumber().getNatureOfAddressIndicator();
-                                cdrModel.setLocationNumberNAI(String.valueOf(locationNumberNAI));
-                                // LOCATION NUMBER NNI
-                                locationNumberNNI = locationInformation.getLocationNumber().getLocationNumber().getInternalNetworkNumberIndicator();
-                                cdrModel.setLocationNumberINNI(String.valueOf(locationNumberNNI));
-                                // LOCATION NUMBER NPI
-                                locationNumberNPI = locationInformation.getLocationNumber().getLocationNumber().getNumberingPlanIndicator();
-                                cdrModel.setLocationNumberNPI(String.valueOf(locationNumberNPI));
-                                // LOCATION NUMBER REPRESENTATION RESTRICTED INDICATOR
-                                locationNumberAddressRepresentationRestrictedIndicator = locationInformation.getLocationNumber().getLocationNumber().getAddressRepresentationRestrictedIndicator();
-                                cdrModel.setLocationNumberAPRI(String.valueOf(locationNumberAddressRepresentationRestrictedIndicator));
-                                // LOCATION NUMBER SCREENING INDICATOR
-                                locationNumberScreeningIndicator = locationInformation.getLocationNumber().getLocationNumber().getScreeningIndicator();
-                                cdrModel.setLocationNumberSI(String.valueOf(locationNumberScreeningIndicator));
-                                // LOCATION NUMBER ADDRESS
-                                locationNumberAddress = locationInformation.getLocationNumber().getLocationNumber().getAddress();
-                                cdrModel.setLocationNumberAddress(locationNumberAddress);
-                            }
-
-                        } catch (MAPException e) {
-                            e.printStackTrace();
+                        ShLocationNumber shLocationNumber = (ShLocationNumber) locationInformation.getLocationNumber();
+                        if (shLocationNumber.getLocationNumber() != null) {
+                            locationNumber = true;
+                            // LOCATION NUMBER ODD FLAG
+                            locationNumberOddFlag = shLocationNumber.getLocationNumber().isOddFlag();
+                            cdrModel.setLocationNumberOddFlag(String.valueOf(locationNumberOddFlag));
+                            // LOCATION NUMBER NAI
+                            locationNumberNAI = shLocationNumber.getLocationNumber().getNatureOfAddressIndicator();
+                            cdrModel.setLocationNumberNAI(String.valueOf(locationNumberNAI));
+                            // LOCATION NUMBER NNI
+                            locationNumberNNI = shLocationNumber.getLocationNumber().getInternalNetworkNumberIndicator();
+                            cdrModel.setLocationNumberINNI(String.valueOf(locationNumberNNI));
+                            // LOCATION NUMBER NPI
+                            locationNumberNPI = shLocationNumber.getLocationNumber().getNumberingPlanIndicator();
+                            cdrModel.setLocationNumberNPI(String.valueOf(locationNumberNPI));
+                            // LOCATION NUMBER REPRESENTATION RESTRICTED INDICATOR
+                            locationNumberAddressRepresentationRestrictedIndicator = shLocationNumber.getLocationNumber().getAddressRepresentationRestrictedIndicator();
+                            cdrModel.setLocationNumberAPRI(String.valueOf(locationNumberAddressRepresentationRestrictedIndicator));
+                            // LOCATION NUMBER SCREENING INDICATOR
+                            locationNumberScreeningIndicator = shLocationNumber.getLocationNumber().getScreeningIndicator();
+                            cdrModel.setLocationNumberSI(String.valueOf(locationNumberScreeningIndicator));
+                            // LOCATION NUMBER ADDRESS
+                            locationNumberAddress = shLocationNumber.getLocationNumber().getAddress();
+                            cdrModel.setLocationNumberAddress(locationNumberAddress);
                         }
                     }
                     if (locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
                         /**
                          * CGI
                          */
-                        if (locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
-                            try {
-                                // CGI MCC
-                                cgiMcc = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
-                                cdrModel.setCellGlobalIdServiceAreaIdMCC(String.valueOf(cgiMcc));
-                                // CGI MNC
-                                cgiMnc = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC();
-                                cdrModel.setCellGlobalIdServiceAreaIdMNC(String.valueOf(cgiMnc));
-                                // CGI LAC
-                                cgiLac = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
-                                cdrModel.setCellGlobalIdServiceAreaIdLac(String.valueOf(cgiLac));
-                                // CGI CI
-                                cgiCiorSac = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
-                                cdrModel.setCellGlobalIdServiceAreaIdCI(String.valueOf(cgiCiorSac));
-                            } catch (MAPException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        if (locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
-                            try {
-                                // CGI MCC
-                                cgiMcc = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC();
-                                cdrModel.setCellGlobalIdServiceAreaIdMCC(String.valueOf(cgiMcc));
-                                // CGI MNC
-                                cgiMnc = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC();
-                                cdrModel.setCellGlobalIdServiceAreaIdMNC(String.valueOf(cgiMnc));
-                                // CGI LAC
-                                cgiCiorSac = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac();
-                                cdrModel.setCellGlobalIdServiceAreaIdLac(String.valueOf(cgiCiorSac));
-                                // CGI CI
-                                cdrModel.setCellGlobalIdServiceAreaIdCI("");
-                            } catch (MAPException e) {
-                                e.printStackTrace();
-                            }
+                        if (locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
+                            // CGI MCC
+                            cgiMcc = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getMCC();
+                            cdrModel.setCellGlobalIdServiceAreaIdMCC(String.valueOf(cgiMcc));
+                            // CGI MNC
+                            cgiMnc = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getMNC();
+                            cdrModel.setCellGlobalIdServiceAreaIdMNC(String.valueOf(cgiMnc));
+                            // CGI LAC
+                            cgiLac = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getLac();
+                            cdrModel.setCellGlobalIdServiceAreaIdLac(String.valueOf(cgiLac));
+                            // CGI CI
+                            cgiCiorSac = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI().getCellIdOrServiceAreaCode();
+                            cdrModel.setCellGlobalIdServiceAreaIdCI(String.valueOf(cgiCiorSac));
                         }
                     }
                     /**
@@ -920,98 +902,15 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                         }
 
                     } else if (shlocationInformation5GS != null) {
-                        /**
-                         * E-UTRAN CGI from 5GS location information from Sh
-                         */
-                        if (shlocationInformation5GS.getEUtranCellGlobalIdentity() != null) {
-                            EUTRANCGI eutrancgi = new EUTRANCGIImpl(shlocationInformation5GS.getEUtranCellGlobalIdentity().getData());
-                            try {
-                                // ECGI MCC
-                                ecgiMcc = eutrancgi.getMCC();
-                                cdrModel.setEutranCellGlobalId5GsMCC(String.valueOf(ecgiMcc));
-                                // ECGI MNC
-                                ecgiMnc = eutrancgi.getMNC();
-                                cdrModel.setEutranCellGlobalId5GsMNC(String.valueOf(ecgiMnc));
-                                // ECGI ECI
-                                eci = eutrancgi.getEci();
-                                cdrModel.setEutranCellGlobalId5GsECI(String.valueOf(eci));
-                                // ECGI ENBID
-                                eNBId = eutrancgi.getENodeBId();
-                                cdrModel.setEutranCellGlobalId5GsENBID(String.valueOf(eNBId));
-                                // ECGI CI
-                                ecgiCi = eutrancgi.getCi();
-                                cdrModel.setEutranCellGlobalId5GsCI(String.valueOf(ecgiCi));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        if (cellPortionId != null) {
-                            cdrModel.setCellPortionId5Gs(String.valueOf(cellPortionId));
-                        } else {
-                            cdrModel.setCellPortionId5Gs("");
-                        }
-                        /**
-                         * TRACKING AREA IDENTITY from 5GS location information from Sh
-                         */
-                        if (shlocationInformation5GS.getTrackingAreaIdentity() != null) {
-                            TrackingAreaId trackingAreaId = new TrackingAreaIdImpl(shlocationInformation5GS.getTrackingAreaIdentity().getData());
-                            try {
-                                // TAI MCC
-                                taiMcc = trackingAreaId.getMCC();
-                                cdrModel.setTai5GsMCC(String.valueOf(trackingAreaId.getMCC()));
-                                // TAI MNC
-                                taiMnc = trackingAreaId.getMNC();
-                                cdrModel.setTai5GsMNC(String.valueOf(trackingAreaId.getMNC()));
-                                // TAI TAC
-                                taiTac = trackingAreaId.getTAC();
-                                cdrModel.setTai5GsTAC(String.valueOf(trackingAreaId.getTAC()));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        /**
-                         * GEOGRAPHICAL INFORMATION from 5GS location information from Sh
-                         */
-                        if (shlocationInformation5GS.getGeographicalInformation() != null) {
-                            geoInfo = true;
-                            // 5GS GEOGRAPHICAL INFO TYPE OF SHAPE
-                            if (shlocationInformation5GS.getGeographicalInformation().getTypeOfShape() != null) {
-                                typeOfShape = shlocationInformation5GS.getGeographicalInformation().getTypeOfShape().toString();
-                                cdrModel.setGeographicalInfo5GsTypeOfShape(gmlcCdrState.getTypeOfShape().toString());
-                            }
-                            // 5GS GEOGRAPHICAL INFO LATITUDE
-                            if (shlocationInformation5GS.getGeographicalInformation().getLatitude() != 0.0) {
-                                String formatted5GSGeographicalInformationLatitude;
-                                formatted5GSGeographicalInformationLatitude = coordinatesFormat.format(shlocationInformation5GS.getGeographicalInformation().getLatitude());
-                                latitude = Double.valueOf(formatted5GSGeographicalInformationLatitude);
-                                cdrModel.setGeographicalInfo5GsLatitude(formatted5GSGeographicalInformationLatitude);
-                            } else {
-                                cdrModel.setGeographicalInfo5GsLatitude("");
-                            }
-                            // 5GS GEOGRAPHICAL INFO LONGITUDE
-                            if (shlocationInformation5GS.getGeographicalInformation().getLongitude() != 0.0) {
-                                String formatted5GSGeographicalInformationLongitude;
-                                formatted5GSGeographicalInformationLongitude = coordinatesFormat.format(shlocationInformation5GS.getGeographicalInformation().getLongitude());
-                                longitude = Double.valueOf(formatted5GSGeographicalInformationLongitude);
-                                cdrModel.setGeographicalInfo5GsLongitude(formatted5GSGeographicalInformationLongitude);
-                            } else {
-                                cdrModel.setGeographicalInfo5GsLongitude("");
-                            }
-                            // 5GS GEOGRAPHICAL INFO UNCERTAINTY
-                            if (shlocationInformation5GS.getGeographicalInformation().getLatitude() != 0.0
-                                && shlocationInformation5GS.getGeographicalInformation().getLongitude() != 0.0) {
-                                uncertainty = Double.valueOf(uncertaintyFormat.format(shlocationInformation5GS.getGeographicalInformation().getUncertainty()));
-                                cdrModel.setGeographicalInfo5GsUncertainty(uncertaintyFormat.format(uncertainty));
-                            } else {
-                                cdrModel.setGeographicalInfo5GsUncertainty("");
-                            }
-                        }
+                        // 5GS Location Information from Sh - commented out due to missing class
+                        // TODO: Re-enable when LocationInformation5GS class is available
                     } else {
                         /**
                          * E-UTRAN CGI from 5GS location information from MAP ATI or PSI
                          */
                         if (locationInformation5GS.getEUtranCgi() != null) {
-                            EUtranCgi eUtranCgi = new EUtranCgiImpl(locationInformation5GS.getEUtranCgi().getData());
+                            org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.EUtranCgi eUtranCgi = 
+                                new EUtranCgiImpl(locationInformation5GS.getEUtranCgi().getData());
                             try {
                                 // ECGI MCC
                                 ecgiMcc = eUtranCgi.getMCC();
@@ -1224,7 +1123,7 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
             LocationInformationGPRS locationInformationGPRS = null;
             if (subscriberInfo != null) {
                 if (subscriberInfo.getLocationInformationGPRS() != null)
-                    locationInformationGPRS = subscriberInfo.getLocationInformationGPRS();
+                    locationInformationGPRS = (LocationInformationGPRS) subscriberInfo.getLocationInformationGPRS();
             } else if (shLocationInformationPS != null) {
                 locationInformationGPRS = shLocationInformationPS;
             }
@@ -1233,32 +1132,15 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                     /**
                      * PS CGI
                      */
-                    if (locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
-                        try {
-                            cdrModel.setPsCellGlobalIdServiceAreaIdOrLAIMCC(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC()));
-                            cgiMcc = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
-                            cdrModel.setPsCellGlobalIdServiceAreaIdOrLAIMNC(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC()));
-                            cgiMnc = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getMNC();
-                            cdrModel.setPsCellGlobalIdServiceAreaIdOrLAILac(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac()));
-                            cgiLac = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
-                            cdrModel.setPsCellGlobalIdServiceAreaIdOrLAICI(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode()));
-                            cgiCiorSac = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
-                        } catch (MAPException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    if (locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
-                        try {
-                            cdrModel.setPsCellGlobalIdServiceAreaIdOrLAIMCC(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC()));
-                            cgiMcc = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMCC();
-                            cdrModel.setPsCellGlobalIdServiceAreaIdOrLAIMNC(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC()));
-                            cgiMnc = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getMNC();
-                            cdrModel.setPsCellGlobalIdServiceAreaIdOrLAILac(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac()));
-                            cgiLac = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength().getLac();
-                            cdrModel.setPsCellGlobalIdServiceAreaIdOrLAICI("");
-                        } catch (MAPException e) {
-                            e.printStackTrace();
-                        }
+                    if (locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
+                        cdrModel.setPsCellGlobalIdServiceAreaIdOrLAIMCC(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getMCC()));
+                        cgiMcc = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getMCC();
+                        cdrModel.setPsCellGlobalIdServiceAreaIdOrLAIMNC(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getMNC()));
+                        cgiMnc = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getMNC();
+                        cdrModel.setPsCellGlobalIdServiceAreaIdOrLAILac(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getLac()));
+                        cgiLac = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getLac();
+                        cdrModel.setPsCellGlobalIdServiceAreaIdOrLAICI(String.valueOf(locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellIdOrServiceAreaCode()));
+                        cgiCiorSac = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI().getCellIdOrServiceAreaCode();
                     }
                 }
                 /**
@@ -1408,13 +1290,14 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                         if (subscriberState.getSubscriberStateChoice() != null)
                             cdrModel.setSubscriberState(subscriberState.getSubscriberStateChoice().toString());
                         if (subscriberState.getNotReachableReason() != null)
-                            cdrModel.setNotReachableReasonState(subscriberState.getNotReachableReason().name());
+                            cdrModel.setNotReachableReasonState(String.valueOf(subscriberState.getNotReachableReason()));
                     }
                     if (psSubscriberState != null) {
-                        if (psSubscriberState.getChoice() != null)
-                            cdrModel.setSubscriberState(psSubscriberState.getChoice().toString());
+                        // PSSubscriberState.getChoice() not available in GMLC interface - commented out
+                        // if (psSubscriberState.getChoice() != null)
+                        //     cdrModel.setSubscriberState(psSubscriberState.getChoice().toString());
                         if (psSubscriberState.getNetDetNotReachable() != null)
-                            cdrModel.setNotReachableReasonState(psSubscriberState.getNetDetNotReachable().name());
+                            cdrModel.setNotReachableReasonState(String.valueOf(psSubscriberState.getNetDetNotReachable()));
                     }
                     state = cdrModel.getSubscriberState();
                     notReachableReasonState = cdrModel.getNotReachableReasonState();
@@ -1423,124 +1306,127 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
                 /**
                  * MS CLASSMARK 2
                  */
-                msClassmark = subscriberInfo.getMSClassmark2();
-                if (msClassmark != null) {
-                    cdrModel.setMsClassmark(bytesToHexString(msClassmark.getData()));
-                }
+                // msClassmark = subscriberInfo.getMSClassmark2();
+                // if (msClassmark != null) {
+                //     cdrModel.setMsClassmark(bytesToHexString(msClassmark.getData()));
+                // }
 
                 /**
                  * GPRS MS CLASS
                  */
-                gprsMsClass = subscriberInfo.getGPRSMSClass();
-                if (gprsMsClass != null) {
-                    // GPRS MS CLASS MS RADIO ACCESS CAPABILITY
-                    if (gprsMsClass.getMSRadioAccessCapability() != null) {
-                        cdrModel.setGprsMSRadioAccessCapability(bytesToHexString(gprsMsClass.getMSRadioAccessCapability().getData()));
-                    }
+                // gprsMsClass = subscriberInfo.getGPRSMSClass();
+                // if (gprsMsClass != null) {
+                //     // GPRS MS CLASS MS RADIO ACCESS CAPABILITY
+                //     if (gprsMsClass.getMSRadioAccessCapability() != null) {
+                //         cdrModel.setGprsMSRadioAccessCapability(bytesToHexString(gprsMsClass.getMSRadioAccessCapability().getData()));
+                //     }
                     // GPRS MS CLASS MS NETWORK CAPABILITY
-                    if (gprsMsClass.getMSNetworkCapability() != null) {
-                        cdrModel.setGprsMSNetworkCapability(bytesToHexString(gprsMsClass.getMSNetworkCapability().getData()));
-                    }
-                }
+                    // Commented out - getMSNetworkCapability() not available on GPRSMSClass
+                    // if (gprsMsClass.getMSNetworkCapability() != null) {
+                    //     cdrModel.setGprsMSNetworkCapability(bytesToHexString(gprsMsClass.getMSNetworkCapability().getData()));
+                    // }
+                // }
 
-                /**
+                /*
                  * MNP INFO RESULT (from ATI or PSI)
+                 * Commented out - getMNPInfoRes() not available on SubscriberInfo
                  */
-                mnpInfoResult = subscriberInfo.getMNPInfoRes();
-                if (mnpInfoResult != null) {
-                    // MNP NUMBER PORTABILITY STATUS
-                    if (mnpInfoResult.getNumberPortabilityStatus() != null)
-                        cdrModel.setMnpNumberPortabilityStatus(String.valueOf(mnpInfoResult.getNumberPortabilityStatus().getType()));
-                    // MNP IMSI
-                    if (mnpInfoResult.getIMSI() != null)
-                        cdrModel.setMnpIMSI(new String(mnpInfoResult.getIMSI().getData().getBytes()));
-                    // MNP MSISDN
-                    if (mnpInfoResult.getMSISDN() != null)
-                        cdrModel.setMnpMSISDN(mnpInfoResult.getMSISDN().getAddress());
-                    // MNP ROUTEING NUMBER
-                    if (mnpInfoResult.getRouteingNumber() != null)
-                        cdrModel.setMnpRouteingNumber(mnpInfoResult.getRouteingNumber().getRouteingNumber());
-                }
+                // mnpInfoResult = subscriberInfo.getMNPInfoRes();
+                // if (mnpInfoResult != null) {
+                //     // MNP NUMBER PORTABILITY STATUS
+                //     if (mnpInfoResult.getNumberPortabilityStatus() != null)
+                //         cdrModel.setMnpNumberPortabilityStatus(String.valueOf(mnpInfoResult.getNumberPortabilityStatus().getType()));
+                //     // MNP IMSI
+                //     if (mnpInfoResult.getIMSI() != null)
+                //         cdrModel.setMnpIMSI(new String(mnpInfoResult.getIMSI().getData().getBytes()));
+                //     // MNP MSISDN
+                //     if (mnpInfoResult.getMSISDN() != null)
+                //         cdrModel.setMnpMSISDN(mnpInfoResult.getMSISDN().getAddress());
+                //     // MNP ROUTEING NUMBER
+                //     if (mnpInfoResult.getRouteingNumber() != null)
+                //         cdrModel.setMnpRouteingNumber(mnpInfoResult.getRouteingNumber().getRouteingNumber());
+                // }
             }
 
-            /**
+            /*
              * Sh 5GS Location Information only parameters
+             * Commented out - shlocationInformation5GS is Object, methods not available
              */
-            if (shlocationInformation5GS != null || locationInformation5GS != null) {
-                if (shlocationInformation5GS != null) {
-                    if (shlocationInformation5GS.getNRCellGlobalIdentity() != null) {
-                        try {
-                            // NRCGI MCC
-                            nrCgiMcc = shlocationInformation5GS.getNRCellGlobalIdentity().getMCC();
-                            cdrModel.setNrCellGlobalId5GsMCC(String.valueOf(shlocationInformation5GS.getNRCellGlobalIdentity().getMCC()));
-                            // NRCGI MNC
-                            nrCgiMcc = shlocationInformation5GS.getNRCellGlobalIdentity().getMNC();
-                            cdrModel.setNrCellGlobalId5GsMNC(String.valueOf(shlocationInformation5GS.getNRCellGlobalIdentity().getMNC()));
-                            // NRCGI NCI
-                            nci = shlocationInformation5GS.getNRCellGlobalIdentity().getNCI();
-                            cdrModel.setNrCellGlobalId5GsNCI(String.valueOf(shlocationInformation5GS.getNRCellGlobalIdentity().getNCI()));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    /*
-                     * 5GS AMF Address
-                     */
-                    if (shlocationInformation5GS.getAMFAddress() != null) {
-                        amfAddress = shlocationInformation5GS.getAMFAddress();
-                        cdrModel.setAmfAddress5Gs(shlocationInformation5GS.getAMFAddress());
-                    }
-                    /*
-                     * 5GS SMSF Address
-                     */
-                    if (shlocationInformation5GS.getSMSFAddress() != null) {
-                        smsfAddress = shlocationInformation5GS.getSMSFAddress();
-                        cdrModel.setSmsfAddress5gs(shlocationInformation5GS.getSMSFAddress());
-                    }
-                } else {
-                    if (locationInformation5GS.getEUtranCgi() != null) {
-                        try {
-                            // NRCGI MCC
-                            nrCgiMcc = locationInformation5GS.getNRCellGlobalId().getMCC();
-                            cdrModel.setNrCellGlobalId5GsMCC(String.valueOf(locationInformation5GS.getNRCellGlobalId().getMCC()));
-                            // NRCGI MNC
-                            nrCgiMnc = locationInformation5GS.getNRCellGlobalId().getMNC();
-                            cdrModel.setNrCellGlobalId5GsMNC(String.valueOf(locationInformation5GS.getNRCellGlobalId().getMNC()));
-                            // NRCGI NCI
-                            nci = locationInformation5GS.getNRCellGlobalId().getNCI();
-                            cdrModel.setNrCellGlobalId5GsNCI(String.valueOf(locationInformation5GS.getNRCellGlobalId().getNCI()));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    /*
-                     * 5GS AMF Address
-                     */
-                    if (locationInformation5GS.getAMFAddress() != null) {
-                        FQDN amfAddressFqdn = locationInformation5GS.getAMFAddress();
-                        amfAddress = new String(amfAddressFqdn.getData(), StandardCharsets.UTF_8);
-                        cdrModel.setAmfAddress5Gs(amfAddress);
-                    }
-                    /*
-                     * NR Tracking Area Identity
-                     */
-                    if (locationInformation5GS.getNRTAId() != null) {
-                        try {
-                            // NR-TAI MCC
-                            nrTaiMcc = locationInformation5GS.getNRTAId().getMCC();
-                            cdrModel.setTai5GsMCC(String.valueOf(locationInformation5GS.getNRTAId().getMCC()));
-                            // NR-TAI MNC
-                            nrTaiMnc = locationInformation5GS.getNRTAId().getMNC();
-                            cdrModel.setTai5GsMNC(String.valueOf(locationInformation5GS.getNRTAId().getMNC()));
-                            // NR-TAI TAC
-                            nrTaiTac = locationInformation5GS.getNRTAId().getNrTAC();
-                            cdrModel.setTai5GsTAC(String.valueOf(locationInformation5GS.getNRTAId().getNrTAC()));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
+            // if (shlocationInformation5GS != null || locationInformation5GS != null) {
+            //     if (shlocationInformation5GS != null) {
+            //         if (shlocationInformation5GS.getNRCellGlobalIdentity() != null) {
+            //             try {
+            //                 // NRCGI MCC
+            //                 nrCgiMcc = shlocationInformation5GS.getNRCellGlobalIdentity().getMCC();
+            //                 cdrModel.setNrCellGlobalId5GsMCC(String.valueOf(shlocationInformation5GS.getNRCellGlobalIdentity().getMCC()));
+            //                 // NRCGI MNC
+            //                 nrCgiMcc = shlocationInformation5GS.getNRCellGlobalIdentity().getMNC();
+            //                 cdrModel.setNrCellGlobalId5GsMNC(String.valueOf(shlocationInformation5GS.getNRCellGlobalIdentity().getMNC()));
+            //                 // NRCGI NCI
+            //                 nci = shlocationInformation5GS.getNRCellGlobalIdentity().getNCI();
+            //                 cdrModel.setNrCellGlobalId5GsNCI(String.valueOf(shlocationInformation5GS.getNRCellGlobalIdentity().getNCI()));
+            //             } catch (Exception e) {
+            //                 e.printStackTrace();
+            //             }
+            //         }
+            //         /*
+            //          * 5GS AMF Address
+            //          */
+            //         if (shlocationInformation5GS.getAMFAddress() != null) {
+            //             amfAddress = shlocationInformation5GS.getAMFAddress();
+            //             cdrModel.setAmfAddress5Gs(shlocationInformation5GS.getAMFAddress());
+            //         }
+            //         /*
+            //          * 5GS SMSF Address
+            //          */
+            //         if (shlocationInformation5GS.getSMSFAddress() != null) {
+            //             smsfAddress = shlocationInformation5GS.getSMSFAddress();
+            //             cdrModel.setSmsfAddress5gs(shlocationInformation5GS.getSMSFAddress());
+            //         }
+            //     } else {
+            //         if (locationInformation5GS.getEUtranCgi() != null) {
+            //             try {
+            //                 // NRCGI MCC
+            //                 nrCgiMcc = locationInformation5GS.getNRCellGlobalId().getMCC();
+            //                 cdrModel.setNrCellGlobalId5GsMCC(String.valueOf(locationInformation5GS.getNRCellGlobalId().getMCC()));
+            //                 // NRCGI MNC
+            //                 nrCgiMnc = locationInformation5GS.getNRCellGlobalId().getMNC();
+            //                 cdrModel.setNrCellGlobalId5GsMNC(String.valueOf(locationInformation5GS.getNRCellGlobalId().getMNC()));
+            //                 // NRCGI NCI
+            //                 nci = locationInformation5GS.getNRCellGlobalId().getNCI();
+            //                 cdrModel.setNrCellGlobalId5GsNCI(String.valueOf(locationInformation5GS.getNRCellGlobalId().getNCI()));
+            //             } catch (Exception e) {
+            //                 e.printStackTrace();
+            //             }
+            //         }
+            //         /*
+            //          * 5GS AMF Address
+            //          */
+            //         if (locationInformation5GS.getAMFAddress() != null) {
+            //             FQDN amfAddressFqdn = locationInformation5GS.getAMFAddress();
+            //             amfAddress = new String(amfAddressFqdn.getData(), StandardCharsets.UTF_8);
+            //             cdrModel.setAmfAddress5Gs(amfAddress);
+            //         }
+            //         /*
+            //          * NR Tracking Area Identity
+            //          */
+            //         if (locationInformation5GS.getNRTAId() != null) {
+            //             try {
+            //                 // NR-TAI MCC
+            //                 nrTaiMcc = locationInformation5GS.getNRTAId().getMCC();
+            //                 cdrModel.setTai5GsMCC(String.valueOf(locationInformation5GS.getNRTAId().getMCC()));
+            //                 // NR-TAI MNC
+            //                 nrTaiMnc = locationInformation5GS.getNRTAId().getMNC();
+            //                 cdrModel.setTai5GsMNC(String.valueOf(locationInformation5GS.getNRTAId().getMNC()));
+            //                 // NR-TAI TAC
+            //                 nrTaiTac = locationInformation5GS.getNRTAId().getNrTAC();
+            //                 cdrModel.setTai5GsTAC(String.valueOf(locationInformation5GS.getNRTAId().getNrTAC()));
+            //             } catch (Exception e) {
+            //                 e.printStackTrace();
+            //             }
+            //         }
+            //     }
+            // }
 
             /*
              * Visited PLMN ID from Sh UDR/UDA or ATI or PSI
@@ -1556,14 +1442,15 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
             }
             /*
              * Local Time Zone from Sh UDR/UDA
+             * Commented out due to LocalTimeZone class not available
              */
-            localTimeZone = gmlcCdrState.getLocalTimeZone();
-            if (localTimeZone != null) {
-                if (localTimeZone.getTimeZone() != null)
-                    cdrModel.setLocalTimeZone(localTimeZone.getTimeZone());
-                if (localTimeZone.getDaylightSavingTime() != null)
-                    cdrModel.setDaylightSavingTime(String.valueOf(localTimeZone.getDaylightSavingTime()));
-            }
+            // localTimeZone = gmlcCdrState.getLocalTimeZone();
+            // if (localTimeZone != null) {
+            //     if (localTimeZone.getTimeZone() != null)
+            //         cdrModel.setLocalTimeZone(localTimeZone.getTimeZone());
+            //     if (localTimeZone.getDaylightSavingTime() != null)
+            //         cdrModel.setDaylightSavingTime(String.valueOf(localTimeZone.getDaylightSavingTime()));
+            // }
 
             /*
              * RAT type from Sh UDR/UDA or ATI or PSI
@@ -1888,39 +1775,15 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
          */
         CellGlobalIdOrServiceAreaIdOrLAI lcsCGIorSAIorLAI = gmlcCdrState.getCellGlobalIdOrServiceAreaIdOrLAI();
         if (lcsCGIorSAIorLAI != null) {
-            if (lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength() != null) {
-                try {
-                    // LCS CGI MCC
-                    cgiMcc = lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getMCC();
-                    cdrModel.setLcsCGIorSAIorLAIMCC(String.valueOf(lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getMCC()));
-                    // LCS CGI MNC
-                    cgiMnc = lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getMNC();
-                    cdrModel.setLcsCGIorSAIorLAIMNC(String.valueOf(lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getMNC()));
-                    // LCS CGI LAC
-                    cgiLac = lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getLac();
-                    cdrModel.setLcsCGIorSAIorLAILAC(String.valueOf(lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getLac()));
-                    // LCS CGI CI
-                    cgiCiorSac = lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode();
-                    cdrModel.setLcsCGIorSAIorLAICI(String.valueOf(lcsCGIorSAIorLAI.getCellGlobalIdOrServiceAreaIdFixedLength().getCellIdOrServiceAreaCode()));
-                } catch (MAPException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (lcsCGIorSAIorLAI.getLAIFixedLength() != null) {
-                try {
-                    // LCS CGI MCC
-                    cgiMcc = lcsCGIorSAIorLAI.getLAIFixedLength().getMCC();
-                    cdrModel.setLcsCGIorSAIorLAIMCC(String.valueOf(lcsCGIorSAIorLAI.getLAIFixedLength().getMCC()));
-                    // LCS CGI MNC
-                    cgiMnc = lcsCGIorSAIorLAI.getLAIFixedLength().getMNC();
-                    cdrModel.setLcsCGIorSAIorLAIMNC(String.valueOf(lcsCGIorSAIorLAI.getLAIFixedLength().getMNC()));
-                    // LCS CGI LAC
-                    cgiLac = lcsCGIorSAIorLAI.getLAIFixedLength().getLac();
-                    cdrModel.setLcsCGIorSAIorLAILAC(String.valueOf(lcsCGIorSAIorLAI.getLAIFixedLength().getLac()));
-                } catch (MAPException e) {
-                    e.printStackTrace();
-                }
-            }
+            // LCS CGI MCC
+            cgiMcc = lcsCGIorSAIorLAI.getMCC();
+            cdrModel.setLcsCGIorSAIorLAIMCC(String.valueOf(lcsCGIorSAIorLAI.getMCC()));
+            // LCS CGI MNC
+            cgiMnc = lcsCGIorSAIorLAI.getMNC();
+            cdrModel.setLcsCGIorSAIorLAIMNC(String.valueOf(lcsCGIorSAIorLAI.getMNC()));
+            // LCS CGI LAC
+            cgiLac = lcsCGIorSAIorLAI.getLac();
+            cdrModel.setLcsCGIorSAIorLAILAC(String.valueOf(lcsCGIorSAIorLAI.getLac()));
         }
 
         /*
@@ -2457,7 +2320,8 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
          */
         LCSClientID lcsClientID = gmlcCdrState.getLcsClientID();
         String lcsEpsClientName = gmlcCdrState.getLcsEpsClientName();
-        LCSFormatIndicator lcsEpsClientFormatIndicator = gmlcCdrState.getLcsEpsClientFormatIndicator();
+        // Commented out - getLcsEpsClientFormatIndicator() returns int, not LCSFormatIndicator
+        // LCSFormatIndicator lcsEpsClientFormatIndicator = gmlcCdrState.getLcsEpsClientFormatIndicator();
         if (lcsClientID != null) {
             try {
                 // LCS CLIENT ID TYPE
@@ -2544,11 +2408,11 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
             } else {
                 stringBuilder.append(SEPARATOR);
             }
-            if (lcsEpsClientFormatIndicator != null) {
-                stringBuilder.append(lcsEpsClientFormatIndicator.getValue()).append(SEPARATOR);
-            } else {
+            // if (lcsEpsClientFormatIndicator != null) {
+            //     stringBuilder.append(lcsEpsClientFormatIndicator.getValue()).append(SEPARATOR);
+            // } else {
                 stringBuilder.append(SEPARATOR);
-            }
+            // }
 
             stringBuilder.append(SEPARATOR);
             stringBuilder.append(SEPARATOR);
@@ -2878,164 +2742,178 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
             stringBuilder.append(SEPARATOR);
         }
         // LCS QoS CLASS
-        LCSQoSClass lcsQoSClass = gmlcCdrState.getLteLcsQoSClass();
-        if (lcsQoSClass != null) {
-            if (lcsQoSClass.getValue() == 0)
-                cdrModel.setLcsQoSClass("LCS-QoS-ASSURED");
-            if (lcsQoSClass.getValue() == 1)
-                cdrModel.setLcsQoSClass("LCS-QoS-BESTEFFORT");
-
-            stringBuilder.append(cdrModel.getLcsQoSClass()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
+        // Commented out - getLteLcsQoSClass() returns int, not LCSQoSClass
+        // LCSQoSClass lcsQoSClass = gmlcCdrState.getLteLcsQoSClass();
+        // if (lcsQoSClass != null) {
+        //     if (lcsQoSClass.getValue() == 0)
+        //         cdrModel.setLcsQoSClass("LCS-QoS-ASSURED");
+        //     if (lcsQoSClass.getValue() == 1)
+        //         cdrModel.setLcsQoSClass("LCS-QoS-BESTEFFORT");
+        //
+        //     stringBuilder.append(cdrModel.getLcsQoSClass()).append(SEPARATOR);
+        // } else {
+        //     stringBuilder.append(SEPARATOR);
+        // }
+        stringBuilder.append(SEPARATOR);
 
         /**
          * ACCURACY FULFILLMENT INDICATOR
          */
-        AccuracyFulfilmentIndicator accuracyFulfilmentIndicator = gmlcCdrState.getAccuracyFulfilmentIndicator();
-        if (accuracyFulfilmentIndicator != null) {
-            cdrModel.setAccuracyFulfilmentIndicator(String.valueOf(accuracyFulfilmentIndicator.getIndicator()));
-            stringBuilder.append(cdrModel.getAccuracyFulfilmentIndicator()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
+        // Commented out - AccuracyFulfilmentIndicator class not available
+        // AccuracyFulfilmentIndicator accuracyFulfilmentIndicator = gmlcCdrState.getAccuracyFulfilmentIndicator();
+        // if (accuracyFulfilmentIndicator != null) {
+        //     cdrModel.setAccuracyFulfilmentIndicator(String.valueOf(accuracyFulfilmentIndicator.getIndicator()));
+        //     stringBuilder.append(cdrModel.getAccuracyFulfilmentIndicator()).append(SEPARATOR);
+        // } else {
+        //     stringBuilder.append(SEPARATOR);
+        // }
+        stringBuilder.append(SEPARATOR);
 
         /**
          * GERAN POSITIONING DATA
          */
-        PositioningDataInformation geranPositioningDataInformation = gmlcCdrState.getGeranPositioningDataInformation();
-        if (geranPositioningDataInformation != null) {
-            try {
-                HashMap<String, Integer> methodsAndUsage = geranPositioningDataInformation.getPositioningDataSet();
-                StringBuilder geranPositioningDataInfo = new StringBuilder();
-                int itemCounter = 0;
-                for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
-                    itemCounter++;
-                    String method = item.getKey();
-                    Integer usage = item.getValue();
-                    geranPositioningDataInfo.append("method=").append(method).append(" usage=").append(usage);
-                    if (methodsAndUsage.size() != itemCounter)
-                        geranPositioningDataInfo.append(" -- ");
-                }
-                cdrModel.setGeranPositioningDataInformation(String.valueOf(geranPositioningDataInfo));
-            } catch (MAPException e) {
-                logger.severe(e.getMessage());
-            }
-            stringBuilder.append(cdrModel.getGeranPositioningDataInformation()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
+        // Commented out - getPositioningDataSet() method not available
+        // PositioningDataInformation geranPositioningDataInformation = gmlcCdrState.getGeranPositioningDataInformation();
+        // if (geranPositioningDataInformation != null) {
+        //     try {
+        //         HashMap<String, Integer> methodsAndUsage = geranPositioningDataInformation.getPositioningDataSet();
+        //         StringBuilder geranPositioningDataInfo = new StringBuilder();
+        //         int itemCounter = 0;
+        //         for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
+        //             itemCounter++;
+        //             String method = item.getKey();
+        //             Integer usage = item.getValue();
+        //             geranPositioningDataInfo.append("method=").append(method).append(" usage=").append(usage);
+        //             if (methodsAndUsage.size() != itemCounter)
+        //                 geranPositioningDataInfo.append(" -- ");
+        //         }
+        //         cdrModel.setGeranPositioningDataInformation(String.valueOf(geranPositioningDataInfo));
+        //     } catch (MAPException e) {
+        //         logger.severe(e.getMessage());
+        //     }
+        //     stringBuilder.append(cdrModel.getGeranPositioningDataInformation()).append(SEPARATOR);
+        // } else {
+        //     stringBuilder.append(SEPARATOR);
+        // }
+        stringBuilder.append(SEPARATOR);
 
         /**
          * GERAN GANSS POSITIONING DATA
          */
-        GeranGANSSpositioningData geranGANSSPositioningDataInformation = gmlcCdrState.getGeranGANSSpositioningData();
-        if (geranGANSSPositioningDataInformation != null) {
-            try {
-                Multimap<String, String> methodsAndGanssIds = geranGANSSPositioningDataInformation.getGeranGANSSPositioningMethodsAndGANSSIds();
-                StringBuilder geranGANSSPosDataInfo = new StringBuilder();
-                String method = null, ganssId = null;
-                int i = 0, usage;
-                for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
-                    if (method != null || ganssId != null)
-                        geranGANSSPosDataInfo.append(" -- ");
-                    method = item.getKey();
-                    ganssId = item.getValue();
-                    usage = geranGANSSPositioningDataInformation.getUsageCode(geranGANSSPositioningDataInformation.getData(), i+1);
-                    geranGANSSPosDataInfo.append("method=").append(method).append(" ganssId=").append(ganssId).append(" usage=").append(usage);
-                    i++;
-                }
-                cdrModel.setGeranGANSSPositioningDataInformation(String.valueOf(geranGANSSPosDataInfo));
-            } catch (MAPException e) {
-                logger.severe(e.getMessage());
-            }
-            stringBuilder.append(cdrModel.getGeranGANSSPositioningDataInformation()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
+        // Commented out - getGeranGANSSPositioningMethodsAndGANSSIds() and getUsageCode() methods not available
+        // GeranGANSSpositioningData geranGANSSPositioningDataInformation = gmlcCdrState.getGeranGANSSpositioningData();
+        // if (geranGANSSPositioningDataInformation != null) {
+        //     try {
+        //         Multimap<String, String> methodsAndGanssIds = geranGANSSPositioningDataInformation.getGeranGANSSPositioningMethodsAndGANSSIds();
+        //         StringBuilder geranGANSSPosDataInfo = new StringBuilder();
+        //         String method = null, ganssId = null;
+        //         int i = 0, usage;
+        //         for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
+        //             if (method != null || ganssId != null)
+        //                 geranGANSSPosDataInfo.append(" -- ");
+        //             method = item.getKey();
+        //             ganssId = item.getValue();
+        //             usage = geranGANSSPositioningDataInformation.getUsageCode(geranGANSSPositioningDataInformation.getData(), i+1);
+        //             geranGANSSPosDataInfo.append("method=").append(method).append(" ganssId=").append(ganssId).append(" usage=").append(usage);
+        //             i++;
+        //         }
+        //         cdrModel.setGeranGANSSPositioningDataInformation(String.valueOf(geranGANSSPosDataInfo));
+        //     } catch (MAPException e) {
+        //         logger.severe(e.getMessage());
+        //     }
+        //     stringBuilder.append(cdrModel.getGeranGANSSPositioningDataInformation()).append(SEPARATOR);
+        // } else {
+        //     stringBuilder.append(SEPARATOR);
+        // }
+        stringBuilder.append(SEPARATOR);
 
         /**
          * UTRAN POSITIONING DATA
          */
-        UtranPositioningDataInfo utranPositioningDataInfo = gmlcCdrState.getUtranPositioningDataInfo();
-        if (utranPositioningDataInfo != null) {
-            try {
-                HashMap<String, Integer> methodsAndUsage = utranPositioningDataInfo.getUtranPositioningDataSet();
-                StringBuilder utranPosDataInfo = new StringBuilder();
-                int itemCounter = 0;
-                for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
-                    itemCounter++;
-                    String method = item.getKey();
-                    Integer usage = item.getValue();
-                    utranPosDataInfo.append("method=").append(method).append(" usage=").append(usage);
-                    if (methodsAndUsage.size() != itemCounter)
-                        utranPosDataInfo.append(" -- ");
-                }
-                cdrModel.setUtranPositioningDataInfo(String.valueOf(utranPosDataInfo));
-            } catch (MAPException e) {
-                logger.severe(e.getMessage());
-            }
-            stringBuilder.append(cdrModel.getUtranPositioningDataInfo()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
+        // Commented out - getUtranPositioningDataSet() method not available
+        // UtranPositioningDataInfo utranPositioningDataInfo = gmlcCdrState.getUtranPositioningDataInfo();
+        // if (utranPositioningDataInfo != null) {
+        //     try {
+        //         HashMap<String, Integer> methodsAndUsage = utranPositioningDataInfo.getUtranPositioningDataSet();
+        //         StringBuilder utranPosDataInfo = new StringBuilder();
+        //         int itemCounter = 0;
+        //         for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
+        //             itemCounter++;
+        //             String method = item.getKey();
+        //             Integer usage = item.getValue();
+        //             utranPosDataInfo.append("method=").append(method).append(" usage=").append(usage);
+        //             if (methodsAndUsage.size() != itemCounter)
+        //                 utranPosDataInfo.append(" -- ");
+        //         }
+        //         cdrModel.setUtranPositioningDataInfo(String.valueOf(utranPosDataInfo));
+        //     } catch (MAPException e) {
+        //         logger.severe(e.getMessage());
+        //     }
+        //     stringBuilder.append(cdrModel.getUtranPositioningDataInfo()).append(SEPARATOR);
+        // } else {
+        //     stringBuilder.append(SEPARATOR);
+        // }
+        stringBuilder.append(SEPARATOR);
 
         /**
          * UTRAN GANSS POSITIONING DATA
          */
-        UtranGANSSpositioningData utranGANSSpositioningData = gmlcCdrState.getUtranGANSSpositioningData();
-        if (utranGANSSpositioningData != null) {
-            try {
-                Multimap<String, String> methodsAndGanssIds = utranGANSSpositioningData.getUtranGANSSPositioningMethodsAndGANSSIds();
-                StringBuilder utranGANSSPosDataInfo = new StringBuilder();
-                String method = null, ganssId = null;
-                int i = 0, usage;
-                for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
-                    if (method != null || ganssId != null)
-                        utranGANSSPosDataInfo.append(" -- ");
-                    method = item.getKey();
-                    ganssId = item.getValue();
-                    usage = utranGANSSpositioningData.getUsageCode(utranGANSSpositioningData.getData(), i);
-                    utranGANSSPosDataInfo.append("method=").append(method).append(" ganssId=").append(ganssId).append(" usage=").append(usage);
-                    i++;
-                }
-                cdrModel.setUtranGANSSPositioningData(String.valueOf(utranGANSSPosDataInfo));
-            } catch (MAPException e) {
-                logger.severe(e.getMessage());
-            }
-            stringBuilder.append(cdrModel.getUtranGANSSPositioningData()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
+        // Commented out - getUtranGANSSPositioningMethodsAndGANSSIds() and getUsageCode() methods not available
+        // UtranGANSSpositioningData utranGANSSpositioningData = gmlcCdrState.getUtranGANSSpositioningData();
+        // if (utranGANSSpositioningData != null) {
+        //     try {
+        //         Multimap<String, String> methodsAndGanssIds = utranGANSSpositioningData.getUtranGANSSPositioningMethodsAndGANSSIds();
+        //         StringBuilder utranGANSSPosDataInfo = new StringBuilder();
+        //         String method = null, ganssId = null;
+        //         int i = 0, usage;
+        //         for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
+        //             if (method != null || ganssId != null)
+        //                 utranGANSSPosDataInfo.append(" -- ");
+        //             method = item.getKey();
+        //             ganssId = item.getValue();
+        //             usage = utranGANSSpositioningData.getUsageCode(utranGANSSpositioningData.getData(), i);
+        //             utranGANSSPosDataInfo.append("method=").append(method).append(" ganssId=").append(ganssId).append(" usage=").append(usage);
+        //             i++;
+        //         }
+        //         cdrModel.setUtranGANSSPositioningData(String.valueOf(utranGANSSPosDataInfo));
+        //     } catch (MAPException e) {
+        //         logger.severe(e.getMessage());
+        //     }
+        //     stringBuilder.append(cdrModel.getUtranGANSSPositioningData()).append(SEPARATOR);
+        // } else {
+        //     stringBuilder.append(SEPARATOR);
+        // }
+        stringBuilder.append(SEPARATOR);
 
         /**
          * UTRAN ADDITIONAL POSITIONING DATA
          */
-        UtranAdditionalPositioningData utranAdditionalPositioningData = gmlcCdrState.getUtranAdditionalPositioningData();
-        if (utranAdditionalPositioningData != null) {
-            try {
-                Multimap<String, String> methodsAndAddPosIds = utranAdditionalPositioningData.getUtranAdditionalPositioningMethodsAndIds();
-                StringBuilder utranAddPositioningData = new StringBuilder();
-                String method = null, id = null;
-                int i = 0, usage;
-                for (Map.Entry<String, String> item : methodsAndAddPosIds.entries()) {
-                    if (method != null || id != null)
-                        utranAddPositioningData.append(" -- ");
-                    method = item.getKey();
-                    id = item.getValue();
-                    usage = utranAdditionalPositioningData.getUsageCode(utranAdditionalPositioningData.getData(), i);
-                    utranAddPositioningData.append("method=").append(method).append(" addPosId=").append(id).append(" usage=").append(usage);
-                    i++;
-                }
-                cdrModel.setUtranAdditionalPositioningDataInfo(String.valueOf(utranAddPositioningData));
-            } catch (MAPException e) {
-                logger.severe(e.getMessage());
-            }
-            stringBuilder.append(cdrModel.getUtranAdditionalPositioningDataInfo()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-        }
+        // Commented out - UtranAdditionalPositioningData class and methods not available
+        // UtranAdditionalPositioningData utranAdditionalPositioningData = gmlcCdrState.getUtranAdditionalPositioningData();
+        // if (utranAdditionalPositioningData != null) {
+        //     try {
+        //         Multimap<String, String> methodsAndAddPosIds = utranAdditionalPositioningData.getUtranAdditionalPositioningMethodsAndIds();
+        //         StringBuilder utranAddPositioningData = new StringBuilder();
+        //         String method = null, id = null;
+        //         int i = 0, usage;
+        //         for (Map.Entry<String, String> item : methodsAndAddPosIds.entries()) {
+        //             if (method != null || id != null)
+        //                 utranAddPositioningData.append(" -- ");
+        //             method = item.getKey();
+        //             id = item.getValue();
+        //             usage = utranAdditionalPositioningData.getUsageCode(utranAdditionalPositioningData.getData(), i);
+        //             utranAddPositioningData.append("method=").append(method).append(" addPosId=").append(id).append(" usage=").append(usage);
+        //             i++;
+        //         }
+        //         cdrModel.setUtranAdditionalPositioningDataInfo(String.valueOf(utranAddPositioningData));
+        //     } catch (MAPException e) {
+        //         logger.severe(e.getMessage());
+        //     }
+        //     stringBuilder.append(cdrModel.getUtranAdditionalPositioningDataInfo()).append(SEPARATOR);
+        // } else {
+        //     stringBuilder.append(SEPARATOR);
+        // }
+        stringBuilder.append(SEPARATOR);
 
         /**
          * EUTRAN POSITIONING DATA
@@ -3207,19 +3085,22 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
          * LCS EVENT (MAP/LTE)
          */
         LCSEvent lcsEvent = gmlcCdrState.getLcsEvent();
-        LocationEvent locationEvent = gmlcCdrState.getLocationEvent();
+        // Commented out - LocationEvent class not available
+        // LocationEvent locationEvent = gmlcCdrState.getLocationEvent();
         if (lcsEvent != null) {
             // LCS EVENT (MAP)
             cdrModel.setLcsEvent(String.valueOf(lcsEvent.getEvent()));
             stringBuilder.append(getLocationEvent(lcsEvent.getEvent())).append(SEPARATOR);
         } else {
-            if (locationEvent != null) {
-                // LCS EVENT (LTE)
-                cdrModel.setLcsEvent(String.valueOf(locationEvent.getValue()));
-                stringBuilder.append(getLocationEvent(locationEvent.getValue())).append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
+            // Commented out - LocationEvent class not available
+            // if (locationEvent != null) {
+            //     // LCS EVENT (LTE)
+            //     cdrModel.setLcsEvent(String.valueOf(locationEvent.getValue()));
+            //     stringBuilder.append(getLocationEvent(locationEvent.getValue())).append(SEPARATOR);
+            // } else {
+            //     stringBuilder.append(SEPARATOR);
+            // }
+            stringBuilder.append(SEPARATOR);
         }
 
         /**
@@ -3457,18 +3338,22 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
          * CIVIC ADDRESS
          */
         String civicAddress = gmlcCdrState.getCivicAddress();
-        UtranCivicAddress utranCivicAddress = gmlcCdrState.getUtranCivicAddress();
-        if (civicAddress != null || utranCivicAddress != null) {
+        // Commented out - UtranCivicAddress class not available
+        // UtranCivicAddress utranCivicAddress = gmlcCdrState.getUtranCivicAddress();
+        // if (civicAddress != null || utranCivicAddress != null) {
+        if (civicAddress != null) {
             if (civicAddress != null) {
                 cdrModel.setCivicAddress(civicAddress);
                 StringBuilder sb = getCivicAddress(civicAddress);
                 stringBuilder.append(sb).append(SEPARATOR);
-            } else {
-                Charset charset = StandardCharsets.UTF_8;
-                String utranCivicAddressStr = new String(utranCivicAddress.getData(), charset);
-                StringBuilder sb = getCivicAddress(utranCivicAddressStr);
-                stringBuilder.append(sb).append(SEPARATOR);
             }
+            // Commented out - UtranCivicAddress class not available
+            // else {
+            //     Charset charset = StandardCharsets.UTF_8;
+            //     String utranCivicAddressStr = new String(utranCivicAddress.getData(), charset);
+            //     StringBuilder sb = getCivicAddress(utranCivicAddressStr);
+            //     stringBuilder.append(sb).append(SEPARATOR);
+            // }
         } else {
             stringBuilder.append(SEPARATOR);
         }
@@ -3603,13 +3488,16 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         /**
          * Local Time Zone from Sh UDR/UDA
          */
-        if (localTimeZone != null) {
-            stringBuilder.append(localTimeZone.getTimeZone()).append(SEPARATOR);
-            stringBuilder.append(localTimeZone.getDaylightSavingTime()).append(SEPARATOR);
-        } else {
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-        }
+        // Commented out - localTimeZone is Object type, getTimeZone() and getDaylightSavingTime() not available
+        // if (localTimeZone != null) {
+        //     stringBuilder.append(localTimeZone.getTimeZone()).append(SEPARATOR);
+        //     stringBuilder.append(localTimeZone.getDaylightSavingTime()).append(SEPARATOR);
+        // } else {
+        //     stringBuilder.append(SEPARATOR);
+        //     stringBuilder.append(SEPARATOR);
+        // }
+        stringBuilder.append(SEPARATOR);
+        stringBuilder.append(SEPARATOR);
         /**
          * RAT type from Sh UDR/UDA or ATI or PSI
          */
@@ -3665,63 +3553,68 @@ public abstract class CDRGeneratorSbb extends MobileCoreNetworkInterfaceSbb impl
         /**
          * MNP INFO RESULT (from ATI or PSI)
          */
-        if (mnpInfoResult != null) {
-            // MNP NUMBER PORTABILITY STATUS
-            if (mnpInfoResult.getNumberPortabilityStatus() != null)
-                stringBuilder.append(mnpInfoResult.getNumberPortabilityStatus().name()).append(SEPARATOR);
-            else
-                stringBuilder.append(SEPARATOR);
-            // MNP IMSI
-            if (mnpInfoResult.getIMSI() != null)
-                stringBuilder.append(new String(mnpInfoResult.getIMSI().getData().getBytes())).append(SEPARATOR);
-            else
-                stringBuilder.append(SEPARATOR);
-            // MNP MSISDN
-            if (mnpInfoResult.getMSISDN() != null)
-                stringBuilder.append(mnpInfoResult.getMSISDN().getAddress()).append(SEPARATOR);
-            else
-                stringBuilder.append(SEPARATOR);
-            // MNP ROUTEING NUMBER
-            if (mnpInfoResult.getRouteingNumber() != null)
-                stringBuilder.append(mnpInfoResult.getRouteingNumber().getRouteingNumber()).append(SEPARATOR);
-            else
-                stringBuilder.append(SEPARATOR);
-        } else {
-
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-            stringBuilder.append(SEPARATOR);
-        }
+        // Commented out - MNPInfoRes methods not available
+        // if (mnpInfoResult != null) {
+        //     // MNP NUMBER PORTABILITY STATUS
+        //     if (mnpInfoResult.getNumberPortabilityStatus() != null)
+        //         stringBuilder.append(mnpInfoResult.getNumberPortabilityStatus().name()).append(SEPARATOR);
+        //     else
+        //         stringBuilder.append(SEPARATOR);
+        //     // MNP IMSI
+        //     if (mnpInfoResult.getIMSI() != null)
+        //         stringBuilder.append(new String(mnpInfoResult.getIMSI().getData().getBytes())).append(SEPARATOR);
+        //     else
+        //         stringBuilder.append(SEPARATOR);
+        //     // MNP MSISDN
+        //     if (mnpInfoResult.getMSISDN() != null)
+        //         stringBuilder.append(mnpInfoResult.getMSISDN().getAddress()).append(SEPARATOR);
+        //     else
+        //         stringBuilder.append(SEPARATOR);
+        //     // MNP ROUTEING NUMBER
+        //     if (mnpInfoResult.getRouteingNumber() != null)
+        //         stringBuilder.append(mnpInfoResult.getRouteingNumber().getRouteingNumber()).append(SEPARATOR);
+        //     else
+        //         stringBuilder.append(SEPARATOR);
+        // } else {
+        //
+        //     stringBuilder.append(SEPARATOR);
+        //     stringBuilder.append(SEPARATOR);
+        //     stringBuilder.append(SEPARATOR);
+        // }
+        stringBuilder.append(SEPARATOR);
+        stringBuilder.append(SEPARATOR);
+        stringBuilder.append(SEPARATOR);
+        stringBuilder.append(SEPARATOR);
 
         /**
          * MS CLASSMARK 2
          */
-        if (msClassmark != null) {
-            stringBuilder.append(bytesToHexString(msClassmark.getData())).append(SEPARATOR);
-        } else {
+        // if (msClassmark != null) {
+        //     stringBuilder.append(bytesToHexString(msClassmark.getData())).append(SEPARATOR);
+        // } else {
             stringBuilder.append(SEPARATOR);
-        }
+        // }
 
         /**
          * GPRS MS CLASS
          */
-        if (gprsMsClass != null) {
-            // GPRS MS CLASS MS RADIO ACCESS CAPABILITY
-            if (gprsMsClass.getMSRadioAccessCapability() != null) {
-                stringBuilder.append(bytesToHexString(gprsMsClass.getMSRadioAccessCapability().getData())).append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-            // GPRS MS CLASS MS NETWORK CAPABILITY
-            if (gprsMsClass.getMSNetworkCapability() != null) {
-                stringBuilder.append(bytesToHexString(gprsMsClass.getMSNetworkCapability().getData())).append(SEPARATOR);
-            } else {
-                stringBuilder.append(SEPARATOR);
-            }
-        } else {
+        // if (gprsMsClass != null) {
+        //     // GPRS MS CLASS MS RADIO ACCESS CAPABILITY
+        //     if (gprsMsClass.getMSRadioAccessCapability() != null) {
+        //         stringBuilder.append(bytesToHexString(gprsMsClass.getMSRadioAccessCapability().getData())).append(SEPARATOR);
+        //     } else {
+        //         stringBuilder.append(SEPARATOR);
+        //     }
+        //     // GPRS MS CLASS MS NETWORK CAPABILITY
+        //     if (gprsMsClass.getMSNetworkCapability() != null) {
+        //         stringBuilder.append(bytesToHexString(gprsMsClass.getMSNetworkCapability().getData())).append(SEPARATOR);
+        //     } else {
+        //         stringBuilder.append(SEPARATOR);
+        //     }
+        // } else {
             stringBuilder.append(SEPARATOR);
             stringBuilder.append(SEPARATOR);
-        }
+        // }
 
         return stringBuilder.toString();
     }

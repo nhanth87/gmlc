@@ -2,9 +2,9 @@ package org.mobicents.gmlc.slee.mlp;
 
 import net.java.slee.resource.diameter.slg.events.avp.LCSQoSClass;
 import org.mobicents.gmlc.GmlcPropertiesManagement;
-import org.mobicents.gmlc.slee.supl.SuplAreaEventType;
-import org.mobicents.gmlc.slee.supl.SuplGeoTargetArea;
-import org.mobicents.gmlc.slee.supl.SuplTriggerType;
+// import org.mobicents.gmlc.slee.supl.SuplAreaEventType;
+// import org.mobicents.gmlc.slee.supl.SuplGeoTargetArea;
+// import org.mobicents.gmlc.slee.supl.SuplTriggerType;
 import org.restcomm.protocols.ss7.map.api.service.lsm.LCSClientType;
 import org.restcomm.protocols.ss7.map.api.service.lsm.LCSPriority;
 import org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoS;
@@ -69,9 +69,9 @@ public class MLPLocationRequest {
   Integer referenceNumber;
   String locationReportCallbackUrl = gmlcPropertiesManagement.getLcsUrlCallback();
   /*** SUPL Triggered Events ***/
-  SuplTriggerType suplTriggerType;
+  // SuplTriggerType suplTriggerType;
   /** SUPL Area Event Params **/
-  SuplAreaEventType suplAreaEventType;
+  // SuplAreaEventType suplAreaEventType;
   String suplAreaId;
   Double suplAreaEventLatitude, suplAreaEventLongitude, suplAreaEventSemiMajor, suplAreaEventSemiMinor, suplAreaEventAngle;
   Integer suplAreaEventRadius;
@@ -80,7 +80,7 @@ public class MLPLocationRequest {
   Long suplStartTime;
   Long suplStopTime;
 
-  SuplGeoTargetArea suplGeographicTargetArea;
+  // SuplGeoTargetArea suplGeographicTargetArea;
   Boolean suplAreaEventRepeatedReporting;
   String suplAreaIdSetType;
 
@@ -257,6 +257,10 @@ public class MLPLocationRequest {
 
   public String getLocationReportCallbackUrl() {
     return locationReportCallbackUrl;
+  }
+
+  public Integer getSuplTriggerType() {
+    return null; // STUB for Ethiopia GMLC
   }
 
   public Boolean getPsiService() {
@@ -491,7 +495,7 @@ public class MLPLocationRequest {
     ResponseTime responseTime = null;
     if (responseTimeCategory != null)
       responseTime = new ResponseTimeImpl(ResponseTimeCategory.getResponseTimeCategory(responseTimeCategory));
-    this.lcsQoS = new LCSQoSImpl(horizontalAccuracy, verticalAccuracy, verticalCoordinateRequest, responseTime, null, false, null);
+    this.lcsQoS = new LCSQoSImpl(horizontalAccuracy, verticalAccuracy, verticalCoordinateRequest != null ? verticalCoordinateRequest : false, responseTime, null);
   }
 
   public void setLcsQoS(LCSQoS lcsQoS) {
@@ -546,11 +550,12 @@ public class MLPLocationRequest {
     this.slpSubClientLastClient = slpSubClientLastClient;
   }
 
-  public SuplTriggerType getSuplTriggerType() {
+  /*
+  // public SuplTriggerType () {
     return suplTriggerType;
   }
 
-  public void setSuplTriggerType(SuplTriggerType suplTriggerType) {
+  // public void setSuplTriggerType(SuplTriggerType REMOVED) {
     this.suplTriggerType = suplTriggerType;
   }
 
@@ -561,6 +566,7 @@ public class MLPLocationRequest {
   public void setSuplAreaEventType(SuplAreaEventType suplAreaEventType) {
     this.suplAreaEventType = suplAreaEventType;
   }
+  */
 
   public String getSuplAreaId() {
     return suplAreaId;
@@ -658,13 +664,15 @@ public class MLPLocationRequest {
     this.suplAreaEventRadius = suplAreaEventRadius;
   }
 
-  public SuplGeoTargetArea getSuplGeographicTargetArea() {
+  /*
+  // public SuplGeoTargetArea () {
     return suplGeographicTargetArea;
   }
 
-  public void setSuplGeographicTargetArea(SuplGeoTargetArea suplGeographicTargetArea) {
+  // public void setSuplGeographicTargetArea(SuplGeoTargetArea REMOVED) {
     this.suplGeographicTargetArea = suplGeographicTargetArea;
   }
+  */
 
   public Boolean getSuplAreaEventRepeatedReporting() {
     return suplAreaEventRepeatedReporting;
@@ -740,6 +748,7 @@ public class MLPLocationRequest {
         ", prioritizedListIndicator=" + prioritizedListIndicator +
         ", referenceNumber=" + referenceNumber +
         ", locationReportCallbackUrl='" + locationReportCallbackUrl + '\'' +
+        /* SUPL DISABLED
         ", suplTriggerType=" + suplTriggerType +
         ", suplAreaEventType=" + suplAreaEventType +
         ", suplAreaId='" + suplAreaId + '\'' +
@@ -757,6 +766,7 @@ public class MLPLocationRequest {
         ", suplGeographicTargetArea=" + suplGeographicTargetArea +
         ", suplAreaEventRepeatedReporting=" + suplAreaEventRepeatedReporting +
         ", suplAreaIdSetType='" + suplAreaIdSetType + '\'' +
+        */
         '}';
   }
 }

@@ -15,7 +15,7 @@ import org.mobicents.gmlc.slee.map.MapLsmResponseHelperForMLP;
 import org.mobicents.gmlc.slee.map.SlrRequestParams;
 import org.mobicents.gmlc.slee.mlp.MLPResponse;
 import org.mobicents.gmlc.slee.primitives.Polygon;
-import org.mobicents.gmlc.slee.supl.SuplResponseHelperForMLP;
+// import org.mobicents.gmlc.slee.supl.SuplResponseHelperForMLP;
 import org.restcomm.protocols.ss7.map.api.MAPException;
 
 import javax.slee.facilities.Tracer;
@@ -171,7 +171,7 @@ public class HttpReport {
                         reportCommandParameterString = SlrRequestJsonBuilder.buildJsonReportForSLR((SlrRequestParams) objectReportParameters, clientReferenceNumber);
                         performJsonReportToCallbackUrl(httpMethod, transactionReportParameters, reportCommandParameterString, callbackUrl);
                     } else {
-                        performMLPReportToCallbackUrl((SlrRequestParams) objectReportParameters, null, null, clientReferenceNumber, lcsReferenceNumber,
+                        performMLPReportToCallbackUrl((SlrRequestParams) objectReportParameters, null, clientReferenceNumber, lcsReferenceNumber,
                             callbackUrl, httpMethod);
                     }
                     break;
@@ -180,13 +180,14 @@ public class HttpReport {
                         reportCommandParameterString = LrrRequestJsonBuilder.buildJsonReportForLRR((SLgLrrAvpValues) objectReportParameters, clientReferenceNumber);
                         performJsonReportToCallbackUrl(httpMethod, transactionReportParameters, reportCommandParameterString, callbackUrl);
                     } else {
-                        performMLPReportToCallbackUrl(null, (SLgLrrAvpValues) objectReportParameters, null, clientReferenceNumber, lcsReferenceNumber,
+                        performMLPReportToCallbackUrl(null, (SLgLrrAvpValues) objectReportParameters, clientReferenceNumber, lcsReferenceNumber,
                             callbackUrl, httpMethod);
                     }
                     break;
-                case "SuplResponseHelperForMLP":
-                    performMLPReportToCallbackUrl(null, null, (SuplResponseHelperForMLP) objectReportParameters, clientReferenceNumber, lcsReferenceNumber, callbackUrl, httpMethod);
-                    break;
+                // SUPL DISABLED
+                // case "SuplResponseHelperForMLP":
+                //     performMLPReportToCallbackUrl(null, null, (SuplResponseHelperForMLP) objectReportParameters, clientReferenceNumber, lcsReferenceNumber, callbackUrl, httpMethod);
+                //     break;
                 default:
                     logger.warn("Perform [default] { type: " + objectReportParameters.getClass().getSimpleName() + " }");
                     performJsonReportToCallbackUrl(httpMethod, transactionReportParameters, reportCommandParameterString, callbackUrl);
@@ -235,13 +236,13 @@ public class HttpReport {
         }
     }
 
-    private void performMLPReportToCallbackUrl(SlrRequestParams slr, SLgLrrAvpValues lrr, SuplResponseHelperForMLP suplResponseHelperForMLP,
+    private void performMLPReportToCallbackUrl(SlrRequestParams slr, SLgLrrAvpValues lrr,
                                                Integer clientReferenceNumber, Integer lcsReferenceNumber,
                                                String callbackUrl, HttpMethod httpMethod) {
-        String svcResultXml, operation;
+        String svcResultXml, operation = "UNKNOWN";
         MLPResponse mlpResponse = new MLPResponse(this.tracer);
 
-        if (slr != null || lrr != null || suplResponseHelperForMLP != null) {
+        if (slr != null || lrr != null) {
             MLPResponse.MLPResultType mlpResultType = MLPResponse.MLPResultType.OK;
             MLPResponseParams mlpResponseParams = new MLPResponseParams();
             if (slr != null) {
@@ -325,7 +326,9 @@ public class HttpReport {
                 mlpResponseParams.mlpTransId = clientReferenceNumber;
                 mlpResponseParams.mlpLcsRefNumber = lcsReferenceNumber;
                 mlpResponseParams.mlpRatType = null;
-            } else {
+            }
+            // SUPL DISABLED
+            /* else {
                 operation = "SUPL";
                 mlpResponseParams.mlpMsisdn = suplResponseHelperForMLP.getMsisdn();
                 mlpResponseParams.mlpImsi = suplResponseHelperForMLP.getImsi();
@@ -365,7 +368,7 @@ public class HttpReport {
                 mlpResponseParams.mlpTransId = clientReferenceNumber;
                 mlpResponseParams.mlpLcsRefNumber = lcsReferenceNumber;
                 mlpResponseParams.mlpRatType = null;
-            }
+            } */
 
             svcResultXml = mlpResponse.getCoreNetworkSinglePositionXML(operation, mlpResponseParams.mlpTypeOfShape,
                 mlpResponseParams.x, mlpResponseParams.y, mlpResponseParams.radius, mlpResponseParams.mlpUncertaintySemiMajorAxis,

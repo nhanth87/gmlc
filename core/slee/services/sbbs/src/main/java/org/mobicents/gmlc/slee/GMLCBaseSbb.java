@@ -1,8 +1,8 @@
 package org.mobicents.gmlc.slee;
 
-import com.paicbd.slee.resource.ulp.ULPMessageFactory;
-import com.paicbd.slee.resource.ulp.UlpActivityContextInterfaceFactory;
-import com.paicbd.slee.resource.ulp.UlpResourceAdaptorSbbInterface;
+// import com.paicbd.slee.resource.ulp.ULPMessageFactory;
+// import com.paicbd.slee.resource.ulp.UlpActivityContextInterfaceFactory;
+// import com.paicbd.slee.resource.ulp.UlpResourceAdaptorSbbInterface;
 import net.java.slee.resource.diameter.base.DiameterActivityContextInterfaceFactory;
 import net.java.slee.resource.diameter.base.DiameterAvpFactory;
 import net.java.slee.resource.diameter.base.DiameterMessageFactory;
@@ -124,9 +124,11 @@ public class GMLCBaseSbb implements Sbb {
   // -------------------------------------------------------------
   protected static final ResourceAdaptorTypeID suplRATypeID = new ResourceAdaptorTypeID("ULPResourceAdaptorType", "com.paicbd", "1.0");
   protected static final String suplRaLink = "ULPRA";
+  /*
   protected UlpResourceAdaptorSbbInterface ulpResourceAdaptorSbbInterface; // ulp provider
   protected UlpActivityContextInterfaceFactory ulpActivityContextInterfaceFactory;
   protected ULPMessageFactory ulpMessageFactory;
+  */
 
 
   public GMLCBaseSbb(String loggerName) {
@@ -174,9 +176,9 @@ public class GMLCBaseSbb implements Sbb {
     this.httpServletProvider = null;
     this.httpServletRaActivityContextInterfaceFactory = null;
 
-    this.ulpResourceAdaptorSbbInterface = null;
-    this.ulpActivityContextInterfaceFactory= null;
-    this.ulpMessageFactory = null;
+    // this.ulpResourceAdaptorSbbInterface = null;
+    // this.ulpActivityContextInterfaceFactory= null;
+    // this.ulpMessageFactory = null;
 
     //this.gmlcStatAggregator = null;
 

@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 public class MlpResponseExecutor implements Runnable {
 
-    private final SuplTransaction suplTransaction = SuplTransaction.Instance();
+    // private final SuplTransaction suplTransaction = SuplTransaction.Instance();
     private final ScheduledThreadPoolExecutor exec;
     private final String  slpId;
 
@@ -18,10 +18,10 @@ public class MlpResponseExecutor implements Runnable {
 
     @Override
     public void run() {
-        int statusSession = (int) suplTransaction.getValue(slpId,"sessionStatus");
-        if (statusSession == SuplSessionStatus.SUPL_SESSION_END.getSuplSessionStatus()) {
-            logger.info("The SUPL session is finished");
-            exec.shutdown();
-        }
+        // int statusSession = (int) suplTransaction.getValue(slpId,"sessionStatus");
+        // if (statusSession == SuplSessionStatus.SUPL_SESSION_END.getSuplSessionStatus()) {
+        //     logger.info("The SUPL session is finished");
+        //     exec.shutdown();
+        // }
     }
 }

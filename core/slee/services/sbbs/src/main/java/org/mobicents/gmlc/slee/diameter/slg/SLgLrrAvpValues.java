@@ -11,11 +11,8 @@ import net.java.slee.resource.diameter.slg.events.avp.ELPAVPCodes;
 import net.java.slee.resource.diameter.slg.events.avp.ESMLCCellInfoAvp;
 import net.java.slee.resource.diameter.slg.events.avp.GERANPositioningInfoAvp;
 import net.java.slee.resource.diameter.slg.events.avp.LCSEPSClientNameAvp;
-import net.java.slee.resource.diameter.slg.events.avp.LCSFormatIndicator;
-import net.java.slee.resource.diameter.slg.events.avp.LCSQoSClass;
 import net.java.slee.resource.diameter.slg.events.avp.LocationEvent;
 import net.java.slee.resource.diameter.slg.events.avp.PeriodicLDRInfoAvp;
-import net.java.slee.resource.diameter.slg.events.avp.PseudonymIndicator;
 import net.java.slee.resource.diameter.slg.events.avp.ServingNodeAvp;
 import net.java.slee.resource.diameter.slg.events.avp.UTRANPositioningInfoAvp;
 import org.mobicents.gmlc.slee.primitives.EUTRANPositioningDataImpl;
@@ -86,10 +83,10 @@ public class SLgLrrAvpValues implements Serializable {
 
   */
 
-  private LocationEvent locationEvent;
+  private int locationEvent;
   private LCSEPSClientNameAvp lcsEPSClientName;
   private String lcsNameString;
-  private LCSFormatIndicator lcsFormatIndicator;
+  private int lcsFormatIndicator;
   private String userName; // i.e. IMSI
   private byte[] msisdn;
   private String imei;
@@ -110,8 +107,8 @@ public class SLgLrrAvpValues implements Serializable {
   private byte[] utranAdditionalPositioningData;
   private byte[] serviceAreaIdentity;
   private Long lcsServiceTypeId;
-  private PseudonymIndicator pseudonymIndicator;
-  private LCSQoSClass lcsQoSClass;
+  private int pseudonymIndicator;
+  private int lcsQoSClass;
   private ServingNodeAvp servingNodeAvp;
   private Address servingNodeGmlcAddress;
   private Long sequenceNumber;
@@ -138,11 +135,11 @@ public class SLgLrrAvpValues implements Serializable {
     super();
   }
 
-  public LocationEvent getLocationEvent() {
+  public int getLocationEvent() {
     return locationEvent;
   }
 
-  public void setLocationEvent(LocationEvent locationEvent) {
+  public void setLocationEvent(int locationEvent) {
     this.locationEvent = locationEvent;
   }
 
@@ -162,11 +159,11 @@ public class SLgLrrAvpValues implements Serializable {
     this.lcsNameString = lcsNameString;
   }
 
-  public LCSFormatIndicator getLcsFormatIndicator() {
+  public int getLcsFormatIndicator() {
     return lcsFormatIndicator;
   }
 
-  public void setLcsFormatIndicator(LCSFormatIndicator lcsFormatIndicator) {
+  public void setLcsFormatIndicator(int lcsFormatIndicator) {
     this.lcsFormatIndicator = lcsFormatIndicator;
   }
 
@@ -330,19 +327,19 @@ public class SLgLrrAvpValues implements Serializable {
     this.lcsServiceTypeId = lcsServiceTypeId;
   }
 
-  public PseudonymIndicator getPseudonymIndicator() {
+  public int getPseudonymIndicator() {
     return pseudonymIndicator;
   }
 
-  public void setPseudonymIndicator(PseudonymIndicator pseudonymIndicator) {
+  public void setPseudonymIndicator(int pseudonymIndicator) {
     this.pseudonymIndicator = pseudonymIndicator;
   }
 
-  public LCSQoSClass getLcsQoSClass() {
+  public int getLcsQoSClass() {
     return lcsQoSClass;
   }
 
-  public void setLcsQoSClass(LCSQoSClass lcsQoSClass) {
+  public void setLcsQoSClass(int lcsQoSClass) {
     this.lcsQoSClass = lcsQoSClass;
   }
 

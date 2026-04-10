@@ -5,7 +5,7 @@ import net.java.slee.resource.diameter.base.events.avp.DiameterAvp;
 import net.java.slee.resource.diameter.base.events.avp.DiameterIdentity;
 import net.java.slee.resource.diameter.base.events.avp.ExperimentalResultAvp;
 import net.java.slee.resource.diameter.slg.SLgAVPFactory;
-import net.java.slee.resource.diameter.slg.events.avp.AccuracyFulfilmentIndicator;
+
 import net.java.slee.resource.diameter.slg.events.avp.ELPAVPCodes;
 import net.java.slee.resource.diameter.slg.events.avp.ESMLCCellInfoAvp;
 import net.java.slee.resource.diameter.slg.events.avp.GERANPositioningInfoAvp;
@@ -66,7 +66,7 @@ public class SLgPlaAvpValues implements Serializable {
   private Long resultCode;
   private ExperimentalResultAvp experimentalResultAvp;
   private byte[] locationEstimate;
-  private AccuracyFulfilmentIndicator accuracyFulfilmentIndicator;
+  private int accuracyFulfilmentIndicator;
   private Long ageOfLocationEstimate;
   private byte[] velocityEstimate;
   private byte[] eUtranPositioningData;
@@ -85,7 +85,7 @@ public class SLgPlaAvpValues implements Serializable {
   private Long plaFlags;
   private ESMLCCellInfoAvp esmlcCellInfoAvp;
   private Long cellPortionId;
-  private String civicAddress;
+  private byte[] civicAddress;
   private Long barometricPressure;
 
   public SLgPlaAvpValues() {
@@ -116,11 +116,11 @@ public class SLgPlaAvpValues implements Serializable {
     this.locationEstimate = locationEstimate;
   }
 
-  public AccuracyFulfilmentIndicator getAccuracyFulfilmentIndicator() {
+  public int getAccuracyFulfilmentIndicator() {
     return accuracyFulfilmentIndicator;
   }
 
-  public void setAccuracyFulfilmentIndicator(AccuracyFulfilmentIndicator accuracyFulfilmentIndicator) {
+  public void setAccuracyFulfilmentIndicator(int accuracyFulfilmentIndicator) {
     this.accuracyFulfilmentIndicator = accuracyFulfilmentIndicator;
   }
 
@@ -243,6 +243,7 @@ public class SLgPlaAvpValues implements Serializable {
   public void setServingNodeAvp(ServingNodeAvp servingNodeAvp) {
     this.servingNodeAvp = servingNodeAvp;
   }
+
   public Long getPlaFlags() {
     return plaFlags;
   }
@@ -267,11 +268,11 @@ public class SLgPlaAvpValues implements Serializable {
     this.cellPortionId = cellPortionId;
   }
 
-  public String getCivicAddress() {
+  public byte[] getCivicAddress() {
     return civicAddress;
   }
 
-  public void setCivicAddress(String civicAddress) {
+  public void setCivicAddress(byte[] civicAddress) {
     this.civicAddress = civicAddress;
   }
 
@@ -280,6 +281,10 @@ public class SLgPlaAvpValues implements Serializable {
   }
 
   public void setBarometricPressure(Long barometricPressure) {
+    this.barometricPressure = barometricPressure;
+  }
+
+  public void setBarometricPressure(long barometricPressure) {
     this.barometricPressure = barometricPressure;
   }
 

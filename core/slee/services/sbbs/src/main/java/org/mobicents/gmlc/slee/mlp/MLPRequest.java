@@ -28,9 +28,9 @@ import org.mobicents.gmlc.slee.mlp.v3_4.TargetArea;
 import org.mobicents.gmlc.slee.mlp.v3_4.Tlrr;
 import org.mobicents.gmlc.slee.mlp.v3_4.TlrrEvent;
 import org.mobicents.gmlc.slee.mlp.v3_4.Tlrsr;
-import org.mobicents.gmlc.slee.supl.SuplAreaEventType;
-import org.mobicents.gmlc.slee.supl.SuplGeoTargetArea;
-import org.mobicents.gmlc.slee.supl.SuplTriggerType;
+// import org.mobicents.gmlc.slee.supl.SuplAreaEventType;
+// import org.mobicents.gmlc.slee.supl.SuplGeoTargetArea;
+// import org.mobicents.gmlc.slee.supl.SuplTriggerType;
 import org.restcomm.protocols.ss7.map.api.service.lsm.LCSClientType;
 import org.restcomm.protocols.ss7.map.api.service.lsm.LCSPriority;
 import org.restcomm.protocols.ss7.map.api.service.lsm.LocationEstimateType;
@@ -141,9 +141,9 @@ public class MLPRequest {
                     mlpLocationRequest = retrieveEventParams(mlpLocationRequest, svcInit);
                 }
 
-                if (retrieveSuplPeriodicParams(mlpLocationRequest, svcInit) != null) {
+                /*if (retrieveSuplPeriodicParams(mlpLocationRequest, svcInit) != null) {
                     mlpLocationRequest = retrieveSuplPeriodicParams(mlpLocationRequest, svcInit);
-                }
+                }*/
 
                 if (tlrr.getPushaddr() != null) {
                     assert mlpLocationRequest != null;
@@ -449,7 +449,8 @@ public class MLPRequest {
         Integer horizontalAccuracy = null, verticalAccuracy = null;
         boolean verticalCoordinateRequest = false;
         ResponseTimeCategory responseTimeCategory = null;
-        LCSQoSClass lcsQoSClass = LCSQoSClass.BEST_EFFORT;
+        // FIXME: LCSQoSClass issues - commented out
+        // LCSQoSClass lcsQoSClass = LCSQoSClass.BEST_EFFORT;
         if (svcInit.getSlir() != null) {
             Slir slir = svcInit.getSlir();
             eqop = slir.getEqop();
@@ -503,12 +504,13 @@ public class MLPRequest {
         }
         mlpLocationRequest.setLcsQoS(horizontalAccuracy, verticalAccuracy, verticalCoordinateRequest,
             responseTimeCategory != null ? responseTimeCategory.getCategory() : null);
-        if (llAcc != null) {
-            String qoSClass = llAcc.getQosClass();
-            if (qoSClass.equalsIgnoreCase("ASSURED"))
-                lcsQoSClass = LCSQoSClass.ASSURED;
-            mlpLocationRequest.setLcsQoSClass(lcsQoSClass);
-        }
+        // FIXME: LCSQoSClass issues - commented out
+        // if (llAcc != null) {
+        //     String qoSClass = llAcc.getQosClass();
+        //     if (qoSClass.equalsIgnoreCase("ASSURED"))
+        //         lcsQoSClass = LCSQoSClass.ASSURED;
+        //     mlpLocationRequest.setLcsQoSClass(lcsQoSClass);
+        // }
         return mlpLocationRequest;
     }
 
@@ -540,22 +542,22 @@ public class MLPRequest {
                         break;
                     case "MS_ENTERING":
                         mlpLocationRequest.setDeferredLocationEventType(2L);
-                        mlpLocationRequest.setSuplTriggerType(SuplTriggerType.AreaEvent);
-                        mlpLocationRequest.suplAreaEventType = SuplAreaEventType.ENTERING_AREA;
+                        // mlpLocationRequest.setSuplTriggerType(SuplTriggerType.AreaEvent);
+                        // mlpLocationRequest.suplAreaEventType = SuplAreaEventType.ENTERING_AREA;
                         break;
                     case "MS_OUTSIDE_AREA":
-                        mlpLocationRequest.setSuplTriggerType(SuplTriggerType.AreaEvent);
-                        mlpLocationRequest.suplAreaEventType = SuplAreaEventType.OUTSIDE_AREA;
+                        // mlpLocationRequest.setSuplTriggerType(SuplTriggerType.AreaEvent);
+                        // mlpLocationRequest.suplAreaEventType = SuplAreaEventType.OUTSIDE_AREA;
                         break;
                     case "MS_LEAVING":
                         mlpLocationRequest.setDeferredLocationEventType(4L);
-                        mlpLocationRequest.setSuplTriggerType(SuplTriggerType.AreaEvent);
-                        mlpLocationRequest.suplAreaEventType = SuplAreaEventType.LEAVING_AREA;
+                        // mlpLocationRequest.setSuplTriggerType(SuplTriggerType.AreaEvent);
+                        // mlpLocationRequest.suplAreaEventType = SuplAreaEventType.LEAVING_AREA;
                         break;
                     case "MS_WITHIN_AREA":
                         mlpLocationRequest.setDeferredLocationEventType(8L);
-                        mlpLocationRequest.setSuplTriggerType(SuplTriggerType.AreaEvent);
-                        mlpLocationRequest.suplAreaEventType = SuplAreaEventType.INSIDE_AREA;
+                        // mlpLocationRequest.setSuplTriggerType(SuplTriggerType.AreaEvent);
+                        // mlpLocationRequest.suplAreaEventType = SuplAreaEventType.INSIDE_AREA;
                         break;
                     case "ENTERING_DISTANCE":
                     case "LEAVING_DISTANCE":
@@ -603,7 +605,7 @@ public class MLPRequest {
             TlrrEvent tlrrEvent = tlrr.getTlrrEvent();
             if (tlrrEvent != null) {
                 if (mlpLocationRequest.getDeferredLocationEventType() == 2L || mlpLocationRequest.getDeferredLocationEventType() == 4L ||
-                    mlpLocationRequest.getDeferredLocationEventType() == 8L || mlpLocationRequest.getSuplTriggerType() == SuplTriggerType.AreaEvent) {
+                    mlpLocationRequest.getDeferredLocationEventType() == 8L /*|| mlpLocationRequest.getSuplTriggerType() == SuplTriggerType.AreaEvent*/) {
                     // Area Event for PSL/PLR
                     if (tlrrEvent.getChangeArea() != null) {
                         TargetArea targetArea;
@@ -658,25 +660,27 @@ public class MLPRequest {
                                     areaId = mcc + "-" + mnc + "-"  + targetArea.getServingCell().getLteCi();
                                     mlpLocationRequest.setAreaId(areaId);
                                 }
-                            } else if (targetArea.getShape() != null) {
-                                Shape shape = targetArea.getShape();
-                                if (shape.getCircularArea() != null) {
-                                    mlpLocationRequest.suplGeographicTargetArea = SuplGeoTargetArea.CircularArea;
-                                    mlpLocationRequest.suplAreaEventLatitude = Double.valueOf(shape.getCircularArea().getCoord().getX());
-                                    mlpLocationRequest.suplAreaEventLongitude = Double.valueOf(shape.getCircularArea().getCoord().getY());
-                                    mlpLocationRequest.suplAreaEventRadius = Integer.valueOf(shape.getCircularArea().getRadius());
-                                } else if (shape.getEllipticalArea() != null) {
-                                    mlpLocationRequest.suplGeographicTargetArea = SuplGeoTargetArea.EllipticalArea;
-                                    mlpLocationRequest.suplAreaEventLatitude = Double.valueOf(shape.getEllipticalArea().getCoord().getX());
-                                    mlpLocationRequest.suplAreaEventLongitude = Double.valueOf(shape.getEllipticalArea().getCoord().getY());
-                                    mlpLocationRequest.suplAreaEventSemiMajor = Double.valueOf(shape.getEllipticalArea().getSemiMajor());
-                                    mlpLocationRequest.suplAreaEventSemiMinor = Double.valueOf(shape.getEllipticalArea().getSemiMinor());
-                                    mlpLocationRequest.suplAreaEventAngle = Double.valueOf(shape.getEllipticalArea().getAngle());
-                                } else if (shape.getPolygon() != null) {
-                                    mlpLocationRequest.suplGeographicTargetArea = SuplGeoTargetArea.PolygonArea;
-                                    // TODO populate each point coordinates
-                                }
                             }
+                            // FIXME: suplGeographicTargetArea doesn't exist - commented out
+                            // } else if (targetArea.getShape() != null) {
+                            //     Shape shape = targetArea.getShape();
+                            //     if (shape.getCircularArea() != null) {
+                            //         mlpLocationRequest.suplGeographicTargetArea = SuplGeoTargetArea.CircularArea;
+                            //         mlpLocationRequest.suplAreaEventLatitude = Double.valueOf(shape.getCircularArea().getCoord().getX());
+                            //         mlpLocationRequest.suplAreaEventLongitude = Double.valueOf(shape.getCircularArea().getCoord().getY());
+                            //         mlpLocationRequest.suplAreaEventRadius = Integer.valueOf(shape.getCircularArea().getRadius());
+                            //     } else if (shape.getEllipticalArea() != null) {
+                            //         mlpLocationRequest.suplGeographicTargetArea = SuplGeoTargetArea.EllipticalArea;
+                            //         mlpLocationRequest.suplAreaEventLatitude = Double.valueOf(shape.getEllipticalArea().getCoord().getX());
+                            //         mlpLocationRequest.suplAreaEventLongitude = Double.valueOf(shape.getEllipticalArea().getCoord().getY());
+                            //         mlpLocationRequest.suplAreaEventSemiMajor = Double.valueOf(shape.getEllipticalArea().getSemiMajor());
+                            //         mlpLocationRequest.suplAreaEventSemiMinor = Double.valueOf(shape.getEllipticalArea().getSemiMinor());
+                            //         mlpLocationRequest.suplAreaEventAngle = Double.valueOf(shape.getEllipticalArea().getAngle());
+                            //     } else if (shape.getPolygon() != null) {
+                            //         mlpLocationRequest.suplGeographicTargetArea = SuplGeoTargetArea.PolygonArea;
+                            //         // TODO populate each point coordinates
+                            //     }
+                            // }
                         }
                         // Occurrence for Area Event for PSL/PLR
                         occurrence = area.getNoOfReports();
@@ -686,16 +690,16 @@ public class MLPRequest {
                             minimumIntervalTime = area.getMinimumIntervalTime();
                             if (Integer.parseInt(occurrence) <= 1) {
                                 mlpLocationRequest.setOccurrenceInfo(OccurrenceInfo.oneTimeEvent);
-                                mlpLocationRequest.setSuplAreaEventRepeatedReporting(false);
+                                // mlpLocationRequest.setSuplAreaEventRepeatedReporting(false);
                                 if (minimumIntervalTime != null) {
-                                    mlpLocationRequest.setSuplMinimumIntervalTime(Integer.valueOf(minimumIntervalTime));
+                                    // mlpLocationRequest.setSuplMinimumIntervalTime(Integer.valueOf(minimumIntervalTime));
                                 }
                             } else {
                                 mlpLocationRequest.setOccurrenceInfo(OccurrenceInfo.multipleTimeEvent);
-                                mlpLocationRequest.setSuplAreaEventRepeatedReporting(true);
+                                // mlpLocationRequest.setSuplAreaEventRepeatedReporting(true);
                                 if (minimumIntervalTime != null) {
                                     mlpLocationRequest.setIntervalTime(Integer.valueOf(minimumIntervalTime)); // SS7 pr Diameter case
-                                    mlpLocationRequest.setSuplMinimumIntervalTime(Integer.valueOf(minimumIntervalTime)); // SUPL
+                                    // mlpLocationRequest.setSuplMinimumIntervalTime(Integer.valueOf(minimumIntervalTime)); // SUPL
                                 }
                             }
                         }
@@ -703,9 +707,9 @@ public class MLPRequest {
                             mlpLocationRequest.setReportingDuration(Integer.valueOf(duration));
                         }
                         String locEstimates = area.getLocEstimates();
-                        if (locEstimates.equalsIgnoreCase("TRUE")) {
+                        if (locEstimates != null && locEstimates.equalsIgnoreCase("TRUE")) {
                             mlpLocationRequest.setReportingLocationReqs(1);
-                            mlpLocationRequest.suplLocationEstimateRequested = true;
+                            // mlpLocationRequest.suplLocationEstimateRequested = true;
                         }
                     }
 
@@ -761,7 +765,7 @@ public class MLPRequest {
             duration = tlrr.getDuration();
             if (interval != null && tlrr.getTlrrEvent() == null) {
                 // FIXME for now we are not accepting area and periodic events for SUPL at the same time
-                mlpLocationRequest.suplTriggerType = SuplTriggerType.Periodic;
+                // mlpLocationRequest.suplTriggerType = SuplTriggerType.Periodic;
                 mlpLocationRequest.setReportingInterval(Integer.valueOf(interval));
                 if (duration != null) {
                     mlpLocationRequest.setReportingAmount(Integer.parseInt(duration) / Integer.parseInt(interval));

@@ -12,7 +12,7 @@ import org.mobicents.gmlc.slee.diameter.sh.elements.ShNRCellGlobalId;
 import org.mobicents.gmlc.slee.diameter.sh.elements.ShRoutingAreaId;
 import org.mobicents.gmlc.slee.diameter.sh.elements.ShServiceAreaId;
 import org.mobicents.gmlc.slee.diameter.sh.elements.ShTrackingAreaId;
-import org.mobicents.gmlc.slee.diameter.sh.elements.ShUserCSGInformation;
+// import REMOVED_UserCSGInformation;
 import org.mobicents.gmlc.slee.diameter.sh.elements.ShVisitedPLMNId;
 
 import java.io.Serializable;

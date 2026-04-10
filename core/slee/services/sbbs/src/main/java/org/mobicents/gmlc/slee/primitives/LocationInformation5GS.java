@@ -21,6 +21,8 @@ public interface LocationInformation5GS extends Serializable {
 
     GeographicalInformation getGeographicalInformation();
 
+    org.restcomm.protocols.ss7.map.api.primitives.GeodeticInformation getGeodeticInformation();
+
     String getAMFAddress();
 
     String getSMSFAddress();

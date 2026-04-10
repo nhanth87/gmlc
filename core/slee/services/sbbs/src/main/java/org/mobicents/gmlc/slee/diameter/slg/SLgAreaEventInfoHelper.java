@@ -90,8 +90,8 @@ public class SLgAreaEventInfoHelper {
                 return parseTBCD(String.valueOf(mcc));
         } else if (areaType.equalsIgnoreCase("plmnId")) {
             try {
-                PlmnId plmnId = new PlmnIdImpl(mcc, mnc);
-                return plmnId.getData();
+                PlmnIdImpl plmnIdImpl = new PlmnIdImpl(mcc, mnc);
+                return plmnIdImpl.getData();
             } catch (Exception e) {
                 return null;
             }

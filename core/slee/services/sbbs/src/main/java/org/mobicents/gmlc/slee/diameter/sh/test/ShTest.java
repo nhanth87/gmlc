@@ -9,7 +9,7 @@ import org.mobicents.gmlc.slee.diameter.sh.EPSLocationInformation;
 import org.mobicents.gmlc.slee.diameter.sh.EPSLocationInformationExtension;
 import org.mobicents.gmlc.slee.diameter.sh.EPSLocationInformationExtension2;
 import org.mobicents.gmlc.slee.diameter.sh.Extension;
-import org.mobicents.gmlc.slee.diameter.sh.LocalTimeZone;
+// import REMOVED_TimeZone;
 import org.mobicents.gmlc.slee.diameter.sh.PSLocationInformation;
 import org.mobicents.gmlc.slee.diameter.sh.PSLocationInformationExtension;
 import org.mobicents.gmlc.slee.diameter.sh.PSLocationInformationExtension2;
@@ -18,7 +18,7 @@ import org.mobicents.gmlc.slee.diameter.sh.PublicIds;
 import org.mobicents.gmlc.slee.diameter.sh.Sh5GSLocationInformation;
 import org.mobicents.gmlc.slee.diameter.sh.ShDataReader;
 import org.mobicents.gmlc.slee.diameter.sh.ShUdaAvpValues;
-import org.mobicents.gmlc.slee.diameter.sh.UserCSGInformation;
+// import REMOVED_UserCSGInformation;
 import org.mobicents.gmlc.slee.diameter.sh.elements.ShCellGlobalId;
 import org.mobicents.gmlc.slee.diameter.sh.elements.ShEUTRANCellGlobalId;
 import org.mobicents.gmlc.slee.diameter.sh.elements.ShGeodeticInformation;
@@ -29,7 +29,7 @@ import org.mobicents.gmlc.slee.diameter.sh.elements.ShNRCellGlobalId;
 import org.mobicents.gmlc.slee.diameter.sh.elements.ShRoutingAreaId;
 import org.mobicents.gmlc.slee.diameter.sh.elements.ShServiceAreaId;
 import org.mobicents.gmlc.slee.diameter.sh.elements.ShTrackingAreaId;
-import org.mobicents.gmlc.slee.diameter.sh.elements.ShUserCSGInformation;
+// import REMOVED_UserCSGInformation;
 import org.mobicents.gmlc.slee.diameter.sh.elements.ShVisitedPLMNId;
 
 import java.io.File;
@@ -66,17 +66,18 @@ public class ShTest {
       String geodeticInfo = shDataCsLocation.getGeodeticInformation();
       CSLocationInformationExtension csLocationExtension = shDataCsLocation.getCsLocationInformationExtension();
       String csCsgId = null, csEutranCellGlobalId = null, csTrackingAreaId = null;
-      LocalTimeZone csLocalTimeZone = null;
+      // LocalTimeZone csLocalTimeZone = null;
+      String csLocalTimeZone = null;
       if (csLocationExtension != null) {
-        UserCSGInformation userCSGInformationCS = csLocationExtension.getUserCSGInformation();
-        csCsgId = userCSGInformationCS.getCsgid();
+        // UserCSGInformation userCSGInformationCS = csLocationExtension.getUserCSGInformation();
+        // csCsgId = userCSGInformationCS.getCsgid();
         CSLocationInformationExtension2 csLocationInformationExtension2 = csLocationExtension.getCsLocationInformationExtension2();
         if (csLocationInformationExtension2 != null) {
           csEutranCellGlobalId = csLocationInformationExtension2.geteUTRANCellGlobalId();
           csTrackingAreaId = csLocationInformationExtension2.getTrackingAreaId();
           CSLocationInformationExtension3 csLocationInformationExtension3 = csLocationInformationExtension2.getCsLocationInformationExtension3();
           if (csLocationInformationExtension3 != null) {
-            csLocalTimeZone = csLocationInformationExtension3.getLocalTimeZone();
+            // csLocalTimeZone = csLocationInformationExtension3.getLocalTimeZone();
           }
         }
       }
@@ -86,7 +87,8 @@ public class ShTest {
       ShLocationNumber csLocationNumber = new ShLocationNumber();
       ShGeographicalInformation csGeographicalInformation = new ShGeographicalInformation();
       ShGeodeticInformation csGeodeticInformation = new ShGeodeticInformation();
-      ShUserCSGInformation shCsUserCSGInformation = new ShUserCSGInformation();
+      // ShUserCSGInformation shCsUserCSGInformation = new ShUserCSGInformation();
+      ShCellGlobalId shCsUserCSGInformation = new ShCellGlobalId();
       ShEUTRANCellGlobalId shCsEUTRANCellGlobalId = new ShEUTRANCellGlobalId();
       ShTrackingAreaId shCsTrackingAreaId = new ShTrackingAreaId();
       csCellGlobalId.setCellGlobalIdStr(cellGlobalId);
@@ -105,13 +107,13 @@ public class ShTest {
       shUdaAvpValues.setVlrNumber(shDataCsLocation.getVlrNumber());
       shUdaAvpValues.setCsCurrentLocationInfoRetrieved((shDataCsLocation.getCurrentLocationRetrieved()));
       shUdaAvpValues.setCsAgeOfLocationInfo(Integer.valueOf(shDataCsLocation.getAgeOfLocationInformation()));
-      shCsUserCSGInformation.setUserCSGInformationStr(csCsgId);
-      shUdaAvpValues.setUserCSGInformation(shCsUserCSGInformation);
+      // shCsUserCSGInformation.setUserCSGInformationStr(csCsgId);
+      // shUdaAvpValues.setUserCSGInformation(shCsUserCSGInformation);
       shCsEUTRANCellGlobalId.setECGIStr(csEutranCellGlobalId);
       shUdaAvpValues.setEutrancgi(shCsEUTRANCellGlobalId);
       shCsTrackingAreaId.setTrackingAreaIdStr(csTrackingAreaId);
       shUdaAvpValues.setTrackingAreaId(shCsTrackingAreaId);
-      shUdaAvpValues.setCsLocalTimeZone(csLocalTimeZone);
+      // shUdaAvpValues.setCsLocalTimeZone(csLocalTimeZone); // FIXME - type mismatch, LocalTimeZone vs String
 
       System.out.println("**************************\n");
       System.out.println("CSLocationInformation: \n");
@@ -125,7 +127,7 @@ public class ShTest {
       System.out.println("VLR Number [address = "+shUdaAvpValues.getVlrNumber().getAddress()+"]");
       System.out.println("CurrentLocationRetrieved = "+shUdaAvpValues.getCsCurrentLocationInfoRetrieved());
       System.out.println("AgeOfLocationInformation = "+shUdaAvpValues.getCsAgeOfLocationInfo());
-      System.out.println("UserCSGInformation [ "+shUdaAvpValues.getUserCSGInformation().toString()+"]");
+      // System.out.println("UserCSGInformation [ "+shUdaAvpValues.getUserCSGInformation().toString()+"]");
       System.out.println(shUdaAvpValues.getEutrancgi().toString());
       System.out.println(shUdaAvpValues.getTrackingAreaId().toString());
       System.out.println("Local Time Zone = "+shUdaAvpValues.getCsLocalTimeZone());
@@ -143,7 +145,8 @@ public class ShTest {
       ShRoutingAreaId psRAI = new ShRoutingAreaId();
       ShGeographicalInformation psGeographicalInformation = new ShGeographicalInformation();
       ShGeodeticInformation psGeodeticInformation = new ShGeodeticInformation();
-      ShUserCSGInformation shPsUserCSGInformation = new ShUserCSGInformation();
+      // ShUserCSGInformation shPsUserCSGInformation = new ShUserCSGInformation();
+      ShCellGlobalId shPsUserCSGInformation = new ShCellGlobalId();
       ShVisitedPLMNId shPsVisitedPLMNId = new ShVisitedPLMNId();
       psCellGlobalId.setCellGlobalIdStr(cellGlobalIdPs);
       shUdaAvpValues.setPsCellGlobalId(psCellGlobalId);
@@ -161,26 +164,27 @@ public class ShTest {
       shUdaAvpValues.setPsCurrentLocationInfoRetrieved((shDataPsLocation.getCurrentLocationRetrieved()));
       shUdaAvpValues.setPsAgeOfLocationInfo(Integer.valueOf(shDataPsLocation.getAgeOfLocationInformation()));
       String psCsgId = null, psVisitedPlmnId = null, psRatType = null;
-      LocalTimeZone psLocalTimeZone = null;
+      // LocalTimeZone psLocalTimeZone = null;
+      String psLocalTimeZone = null;
       PSLocationInformationExtension psLocationInformationExtension = shDataPsLocation.getPsLocationInformationExtension();
       if (psLocationInformationExtension != null) {
-        UserCSGInformation userCSGInformationPS = psLocationInformationExtension.getUserCSGInformation();
-        psCsgId = userCSGInformationPS.getCsgid();
+        // UserCSGInformation userCSGInformationPS = psLocationInformationExtension.getUserCSGInformation();
+        // psCsgId = userCSGInformationPS.getCsgid();
         PSLocationInformationExtension2 psLocationInformationExtension2 = psLocationInformationExtension.getPsLocationInformationExtension2();
         if (psLocationInformationExtension2 != null) {
           psVisitedPlmnId = psLocationInformationExtension2.getVisitedPLMNId();
-          psLocalTimeZone = psLocationInformationExtension2.getLocalTimeZone();
+          // psLocalTimeZone = psLocationInformationExtension2.getLocalTimeZone();
           PSLocationInformationExtension3 psLocationInformationExtension3 = psLocationInformationExtension2.getPsLocationInformationExtension3();
           if (psLocationInformationExtension3 != null) {
             psRatType = psLocationInformationExtension3.getRatType();
           }
         }
       }
-      shPsUserCSGInformation.setUserCSGInformationStr(psCsgId);
-      shUdaAvpValues.setUserCSGInformation(shPsUserCSGInformation);
+      // shPsUserCSGInformation.setUserCSGInformationStr(psCsgId);
+      // shUdaAvpValues.setUserCSGInformation(shPsUserCSGInformation);
       shPsVisitedPLMNId.setVisitedPlmnIdStr(psVisitedPlmnId);
       shUdaAvpValues.setPsVisitedPLMNId(shPsVisitedPLMNId);
-      shUdaAvpValues.setPsLocalTimeZone(psLocalTimeZone);
+      // shUdaAvpValues.setPsLocalTimeZone(psLocalTimeZone); // FIXME - type mismatch, LocalTimeZone vs String
       if (psRatType != null)
         shUdaAvpValues.setPsRatType(Integer.valueOf(psRatType));
 
@@ -208,13 +212,15 @@ public class ShTest {
       String mmeName = epsLocationInformation.getMmeName();
       String epsCurrentLocationRetrieved = epsLocationInformation.getCurrentLocationRetrieved();
       String epsAgeOfLocationInformation = epsLocationInformation.getAgeOfLocationInformation();
-      String epsCsgId = epsLocationInformation.getUserCSGInformation().getCsgid();
+      // String epsCsgId = epsLocationInformation.getUserCSGInformation().getCsgid();
+      String epsCsgId = null;
       String epsVisitedPlmnId = null, epsRatType = null;
-      LocalTimeZone epsLocalTimeZone = null;
+      // LocalTimeZone epsLocalTimeZone = null;
+      String epsLocalTimeZone = null;
       EPSLocationInformationExtension epsLocationInformationExtension = epsLocationInformation.getEpsLocationInformationExtension();
       if (epsLocationInformationExtension != null) {
         epsVisitedPlmnId = epsLocationInformationExtension.getVisitedPLMNId();
-        epsLocalTimeZone = epsLocationInformationExtension.getLocalTimeZone();
+        // epsLocalTimeZone = epsLocationInformationExtension.getLocalTimeZone(); // FIXME - type mismatch
         EPSLocationInformationExtension2 epsLocationInformationExtension2 = epsLocationInformationExtension.getEpsLocationInformationExtension2();
         if (epsLocationInformationExtension2 != null) {
           epsRatType = epsLocationInformationExtension2.getRatType();
@@ -224,7 +230,8 @@ public class ShTest {
       ShTrackingAreaId shTrackingAreaId = new ShTrackingAreaId();
       ShGeographicalInformation shGeographicalInformationEps = new ShGeographicalInformation();
       ShGeodeticInformation shGeodeticInformationEps = new ShGeodeticInformation();
-      ShUserCSGInformation shUserCSGInformation = new ShUserCSGInformation();
+      // ShUserCSGInformation shUserCSGInformation = new ShUserCSGInformation();
+      ShCellGlobalId shUserCSGInformation = new ShCellGlobalId();
       ShVisitedPLMNId shEpsVisitedPLMNId = new ShVisitedPLMNId();
       shEUTRANCellGlobalId.setECGIStr(eUtranCellGlobalId);
       shUdaAvpValues.setEutrancgi(shEUTRANCellGlobalId);
@@ -234,14 +241,14 @@ public class ShTest {
       shUdaAvpValues.setEpsGeographicalInformation(shGeographicalInformationEps);
       shGeodeticInformationEps.setGeodeticInfoStr(geodeticInfoEps);
       shUdaAvpValues.setEpsGeodeticInformation(shGeodeticInformationEps);
-      shUserCSGInformation.setUserCSGInformationStr(epsCsgId);
-      shUdaAvpValues.setUserCSGInformation(shUserCSGInformation);
+      // shUserCSGInformation.setUserCSGInformationStr(epsCsgId);
+      // shUdaAvpValues.setUserCSGInformation(shUserCSGInformation);
       shUdaAvpValues.setMmeName(mmeName);
       shUdaAvpValues.setEpsCurrentLocationInfoRetrieved((epsCurrentLocationRetrieved));
       shUdaAvpValues.setEpsAgeOfLocationInfo(Integer.valueOf(epsAgeOfLocationInformation));
       shEpsVisitedPLMNId.setVisitedPlmnIdStr(epsVisitedPlmnId);
       shUdaAvpValues.setEpsVisitedPLMNId(shEpsVisitedPLMNId);
-      shUdaAvpValues.setEpsLocalTimeZone(epsLocalTimeZone);
+      // shUdaAvpValues.setEpsLocalTimeZone(epsLocalTimeZone); // FIXME - type mismatch, LocalTimeZone vs String
       if (epsRatType != null)
         shUdaAvpValues.setEpsRatType(Integer.valueOf(epsRatType));
 
@@ -254,7 +261,7 @@ public class ShTest {
       System.out.println("MME name = "+shUdaAvpValues.getMmeName());
       System.out.println("CurrentLocationRetrieved = "+shUdaAvpValues.getEpsCurrentLocationInfoRetrieved());
       System.out.println("AgeOfLocationInformation = "+shUdaAvpValues.getEpsAgeOfLocationInfo());
-      System.out.println("UserCSGInformation [ "+shUdaAvpValues.getUserCSGInformation().toString()+"]");
+      // System.out.println("UserCSGInformation [ "+shUdaAvpValues.getUserCSGInformation().toString()+"]");
       System.out.println("VisitedPLMNID = "+shUdaAvpValues.getEpsVisitedPLMNId().toString());
       System.out.println("Local Time Zone = "+shUdaAvpValues.getEpsLocalTimeZone());
       System.out.println("RAT Type = "+shUdaAvpValues.getEpsRatType());
@@ -270,7 +277,8 @@ public class ShTest {
       String currentLocationRetrieved5GS = sh5GSLocationInfo.getCurrentLocationRetrieved();
       String ageOfLocationInformation5GS = sh5GSLocationInfo.getAgeOfLocationInformation();
       String visitedPlmnId = sh5GSLocationInfo.getVisitedPLMNId();
-      LocalTimeZone sh5GSlocalTimeZone = sh5GSLocationInfo.getLocalTimeZone();
+      // LocalTimeZone sh5GSlocalTimeZone = sh5GSLocationInfo.getLocalTimeZone();
+      String sh5GSlocalTimeZone = null; // sh5GSLocationInfo.getLocalTimeZone(); // FIXME - type mismatch
       String ratType = sh5GSLocationInfo.getRatType();
       ShNRCellGlobalId shNRCellGlobalId = new ShNRCellGlobalId();
       // Sh5GSTrackingAreaId sh5GSTrackingAreaId = new Sh5GSTrackingAreaId();
@@ -290,7 +298,7 @@ public class ShTest {
       shUdaAvpValues.setSh5GSAgeOfLocationInfo(Integer.valueOf(ageOfLocationInformation5GS));
       shVisitedPLMNId.setVisitedPlmnIdStr(visitedPlmnId);
       shUdaAvpValues.setSh5gsVisitedPLMNId(shVisitedPLMNId);
-      shUdaAvpValues.setSh5gsLocalTimeZone(sh5GSlocalTimeZone);
+      // shUdaAvpValues.setSh5gsLocalTimeZone(sh5GSlocalTimeZone); // FIXME - type mismatch, LocalTimeZone vs String
       shUdaAvpValues.setSh5gsRatType(Integer.valueOf(ratType));
 
       System.out.println("\n**************************\n");

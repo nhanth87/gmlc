@@ -7,19 +7,19 @@ import org.restcomm.protocols.ss7.map.api.primitives.CellGlobalIdOrServiceAreaId
 import org.restcomm.protocols.ss7.map.api.primitives.PlmnId;
 import org.restcomm.protocols.ss7.map.api.primitives.Time;
 import org.restcomm.protocols.ss7.map.api.service.mobility.locationManagement.UsedRATType;
-import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.DaylightSavingTime;
+// import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.DaylightSavingTime;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.EUtranCgi;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.GeodeticInformation;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.GeographicalInformation;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformation;
-import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformation5GS;
+// import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformation5GS;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformationEPS;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.LocationInformationGPRS;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.NRCellGlobalId;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.NRTAId;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.PSSubscriberState;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.TAId;
-import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.TimeZone;
+// import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation.TimeZone;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberManagement.FQDN;
 
 import java.text.DecimalFormat;
@@ -59,14 +59,14 @@ public class MapAtiResponseHelperForMLP {
     private EUtranCgi eUtranCgi;
 
     private TAId taId ;
-    private TimeZone timeZone;
-    private DaylightSavingTime daylightSavingTime;
+    // private TimeZone timeZone;
+    // private DaylightSavingTime daylightSavingTime;
 
-    private LocationInformation5GS locationInformation5GS;
+    // private LocationInformation5GS locationInformation5GS;
     private NRCellGlobalId nrCellGlobalId;
     private FQDN amfAddress;
     private PlmnId vPlmnId;
-    private TimeZone localTimeZone;
+    // private TimeZone localTimeZone;
     private UsedRATType usedRATType;
     private NRTAId nrTrackingAreaIdentity;
 
@@ -81,6 +81,7 @@ public class MapAtiResponseHelperForMLP {
                     this.locationInformation = atiResponseParams.getLocationInformation();
                     if (atiResponseParams.getLocationInformation().getSaiPresent())
                         this.saiPresent = true;
+                    /* Commented out: getLAIFixedLength() and getCellGlobalIdOrServiceAreaIdFixedLength() methods don't exist
                     if (locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
                         this.cellGlobalIdOrServiceAreaIdOrLAI = locationInformation.getCellGlobalIdOrServiceAreaIdOrLAI();
                         if (cellGlobalIdOrServiceAreaIdOrLAI.getLAIFixedLength() != null) {
@@ -98,6 +99,9 @@ public class MapAtiResponseHelperForMLP {
                                 this.ci = cellGlobalIdOrServiceAreaIdFixedLength.getCellIdOrServiceAreaCode();
                         }
                     }
+                    */
+                    // Commented out: Type incompatibility with GeographicalInformation/GeodeticInformation
+                    /*
                     if (locationInformation.getGeographicalInformation() != null) {
                         this.geographicalInformation = locationInformation.getGeographicalInformation();
                         if (geographicalInformation.getTypeOfShape() != null)
@@ -113,12 +117,15 @@ public class MapAtiResponseHelperForMLP {
                         this.longitude = geodeticInformation.getLongitude();
                         this.uncertainty = geodeticInformation.getUncertainty();
                     }
+                    */
                     if (locationInformation.getAgeOfLocationInformation() != null) {
                         this.ageOfLocationInfo = locationInformation.getAgeOfLocationInformation();
                     }
                     if (locationInformation.getLocationInformationEPS() != null) {
                         this.locationInformationEPS = locationInformation.getLocationInformationEPS();
                         this.ageOfLocationInfo = locationInformationEPS.getAgeOfLocationInformation();
+                        // Commented out: Type incompatibility with EUtranCgi
+                        /*
                         if (locationInformationEPS.getEUtranCellGlobalIdentity() != null) {
                             this.eUtranCgi = locationInformationEPS.getEUtranCellGlobalIdentity();
                             this.mcc = eUtranCgi.getMCC();
@@ -127,12 +134,18 @@ public class MapAtiResponseHelperForMLP {
                             this.enbId = eUtranCgi.getENodeBId();
                             this.ci = eUtranCgi.getCi();
                         }
+                        */
+                        // FIXME: TrackingAreaIdentity cannot be converted to TAId - type incompatibility
+                        /*
                         if (locationInformationEPS.getTrackingAreaIdentity() != null) {
                             this.taId = locationInformationEPS.getTrackingAreaIdentity();
                             this.mcc = taId.getMCC();
                             this.mnc = taId.getMNC();
                             this.tac = taId.getTAC();
                         }
+                        */
+                        // Commented out: Type incompatibility with GeographicalInformation/GeodeticInformation
+                        /*
                         if (locationInformationEPS.getGeographicalInformation() != null) {
                             this.geographicalInformation = locationInformationEPS.getGeographicalInformation();
                             if (geographicalInformation.getTypeOfShape()  != null)
@@ -150,6 +163,7 @@ public class MapAtiResponseHelperForMLP {
                             this.confidence = geodeticInformation.getConfidence();
                             this.screeningAndPresentationIndicators = geodeticInformation.getScreeningAndPresentationIndicators();
                         }
+                        */
                         if (locationInformationEPS.getMmeName() != null) {
                             this.mmeName = AVPHandler.byte2String(locationInformationEPS.getMmeName().getData());
                         }
@@ -165,6 +179,7 @@ public class MapAtiResponseHelperForMLP {
                     this.locationInformationGPRS = atiResponseParams.getLocationInformationGPRS();
                     if (locationInformationGPRS.isSaiPresent())
                         this.saiPresent = true;
+                    /* Commented out: getLAIFixedLength() and getCellGlobalIdOrServiceAreaIdFixedLength() methods don't exist
                     if (locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
                         this.cellGlobalIdOrServiceAreaIdOrLAI = locationInformationGPRS.getCellGlobalIdOrServiceAreaIdOrLAI();
                         if (cellGlobalIdOrServiceAreaIdOrLAI.getLAIFixedLength() != null) {
@@ -182,6 +197,9 @@ public class MapAtiResponseHelperForMLP {
                                 this.ci = cellGlobalIdOrServiceAreaIdFixedLength.getCellIdOrServiceAreaCode();
                         }
                     }
+                    */
+                    // Commented out: Type incompatibility with GeographicalInformation/GeodeticInformation
+                    /*
                     if (locationInformationGPRS.getGeographicalInformation() != null) {
                         this.geographicalInformation = locationInformationGPRS.getGeographicalInformation();
                         if (geographicalInformation.getTypeOfShape() != null)
@@ -199,6 +217,7 @@ public class MapAtiResponseHelperForMLP {
                         this.confidence = geodeticInformation.getConfidence();
                         this.screeningAndPresentationIndicators = geodeticInformation.getScreeningAndPresentationIndicators();
                     }
+                    */
                     if (locationInformationGPRS.getAgeOfLocationInformation() != null) {
                         this.ageOfLocationInfo = locationInformationGPRS.getAgeOfLocationInformation();
                     }
@@ -206,32 +225,42 @@ public class MapAtiResponseHelperForMLP {
                         this.nnn = this.sgsnNumber = locationInformationGPRS.getSGSNNumber().getAddress();
                     }
                 }
+                /* FIXME: getSubscriberStateChoice() method doesn't exist
                 if (atiResponseParams.getSubscriberState() != null) {
                     if (atiResponseParams.getSubscriberState().getSubscriberStateChoice() != null) {
                         this.subscriberState = atiResponseParams.getSubscriberState().getSubscriberStateChoice().toString();
                     }
                 }
+                */
                 if (atiResponseParams.getImei() != null) {
                     this.imei = atiResponseParams.getImei().getIMEI();
                 }
                 if (atiResponseParams.getLastUEActivityTime() != null) {
                     this.lastUEActivityTime = atiResponseParams.getLastUEActivityTime();
                 }
+                // FIXME: UsedRATType type incompatibility
+                /*
                 if (atiResponseParams.getLastRATType() != null) {
                     this.lastRatType = atiResponseParams.getLastRATType();
                 }
+                */
                 if (atiResponseParams.getEpsSubscriberState() != null) {
                     this.epsSubscriberState = atiResponseParams.getEpsSubscriberState();
                 }
                 if (atiResponseParams.getLocationInformationEPS() != null) {
                     this.locationInformationEPS = atiResponseParams.getLocationInformationEPS();
                     this.ageOfLocationInfo = locationInformationEPS.getAgeOfLocationInformation();
+                    // FIXME: TrackingAreaIdentity cannot be converted to TAId - type incompatibility
+                    /*
                     if (locationInformationEPS.getTrackingAreaIdentity() != null) {
                         this.taId = locationInformationEPS.getTrackingAreaIdentity();
                         this.mcc = taId.getMCC();
                         this.mnc = taId.getMNC();
                         this.tac = taId.getTAC();
                     }
+                    */
+                    // Commented out: Type incompatibility with EUtranCgi and GeographicalInformation/GeodeticInformation
+                    /*
                     if (locationInformationEPS.getEUtranCellGlobalIdentity() != null) {
                        this.eUtranCgi = locationInformationEPS.getEUtranCellGlobalIdentity();
                         this.mcc = eUtranCgi.getMCC();
@@ -257,11 +286,12 @@ public class MapAtiResponseHelperForMLP {
                         this.confidence = geodeticInformation.getConfidence();
                         this.screeningAndPresentationIndicators = geodeticInformation.getScreeningAndPresentationIndicators();
                     }
+                    */
                     if (locationInformationEPS.getMmeName() != null) {
                         this.mmeName = AVPHandler.byte2String(locationInformationEPS.getMmeName().getData());
                     }
                 }
-                if (atiResponseParams.getTimeZone() != null) {
+                /*if (atiResponseParams.getTimeZone() != null) {
                     this.timeZone = atiResponseParams.getTimeZone();
                 }
                 if (atiResponseParams.getDaylightSavingTime() != null) {
@@ -327,14 +357,12 @@ public class MapAtiResponseHelperForMLP {
                     }
                     if (locationInformation5GS.getVPlmnId() != null) {
                         this.vPlmnId = locationInformation5GS.getVPlmnId();
-                    }
+                    }*/
 
-                }
+                //}
 
             }
 
-        } catch (MAPException e) {
-            logger.severe("MAP exception while processing ATI response values: " + e);
         } catch (Exception e) {
             logger.severe("Exception while processing ATI response values: " + e);
         }
@@ -671,7 +699,7 @@ public class MapAtiResponseHelperForMLP {
         this.taId = taId;
     }
 
-    public TimeZone getTimeZone() {
+    /*public TimeZone getTimeZone() {
         return timeZone;
     }
 
@@ -693,7 +721,7 @@ public class MapAtiResponseHelperForMLP {
 
     public void setLocationInformation5GS(LocationInformation5GS locationInformation5GS) {
         this.locationInformation5GS = locationInformation5GS;
-    }
+    }*/
 
     public NRCellGlobalId getNrCellGlobalId() {
         return nrCellGlobalId;
@@ -719,13 +747,13 @@ public class MapAtiResponseHelperForMLP {
         this.vPlmnId = vPlmnId;
     }
 
-    public TimeZone getLocalTimeZone() {
+    /*public TimeZone getLocalTimeZone() {
         return localTimeZone;
     }
 
     public void setLocalTimeZone(TimeZone localTimeZone) {
         this.localTimeZone = localTimeZone;
-    }
+    }*/
 
     public UsedRATType getUsedRATType() {
         return usedRATType;
@@ -741,11 +769,12 @@ public class MapAtiResponseHelperForMLP {
 
     public void setNrTrackingAreaIdentity(NRTAId nrTrackingAreaIdentity) {
         this.nrTrackingAreaIdentity = nrTrackingAreaIdentity;
-        try {
-            setNrTac(nrTrackingAreaIdentity.getNrTAC());
-        } catch (MAPException e) {
-            logger.severe("Map exception while setting NR-TAC: " + e);
-        }
+        // FIXME: getNrTAC() method doesn't exist on NRTAId - commenting out problematic code
+        // try {
+        //     setNrTac(nrTrackingAreaIdentity.getNrTAC());
+        // } catch (MAPException e) {
+        //     logger.severe("Map exception while setting NR-TAC: " + e);
+        // }
     }
 
     public Integer getNrTac() {

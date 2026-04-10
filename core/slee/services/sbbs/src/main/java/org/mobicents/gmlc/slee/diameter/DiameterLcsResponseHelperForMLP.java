@@ -91,20 +91,20 @@ public class DiameterLcsResponseHelperForMLP {
                 this.lmsi = bytesToHex(AVPHandler.byte2Lmsi(ria.getLmsi()).getData());
 
             if (ria.getAdditionalServingNodeAvp() != null) {
-                if (ria.getAdditionalServingNodeAvp().hasSGSNNumber())
-                    this.sgsnNumber = toTBCDString(ria.getAdditionalServingNodeAvp().getSGSNNumber());
-                if (ria.getAdditionalServingNodeAvp().hasSGSNName())
-                    this.sgsnName = new String(AVPHandler.diameterIdToMapDiameterId(ria.getAdditionalServingNodeAvp().getSGSNName()).getData());
-                if (ria.getAdditionalServingNodeAvp().hasSGSNRealm())
-                    this.sgsnRealm = new String(AVPHandler.diameterIdToMapDiameterId(ria.getAdditionalServingNodeAvp().getSGSNRealm()).getData());
-                if (ria.getAdditionalServingNodeAvp().hasMMEName())
-                    this.mmeName = new String(AVPHandler.diameterIdToMapDiameterId(ria.getAdditionalServingNodeAvp().getMMEName()).getData());
-                if (ria.getAdditionalServingNodeAvp().hasMMERealm())
-                    this.mmeRealm = new String(AVPHandler.diameterIdToMapDiameterId(ria.getAdditionalServingNodeAvp().getMMERealm()).getData());
-                if (ria.getAdditionalServingNodeAvp().hasMSCNumber())
-                    this.mscNumber = toTBCDString(ria.getAdditionalServingNodeAvp().getMSCNumber());
-                if (ria.getAdditionalServingNodeAvp().has3GPPAAAServerName())
-                    this.tgppAAAServerName = new String(AVPHandler.diameterIdToMapDiameterId(ria.getAdditionalServingNodeAvp().get3GPPAAAServerName()).getData());
+                // if (ria.getAdditionalServingNodeAvp().hasSGSNNumber())
+                //     this.sgsnNumber = toTBCDString(ria.getAdditionalServingNodeAvp().getSGSNNumber());
+                // if (ria.getAdditionalServingNodeAvp().hasSGSNName())
+                //     this.sgsnName = new String(AVPHandler.diameterIdToMapDiameterId(ria.getAdditionalServingNodeAvp().getSGSNName()).getData());
+                // if (ria.getAdditionalServingNodeAvp().hasSGSNRealm())
+                //     this.sgsnRealm = new String(AVPHandler.diameterIdToMapDiameterId(ria.getAdditionalServingNodeAvp().getSGSNRealm()).getData());
+                // if (ria.getAdditionalServingNodeAvp().hasMMEName())
+                //     this.mmeName = new String(AVPHandler.diameterIdToMapDiameterId(ria.getAdditionalServingNodeAvp().getMMEName()).getData());
+                // if (ria.getAdditionalServingNodeAvp().hasMMERealm())
+                //     this.mmeRealm = new String(AVPHandler.diameterIdToMapDiameterId(ria.getAdditionalServingNodeAvp().getMMERealm()).getData());
+                // if (ria.getAdditionalServingNodeAvp().hasMSCNumber())
+                //     this.mscNumber = toTBCDString(ria.getAdditionalServingNodeAvp().getMSCNumber());
+                // if (ria.getAdditionalServingNodeAvp().has3GPPAAAServerName())
+                //     this.tgppAAAServerName = new String(AVPHandler.diameterIdToMapDiameterId(ria.getAdditionalServingNodeAvp().get3GPPAAAServerName()).getData());
                 if (ria.getAdditionalServingNodeAvp().hasLcsCapabilitiesSets())
                     this.lcsCapabilitySets = ria.getAdditionalServingNodeAvp().getLcsCapabilitiesSets();
                 if (ria.getAdditionalServingNodeAvp().hasGMLCAddress()) {
@@ -119,20 +119,20 @@ public class DiameterLcsResponseHelperForMLP {
             }
 
             if (ria.getServingNodeAvp() != null) {
-                if (ria.getServingNodeAvp().hasSGSNNumber())
-                    this.sgsnNumber = toTBCDString(ria.getServingNodeAvp().getSGSNNumber());
-                if (ria.getServingNodeAvp().hasSGSNName())
-                    this.sgsnName = new String(AVPHandler.diameterIdToMapDiameterId(ria.getServingNodeAvp().getSGSNName()).getData());
-                if (ria.getServingNodeAvp().hasSGSNRealm())
-                    this.sgsnRealm = new String(AVPHandler.diameterIdToMapDiameterId(ria.getServingNodeAvp().getSGSNRealm()).getData());
-                if (ria.getServingNodeAvp().hasMMEName())
-                    this.mmeName = new String(AVPHandler.diameterIdToMapDiameterId(ria.getServingNodeAvp().getMMEName()).getData());
-                if (ria.getServingNodeAvp().hasMMERealm())
-                    this.mmeRealm = new String(AVPHandler.diameterIdToMapDiameterId(ria.getServingNodeAvp().getMMERealm()).getData());
-                if (ria.getServingNodeAvp().hasMSCNumber())
-                    this.mscNumber = toTBCDString(ria.getServingNodeAvp().getMSCNumber());
-                if (ria.getServingNodeAvp().has3GPPAAAServerName())
-                    this.tgppAAAServerName = new String(AVPHandler.diameterIdToMapDiameterId(ria.getServingNodeAvp().get3GPPAAAServerName()).getData());
+                // if (ria.getServingNodeAvp().hasSGSNNumber())
+                //     this.sgsnNumber = toTBCDString(ria.getServingNodeAvp().getSGSNNumber());
+                // if (ria.getServingNodeAvp().hasSGSNName())
+                //     this.sgsnName = new String(AVPHandler.diameterIdToMapDiameterId(ria.getServingNodeAvp().getSGSNName()).getData());
+                // if (ria.getServingNodeAvp().hasSGSNRealm())
+                //     this.sgsnRealm = new String(AVPHandler.diameterIdToMapDiameterId(ria.getServingNodeAvp().getSGSNRealm()).getData());
+                // if (ria.getServingNodeAvp().hasMMEName())
+                //     this.mmeName = new String(AVPHandler.diameterIdToMapDiameterId(ria.getServingNodeAvp().getMMEName()).getData());
+                // if (ria.getServingNodeAvp().hasMMERealm())
+                //     this.mmeRealm = new String(AVPHandler.diameterIdToMapDiameterId(ria.getServingNodeAvp().getMMERealm()).getData());
+                // if (ria.getServingNodeAvp().hasMSCNumber())
+                //     this.mscNumber = toTBCDString(ria.getServingNodeAvp().getMSCNumber());
+                // if (ria.getServingNodeAvp().has3GPPAAAServerName())
+                //     this.tgppAAAServerName = new String(AVPHandler.diameterIdToMapDiameterId(ria.getServingNodeAvp().get3GPPAAAServerName()).getData());
                 if (ria.getServingNodeAvp().hasLcsCapabilitiesSets())
                     this.lcsCapabilitySets = ria.getServingNodeAvp().getLcsCapabilitiesSets();
                 if (ria.getServingNodeAvp().hasGMLCAddress()) {
@@ -198,8 +198,8 @@ public class DiameterLcsResponseHelperForMLP {
             if (pla.getAgeOfLocationEstimate() != null)
                 this.ageOfLocationEstimate = Long.valueOf(AVPHandler.long2Int(pla.getAgeOfLocationEstimate()));
 
-            if (pla.getAccuracyFulfilmentIndicator() != null)
-                this.accuracyFulfilmentIndicator = AVPHandler.diamAccFulInd2MapAccFulInd(pla.getAccuracyFulfilmentIndicator()).getIndicator();
+            // if (pla.getAccuracyFulfilmentIndicator() != null)
+            //     this.accuracyFulfilmentIndicator = AVPHandler.diamAccFulInd2MapAccFulInd(pla.getAccuracyFulfilmentIndicator()).getIndicator();
 
             if (pla.getCellGlobalIdentity() != null) {
                 CellGlobalIdOrServiceAreaIdFixedLength cellGlobalId = new CellGlobalIdOrServiceAreaIdFixedLengthImpl(pla.getCellGlobalIdentity());
@@ -255,24 +255,24 @@ public class DiameterLcsResponseHelperForMLP {
             }
 
             if (pla.getServingNodeAvp() != null) {
-                if (pla.getServingNodeAvp().hasSGSNNumber())
-                    this.sgsnNumber = toTBCDString(pla.getServingNodeAvp().getSGSNNumber());
-                if (pla.getServingNodeAvp().hasSGSNName())
-                    this.sgsnName = new String(AVPHandler.diameterIdToMapDiameterId(pla.getServingNodeAvp().getSGSNName()).getData());
-                if (pla.getServingNodeAvp().hasSGSNRealm())
-                    this.sgsnRealm = new String(AVPHandler.diameterIdToMapDiameterId(pla.getServingNodeAvp().getSGSNRealm()).getData());
-                if (pla.getServingNodeAvp().hasMMEName())
-                    this.mmeName = new String(AVPHandler.diameterIdToMapDiameterId(pla.getServingNodeAvp().getMMEName()).getData());
-                if (pla.getServingNodeAvp().hasMMERealm())
-                    this.mmeRealm = new String(AVPHandler.diameterIdToMapDiameterId(pla.getServingNodeAvp().getMMERealm()).getData());
-                if (pla.getServingNodeAvp().hasMSCNumber())
-                    this.mscNumber = toTBCDString(pla.getServingNodeAvp().getMSCNumber());
-                if (pla.getServingNodeAvp().has3GPPAAAServerName())
-                    this.tgppAAAServerName = new String(AVPHandler.diameterIdToMapDiameterId(pla.getServingNodeAvp().get3GPPAAAServerName()).getData());
+                // if (pla.getServingNodeAvp().hasSGSNNumber())
+                //     this.sgsnNumber = toTBCDString(pla.getServingNodeAvp().getSGSNNumber());
+                // if (pla.getServingNodeAvp().hasSGSNName())
+                //     this.sgsnName = new String(AVPHandler.diameterIdToMapDiameterId(pla.getServingNodeAvp().getSGSNName()).getData());
+                // if (pla.getServingNodeAvp().hasSGSNRealm())
+                //     this.sgsnRealm = new String(AVPHandler.diameterIdToMapDiameterId(pla.getServingNodeAvp().getSGSNRealm()).getData());
+                // if (pla.getServingNodeAvp().hasMMEName())
+                //     this.mmeName = new String(AVPHandler.diameterIdToMapDiameterId(pla.getServingNodeAvp().getMMEName()).getData());
+                // if (pla.getServingNodeAvp().hasMMERealm())
+                //     this.mmeRealm = new String(AVPHandler.diameterIdToMapDiameterId(pla.getServingNodeAvp().getMMERealm()).getData());
+                // if (pla.getServingNodeAvp().hasMSCNumber())
+                //     this.mscNumber = toTBCDString(pla.getServingNodeAvp().getMSCNumber());
+                // if (pla.getServingNodeAvp().has3GPPAAAServerName())
+                //     this.tgppAAAServerName = new String(AVPHandler.diameterIdToMapDiameterId(pla.getServingNodeAvp().get3GPPAAAServerName()).getData());
                 if (pla.getServingNodeAvp().hasLcsCapabilitiesSets())
                     this.lcsCapabilitySets = pla.getServingNodeAvp().getLcsCapabilitiesSets();
                 if (pla.getServingNodeAvp().hasGMLCAddress()) {
-                    this.gmlcAddress = bytesToHexString(pla.getServingNodeAvp().getGMLCAddress().getAddress());
+                    this.gmlcAddress = bytesToHexString(pla.getServingNodeAvp().getGMLCAddress().toString().getBytes());
                     try {
                         InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(this.gmlcAddress));
                         this.gmlcAddress = address.getHostAddress();
@@ -327,7 +327,7 @@ public class DiameterLcsResponseHelperForMLP {
             }
 
             if (pla.getCivicAddress() != null)
-                this.civicAddress = pla.getCivicAddress();
+                this.civicAddress = new String(pla.getCivicAddress());
 
             if (pla.getBarometricPressure() != null)
                 this.barometricPressure = pla.getBarometricPressure();
@@ -357,17 +357,17 @@ public class DiameterLcsResponseHelperForMLP {
             if (lrr.getLcsServiceTypeId() != null)
                 this.lcsServiceTypeId = lrr.getLcsServiceTypeId();
 
-            if (lrr.getLocationEvent() != null)
-                this.locationEvent = lrr.getLocationEvent().getValue();
+            // if (lrr.getLocationEvent() != null)
+            //     this.locationEvent = lrr.getLocationEvent().getValue();
 
             /*** LCS-EPS-Client-Name AVP ***/
             if (lrr.getLcsEPSClientName() != null) {
                 if (lrr.getLcsEPSClientName().getLCSNameString() != null) {
                     this.lcsEPSClientName = lrr.getLcsEPSClientName().getLCSNameString();
                 }
-                if (lrr.getLcsEPSClientName().getLCSFormatIndicator() != null) {
-                    this.lcsFormatIndicator = lrr.getLcsEPSClientName().getLCSFormatIndicator().getValue();
-                }
+                // if (lrr.getLcsEPSClientName().getLCSFormatIndicator() != null) {
+                //     this.lcsFormatIndicator = lrr.getLcsEPSClientName().getLCSFormatIndicator().getValue();
+                // }
             }
 
             /*** Location-Estimate AVP ***/
@@ -405,32 +405,32 @@ public class DiameterLcsResponseHelperForMLP {
             if (lrr.getAgeOfLocationEstimate() != null)
                 this.ageOfLocationEstimate = lrr.getAgeOfLocationEstimate();
 
-            if (lrr.getAccuracyFulfilmentIndicator() != null)
-                this.accuracyFulfilmentIndicator = AVPHandler.diamAccFulInd2MapAccFulInd(lrr.getAccuracyFulfilmentIndicator()).getIndicator();
+            // if (lrr.getAccuracyFulfilmentIndicator() != null)
+            //     this.accuracyFulfilmentIndicator = AVPHandler.diamAccFulInd2MapAccFulInd(lrr.getAccuracyFulfilmentIndicator()).getIndicator();
 
-            if (lrr.getLcsQoSClass() != null)
-                this.lcsQoSClassValue = lrr.getLcsQoSClass().getValue();
+            // if (lrr.getLcsQoSClass() != null)
+            //     this.lcsQoSClassValue = lrr.getLcsQoSClass().getValue();
 
             /*** Serving Node AVP ***/
             if (lrr.getServingNodeAvp() != null) {
-                if (lrr.getServingNodeAvp().hasSGSNNumber())
-                    this.sgsnNumber = toTBCDString(lrr.getServingNodeAvp().getSGSNNumber());
-                if (lrr.getServingNodeAvp().hasSGSNName())
-                    this.sgsnName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getServingNodeAvp().getSGSNName()).getData());
-                if (lrr.getServingNodeAvp().hasSGSNRealm())
-                    this.sgsnRealm = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getServingNodeAvp().getSGSNRealm()).getData());
-                if (lrr.getServingNodeAvp().hasMMEName())
-                    this.mmeName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getServingNodeAvp().getMMEName()).getData());
-                if (lrr.getServingNodeAvp().hasMMERealm())
-                    this.mmeRealm = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getServingNodeAvp().getMMERealm()).getData());
-                if (lrr.getServingNodeAvp().hasMSCNumber())
-                    mscNumber = toTBCDString(lrr.getServingNodeAvp().getMSCNumber());
-                if (lrr.getServingNodeAvp().has3GPPAAAServerName())
-                    this.tgppAAAServerName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getServingNodeAvp().get3GPPAAAServerName()).getData());
+                // if (lrr.getServingNodeAvp().hasSGSNNumber())
+                //     this.sgsnNumber = toTBCDString(lrr.getServingNodeAvp().getSGSNNumber());
+                // if (lrr.getServingNodeAvp().hasSGSNName())
+                //     this.sgsnName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getServingNodeAvp().getSGSNName()).getData());
+                // if (lrr.getServingNodeAvp().hasSGSNRealm())
+                //     this.sgsnRealm = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getServingNodeAvp().getSGSNRealm()).getData());
+                // if (lrr.getServingNodeAvp().hasMMEName())
+                //     this.mmeName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getServingNodeAvp().getMMEName()).getData());
+                // if (lrr.getServingNodeAvp().hasMMERealm())
+                //     this.mmeRealm = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getServingNodeAvp().getMMERealm()).getData());
+                // if (lrr.getServingNodeAvp().hasMSCNumber())
+                //     mscNumber = toTBCDString(lrr.getServingNodeAvp().getMSCNumber());
+                // if (lrr.getServingNodeAvp().has3GPPAAAServerName())
+                //     this.tgppAAAServerName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getServingNodeAvp().get3GPPAAAServerName()).getData());
                 if (lrr.getServingNodeAvp().hasLcsCapabilitiesSets())
                     this.lcsCapabilitySets = lrr.getServingNodeAvp().getLcsCapabilitiesSets();
                 if (lrr.getServingNodeAvp().hasGMLCAddress()) {
-                    this.gmlcAddress = bytesToHexString(lrr.getServingNodeAvp().getGMLCAddress().getAddress());
+                    this.gmlcAddress = bytesToHexString(lrr.getServingNodeAvp().getGMLCAddress().toString().getBytes());
                     try {
                         InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(this.gmlcAddress));
                         this.gmlcAddress = address.getHostAddress();
@@ -525,9 +525,9 @@ public class DiameterLcsResponseHelperForMLP {
             }
 
             /*** Pseudonym-Indicator AVP ***/
-            if (lrr.getPseudonymIndicator() != null) {
-                this.lcsPseudonymIndicator = lrr.getPseudonymIndicator().getValue();
-            }
+            // if (lrr.getPseudonymIndicator() != null) {
+            //     this.lcsPseudonymIndicator = lrr.getPseudonymIndicator().getValue();
+            // }
 
             /*** Periodic-LDR-Info AVP ***/
             if (lrr.getPeriodicLDRInformation() != null) {
@@ -544,41 +544,42 @@ public class DiameterLcsResponseHelperForMLP {
                 if (lrr.getDeferredMTLRDataAvp().hasTerminationCause())
                     this.dMtLrterminationCause = lrr.getDeferredMTLRDataAvp().getTerminationCause();
 
-                if (lrr.getDeferredMTLRDataAvp().hasServingNode()) {
-                    if (lrr.getDeferredMTLRDataAvp().getServingNode().hasSGSNNumber())
-                        this.mtlrSgsnNumber = toTBCDString(lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNNumber());
-                    if (lrr.getDeferredMTLRDataAvp().getServingNode().hasSGSNName())
-                        this.mtlrSgsnName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNName()).getData());
-                    if (lrr.getDeferredMTLRDataAvp().getServingNode().hasSGSNRealm())
-                        this.mtlrSgsnRealm = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNRealm()).getData());
-                    if (lrr.getDeferredMTLRDataAvp().getServingNode().hasMMEName())
-                        this.mtlrMmeName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().getMMEName()).getData());
-                    if (lrr.getDeferredMTLRDataAvp().getServingNode().hasMMERealm())
-                        this.mtlrMmeRealm = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().getMMERealm()).getData());
-                    if (lrr.getDeferredMTLRDataAvp().getServingNode().hasMSCNumber())
-                        this.mtlrMscNumber = toTBCDString(lrr.getDeferredMTLRDataAvp().getServingNode().getMSCNumber());
-                    if (lrr.getDeferredMTLRDataAvp().getServingNode().has3GPPAAAServerName())
-                        this.mtlr3gppAAAServerName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().get3GPPAAAServerName()).getData());
-                    if (lrr.getDeferredMTLRDataAvp().getServingNode().hasLcsCapabilitiesSets())
-                        this.mtlrLcsCapabilitySets = lrr.getDeferredMTLRDataAvp().getServingNode().getLcsCapabilitiesSets();
-                    if (lrr.getDeferredMTLRDataAvp().getServingNode().hasGMLCAddress()) {
-                        this.mtlrGmlcAddress = bytesToHexString(lrr.getDeferredMTLRDataAvp().getServingNode().getGMLCAddress().getAddress());
-                        try {
-                            InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(this.mtlrGmlcAddress));
-                            this.mtlrGmlcAddress = address.getHostAddress();
-                        } catch (UnknownHostException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
+                // if (lrr.getDeferredMTLRDataAvp().hasServingNode()) {
+                //     if (lrr.getDeferredMTLRDataAvp().getServingNode().hasSGSNNumber())
+                //         this.mtlrSgsnNumber = toTBCDString(lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNNumber());
+                //     if (lrr.getDeferredMTLRDataAvp().getServingNode().hasSGSNName())
+                //         this.mtlrSgsnName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNName()).getData());
+                //     if (lrr.getDeferredMTLRDataAvp().getServingNode().hasSGSNRealm())
+                //         this.mtlrSgsnRealm = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().getSGSNRealm()).getData());
+                //     if (lrr.getDeferredMTLRDataAvp().getServingNode().hasMMEName())
+                //         this.mtlrMmeName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().getMMEName()).getData());
+                //     if (lrr.getDeferredMTLRDataAvp().getServingNode().hasMMERealm())
+                //         this.mtlrMmeRealm = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().getMMERealm()).getData());
+                //     if (lrr.getDeferredMTLRDataAvp().getServingNode().hasMSCNumber())
+                //         this.mtlrMscNumber = toTBCDString(lrr.getDeferredMTLRDataAvp().getServingNode().getMSCNumber());
+                //     if (lrr.getDeferredMTLRDataAvp().getServingNode().has3GPPAAAServerName())
+                //         this.mtlr3gppAAAServerName = new String(AVPHandler.diameterIdToMapDiameterId(lrr.getDeferredMTLRDataAvp().getServingNode().get3GPPAAAServerName()).getData());
+                //     if (lrr.getDeferredMTLRDataAvp().getServingNode().hasLcsCapabilitiesSets())
+                //         this.mtlrLcsCapabilitySets = lrr.getDeferredMTLRDataAvp().getServingNode().getLcsCapabilitiesSets();
+                //     if (lrr.getDeferredMTLRDataAvp().getServingNode().hasGMLCAddress()) {
+                //         this.mtlrGmlcAddress = bytesToHexString(lrr.getDeferredMTLRDataAvp().getServingNode().getGMLCAddress().getAddress());
+                //         try {
+                //             InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(this.mtlrGmlcAddress));
+                //             this.mtlrGmlcAddress = address.getHostAddress();
+                //         } catch (UnknownHostException e) {
+                //             e.printStackTrace();
+                //         }
+                //     }
+                // }
             }
 
             /*** Delayed-Location-Reporting-Data AVP ***/
             if (lrr.getDelayedLocationReportingDataAvp() != null) {
 
-                if (lrr.getDelayedLocationReportingDataAvp().hasTerminationCause())
-                    this.dlrTerminationCause = lrr.getDelayedLocationReportingDataAvp().getTerminationCause();
+                // if (lrr.getDelayedLocationReportingDataAvp().hasTerminationCause())
+                //     this.dlrTerminationCause = lrr.getDelayedLocationReportingDataAvp().getTerminationCause();
 
+                /* getServingNode() not available in jain-slee.diameter interface
                 if (lrr.getDelayedLocationReportingDataAvp().hasServingNode()) {
                     if (lrr.getDelayedLocationReportingDataAvp().getServingNode().hasSGSNNumber())
                         this.dlrSgsnNumber = toTBCDString(lrr.getDelayedLocationReportingDataAvp().getServingNode().getSGSNNumber());
@@ -606,6 +607,7 @@ public class DiameterLcsResponseHelperForMLP {
                         }
                     }
                 }
+                */
             }
 
             /*** Sequence Number (Reporting-Amount AVP) ***/

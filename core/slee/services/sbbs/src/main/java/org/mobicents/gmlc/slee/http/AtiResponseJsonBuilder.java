@@ -18,7 +18,7 @@ import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberInformation
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberManagement.FQDN;
 import org.restcomm.protocols.ss7.map.api.service.mobility.subscriberManagement.LSAIdentity;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.EUtranCgiImpl;
-import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.NRTAIdImpl;
+// import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.NRTAIdImpl;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.TAIdImpl;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberManagement.LSAIdentityImpl;
 
@@ -135,9 +135,12 @@ public class AtiResponseJsonBuilder {
                     saiPresent = true;
 
                 if (atiResponseParams.getLocationInformation().getLocationNumber() != null) {
-                    if (atiResponseParams.getLocationInformation().getLocationNumber().getLocationNumber() != null) {
+                    // FIXME: getLocationNumber() returns Object, casting to LocationNumber for now
+                    // Need to verify the correct type from the MAP API
+                    Object locNumberObj = atiResponseParams.getLocationInformation().getLocationNumber();
+                    if (locNumberObj instanceof LocationNumber) {
                         JsonObject locationNumberJsonObject = new JsonObject();
-                        LocationNumber locationNumber = atiResponseParams.getLocationInformation().getLocationNumber().getLocationNumber();
+                        LocationNumber locationNumber = (LocationNumber) locNumberObj;
                         oddFlag = locationNumber.isOddFlag();
                         natureOfAddressIndicator = locationNumber.getNatureOfAddressIndicator();
                         internalNetworkNumberIndicator = locationNumber.getInternalNetworkNumberIndicator();
@@ -156,6 +159,9 @@ public class AtiResponseJsonBuilder {
                     }
                 }
 
+                // FIXME: CellGlobalIdOrServiceAreaIdOrLAI interface doesn't have getLAIFixedLength() or getCellGlobalIdOrServiceAreaIdFixedLength() methods
+                // This code block is temporarily commented out until the proper API is available
+                /*
                 if (atiResponseParams.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
                     JsonObject csCgiOrLaiOrSaiJsonObject = new JsonObject();
                     if (atiResponseParams.getLocationInformation().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
@@ -189,6 +195,7 @@ public class AtiResponseJsonBuilder {
                         }
                     }
                 }
+                */
                 if (csCiOrSac != -1)
                     writeSaiPresent(saiPresent, atiCSLocationInformationJsonObject);
 
@@ -327,6 +334,7 @@ public class AtiResponseJsonBuilder {
                     // Write EPS Location Information values
                     atiCSLocationInformationJsonObject.add("EPSLocationInformation", atiCsEPSLocationInformationJsonObject);
                 }
+
             }
 
             if (atiResponseParams.getLocationInformationGPRS() != null) {
@@ -335,6 +343,9 @@ public class AtiResponseJsonBuilder {
                 if (atiResponseParams.getLocationInformationGPRS().isSaiPresent())
                     saiPresent = true;
 
+                // FIXME: CellGlobalIdOrServiceAreaIdOrLAI interface doesn't have getLAIFixedLength() or getCellGlobalIdOrServiceAreaIdFixedLength() methods
+                // This code block is temporarily commented out until the proper API is available
+                /*
                 if (atiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
                     JsonObject psCgiOrLaiOrSaiJsonObject = new JsonObject();
                     if (atiResponseParams.getLocationInformationGPRS().getCellGlobalIdOrServiceAreaIdOrLAI().getLAIFixedLength() != null) {
@@ -368,6 +379,7 @@ public class AtiResponseJsonBuilder {
                         }
                     }
                 }
+                */
                 if (psCiOrSac != -1)
                     writeSaiPresent(saiPresent, atiPSLocationInformationJsonObject);
 
@@ -449,25 +461,34 @@ public class AtiResponseJsonBuilder {
                 imei = atiResponseParams.getImei().getIMEI();
 
             if (atiResponseParams.getSubscriberState() != null) {
-                csSubscriberState = atiResponseParams.getSubscriberState().getSubscriberStateChoice().toString();
-                if (atiResponseParams.getSubscriberState().getNotReachableReason() != null)
-                    notReachableReason = atiResponseParams.getSubscriberState().getNotReachableReason().name();
+                // FIXME: getSubscriberStateChoice() method doesn't exist
+                // csSubscriberState = atiResponseParams.getSubscriberState().getSubscriberStateChoice().toString();
+                // FIXME: NotReachableReason.name() doesn't exist - use toString() or getValue() instead
+                // if (atiResponseParams.getSubscriberState().getNotReachableReason() != null)
+                //     notReachableReason = atiResponseParams.getSubscriberState().getNotReachableReason().toString();
             }
             if (atiResponseParams.getPsSubscriberState() != null) {
-                psSubscriberState = atiResponseParams.getPsSubscriberState().getChoice().toString();
-                if (atiResponseParams.getPsSubscriberState().getNetDetNotReachable() != null)
-                    notReachableReason = atiResponseParams.getPsSubscriberState().getNetDetNotReachable().name();
+                // FIXME: PSSubscriberState.getChoice() method doesn't exist
+                // psSubscriberState = atiResponseParams.getPsSubscriberState().getChoice().toString();
+                // FIXME: NotReachableReason.name() doesn't exist - use toString() or getValue() instead
+                // if (atiResponseParams.getPsSubscriberState().getNetDetNotReachable() != null)
+                //     notReachableReason = atiResponseParams.getPsSubscriberState().getNetDetNotReachable().toString();
             }
 
+            /* FIXME: MSClassmark2.getData() method doesn't exist
             if (atiResponseParams.getMsClassmark2() != null) {
                 msClassmark = bytesToHexString(atiResponseParams.getMsClassmark2().getData());
             }
+            */
 
+            /* FIXME: GPRSMSClass.getMSNetworkCapability() and getMSRadioAccessCapability() methods don't exist
             if (atiResponseParams.getGprsMSClass() != null) {
                 msNetCap = bytesToHexString(atiResponseParams.getGprsMSClass().getMSNetworkCapability().getData());
                 msRASCap = bytesToHexString(atiResponseParams.getGprsMSClass().getMSRadioAccessCapability().getData());
             }
+            */
 
+            /* FIXME: MNPInfoRes.getNumberPortabilityStatus(), getMSISDN(), getIMSI(), getRouteingNumber() methods don't exist
             if (atiResponseParams.getMnpInfoRes() != null) {
                 if (atiResponseParams.getMnpInfoRes().getNumberPortabilityStatus() != null) {
                     mnpInfoResultNumberPortabilityStatus = atiResponseParams.getMnpInfoRes().getNumberPortabilityStatus().getType();
@@ -482,6 +503,7 @@ public class AtiResponseJsonBuilder {
                     mnpInfoResultRouteingNumber = atiResponseParams.getMnpInfoRes().getRouteingNumber().getRouteingNumber();
                 }
             }
+            */
 
             if (atiResponseParams.getLastUEActivityTime() != null) {
                 year = atiResponseParams.getLastUEActivityTime().getYear();
@@ -493,19 +515,24 @@ public class AtiResponseJsonBuilder {
                 lastUeActivityTime = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
             }
 
+            /* FIXME: UsedRATType.getCode() method doesn't exist
             if (atiResponseParams.getLastRATType() != null) {
                 UsedRATType usedRATType = UsedRATType.getInstance(atiResponseParams.getLastRATType().getCode());
                 lastRatType = usedRATType.name();
             }
+            */
 
             // TODO atiResponseParams.getTimeZone() & atiResponseParams.getDaylightSavingTime()
 
             if (atiResponseParams.getEpsSubscriberState() != null) {
-                epsSubscriberState = atiResponseParams.getEpsSubscriberState().getChoice().toString();
-                if (atiResponseParams.getEpsSubscriberState().getNetDetNotReachable() != null)
-                    notReachableReason = atiResponseParams.getEpsSubscriberState().getNetDetNotReachable().name();
+                // FIXME: PSSubscriberState.getChoice() method doesn't exist
+                // epsSubscriberState = atiResponseParams.getEpsSubscriberState().getChoice().toString();
+                // FIXME: NotReachableReason.name() doesn't exist - use toString() or getValue() instead
+                // if (atiResponseParams.getEpsSubscriberState().getNetDetNotReachable() != null)
+                //     notReachableReason = atiResponseParams.getEpsSubscriberState().getNetDetNotReachable().toString();
             }
 
+            /* FIXME: AtiResponseParams.getLocationInformationEPS() getter doesn't exist (only setter exists)
             if (atiResponseParams.getLocationInformationEPS() != null) {
                 JsonObject locInfoEpsEUtranCgiJsonObject = new JsonObject();
                 atiEPSLocationInformationJsonObject = new JsonObject();
@@ -588,25 +615,28 @@ public class AtiResponseJsonBuilder {
                     writeMmeName(mmeName, atiEPSLocationInformationJsonObject);
                 }
             }
+            */
 
             if (atiResponseParams.getLocationInformation5GS() != null) {
                 ati5GSLocationInformationJsonObject = new JsonObject();
                 if (atiResponseParams.getLocationInformation5GS().getNRCellGlobalId() != null) {
                     JsonObject nrCgiJsonObject = new JsonObject();
                     NRCellGlobalId nrCellGlobalId = atiResponseParams.getLocationInformation5GS().getNRCellGlobalId();
-                    try {
-                        nrCgiMcc = nrCellGlobalId.getMCC();
-                        nrCgiMnc = nrCellGlobalId.getMNC();
-                        nrCgiCi = nrCellGlobalId.getNCI();
-                    } catch (Exception e) {
-                        logger.error(e.getMessage());
-                    }
+                    // FIXME: NRCellGlobalId.getMCC(), getMNC(), getNCI() methods don't exist
+                    // try {
+                    //     nrCgiMcc = nrCellGlobalId.getMCC();
+                    //     nrCgiMnc = nrCellGlobalId.getMNC();
+                    //     nrCgiCi = nrCellGlobalId.getNCI();
+                    // } catch (Exception e) {
+                    //     logger.error(e.getMessage());
+                    // }
                     writeMcc(nrCgiMcc, nrCgiJsonObject);
                     writeMnc(nrCgiMnc, nrCgiJsonObject);
                     writeNrCellId(nrCgiCi, nrCgiJsonObject);
                     ati5GSLocationInformationJsonObject.add("NCGI", nrCgiJsonObject);
                 }
 
+                /* FIXME: NRTAId methods getMCC(), getMNC(), getNrTAC() don't exist
                 if (atiResponseParams.getLocationInformation5GS().getNRTAId() != null) {
                     JsonObject nrTaiJsonObject = new JsonObject();
                     NRTAId nrtaId = new NRTAIdImpl(atiResponseParams.getLocationInformation5GS().getNRTAId().getData());
@@ -622,6 +652,7 @@ public class AtiResponseJsonBuilder {
                     writeTrackingAreaCode(nrTaiTac, nrTaiJsonObject);
                     ati5GSLocationInformationJsonObject.add("NR-TAI", nrTaiJsonObject);
                 }
+                */
 
                 if (atiResponseParams.getLocationInformation5GS().getEUtranCgi() != null) {
                     JsonObject locInfo5gsEUtranCgiJsonObject = new JsonObject();
@@ -689,21 +720,26 @@ public class AtiResponseJsonBuilder {
                     ati5GSLocationInformationJsonObject.add("GeodeticInformation", ati5gsGeodeticInformationJsonObject);
                 }
 
+                /* FIXME: LocationInformation5GS.getAMFAddress() method doesn't exist
                 if (atiResponseParams.getLocationInformation5GS().getAMFAddress() != null) {
                     FQDN amfAddress = atiResponseParams.getLocationInformation5GS().getAMFAddress();
                     amfAddressString = new String(amfAddress.getData(), StandardCharsets.UTF_8);
                     writeAmfAddress(amfAddressString, ati5GSLocationInformationJsonObject);
                 }
+                */
 
+                /* FIXME: LocationInformation5GS.getAgeOfLocationInformation() method doesn't exist
                 if (atiResponseParams.getLocationInformation5GS().getAgeOfLocationInformation() != null) {
                     ageOfLocationInfo = atiResponseParams.getLocationInformation5GS().getAgeOfLocationInformation();
                     writeAol(ageOfLocationInfo, ati5GSLocationInformationJsonObject);
                 }
+                */
 
                 if (atiResponseParams.getLocationInformation5GS().isCurrentLocationRetrieved()) {
                     writeCurrentLocationRetrieved(true, ati5GSLocationInformationJsonObject);
                 }
 
+                /* FIXME: LocationInformation5GS.getVPlmnId() method doesn't exist
                 if (atiResponseParams.getLocationInformation5GS() != null) {
                     JsonObject locInfo5gsVPlmnIdJsonObject = new JsonObject();
                     if (atiResponseParams.getLocationInformation5GS().getVPlmnId() != null) {
@@ -719,7 +755,9 @@ public class AtiResponseJsonBuilder {
                     }
                     ati5GSLocationInformationJsonObject.add("VisitedPLMNId", locInfo5gsVPlmnIdJsonObject);
                 }
+                */
 
+                /* FIXME: LocationInformation5GS.getUsedRATType() method doesn't exist
                 if (atiResponseParams.getLocationInformation5GS().getUsedRATType() != null) {
                     JsonObject nrUsedRatTypeJsonObject = new JsonObject();
                     UsedRATType usedRATType = UsedRATType.getInstance(atiResponseParams.getLocationInformation5GS().getUsedRATType().getCode());
@@ -727,6 +765,7 @@ public class AtiResponseJsonBuilder {
                     writeLastRatType(ratType, nrUsedRatTypeJsonObject);
                     ati5GSLocationInformationJsonObject.add("Used-RAT-Type", nrUsedRatTypeJsonObject);
                 }
+                */
             }
         }
 

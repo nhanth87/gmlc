@@ -62,10 +62,10 @@ import javax.xml.bind.annotation.XmlType;
 public class Hdr {
 
     @XmlElementRefs({
-        @XmlElementRef(name = "sessionid", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "client", type = Client.class, required = false),
-        @XmlElementRef(name = "subclient", type = Subclient.class, required = false),
-        @XmlElementRef(name = "requestor", type = Requestor.class, required = false)
+        @XmlElementRef(name = "sessionid", type = JAXBElement.class),
+        @XmlElementRef(name = "client", type = Client.class),
+        @XmlElementRef(name = "subclient", type = Subclient.class),
+        @XmlElementRef(name = "requestor", type = Requestor.class)
     })
     protected List<Object> content;
     @XmlAttribute(name = "ver")

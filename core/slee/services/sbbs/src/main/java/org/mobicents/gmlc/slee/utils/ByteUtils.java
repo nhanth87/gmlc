@@ -1,9 +1,9 @@
 package org.mobicents.gmlc.slee.utils;
 
-import com.objsys.asn1j.runtime.Asn1Integer;
-import com.objsys.asn1j.runtime.Asn1PerEncodeBuffer;
-import org.mobicents.gmlc.slee.supl.SUPL_INIT.SUPLINIT;
-import org.mobicents.gmlc.slee.supl.ULP.ULP_PDU;
+// import com.objsys.asn1j.runtime.Asn1Integer;
+// import com.objsys.asn1j.runtime.Asn1PerEncodeBuffer;
+// import org.mobicents.gmlc.slee.supl.SUPL_INIT.SUPLINIT;
+// import org.mobicents.gmlc.slee.supl.ULP.ULP_PDU;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -213,6 +213,7 @@ public class ByteUtils {
                 .toString();
     }
 
+    /*
     public static byte[] encodeUlp(ULP_PDU message) {
         try {
             Asn1PerEncodeBuffer outputStream = new Asn1PerEncodeBuffer(false);
@@ -242,4 +243,5 @@ public class ByteUtils {
         }
         return null;
     }
+    */
 }

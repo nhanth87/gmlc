@@ -34,7 +34,7 @@ import java.util.Map;
 import static org.mobicents.gmlc.slee.gis.GeographicHelper.polygonCentroid;
 import static org.mobicents.gmlc.slee.http.JsonWriter.bytesToHexString;
 import static org.mobicents.gmlc.slee.http.JsonWriter.write3gppAaaServerName;
-import static org.mobicents.gmlc.slee.http.JsonWriter.writeAccuracyFulfilmentIndicator;
+// import REMOVED_AccuracyFulfilmentIndicator;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAdditionalLCSCapabilitySets;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAdditionalNetworkNodeNumber;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAdditionalVGmlcAddress;
@@ -507,229 +507,249 @@ public class PslResponseJsonBuilder {
                 writeDeferredMTlrResponseIndicator(psl.isDeferredMTLRResponseIndicator(), pslJsonObject);
             }
 
-            /*** geranPositioningData [4] PositioningDataInformation OPTIONAL ***/
-            if (psl.getGeranPositioningDataInformation() != null) {
-                JsonObject pslGeranPosInfoDataSetJsonObject = new JsonObject();
-                JsonObject pslGeranPosInfoJsonObject = new JsonObject();
-                HashMap<String, Integer> methodsAndUsage = psl.getGeranPositioningDataInformation().getPositioningDataSet();
-                JsonObject[] pslGeranPosInfoMethodAndUsage = new JsonObject[methodsAndUsage.size()];
-                int itemIndex = 0;
-                for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
-                    String property = "Item-" + itemIndex;
-                    String method = item.getKey();
-                    Integer usage = item.getValue();
-                    pslGeranPosInfoMethodAndUsage[itemIndex] = new JsonObject();
-                    pslGeranPosInfoDataSetJsonObject.add(property, pslGeranPosInfoMethodAndUsage[itemIndex]);
-                    writeGeranPositioningMethod(method, pslGeranPosInfoMethodAndUsage[itemIndex]);
-                    writeGeranPositioningUsage(usage, pslGeranPosInfoMethodAndUsage[itemIndex]);
-                    itemIndex++;
-                }
-                pslGeranPosInfoJsonObject.add("PositioningDataSet", pslGeranPosInfoDataSetJsonObject);
-                // Write GERAN Positioning Info values from PSL
-                pslJsonObject.add("GeranPositioningData", pslGeranPosInfoJsonObject);
-            }
+            // /*
+            // /*** geranPositioningData [4] PositioningDataInformation OPTIONAL ***/
+            // if (psl.getGeranPositioningDataInformation() != null) {
+            //     JsonObject pslGeranPosInfoDataSetJsonObject = new JsonObject();
+            //     JsonObject pslGeranPosInfoJsonObject = new JsonObject();
+            //     HashMap<String, Integer> methodsAndUsage = psl.getGeranPositioningDataInformation().getPositioningDataSet();
+            //     JsonObject[] pslGeranPosInfoMethodAndUsage = new JsonObject[methodsAndUsage.size()];
+            //     int itemIndex = 0;
+            //     for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
+            //         String property = "Item-" + itemIndex;
+            //         String method = item.getKey();
+            //         Integer usage = item.getValue();
+            //         pslGeranPosInfoMethodAndUsage[itemIndex] = new JsonObject();
+            //         pslGeranPosInfoDataSetJsonObject.add(property, pslGeranPosInfoMethodAndUsage[itemIndex]);
+            //         writeGeranPositioningMethod(method, pslGeranPosInfoMethodAndUsage[itemIndex]);
+            //         writeGeranPositioningUsage(usage, pslGeranPosInfoMethodAndUsage[itemIndex]);
+            //         itemIndex++;
+            //     }
+            //     pslGeranPosInfoJsonObject.add("PositioningDataSet", pslGeranPosInfoDataSetJsonObject);
+            //     // Write GERAN Positioning Info values from PSL
+            //     pslJsonObject.add("GeranPositioningData", pslGeranPosInfoJsonObject);
+            // }
+            // */
 
-            /*** utranPositioningData [5] UtranPositioningDataInfo OPTIONAL ***/
-            if (psl.getUtranPositioningDataInfo() != null) {
-                JsonObject pslUtranPosInfoDataSetJsonObject = new JsonObject();
-                JsonObject pslUtranPosInfoJsonObject = new JsonObject();
-                HashMap<String, Integer> methodsAndUsage = psl.getUtranPositioningDataInfo().getUtranPositioningDataSet();
-                JsonObject[] pslUtranPosInfoMethodAndUsage = new JsonObject[methodsAndUsage.size()];
-                int itemIndex = 0;
-                for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
-                    String property = "Item-" + itemIndex;
-                    String method = item.getKey();
-                    Integer usage = item.getValue();
-                    pslUtranPosInfoMethodAndUsage[itemIndex] = new JsonObject();
-                    pslUtranPosInfoDataSetJsonObject.add(property, pslUtranPosInfoMethodAndUsage[itemIndex]);
-                    writeUtranPositioningMethod(method, pslUtranPosInfoMethodAndUsage[itemIndex]);
-                    writeUtranPositioningUsage(usage, pslUtranPosInfoMethodAndUsage[itemIndex]);
-                    itemIndex++;
-                }
-                pslUtranPosInfoJsonObject.add("PositioningDataSet", pslUtranPosInfoDataSetJsonObject);
-                // Write GERAN Positioning Info values from PSL
-                pslJsonObject.add("UtranPositioningData", pslUtranPosInfoJsonObject);
-            }
+            // /*
+            // /*** utranPositioningData [5] UtranPositioningDataInfo OPTIONAL ***/
+            // if (psl.getUtranPositioningDataInfo() != null) {
+            //     JsonObject pslUtranPosInfoDataSetJsonObject = new JsonObject();
+            //     JsonObject pslUtranPosInfoJsonObject = new JsonObject();
+            //     HashMap<String, Integer> methodsAndUsage = psl.getUtranPositioningDataInfo().getUtranPositioningDataSet();
+            //     JsonObject[] pslUtranPosInfoMethodAndUsage = new JsonObject[methodsAndUsage.size()];
+            //     int itemIndex = 0;
+            //     for (HashMap.Entry<String, Integer> item : methodsAndUsage.entrySet()) {
+            //         String property = "Item-" + itemIndex;
+            //         String method = item.getKey();
+            //         Integer usage = item.getValue();
+            //         pslUtranPosInfoMethodAndUsage[itemIndex] = new JsonObject();
+            //         pslUtranPosInfoDataSetJsonObject.add(property, pslUtranPosInfoMethodAndUsage[itemIndex]);
+            //         writeUtranPositioningMethod(method, pslUtranPosInfoMethodAndUsage[itemIndex]);
+            //         writeUtranPositioningUsage(usage, pslUtranPosInfoMethodAndUsage[itemIndex]);
+            //         itemIndex++;
+            //     }
+            //     pslUtranPosInfoJsonObject.add("PositioningDataSet", pslUtranPosInfoDataSetJsonObject);
+            //     // Write GERAN Positioning Info values from PSL
+            //     pslJsonObject.add("UtranPositioningData", pslUtranPosInfoJsonObject);
+            // }
+            // */
 
-            /*** cellIdOrSai [6] CellGlobalIdOrServiceAreaIdOrLAI OPTIONAL ***/
-            if (psl.getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
-                JsonObject pslCgiOrSaiOrLaiJsonObject = new JsonObject();
-                CellGlobalIdOrServiceAreaIdOrLAI cgiOrSaiOrLai = psl.getCellGlobalIdOrServiceAreaIdOrLAI();
-                LAIFixedLength laiFixedLength = cgiOrSaiOrLai.getLAIFixedLength();
-                CellGlobalIdOrServiceAreaIdFixedLength cellGlobalIdOrServiceAreaIdFixedLength = cgiOrSaiOrLai.getCellGlobalIdOrServiceAreaIdFixedLength();
-                if (laiFixedLength != null) {
-                    mcc = laiFixedLength.getMCC();
-                    mnc = laiFixedLength.getMNC();
-                    lac = laiFixedLength.getLac();
-                } else if (cellGlobalIdOrServiceAreaIdFixedLength != null) {
-                    mcc = cellGlobalIdOrServiceAreaIdFixedLength.getMCC();
-                    mnc = cellGlobalIdOrServiceAreaIdFixedLength.getMNC();
-                    lac = cellGlobalIdOrServiceAreaIdFixedLength.getLac();
-                    ciOrSac = cellGlobalIdOrServiceAreaIdFixedLength.getCellIdOrServiceAreaCode();
-                }
-                // Write CGI or SAI values from PSL
-                writeMcc(mcc, pslCgiOrSaiOrLaiJsonObject);
-                writeMnc(mnc, pslCgiOrSaiOrLaiJsonObject);
-                writeLac(lac, pslCgiOrSaiOrLaiJsonObject);
-                /*** sai-Present [7] NULL OPTIONAL ***/
-                if (!psl.isSaiPresent()) {
-                    if (ciOrSac >= 0) {
-                        writeCellId(ciOrSac, pslCgiOrSaiOrLaiJsonObject);
-                        pslJsonObject.add("CGI", pslCgiOrSaiOrLaiJsonObject);
-                    } else {
-                        if (lac >= 0)
-                            pslJsonObject.add("LAI", pslCgiOrSaiOrLaiJsonObject);
-                    }
-                } else {
-                    if (ciOrSac >= 0) {
-                        writeServiceAreaCode(ciOrSac, pslCgiOrSaiOrLaiJsonObject);
-                        pslJsonObject.add("SAI", pslCgiOrSaiOrLaiJsonObject);
-                    } else {
-                        if (lac >= 0)
-                            pslJsonObject.add("LAI", pslCgiOrSaiOrLaiJsonObject);
-                    }
-                }
-            }
+            // /*
+            // /*** cellIdOrSai [6] CellGlobalIdOrServiceAreaIdOrLAI OPTIONAL ***/
+            // if (psl.getCellGlobalIdOrServiceAreaIdOrLAI() != null) {
+            //     JsonObject pslCgiOrSaiOrLaiJsonObject = new JsonObject();
+            //     CellGlobalIdOrServiceAreaIdOrLAI cgiOrSaiOrLai = psl.getCellGlobalIdOrServiceAreaIdOrLAI();
+            //     LAIFixedLength laiFixedLength = cgiOrSaiOrLai.getLAIFixedLength();
+            //     CellGlobalIdOrServiceAreaIdFixedLength cellGlobalIdOrServiceAreaIdFixedLength = cgiOrSaiOrLai.getCellGlobalIdOrServiceAreaIdFixedLength();
+            //     if (laiFixedLength != null) {
+            //         mcc = laiFixedLength.getMCC();
+            //         mnc = laiFixedLength.getMNC();
+            //         lac = laiFixedLength.getLac();
+            //     } else if (cellGlobalIdOrServiceAreaIdFixedLength != null) {
+            //         mcc = cellGlobalIdOrServiceAreaIdFixedLength.getMCC();
+            //         mnc = cellGlobalIdOrServiceAreaIdFixedLength.getMNC();
+            //         lac = cellGlobalIdOrServiceAreaIdFixedLength.getLac();
+            //         ciOrSac = cellGlobalIdOrServiceAreaIdFixedLength.getCellIdOrServiceAreaCode();
+            //     }
+            //     // Write CGI or SAI values from PSL
+            //     writeMcc(mcc, pslCgiOrSaiOrLaiJsonObject);
+            //     writeMnc(mnc, pslCgiOrSaiOrLaiJsonObject);
+            //     writeLac(lac, pslCgiOrSaiOrLaiJsonObject);
+            //     /*** sai-Present [7] NULL OPTIONAL ***/
+            //     if (!psl.isSaiPresent()) {
+            //         if (ciOrSac >= 0) {
+            //             writeCellId(ciOrSac, pslCgiOrSaiOrLaiJsonObject);
+            //             pslJsonObject.add("CGI", pslCgiOrSaiOrLaiJsonObject);
+            //         } else {
+            //             if (lac >= 0)
+            //                 pslJsonObject.add("LAI", pslCgiOrSaiOrLaiJsonObject);
+            //         }
+            //     } else {
+            //         if (ciOrSac >= 0) {
+            //             writeServiceAreaCode(ciOrSac, pslCgiOrSaiOrLaiJsonObject);
+            //             pslJsonObject.add("SAI", pslCgiOrSaiOrLaiJsonObject);
+            //         } else {
+            //             if (lac >= 0)
+            //                 pslJsonObject.add("LAI", pslCgiOrSaiOrLaiJsonObject);
+            //         }
+            //     }
+            // }
+            // */
 
-            /*** accuracyFulfilmentIndicator [8] AccuracyFulfilmentIndicator OPTIONAL ***/
-            if (psl.getAccuracyFulfilmentIndicator() != null) {
-                accuracyFulfilmentIndicator = psl.getAccuracyFulfilmentIndicator().getIndicator();
-                writeAccuracyFulfilmentIndicator(accuracyFulfilmentIndicator, pslJsonObject);
-            }
+            // /*
+            // /*** accuracyFulfilmentIndicator [8] AccuracyFulfilmentIndicator OPTIONAL ***/
+            // if (psl.getAccuracyFulfilmentIndicator() != null) {
+            //     accuracyFulfilmentIndicator = psl.getAccuracyFulfilmentIndicator().getIndicator();
+            //     writeAccuracyFulfilmentIndicator(accuracyFulfilmentIndicator, pslJsonObject);
+            // }
+            // */
 
-            /*** velocityEstimate [9] VelocityEstimate OPTIONAL ***/
-            if (psl.getVelocityEstimate() != null) {
-                JsonObject pslVelocityEstimateJsonObject = new JsonObject();
-                if (psl.getVelocityEstimate().getHorizontalSpeed() > -1)
-                    horizontalSpeed = psl.getVelocityEstimate().getHorizontalSpeed();
-                if (psl.getVelocityEstimate().getBearing() > -1)
-                    bearing = psl.getVelocityEstimate().getBearing();
-                if (psl.getVelocityEstimate().getVerticalSpeed() > -1)
-                    verticalSpeed = psl.getVelocityEstimate().getVerticalSpeed();
-                if (psl.getVelocityEstimate().getUncertaintyHorizontalSpeed() > -1)
-                    uncertaintyHorizontalSpeed = psl.getVelocityEstimate().getUncertaintyHorizontalSpeed();
-                if (psl.getVelocityEstimate().getUncertaintyVerticalSpeed() > -1)
-                    uncertaintyVerticalSpeed = psl.getVelocityEstimate().getUncertaintyVerticalSpeed();
-                String velocityType = null;
-                if (psl.getVelocityEstimate().getVelocityType() != null)
-                    velocityType = psl.getVelocityEstimate().getVelocityType().name();
-                // Write Velocity Estimate values from PSL
-                writeHorizontalSpeed(horizontalSpeed, pslVelocityEstimateJsonObject);
-                writeBearing(bearing, pslVelocityEstimateJsonObject);
-                writeVerticalSpeed(verticalSpeed, pslVelocityEstimateJsonObject);
-                writeUncertaintyHorizontalSpeed(uncertaintyHorizontalSpeed, pslVelocityEstimateJsonObject);
-                writeUncertaintyVerticalSpeed(uncertaintyVerticalSpeed, pslVelocityEstimateJsonObject);
-                writeVelocityType(velocityType, pslVelocityEstimateJsonObject);
-                pslJsonObject.add("VelocityEstimate", pslVelocityEstimateJsonObject);
-            }
+            // /*
+            // /*** velocityEstimate [9] VelocityEstimate OPTIONAL ***/
+            // if (psl.getVelocityEstimate() != null) {
+            //     JsonObject pslVelocityEstimateJsonObject = new JsonObject();
+            //     if (psl.getVelocityEstimate().getHorizontalSpeed() > -1)
+            //         horizontalSpeed = psl.getVelocityEstimate().getHorizontalSpeed();
+            //     if (psl.getVelocityEstimate().getBearing() > -1)
+            //         bearing = psl.getVelocityEstimate().getBearing();
+            //     if (psl.getVelocityEstimate().getVerticalSpeed() > -1)
+            //         verticalSpeed = psl.getVelocityEstimate().getVerticalSpeed();
+            //     if (psl.getVelocityEstimate().getUncertaintyHorizontalSpeed() > -1)
+            //         uncertaintyHorizontalSpeed = psl.getVelocityEstimate().getUncertaintyHorizontalSpeed();
+            //     if (psl.getVelocityEstimate().getUncertaintyVerticalSpeed() > -1)
+            //         uncertaintyVerticalSpeed = psl.getVelocityEstimate().getUncertaintyVerticalSpeed();
+            //     String velocityType = null;
+            //     if (psl.getVelocityEstimate().getVelocityType() != null)
+            //         velocityType = psl.getVelocityEstimate().getVelocityType().name();
+            //     // Write Velocity Estimate values from PSL
+            //     writeHorizontalSpeed(horizontalSpeed, pslVelocityEstimateJsonObject);
+            //     writeBearing(bearing, pslVelocityEstimateJsonObject);
+            //     writeVerticalSpeed(verticalSpeed, pslVelocityEstimateJsonObject);
+            //     writeUncertaintyHorizontalSpeed(uncertaintyHorizontalSpeed, pslVelocityEstimateJsonObject);
+            //     writeUncertaintyVerticalSpeed(uncertaintyVerticalSpeed, pslVelocityEstimateJsonObject);
+            //     writeVelocityType(velocityType, pslVelocityEstimateJsonObject);
+            //     pslJsonObject.add("VelocityEstimate", pslVelocityEstimateJsonObject);
+            // }
+            // 
+            // /*** mo-lrShortCircuitIndicator [10] NULL OPTIONAL ***/
+            // if (psl.isMoLrShortCircuitIndicator()) {
+            //     writeMoLrShortCircuitIndicator(psl.isMoLrShortCircuitIndicator(), pslJsonObject);
+            // }
+            // */
 
-            /*** mo-lrShortCircuitIndicator [10] NULL OPTIONAL ***/
-            if (psl.isMoLrShortCircuitIndicator()) {
-                writeMoLrShortCircuitIndicator(psl.isMoLrShortCircuitIndicator(), pslJsonObject);
-            }
+            // /*
+            // /*** geranGANSSpositioningData [11] GeranGANSSpositioningData OPTIONAL ***/
+            // if (psl.getGeranGANSSpositioningData() != null) {
+            //     JsonObject pslGeranGanssPosInfoDataSetJsonObject = new JsonObject();
+            //     JsonObject pslGeranGanssInfoJsonObject = new JsonObject();
+            //     Multimap<String, String> methodsAndGanssIds = psl.getGeranGANSSpositioningData().getGeranGANSSPositioningMethodsAndGANSSIds();
+            //     JsonObject[] pslGeranGanssPosInfoMethodIdUsage = new JsonObject[methodsAndGanssIds.size()];
+            //     String method, id;
+            //     int itemIndex = 0, usage;
+            //     for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
+            //         method = item.getKey();
+            //         id = item.getValue();
+            //         usage = psl.getGeranGANSSpositioningData().getUsageCode(psl.getGeranGANSSpositioningData().getData(), itemIndex+1);
+            //         String property = "Item-" + itemIndex;
+            //         pslGeranGanssPosInfoMethodIdUsage[itemIndex] = new JsonObject();
+            //         pslGeranGanssPosInfoDataSetJsonObject.add(property, pslGeranGanssPosInfoMethodIdUsage[itemIndex]);
+            //         writeGeranGanssPositioningMethod(method, pslGeranGanssPosInfoMethodIdUsage[itemIndex]);
+            //         writeGeranGanssPositioningGanssId(id, pslGeranGanssPosInfoMethodIdUsage[itemIndex]);
+            //         writeGeranGanssPositioningUsage(usage, pslGeranGanssPosInfoMethodIdUsage[itemIndex]);
+            //         itemIndex++;
+            //     }
+            //     pslGeranGanssInfoJsonObject.add("GanssPositioningDataSet", pslGeranGanssPosInfoDataSetJsonObject);
+            //     // Write GERAN GANSS Positioning Info values from PSL
+            //     pslJsonObject.add("GeranGANSSPositioningData", pslGeranGanssInfoJsonObject);
+            // }
+            // */
 
-            /*** geranGANSSpositioningData [11] GeranGANSSpositioningData OPTIONAL ***/
-            if (psl.getGeranGANSSpositioningData() != null) {
-                JsonObject pslGeranGanssPosInfoDataSetJsonObject = new JsonObject();
-                JsonObject pslGeranGanssInfoJsonObject = new JsonObject();
-                Multimap<String, String> methodsAndGanssIds = psl.getGeranGANSSpositioningData().getGeranGANSSPositioningMethodsAndGANSSIds();
-                JsonObject[] pslGeranGanssPosInfoMethodIdUsage = new JsonObject[methodsAndGanssIds.size()];
-                String method, id;
-                int itemIndex = 0, usage;
-                for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
-                    method = item.getKey();
-                    id = item.getValue();
-                    usage = psl.getGeranGANSSpositioningData().getUsageCode(psl.getGeranGANSSpositioningData().getData(), itemIndex+1);
-                    String property = "Item-" + itemIndex;
-                    pslGeranGanssPosInfoMethodIdUsage[itemIndex] = new JsonObject();
-                    pslGeranGanssPosInfoDataSetJsonObject.add(property, pslGeranGanssPosInfoMethodIdUsage[itemIndex]);
-                    writeGeranGanssPositioningMethod(method, pslGeranGanssPosInfoMethodIdUsage[itemIndex]);
-                    writeGeranGanssPositioningGanssId(id, pslGeranGanssPosInfoMethodIdUsage[itemIndex]);
-                    writeGeranGanssPositioningUsage(usage, pslGeranGanssPosInfoMethodIdUsage[itemIndex]);
-                    itemIndex++;
-                }
-                pslGeranGanssInfoJsonObject.add("GanssPositioningDataSet", pslGeranGanssPosInfoDataSetJsonObject);
-                // Write GERAN GANSS Positioning Info values from PSL
-                pslJsonObject.add("GeranGANSSPositioningData", pslGeranGanssInfoJsonObject);
-            }
+            // /*
+            // /*** utranGANSSpositioningData [12] UtranGANSSpositioningData OPTIONAL ***/
+            // if (psl.getUtranGANSSpositioningData() != null) {
+            //     JsonObject pslUtranGanssPosInfoDataSetJsonObject = new JsonObject();
+            //     JsonObject pslUtranGanssInfoJsonObject = new JsonObject();
+            //     Multimap<String, String> methodsAndGanssIds = psl.getUtranGANSSpositioningData().getUtranGANSSPositioningMethodsAndGANSSIds();
+            //     JsonObject[] pslUtranGanssPosInfoMethodIdUsage  = new JsonObject[methodsAndGanssIds.size()];
+            //     String method, id;
+            //     int itemIndex = 0, usage;
+            //     for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
+            //         method = item.getKey();
+            //         id = item.getValue();
+            //         usage = psl.getUtranGANSSpositioningData().getUsageCode(psl.getUtranGANSSpositioningData().getData(), itemIndex);
+            //         String property = "Item-" + itemIndex;
+            //         pslUtranGanssPosInfoMethodIdUsage[itemIndex] = new JsonObject();
+            //         pslUtranGanssPosInfoDataSetJsonObject.add(property, pslUtranGanssPosInfoMethodIdUsage[itemIndex]);
+            //         writeUtranGanssPositioningMethod(method, pslUtranGanssPosInfoMethodIdUsage[itemIndex]);
+            //         writeUtranGanssPositioningGanssId(id, pslUtranGanssPosInfoMethodIdUsage[itemIndex]);
+            //         writeUtranGanssPositioningUsage(usage, pslUtranGanssPosInfoMethodIdUsage[itemIndex]);
+            //         itemIndex++;
+            //     }
+            //     pslUtranGanssInfoJsonObject.add("GanssPositioningDataSet", pslUtranGanssPosInfoDataSetJsonObject);
+            //     // Write UTRAN GANSS Positioning Info values from PSL
+            //     pslJsonObject.add("UtranGANSSPositioningData", pslUtranGanssInfoJsonObject);
+            // }
+            // */
 
-            /*** utranGANSSpositioningData [12] UtranGANSSpositioningData OPTIONAL ***/
-            if (psl.getUtranGANSSpositioningData() != null) {
-                JsonObject pslUtranGanssPosInfoDataSetJsonObject = new JsonObject();
-                JsonObject pslUtranGanssInfoJsonObject = new JsonObject();
-                Multimap<String, String> methodsAndGanssIds = psl.getUtranGANSSpositioningData().getUtranGANSSPositioningMethodsAndGANSSIds();
-                JsonObject[] pslUtranGanssPosInfoMethodIdUsage  = new JsonObject[methodsAndGanssIds.size()];
-                String method, id;
-                int itemIndex = 0, usage;
-                for (Map.Entry<String, String> item : methodsAndGanssIds.entries()) {
-                    method = item.getKey();
-                    id = item.getValue();
-                    usage = psl.getUtranGANSSpositioningData().getUsageCode(psl.getUtranGANSSpositioningData().getData(), itemIndex);
-                    String property = "Item-" + itemIndex;
-                    pslUtranGanssPosInfoMethodIdUsage[itemIndex] = new JsonObject();
-                    pslUtranGanssPosInfoDataSetJsonObject.add(property, pslUtranGanssPosInfoMethodIdUsage[itemIndex]);
-                    writeUtranGanssPositioningMethod(method, pslUtranGanssPosInfoMethodIdUsage[itemIndex]);
-                    writeUtranGanssPositioningGanssId(id, pslUtranGanssPosInfoMethodIdUsage[itemIndex]);
-                    writeUtranGanssPositioningUsage(usage, pslUtranGanssPosInfoMethodIdUsage[itemIndex]);
-                    itemIndex++;
-                }
-                pslUtranGanssInfoJsonObject.add("GanssPositioningDataSet", pslUtranGanssPosInfoDataSetJsonObject);
-                // Write UTRAN GANSS Positioning Info values from PSL
-                pslJsonObject.add("UtranGANSSPositioningData", pslUtranGanssInfoJsonObject);
-            }
+            // /*
+            // /*** targetServingNodeForHandover [13] ServingNodeAddress OPTIONAL ***/
+            // if (psl.getTargetServingNodeForHandover() != null) {
+            //     JsonObject pslServingNodeForHoJsonObject = new JsonObject();
+            //     if (psl.getTargetServingNodeForHandover().getMmeNumber() != null) {
+            //         String mmeNumber = Arrays.toString(psl.getTargetServingNodeForHandover().getMmeNumber().getData());
+            //         writeMmeNumber(mmeNumber, pslServingNodeForHoJsonObject);
+            //     }
+            //     if (psl.getTargetServingNodeForHandover().getMscNumber() != null) {
+            //         String mscNumber = psl.getTargetServingNodeForHandover().getMscNumber().getAddress();
+            //         writeMscNumber(mscNumber, pslServingNodeForHoJsonObject);
+            //     }
+            //     if (psl.getTargetServingNodeForHandover().getSgsnNumber() != null) {
+            //         String sgsnNumber = psl.getTargetServingNodeForHandover().getSgsnNumber().getAddress();
+            //         writeSgsnNumber(sgsnNumber, pslServingNodeForHoJsonObject);
+            //     }
+            //     // Write Target Serving Node for Handover address
+            //     pslJsonObject.add("TargetServingNodeForHandover", pslServingNodeForHoJsonObject);
+            // }
+            // */
 
-            /*** targetServingNodeForHandover [13] ServingNodeAddress OPTIONAL ***/
-            if (psl.getTargetServingNodeForHandover() != null) {
-                JsonObject pslServingNodeForHoJsonObject = new JsonObject();
-                if (psl.getTargetServingNodeForHandover().getMmeNumber() != null) {
-                    String mmeNumber = Arrays.toString(psl.getTargetServingNodeForHandover().getMmeNumber().getData());
-                    writeMmeNumber(mmeNumber, pslServingNodeForHoJsonObject);
-                }
-                if (psl.getTargetServingNodeForHandover().getMscNumber() != null) {
-                    String mscNumber = psl.getTargetServingNodeForHandover().getMscNumber().getAddress();
-                    writeMscNumber(mscNumber, pslServingNodeForHoJsonObject);
-                }
-                if (psl.getTargetServingNodeForHandover().getSgsnNumber() != null) {
-                    String sgsnNumber = psl.getTargetServingNodeForHandover().getSgsnNumber().getAddress();
-                    writeSgsnNumber(sgsnNumber, pslServingNodeForHoJsonObject);
-                }
-                // Write Target Serving Node for Handover address
-                pslJsonObject.add("TargetServingNodeForHandover", pslServingNodeForHoJsonObject);
-            }
+            // /*
+            // /*** utranAdditionalPositioningData [14] UtranAdditionalPositioningData OPTIONAL ***/
+            // if (psl.getUtranAdditionalPositioningData() != null) {
+            //     JsonObject pslUtranAddPosInfoDataSetJsonObject = new JsonObject();
+            //     JsonObject pslUtranAddInfoJsonObject = new JsonObject();
+            //     Multimap<String, String> methodsAndAddPosIds = psl.getUtranAdditionalPositioningData().getUtranAdditionalPositioningMethodsAndIds();
+            //     JsonObject[] pslUtranAddPosInfoMethodAndId = new JsonObject[methodsAndAddPosIds.size()];
+            //     String method, id;
+            //     int itemIndex = 0, usage;
+            //     for (Map.Entry<String, String> item : methodsAndAddPosIds.entries()) {
+            //         method = item.getKey();
+            //         id = item.getValue();
+            //         usage = psl.getUtranAdditionalPositioningData().getUsageCode(psl.getUtranAdditionalPositioningData().getData(), itemIndex);
+            //         String property = "Item-" + itemIndex;
+            //         pslUtranAddPosInfoMethodAndId[itemIndex] = new JsonObject();
+            //         pslUtranAddPosInfoDataSetJsonObject.add(property, pslUtranAddPosInfoMethodAndId[itemIndex]);
+            //         writeUtranAddPositioningMethod(method, pslUtranAddPosInfoMethodAndId[itemIndex]);
+            //         writeUtranAddPositioningPosId(id, pslUtranAddPosInfoMethodAndId[itemIndex]);
+            //         writeUtranAddPositioningUsage(usage, pslUtranAddPosInfoMethodAndId[itemIndex]);
+            //         itemIndex++;
+            //     }
+            //     pslUtranAddInfoJsonObject.add("AdditionalPositioningDataSet", pslUtranAddPosInfoDataSetJsonObject);
+            //     // Write UTRAN Positioning Info values from PSL
+            //     pslJsonObject.add("UtranAdditionalPositioningData", pslUtranAddInfoJsonObject);
+            // }
+            // */
 
-            /*** utranAdditionalPositioningData [14] UtranAdditionalPositioningData OPTIONAL ***/
-            if (psl.getUtranAdditionalPositioningData() != null) {
-                JsonObject pslUtranAddPosInfoDataSetJsonObject = new JsonObject();
-                JsonObject pslUtranAddInfoJsonObject = new JsonObject();
-                Multimap<String, String> methodsAndAddPosIds = psl.getUtranAdditionalPositioningData().getUtranAdditionalPositioningMethodsAndIds();
-                JsonObject[] pslUtranAddPosInfoMethodAndId = new JsonObject[methodsAndAddPosIds.size()];
-                String method, id;
-                int itemIndex = 0, usage;
-                for (Map.Entry<String, String> item : methodsAndAddPosIds.entries()) {
-                    method = item.getKey();
-                    id = item.getValue();
-                    usage = psl.getUtranAdditionalPositioningData().getUsageCode(psl.getUtranAdditionalPositioningData().getData(), itemIndex);
-                    String property = "Item-" + itemIndex;
-                    pslUtranAddPosInfoMethodAndId[itemIndex] = new JsonObject();
-                    pslUtranAddPosInfoDataSetJsonObject.add(property, pslUtranAddPosInfoMethodAndId[itemIndex]);
-                    writeUtranAddPositioningMethod(method, pslUtranAddPosInfoMethodAndId[itemIndex]);
-                    writeUtranAddPositioningPosId(id, pslUtranAddPosInfoMethodAndId[itemIndex]);
-                    writeUtranAddPositioningUsage(usage, pslUtranAddPosInfoMethodAndId[itemIndex]);
-                    itemIndex++;
-                }
-                pslUtranAddInfoJsonObject.add("AdditionalPositioningDataSet", pslUtranAddPosInfoDataSetJsonObject);
-                // Write UTRAN Positioning Info values from PSL
-                pslJsonObject.add("UtranAdditionalPositioningData", pslUtranAddInfoJsonObject);
-            }
-
-            /*** utranBaroPressureMeas [15] UtranBaroPressureMeas OPTIONAL ***/
-            if (psl.getUtranBaroPressureMeas() != null) {
-                Long utranBarometricPressureMeas = Long.valueOf(psl.getUtranBaroPressureMeas());
-                // Write UTRAN Barometric Pressure Measurement from PSL
-                JsonObject pslUtranBaroPressureMeasJsonObject = new JsonObject();
-                writeBarometricPressure(utranBarometricPressureMeas, pslUtranBaroPressureMeasJsonObject);
-                pslJsonObject.add("BarometricPressure", pslUtranBaroPressureMeasJsonObject);
-            }
+            // /*
+            // /*** utranBaroPressureMeas [15] UtranBaroPressureMeas OPTIONAL ***/
+            // if (psl.getUtranBaroPressureMeas() != null) {
+            //     Long utranBarometricPressureMeas = Long.valueOf(psl.getUtranBaroPressureMeas());
+            //     // Write UTRAN Barometric Pressure Measurement from PSL
+            //     JsonObject pslUtranBaroPressureMeasJsonObject = new JsonObject();
+            //     writeBarometricPressure(utranBarometricPressureMeas, pslUtranBaroPressureMeasJsonObject);
+            //     pslJsonObject.add("BarometricPressure", pslUtranBaroPressureMeasJsonObject);
+            // }
+            // */
 
             /*** utranCivicAddress [16] UtranCivicAddress OPTIONAL ***/
             if (psl.getUtranCivicAddress() != null) {

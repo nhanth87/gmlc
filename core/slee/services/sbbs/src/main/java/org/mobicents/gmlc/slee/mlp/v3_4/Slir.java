@@ -91,10 +91,10 @@ public class Slir {
 
     protected Msids msids;
     @XmlElementRefs({
-        @XmlElementRef(name = "gsm_net_param", type = GsmNetParam.class, required = false),
-        @XmlElementRef(name = "msid", type = Msid.class, required = false),
-        @XmlElementRef(name = "codeword", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "trans_id", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "gsm_net_param", type = GsmNetParam.class),
+        @XmlElementRef(name = "msid", type = Msid.class),
+        @XmlElementRef(name = "codeword", type = JAXBElement.class),
+        @XmlElementRef(name = "trans_id", type = JAXBElement.class)
     })
     protected List<Object> msidAndCodewordAndGsmNetParam;
     protected Eqop eqop;

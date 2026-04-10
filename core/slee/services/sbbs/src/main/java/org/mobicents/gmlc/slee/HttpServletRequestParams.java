@@ -11,9 +11,9 @@ import net.java.slee.resource.diameter.slg.events.avp.VerticalRequested;
 import org.mobicents.gmlc.GmlcPropertiesManagement;
 import org.mobicents.gmlc.slee.http.MongoGmlc;
 import org.mobicents.gmlc.slee.mlp.MLPLocationRequest;
-import org.mobicents.gmlc.slee.supl.SuplAreaEventType;
-import org.mobicents.gmlc.slee.supl.SuplGeoTargetArea;
-import org.mobicents.gmlc.slee.supl.SuplTriggerType;
+// import org.mobicents.gmlc.slee.supl.SuplAreaEventType;
+// import org.mobicents.gmlc.slee.supl.SuplGeoTargetArea;
+// import org.mobicents.gmlc.slee.supl.SuplTriggerType;
 import org.mobicents.gmlc.slee.utils.GADShapesUtils;
 import org.restcomm.protocols.ss7.map.api.service.lsm.LCSClientInternalID;
 import org.restcomm.protocols.ss7.map.api.service.lsm.LocationEstimateType;
@@ -501,14 +501,14 @@ public class HttpServletRequestParams {
         if (httpServletRequest.getParameter("pslQosClass") != null) {
             try {
                 locationRequestParams.pslQoSClass = Integer.valueOf(httpServletRequest.getParameter("pslQosClass"));
-                if (locationRequestParams.pslQoSClass != org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoSClass.bestEffort.getCode() &&
-                        locationRequestParams.pslQoSClass != org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoSClass.assured.getCode()) {
+                if (locationRequestParams.pslQoSClass != org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoSClass.BestEffort.getCode() &&
+                        locationRequestParams.pslQoSClass != org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoSClass.Assured.getCode()) {
                     throw new IllegalArgumentException("Incorrect lcsQoSClass argument, must be one of 0 (bestEffort) or 1 (assured)");
                 } else {
                     if (locationRequestParams.pslQoSClass == 0)
-                        locationRequestParams.pslQoSClass = org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoSClass.bestEffort.getCode();
+                        locationRequestParams.pslQoSClass = org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoSClass.BestEffort.getCode();
                     else if (locationRequestParams.pslQoSClass == 1)
-                        locationRequestParams.pslQoSClass = org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoSClass.assured.getCode();
+                        locationRequestParams.pslQoSClass = org.restcomm.protocols.ss7.map.api.service.lsm.LCSQoSClass.Assured.getCode();
                 }
             } catch (NumberFormatException nfe) {
                 numberFormatException = "Incorrect lcsQoSClass argument, must be one of 0 (bestEffort) or 1 (assured)";
@@ -3042,6 +3042,7 @@ public class HttpServletRequestParams {
                 locationRequestParams.reportingService = MLPLocationRequest.ReportingService.Triggered;
             else
                 locationRequestParams.reportingService = MLPLocationRequest.ReportingService.Immediate;
+            /* SUPL DISABLED - Ethiopia GMLC
             if (mlpLocationRequest.getSuplTriggerType() != null) {
                 if (mlpLocationRequest.getSuplTriggerType() == SuplTriggerType.AreaEvent) {
                     if (mlpLocationRequest.getSuplAreaEventType() != null) {
@@ -3105,7 +3106,9 @@ public class HttpServletRequestParams {
                         throw new IllegalArgumentException("shape argument cannot be null for SUPL when valid change_area nd target_area parameters " +
                             "are provided");
                     }
+            */
 
+            /* SUPL DISABLED - continued
                     if (mlpLocationRequest.getSuplStartTime() != null) {
                         locationRequestParams.suplStartTime = mlpLocationRequest.getSuplStartTime();
                         if (mlpLocationRequest.getSuplStopTime() != null) {
@@ -3125,7 +3128,8 @@ public class HttpServletRequestParams {
                     }
                 }
             }
-        }
+            */ 
+        } // END SUPL DISABLED
 
         // Callback URL for MAP PSL or Diameter PLR or SUPL
         if (locationRequestParams.operation.equalsIgnoreCase("PSL")) {

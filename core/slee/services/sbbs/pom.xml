@@ -56,34 +56,25 @@
             <artifactId>jdiameter-impl</artifactId>
             <version>${restcomm.jdiameter.version}</version>
         </dependency>
-        <!-- jain-slee.diameter for SLh interface RA -->
+        <!-- jain-slee.diameter for SLh interface RA - TEMPORARILY DISABLED
         <dependency>
             <artifactId>restcomm-slee-ra-diameter-slh-events</artifactId>
             <groupId>org.mobicents.resources</groupId>
             <version>${restcomm.slee.diameter.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>sun-jaxb</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <artifactId>restcomm-slee-ra-diameter-slh-ra</artifactId>
             <groupId>org.mobicents.resources</groupId>
             <version>${restcomm.slee.diameter.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>sun-jaxb</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
+        -->
+        <!-- SLh dependencies temporarily disabled
         <dependency>
             <artifactId>restcomm-slee-ra-diameter-slh-ratype</artifactId>
             <groupId>org.mobicents.resources</groupId>
             <version>${restcomm.slee.diameter.version}</version>
         </dependency>
+        -->
         <!-- jain-slee.diameter for SLg interface RA -->
         <dependency>
             <artifactId>restcomm-slee-ra-diameter-slg-events</artifactId>
@@ -233,22 +224,7 @@
             <artifactId>asn-one</artifactId>
             <version>0.5.0</version>
         </dependency>
-        <!-- jain-slee.ulp for SUPL -->
-        <dependency>
-            <artifactId>jain-slee-ra-ulp-events</artifactId>
-            <groupId>com.paicbd.resources</groupId>
-            <version>${supl-jain-slee-ra.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>jain-slee-ra-ulp-ra</artifactId>
-            <groupId>com.paicbd.resources</groupId>
-            <version>${supl-jain-slee-ra.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>jain-slee-ra-ulp-ratype</artifactId>
-            <groupId>com.paicbd.resources</groupId>
-            <version>${supl-jain-slee-ra.version}</version>
-        </dependency>
+        <!-- SUPL dependencies removed - requires PAiC repository access -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>

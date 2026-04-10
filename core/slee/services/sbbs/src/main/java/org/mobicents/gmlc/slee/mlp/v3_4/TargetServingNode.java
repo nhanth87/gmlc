@@ -55,11 +55,11 @@ import javax.xml.bind.annotation.XmlType;
 public class TargetServingNode {
 
     @XmlElementRefs({
-        @XmlElementRef(name = "diameter_realm", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "sgsn_name", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "vmscid", type = Vmscid.class, required = false),
-        @XmlElementRef(name = "mme_name", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "sgsnid", type = Sgsnid.class, required = false)
+        @XmlElementRef(name = "diameter_realm", type = JAXBElement.class),
+        @XmlElementRef(name = "sgsn_name", type = JAXBElement.class),
+        @XmlElementRef(name = "vmscid", type = Vmscid.class),
+        @XmlElementRef(name = "mme_name", type = JAXBElement.class),
+        @XmlElementRef(name = "sgsnid", type = Sgsnid.class)
     })
     protected List<Object> content;
 

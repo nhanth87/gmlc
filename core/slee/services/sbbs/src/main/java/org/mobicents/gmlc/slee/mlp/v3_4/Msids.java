@@ -56,12 +56,12 @@ import javax.xml.bind.annotation.XmlType;
 public class Msids {
 
     @XmlElementRefs({
-        @XmlElementRef(name = "session", type = Session.class, required = false),
-        @XmlElementRef(name = "msid", type = Msid.class, required = false),
-        @XmlElementRef(name = "msid_group", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "codeword", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "trans_id", type = JAXBElement.class, required = false),
-        @XmlElementRef(name = "msid_range", type = MsidRange.class, required = false)
+        @XmlElementRef(name = "session", type = Session.class),
+        @XmlElementRef(name = "msid", type = Msid.class),
+        @XmlElementRef(name = "msid_group", type = JAXBElement.class),
+        @XmlElementRef(name = "codeword", type = JAXBElement.class),
+        @XmlElementRef(name = "trans_id", type = JAXBElement.class),
+        @XmlElementRef(name = "msid_range", type = MsidRange.class)
     })
     protected List<Object> msidAndCodewordAndSession;
 

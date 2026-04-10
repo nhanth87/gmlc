@@ -183,13 +183,13 @@ public class PslResponseParams implements Serializable {
     this.targetServingNodeForHandover = targetServingNodeForHandover;
   }
 
-  public UtranAdditionalPositioningData getUtranAdditionalPositioningData() {
+  /* public UtranAdditionalPositioningData getUtranAdditionalPositioningData() {
     return utranAdditionalPositioningData;
   }
 
-  public void setUtranAdditionalPositioningData(UtranAdditionalPositioningData utranAdditionalPositioningData) {
+  // public void setUtranAdditionalPositioningData(UtranAdditionalPositioningData REMOVED) {
     this.utranAdditionalPositioningData = utranAdditionalPositioningData;
-  }
+  } */
 
   public Integer getUtranBaroPressureMeas() {
     return utranBaroPressureMeas;
@@ -197,6 +197,14 @@ public class PslResponseParams implements Serializable {
 
   public void setUtranBaroPressureMeas(Integer utranBaroPressureMeas) {
     this.utranBaroPressureMeas = utranBaroPressureMeas;
+  }
+
+  public UtranAdditionalPositioningData getUtranAdditionalPositioningData() {
+    return utranAdditionalPositioningData;
+  }
+
+  public void setUtranAdditionalPositioningData(UtranAdditionalPositioningData utranAdditionalPositioningData) {
+    this.utranAdditionalPositioningData = utranAdditionalPositioningData;
   }
 
   public UtranCivicAddress getUtranCivicAddress() {
@@ -219,15 +227,15 @@ public class PslResponseParams implements Serializable {
             ", utranPositioningDataInfo=" + utranPositioningDataInfo +
             ", cellGlobalIdOrServiceAreaIdOrLAI=" + cellGlobalIdOrServiceAreaIdOrLAI +
             ", saiPresent=" + saiPresent +
-            ", accuracyFulfilmentIndicator=" + accuracyFulfilmentIndicator +
+            // ", accuracyFulfilmentIndicator=" + accuracyFulfilmentIndicator +
             ", velocityEstimate=" + velocityEstimate +
             ", moLrShortCircuitIndicator=" + moLrShortCircuitIndicator +
             ", geranGANSSpositioningData=" + geranGANSSpositioningData +
             ", utranGANSSpositioningData=" + utranGANSSpositioningData +
             ", targetServingNodeForHandover=" + targetServingNodeForHandover +
-            ", utranAdditionalPositioningData=" + utranAdditionalPositioningData +
+            // ", utranAdditionalPositioningData=" + utranAdditionalPositioningData +
             ", utranBaroPressureMeas=" + utranBaroPressureMeas +
-            ", utranCivicAddress=" + utranCivicAddress +
+            // ", utranCivicAddress=" + utranCivicAddress +
             '}';
   }
 }

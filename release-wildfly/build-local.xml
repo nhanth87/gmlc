@@ -1,0 +1,186 @@
+<?xml version="1.0"?>
+<project name="restcomm.gmlc.release.local" default="release" basedir=".">
+    <property environment="sys"/>
+    <property name="release.dir" location="${ant.file.restcomm.gmlc.release.local}/../target" />
+    <property name="base.dir" location="${ant.file.restcomm.gmlc.release.local}/.." />
+    <property name="checkout.dir" value="${base.dir}/checkout" />
+    
+    <!-- jSS7 và MAP RA local build directories -->
+    <property name="jss7.build.dir" value="${base.dir}/../../jSS7" />
+    <property name="mapra.build.dir" value="${base.dir}/../../jain-slee.ss7" />
+    <property name="sctp.build.dir" value="${base.dir}/../../sctp" />
+    
+    <!-- Versions -->
+    <property name="restcomm.gmlc.release.version" value="6.0.1-SNAPSHOT"/>
+    <property name="restcomm-jss7.version" value="9.0.0-318" />
+    <property name="restcomm-map-ra.version" value="9.0.0-215" />
+    <property name="sctp.version" value="2.0.2-17" />
+    <property name="restcomm-slee.version" value="8.2.1-29" />
+    <property name="wildfly_version" value="24.0.1" />
+    
+    <property name="wildfly.home.relative.path" value="wildfly-24.0.1.Final"/>
+    <property name="jboss.home" value="${release.dir}/${wildfly.home.relative.path}/"/>
+    <property name="deploy.dir" value="${jboss.home}/standalone/deployments" />
+    
+    <property name="release.build.goals" value="clean install dependency:tree -Dmaven.test.skip=true"/>
+
+    <condition property="mvn.executable" value="${sys.M2_HOME}\bin\mvn.bat" else="mvn">
+        <os family="windows"/>
+    </condition>
+
+    <taskdef onerror="fail" resource="net/sf/antcontrib/antlib.xml">
+        <classpath>
+            <pathelement location="${ant.file.restcomm.gmlc.release.local}/../ant-contrib-1.0b3.jar" />
+        </classpath>
+    </taskdef>
+
+    <target name="clean">
+        <delete dir="${release.dir}" failonerror="false"/>
+        <delete dir="${base.dir}/checkout" failonerror="false"/>
+        <delete>
+            <fileset dir="${base.dir}">
+                <include name="Extended-GMLC-*.*" />
+            </fileset>
+        </delete>
+    </target>
+
+    <target name="release" depends="clean,check-prerequisites,copy-jss7-modules,copy-map-ra,build-gmlc,copy-gmlc,make-final-zip" />
+
+    <target name="check-prerequisites">
+        <echo>Checking prerequisites...</echo>
+        <echo>jSS7 build dir: ${jss7.build.dir}</echo>
+        <echo>MAP RA build dir: ${mapra.build.dir}</echo>
+        
+        <available file="${jss7.build.dir}/service/wildfly/modules/target/module/main" property="jss7.modules.exists" />
+        <fail unless="jss7.modules.exists" message="jSS7 modules not found. Please build jSS7 first with: mvn clean install -DskipTests" />
+        
+        <available file="${jss7.build.dir}/service/wildfly/extension/target/module/main" property="jss7.extension.exists" />
+        <fail unless="jss7.extension.exists" message="jSS7 extension not found. Please build jSS7 first." />
+        
+        <available file="${mapra.build.dir}/resources/map/du/target" property="mapra.du.exists" />
+        <fail unless="mapra.du.exists" message="MAP RA DU not found. Please build jain-slee.ss7 first with: mvn clean install -DskipTests" />
+        
+        <echo>All prerequisites found!</echo>
+    </target>
+
+    <target name="copy-jss7-modules">
+        <echo>Copying jSS7 modules to WildFly...</echo>
+        
+        <!-- Create WildFly module directories -->
+        <mkdir dir="${jboss.home}/modules/org/restcomm/ss7/main" />
+        <mkdir dir="${jboss.home}/modules/org/restcomm/ss7/extension/main" />
+        <mkdir dir="${jboss.home}/modules/org/restcomm/ss7/commons/main" />
+        
+        <!-- Copy jSS7 main modules -->
+        <copy todir="${jboss.home}/modules/org/restcomm/ss7/main" overwrite="true">
+            <fileset dir="${jss7.build.dir}/service/wildfly/modules/target/module/main">
+                <include name="**/*.jar" />
+                <include name="module.xml" />
+            </fileset>
+        </copy>
+        
+        <!-- Copy jSS7 extension -->
+        <copy todir="${jboss.home}/modules/org/restcomm/ss7/extension/main" overwrite="true">
+            <fileset dir="${jss7.build.dir}/service/wildfly/extension/target/module/main">
+                <include name="**/*.jar" />
+                <include name="module.xml" />
+            </fileset>
+        </copy>
+        
+        <!-- Copy jSS7 commons -->
+        <copy todir="${jboss.home}/modules/org/restcomm/ss7/commons/main" overwrite="true">
+            <fileset dir="${jss7.build.dir}/service/wildfly/restcomm-ss7-wildfly-commons/target/module/main">
+                <include name="**/*.jar" />
+                <include name="module.xml" />
+            </fileset>
+        </copy>
+        
+        <echo>jSS7 modules copied successfully!</echo>
+    </target>
+
+    <target name="copy-map-ra">
+        <echo>Copying MAP RA from local build...</echo>
+        <mkdir dir="${release.dir}/resources/map" />
+        <copy todir="${release.dir}/resources/map" overwrite="true">
+            <fileset dir="${mapra.build.dir}/resources/map/du/target">
+                <include name="*.jar" />
+            </fileset>
+        </copy>
+        <echo>MAP RA copied: restcomm-slee-ra-map-du-${restcomm-map-ra.version}.jar</echo>
+    </target>
+
+    <target name="build-gmlc">
+        <echo>Building GMLC...</echo>
+        <exec failonerror="true" executable="${mvn.executable}" dir="${base.dir}">
+            <arg line="${release.build.goals} -Passembly" />
+        </exec>
+    </target>
+
+    <target name="copy-gmlc">
+        <echo>Copying GMLC to WildFly...</echo>
+        
+        <!-- Create deployment directory -->
+        <mkdir dir="${deploy.dir}" />
+        
+        <!-- Copy GMLC services DU -->
+        <copy file="${base.dir}/core/slee/services/du/target/gmlc-services-du-${restcomm.gmlc.release.version}.jar" 
+              todir="${deploy.dir}" failonerror="true" />
+        
+        <!-- Copy MAP RA DU -->
+        <copy file="${mapra.build.dir}/resources/map/du/target/restcomm-slee-ra-map-du-${restcomm-map-ra.version}.jar" 
+              todir="${deploy.dir}" failonerror="true" />
+        
+        <!-- Copy GMLC bootstrap module -->
+        <mkdir dir="${jboss.home}/modules/org/restcomm/gmlc/main" />
+        <copy todir="${jboss.home}/modules/org/restcomm/gmlc/main" overwrite="true">
+            <fileset dir="${base.dir}/core/bootstrap-wildfly/target/module/main">
+                <include name="**/*" />
+            </fileset>
+        </copy>
+        
+        <!-- Copy CLI tools -->
+        <copy file="${base.dir}/core/oam/cli/target/gmlc-cli-${restcomm.gmlc.release.version}.jar" 
+              todir="${jboss.home}/lib" failonerror="false" />
+        
+        <!-- Copy jSS7 shell -->
+        <mkdir dir="${jboss.home}/shell" />
+        <copy todir="${jboss.home}/shell" overwrite="true">
+            <fileset dir="${jss7.build.dir}/management/shell-client/target">
+                <include name="*.jar" />
+            </fileset>
+        </copy>
+        
+        <echo>GMLC copied successfully!</echo>
+    </target>
+
+    <target name="make-final-zip" depends="set-time-stamp">
+        <zip destfile="${base.dir}/Extended-GMLC-${restcomm.gmlc.release.version}.zip" filesonly="false">
+            <zipfileset dir="${release.dir}" prefix="Extended-GMLC-${restcomm.gmlc.release.version}">
+                <include name="**" />
+            </zipfileset>
+        </zip>
+        <echo>Release package created: Extended-GMLC-${restcomm.gmlc.release.version}.zip</echo>
+    </target>
+
+    <target name="set-time-stamp" unless="skip.timestamp">
+        <tstamp>
+            <format property="time.stamp" pattern="yyMMddHHmm" />
+        </tstamp>
+    </target>
+
+    <target name="help">
+        <echo message="GMLC Local Build Script for WildFly 24" />
+        <echo message="======================================" />
+        <echo message="" />
+        <echo message="Prerequisites:" />
+        <echo message="  1. Build jSS7: cd ../../jSS7 &amp;&amp; mvn clean install -DskipTests" />
+        <echo message="  2. Build MAP RA: cd ../../jain-slee.ss7 &amp;&amp; mvn clean install -DskipTests" />
+        <echo message="  3. Set M2_HOME environment variable" />
+        <echo message="" />
+        <echo message="Targets:" />
+        <echo message="  ant release   - Full release build" />
+        <echo message="  ant clean     - Clean build artifacts" />
+        <echo message="  ant help      - Show this help" />
+    </target>
+
+</project>

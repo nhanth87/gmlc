@@ -49,8 +49,8 @@ import javax.xml.bind.annotation.XmlType;
 public class Neid {
 
     @XmlElementRefs({
-        @XmlElementRef(name = "vmscid", type = Vmscid.class, required = false),
-        @XmlElementRef(name = "vlrid", type = Vlrid.class, required = false)
+        @XmlElementRef(name = "vmscid", type = Vmscid.class),
+        @XmlElementRef(name = "vlrid", type = Vlrid.class)
     })
     protected List<Object> content;
 

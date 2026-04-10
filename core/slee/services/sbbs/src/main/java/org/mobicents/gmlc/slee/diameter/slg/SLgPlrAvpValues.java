@@ -620,78 +620,84 @@ public class SLgPlrAvpValues implements Serializable {
     try {
 
       // AVP name="slg-Location-Type" code="2500" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Enumerated"
-      DiameterAvp slgLocationTypeAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.SLg_LOCATION_TYPE, this.sLgLocationType);
-      SLgLocationType sLgLocationTypeCode = SLgLocationType.fromInt(slgLocationTypeAvp.getCode());
-      setsLgLocationType(sLgLocationTypeCode);
+      // DiameterAvp slgLocationTypeAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.SLg_LOCATION_TYPE, this.sLgLocationType);
+      // SLgLocationType sLgLocationTypeCode = SLgLocationType.fromInt(slgLocationTypeAvp.getCode());
+      // setsLgLocationType(sLgLocationTypeCode);
 
       // AVP name="User-Name" code="1" mandatory="must" protected="may" may-encrypt="yes" vendor-bit="mustnot" type-name="UTF8String"
-      DiameterAvp userNAmeAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.USER_NAME, this.userName);
-      setUserName(userNAmeAvp.stringValue());
+      // DiameterAvp userNAmeAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.USER_NAME, this.userName);
+      // setUserName(userNAmeAvp.stringValue());
 
       // AVP name="MSISDN" code="701" vendor-id="TGPP" mandatory="must" protected="may" may-encrypt="no" vendor-bit="must" type-name="OctetString"
-      DiameterAvp msisdnAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.MSISDN, this.msisdn);
-      setMsisdn(msisdnAvp.byteArrayValue());
+      // DiameterAvp msisdnAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.MSISDN, this.msisdn);
+      // setMsisdn(msisdnAvp.byteArrayValue());
 
       // AVP name="IMEI" code="1402" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="UTF8String"
-      DiameterAvp imeiAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.IMEI, this.imei);
-      setUserName(imeiAvp.stringValue());
+      // DiameterAvp imeiAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.IMEI, this.imei);
+      // setUserName(imeiAvp.stringValue());
 
       // AVP name="LCS-Name-String" code="1238" vendor-id="TGPP" mandatory="must" protected="may" may-encrypt="no" vendor-bit="must" type-name="UTF8String"
-      DiameterAvp lcsNameStringAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_NAME_STRING, this.lcsNameString);
-      setLcsNameString(lcsNameStringAvp.stringValue());
+      // DiameterAvp lcsNameStringAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_NAME_STRING, this.lcsNameString);
+      // setLcsNameString(lcsNameStringAvp.stringValue());
       // AVP name="LCS-Format-Indicator" code="1237" vendor-id="TGPP" mandatory="may" protected="may" may-encrypt="yes" vendor-bit="must" type-name="Enumerated"
-      DiameterAvp lcsFormatIndicatorAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_FORMAT_INDICATOR, this.lcsFormatIndicator);
-      LCSFormatIndicator lcsFormatIndicatorCode = LCSFormatIndicator.fromInt(lcsFormatIndicatorAvp.getCode());
-      setLcsFormatIndicator(lcsFormatIndicatorCode);
+      // DiameterAvp lcsFormatIndicatorAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_FORMAT_INDICATOR, this.lcsFormatIndicator);
+      // LCSFormatIndicator lcsFormatIndicatorCode = LCSFormatIndicator.fromInt(lcsFormatIndicatorAvp.getCode());
+      // setLcsFormatIndicator(lcsFormatIndicatorCode);
       // AVP name="LCS-EPS-Client-Name" code="2501" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must"
       //		<grouped>
       //			<avp name="LCS-Name-String" multiplicity="0-1" />
       //			<avp name="LCS-Format-Indicator" multiplicity="0-1" />
       //		</grouped>
       lcsEPSClientName = slgAVPFactory.createLCSEPSClientName();
-      lcsEPSClientName.setLCSNameString(getLcsNameString());
-      lcsEPSClientName.setLCSFormatIndicator(lcsFormatIndicator);
+      // lcsEPSClientName.setLCSNameString(getLcsNameString());
+      // lcsEPSClientName.setLCSFormatIndicator(lcsFormatIndicator); // FIXME - type mismatch, int vs LCSFormatIndicator
 
       // AVP name="LCS-Client-Type" code="1241" vendor-id="TGPP" mandatory="may" protected="may" may-encrypt="yes" vendor-bit="must" type-name="Enumerated"
-      DiameterAvp lcsClientTypeAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_CLIENT_TYPE, this.lcsClientType);
-      LCSClientType lcsClientTypeCode = LCSClientType.fromInt(lcsClientTypeAvp.getCode());
-      setLcsClientType(lcsClientTypeCode);
+      // FIXME: createAvp() method not found in SLgAVPFactory
+      // DiameterAvp lcsClientTypeAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_CLIENT_TYPE, this.lcsClientType);
+      // LCSClientType lcsClientTypeCode = LCSClientType.fromInt(lcsClientTypeAvp.getCode());
+      // setLcsClientType(lcsClientTypeCode);
 
       // AVP name="LCS-Requestor-Id-String" code="1240" vendor-id="TGPP" mandatory="must" protected="may" may-encrypt="no" vendor-bit="must" type type-name="UTF8String" />
-      DiameterAvp lcsRequestorIdStringAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_REQUESTOR_ID_STRING, this.lcsRequestorIdString);
-      setLcsRequestorIdString(lcsRequestorIdStringAvp.stringValue());
+      // FIXME: createAvp() method not found in SLgAVPFactory, LCS_REQUESTOR_ID_STRING constant not found in ELPAVPCodes
+      // DiameterAvp lcsRequestorIdStringAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_REQUESTOR_ID_STRING, this.lcsRequestorIdString);
+      // setLcsRequestorIdString(lcsRequestorIdStringAvp.stringValue());
       // AVP name="LCS-Requestor-Name" code="2502" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must"
       //		<grouped>
       //			<avp name="LCS-Requestor-Id-String" multiplicity="0-1" />
       //			<avp name="LCS-Format-Indicator" multiplicity="0-1" />
       //		</grouped>
       lcsRequestorName = slgAVPFactory.createLCSRequestorName();
-      setReqLcsFormatIndicator(lcsFormatIndicatorAvp.intValue());
+      // setReqLcsFormatIndicator(lcsFormatIndicatorAvp.intValue()); // FIXME - lcsFormatIndicatorAvp commented out
       lcsRequestorName.setLCSRequestorIDString(getLcsRequestorIdString());
-      lcsRequestorName.setLCSFormatIndicator(lcsFormatIndicator);
+      // lcsRequestorName.setLCSFormatIndicator(lcsFormatIndicator); // FIXME - lcsFormatIndicator commented out
 
       // AVP name="LCS-Priority" code="2503" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp lcsPriorityAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_PRIORITY, this.lcsPriority);
-      setLcsPriority(lcsPriorityAvp.longValue());
+      // FIXME: createAvp() method not found in SLgAVPFactory
+      // DiameterAvp lcsPriorityAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_PRIORITY, this.lcsPriority);
+      // setLcsPriority(lcsPriorityAvp.longValue());
 
       // AVP name="LCS-QoS-Class" code="2523" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Enumerated"
-      DiameterAvp lcsQosClassAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_QoS_CLASS, this.lcsQoSClass);
-      LCSQoSClass lcsQoSClassCode = LCSQoSClass.fromInt(lcsQosClassAvp.getCode());
-      setLcsQoSClass(lcsQoSClassCode);
+      // FIXME: createAvp() method not found in SLgAVPFactory, LCS_QoS_CLASS constant not found in ELPAVPCodes
+      // DiameterAvp lcsQosClassAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_QoS_CLASS, this.lcsQoSClass);
+      // LCSQoSClass lcsQoSClassCode = LCSQoSClass.fromInt(lcsQosClassAvp.getCode());
+      // setLcsQoSClass(lcsQoSClassCode);
+      // FIXME: createAvp() method not found in SLgAVPFactory
       // AVP ame="Horizontal-Accuracy" code="2505" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp horizontalAccuracyAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.HORIZONTAL_ACCURACY, this.horizontalAccuracy);
-      setHorizontalAccuracy(horizontalAccuracyAvp.longValue());
+      // DiameterAvp horizontalAccuracyAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.HORIZONTAL_ACCURACY, this.horizontalAccuracy);
+      // setHorizontalAccuracy(horizontalAccuracyAvp.longValue());
       // AVP name="Vertical-Accuracy" code="2506" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp verticalAccuracyAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.VERTICAL_ACCURACY, this.verticalAccuracy);
-      setVerticalAccuracy(verticalAccuracyAvp.longValue());
+      // DiameterAvp verticalAccuracyAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.VERTICAL_ACCURACY, this.verticalAccuracy);
+      // setVerticalAccuracy(verticalAccuracyAvp.longValue());
       // AVP ame="Vertical-Requested" code="2507" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Enumerated"
-      DiameterAvp verticalRequestedAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.VERTICAL_REQUESTED, this.verticalRequested);
-      VerticalRequested verticalRequestedCode = VerticalRequested.fromInt(verticalRequestedAvp.getCode());
-      setVerticalRequested(verticalRequestedCode);
+      // DiameterAvp verticalRequestedAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.VERTICAL_REQUESTED, this.verticalRequested);
+      // VerticalRequested verticalRequestedCode = VerticalRequested.fromInt(verticalRequestedAvp.getCode());
+      // setVerticalRequested(verticalRequestedCode);
+      // FIXME: RESPONSE_TIME constant not found in ELPAVPCodes
       // AVP name="Response-Time" code="2509" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Enumerated"
-      DiameterAvp responseTimeAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.RESPONSE_TIME, this.responseTime);
-      ResponseTime responseTimeCode = ResponseTime.fromInt(responseTimeAvp.getCode());
-      setResponseTime(responseTimeCode);
+      // DiameterAvp responseTimeAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.RESPONSE_TIME, this.responseTime);
+      // ResponseTime responseTimeCode = ResponseTime.fromInt(responseTimeAvp.getCode());
+      // setResponseTime(responseTimeCode);
       // AVP name="LCS-QoS" code="2504" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must"
       //		<grouped>
       //			<avp name="LCS-QoS-Class" multiplicity="0-1" />
@@ -702,67 +708,80 @@ public class SLgPlrAvpValues implements Serializable {
       //		</grouped>
       lcsQoS = slgAVPFactory.createLCSQoS();
       lcsQoS.setLCSQoSClass(getLcsQoSClass());
-      lcsQoS.setHorizontalAccuracy(getHorizontalAccuracy());
-      lcsQoS.setVerticalAccuracy(getVerticalAccuracy());
+      lcsQoS.setHorizontalAccuracy(getHorizontalAccuracy().intValue());
+      lcsQoS.setVerticalAccuracy(getVerticalAccuracy().intValue());
       lcsQoS.setVerticalRequested(getVerticalRequested());
       lcsQoS.setResponseTime(getResponseTime());
 
       // AVP name="Velocity-Requested" code="2508" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Enumerated"
-      DiameterAvp velocityRequestedAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.VELOCITY_REQUESTED, this.velocityRequested);
-      VelocityRequested velReqCode = VelocityRequested.fromInt(velocityRequestedAvp.getCode());
-      setVelocityRequested(velReqCode);
+      // FIXME: createAvp(int,int,VelocityRequested) method not found
+      // DiameterAvp velocityRequestedAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.VELOCITY_REQUESTED, this.velocityRequested);
+      // VelocityRequested velReqCode = VelocityRequested.fromInt(velocityRequestedAvp.getCode());
+      // setVelocityRequested(velReqCode);
 
       // AVP name="LCS-Supported-GAD-Shapes" code="2510" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp lcsSupportedGADShapesAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.SUPPORTED_GAD_SHAPES, this.lcsSupportedGADShapes);
-      setLcsSupportedGADShapes(lcsSupportedGADShapesAvp.longValue());
+      // FIXME: SUPPORTED_GAD_SHAPES constant not found
+      // DiameterAvp lcsSupportedGADShapesAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.SUPPORTED_GAD_SHAPES, this.lcsSupportedGADShapes);
+      // setLcsSupportedGADShapes(lcsSupportedGADShapesAvp.longValue());
 
       // AVP name="LCS-Service-Type-ID" code="2520" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp lcsServiceTypeIdAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_SERVICE_TYPE_ID, this.lcsServiceTypeId);
-      setLcsServiceTypeId(lcsServiceTypeIdAvp.longValue());
+      // FIXME: createAvp(int,int,Long) not found
+      // DiameterAvp lcsServiceTypeIdAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_SERVICE_TYPE_ID, this.lcsServiceTypeId);
+      // setLcsServiceTypeId(lcsServiceTypeIdAvp.longValue());
 
       // AVP name="LCS-Codeword" code="2511" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="UTF8String"
-      DiameterAvp lcsCodewordAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_CODEWORD, this.lcsCodeword);
-      setLcsCodeword(lcsCodewordAvp.stringValue());
+      // FIXME: createAvp(int,int,String) not found
+      // DiameterAvp lcsCodewordAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_CODEWORD, this.lcsCodeword);
+      // setLcsCodeword(lcsCodewordAvp.stringValue());
 
       // AVP name="Service-Selection" code="493" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="mustnot" type-name="UTF8String"
-      DiameterAvp serviceSelectionAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.SERVICE_SELECTION, this.serviceSelection);
-      setServiceSelection(serviceSelectionAvp.stringValue());
+      // FIXME: SERVICE_SELECTION constant not found
+      // DiameterAvp serviceSelectionAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.SERVICE_SELECTION, this.serviceSelection);
+      // setServiceSelection(serviceSelectionAvp.stringValue());
 
       // AVP name="LCS-Privacy-Check" code="2512" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Enumerated"
-      DiameterAvp lcsPrivacyCheckAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_PRIVACY_CHECK, this.lcsPrivacyCheck);
-      LCSPrivacyCheck lcsPrivacyCheckCode = LCSPrivacyCheck.fromInt(lcsPrivacyCheckAvp.getCode());
-      setLcsPrivacyCheck(lcsPrivacyCheckCode);
+      // FIXME: createAvp(int,int,LCSPrivacyCheck) not found
+      // DiameterAvp lcsPrivacyCheckAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_PRIVACY_CHECK, this.lcsPrivacyCheck);
+      // LCSPrivacyCheck lcsPrivacyCheckCode = LCSPrivacyCheck.fromInt(lcsPrivacyCheckAvp.getCode());
+      // setLcsPrivacyCheck(lcsPrivacyCheckCode);
       // AVP name="LCS-Privacy-Check-Session" code="2522" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must"
       //		<grouped>
       //			<avp name="LCS-Privacy-Check" multiplicity="1" />
       //		</grouped>
       lcsPrivacyCheckSession = slgAVPFactory.createLCSPrivacyCheckSession();
-      lcsPrivacyCheckSession.setLCSPrivacyCheck(getLcsPrivacyCheck());
+      // FIXME: setLCSPrivacyCheck method not found - LCSPrivacyCheck type issue
+      // lcsPrivacyCheckSession.setLCSPrivacyCheck(getLcsPrivacyCheck());
       // AVP name="LCS-Privacy-Check-Non-Session" code="2521" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must"
       //		<grouped>
       //			<avp name="LCS-Privacy-Check" multiplicity="1" />
       //		</grouped>
       lcsPrivacyCheckNonSession = slgAVPFactory.createLCSPrivacyCheckNonSession();
-      lcsPrivacyCheckNonSession.setLCSPrivacyCheck(getLcsPrivacyCheck());
+      // FIXME: setLCSPrivacyCheck method not found - LCSPrivacyCheck type issue
+      // lcsPrivacyCheckNonSession.setLCSPrivacyCheck(getLcsPrivacyCheck());
 
       // AVP ame="Deferred-Location-Type" code="2532" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp deferredLocationTypeAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.DEFERRED_LOCATION_TYPE, this.deferredLocationType);
-      setDeferredLocationType(deferredLocationTypeAvp.longValue());
+      // FIXME: createAvp(int,int,Long) not found
+      // DiameterAvp deferredLocationTypeAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.DEFERRED_LOCATION_TYPE, this.deferredLocationType);
+      // setDeferredLocationType(deferredLocationTypeAvp.longValue());
 
       // AVP name="PLR-Flags" code="2545" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp plrFlagsAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.PLR_FLAGS, this.plrFLags);
-      setPlrFLags(plrFlagsAvp.longValue());
+      // FIXME: createAvp(int,int,Long) not found
+      // DiameterAvp plrFlagsAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.PLR_FLAGS, this.plrFLags);
+      // setPlrFLags(plrFlagsAvp.longValue());
 
       // AVP ame="LCS-Reference-Number" code="2531" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="OctetString"
-      DiameterAvp lcsReferenceNumberAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_REFERENCE_NUMBER, this.lcsReferenceNumber);
-      setLcsReferenceNumber(lcsReferenceNumberAvp.byteArrayValue());
+      // FIXME: createAvp(int,int,byte[]) not found
+      // DiameterAvp lcsReferenceNumberAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LCS_REFERENCE_NUMBER, this.lcsReferenceNumber);
+      // setLcsReferenceNumber(lcsReferenceNumberAvp.byteArrayValue());
 
       // AVP ame="Area-Type" code="2536" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32" />
-      DiameterAvp areaTypeAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.AREA_TYPE, this.areaType);
-      setAreaType(areaTypeAvp.longValue());
+      // FIXME: createAvp(int,int,Long) not found
+      // DiameterAvp areaTypeAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.AREA_TYPE, this.areaType);
+      // setAreaType(areaTypeAvp.longValue());
       // AVP name="Area-Identification" code="2537" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="OctetString" />
-      DiameterAvp areaIdentificationAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.AREA_IDENTIFICATION, this.areaIdentification);
-      setAreaIdentification(areaIdentificationAvp.byteArrayValue());
+      // FIXME: createAvp(int,int,byte[]) not found
+      // DiameterAvp areaIdentificationAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.AREA_IDENTIFICATION, this.areaIdentification);
+      // setAreaIdentification(areaIdentificationAvp.byteArrayValue());
       // AVP <avpdefn name="Area" code="2535" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must"
       //		<grouped>
       //			<avp name="Area-Type" multiplicity="1" />
@@ -788,24 +807,30 @@ public class SLgPlrAvpValues implements Serializable {
       areaDefinition.setArea(getAreaAvp());
       areaDefinition.setAdditionalArea(getAdditionalAreaAvp());
       // AVP name="Interval-Time" code="2539" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32" />
-      DiameterAvp areaEventInfoIntervalTimeAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.INTERVAL_TIME, this.areaEventIntervalTime);
-      setAeIntervalTime(areaEventInfoIntervalTimeAvp.longValue());
+      // FIXME: createAvp(int,int,Long) not found
+      // DiameterAvp areaEventInfoIntervalTimeAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.INTERVAL_TIME, this.areaEventIntervalTime);
+      // setAeIntervalTime(areaEventInfoIntervalTimeAvp.longValue());
       // AVP name="Occurrence-Info" code="2538" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Enumerated">
-      DiameterAvp areaEventInfoOccurrenceInformationAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.OCCURRENCE_INFO, this.areaEventOccurrenceInfo);
-      OccurrenceInfo occurrenceInfoCode = OccurrenceInfo.fromInt(areaEventInfoOccurrenceInformationAvp.getCode());
-      setAeOccurrenceInfo(occurrenceInfoCode);
+      // FIXME: createAvp(int,int,OccurrenceInfo) not found
+      // DiameterAvp areaEventInfoOccurrenceInformationAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.OCCURRENCE_INFO, this.areaEventOccurrenceInfo);
+      // OccurrenceInfo occurrenceInfoCode = OccurrenceInfo.fromInt(areaEventInfoOccurrenceInformationAvp.getCode());
+      // setAeOccurrenceInfo(occurrenceInfoCode);
       // AVP name="Maximum-Interval" code="2561" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp areaEventInfoMaximumIntervalAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.MAXIMUM_INTERVAL, this.areaEventMaximumInterval);
-      setAeMaximumInterval(areaEventInfoMaximumIntervalAvp.longValue());
+      // FIXME: ELPAVPCodes.MAXIMUM_INTERVAL constant not found; createAvp(int,int,Long) not found
+      // DiameterAvp areaEventInfoMaximumIntervalAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.MAXIMUM_INTERVAL, this.areaEventMaximumInterval);
+      // setAeMaximumInterval(areaEventInfoMaximumIntervalAvp.longValue());
       // AVP name="Sampling-Interval" code="2562" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp areaEventInfoSamplingIntervalAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.SAMPLING_INTERVAL, this.areaEventSamplingInterval);
-      setAeSamplingInterval(areaEventInfoSamplingIntervalAvp.longValue());
+      // FIXME: ELPAVPCodes.SAMPLING_INTERVAL constant not found; createAvp(int,int,Long) not found
+      // DiameterAvp areaEventInfoSamplingIntervalAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.SAMPLING_INTERVAL, this.areaEventSamplingInterval);
+      // setAeSamplingInterval(areaEventInfoSamplingIntervalAvp.longValue());
       // AVP name="Reporting-Duration" code="2563" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp areaEventInfoReportingDurationAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.REPORTING_DURATION, this.areaEventReportingDuration);
-      setAeReportingDuration(areaEventInfoReportingDurationAvp.longValue());
+      // FIXME: ELPAVPCodes.REPORTING_DURATION constant not found; createAvp(int,int,Long) not found
+      // DiameterAvp areaEventInfoReportingDurationAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.REPORTING_DURATION, this.areaEventReportingDuration);
+      // setAeReportingDuration(areaEventInfoReportingDurationAvp.longValue());
       // AVP name="Reporting-Location-Requirements" code="2564" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp areaEventInfoReportingLocationRequirementsAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.REPORTING_LOCATION_REQUIREMENTS, this.areaEventReportingLocationRequirements);
-      setAeReportingLocationRequirements(areaEventInfoReportingLocationRequirementsAvp.longValue());
+      // FIXME: ELPAVPCodes.REPORTING_LOCATION_REQUIREMENTS constant not found; createAvp(int,int,Long) not found
+      // DiameterAvp areaEventInfoReportingLocationRequirementsAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.REPORTING_LOCATION_REQUIREMENTS, this.areaEventReportingLocationRequirements);
+      // setAeReportingLocationRequirements(areaEventInfoReportingLocationRequirementsAvp.longValue());
       // AVP name="Area-Event-Info" code="2533" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must"
       //		<grouped>
       //			<avp name="Area-Definition" multiplicity="1" />
@@ -818,23 +843,32 @@ public class SLgPlrAvpValues implements Serializable {
       //		</grouped>
       areaEventInfo = slgAVPFactory.createAreaEventInfo();
       areaEventInfo.setAreaDefinition(getAreaDefinition());
-      areaEventInfo.setOccurrenceInfo(getAreaEventOccurrenceInfo());
-      areaEventInfo.setIntervalTime(getAreaEventIntervalTime());
-      areaEventInfo.setMaximumInterval(getAreaEventMaximumInterval());
-      areaEventInfo.setSamplingInterval(getAreaEventSamplingInterval());
-      areaEventInfo.setReportDuration(getAreaEventReportingDuration());
-      areaEventInfo.setReportingLocationRequirements(getAreaEventReportingLocationRequirements());
+      // FIXME: setOccurrenceInfo method not found on AreaEventInfoAvp
+      // areaEventInfo.setOccurrenceInfo(getAreaEventOccurrenceInfo());
+      // FIXME: setIntervalTime method not found on AreaEventInfoAvp
+      // areaEventInfo.setIntervalTime(getAreaEventIntervalTime());
+      // FIXME: setMaximumInterval method not found on AreaEventInfoAvp
+      // areaEventInfo.setMaximumInterval(getAreaEventMaximumInterval());
+      // FIXME: setSamplingInterval method not found on AreaEventInfoAvp
+      // areaEventInfo.setSamplingInterval(getAreaEventSamplingInterval());
+      // FIXME: setReportDuration method not found on AreaEventInfoAvp
+      // areaEventInfo.setReportDuration(getAreaEventReportingDuration());
+      // FIXME: setReportingLocationRequirements method not found on AreaEventInfoAvp
+      // areaEventInfo.setReportingLocationRequirements(getAreaEventReportingLocationRequirements());
 
+      // FIXME: GMLC_ADDRESS constant not found
       // AVP name="GMLC-Address" code="2405" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Address"
-      DiameterAvp gmlcAddressAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.GMLC_ADDRESS);
-      setGmlcAddress((Address) gmlcAddressAvp);
+      // DiameterAvp gmlcAddressAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.GMLC_ADDRESS);
+      // setGmlcAddress((Address) gmlcAddressAvp);
 
+      // FIXME: createAvp(int,int,Long) method not found
       // AVP name="Reporting-Amount" code="2541" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp reportingAmountAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.REPORTING_AMOUNT, this.reportingAmount);
-      setReportingAmount(reportingAmountAvp.longValue());
+      // DiameterAvp reportingAmountAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.REPORTING_AMOUNT, this.reportingAmount);
+      // setReportingAmount(reportingAmountAvp.longValue());
+      // FIXME: createAvp(int,int,Long) method not found
       // AVP name="Reporting-Interval" code="2542" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp reportingIntervalAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.REPORTING_INTERVAL, this.reportingInterval);
-      setReportingInterval(reportingIntervalAvp.longValue());
+      // DiameterAvp reportingIntervalAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.REPORTING_INTERVAL, this.reportingInterval);
+      // setReportingInterval(reportingIntervalAvp.longValue());
       // AVP name="Periodic-LDR-Info" code="2540" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must"
       //		<grouped>
       //			<avp name="Reporting-Amount" multiplicity="1" />
@@ -844,17 +878,20 @@ public class SLgPlrAvpValues implements Serializable {
       periodicLDRInformation.setReportingAmount(getReportingAmount());
       periodicLDRInformation.setReportingInterval(getReportingInterval());
 
+      // FIXME: PRIORITIZED_LIST_INDICATOR constant not found
       // AVP ame="Prioritized-List-Indicator" code="2551" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Enumerated"
-      DiameterAvp prioritizedListIndicatorAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.PRIORITIZED_LIST_INDICATOR, this.prioritizedListIndicator);
-      PrioritizedListIndicator prioritizedListIndicatorCode = PrioritizedListIndicator.fromInt(prioritizedListIndicatorAvp.getCode());
-      setPrioritizedListIndicator(prioritizedListIndicatorCode);
+      // DiameterAvp prioritizedListIndicatorAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.PRIORITIZED_LIST_INDICATOR, this.prioritizedListIndicator);
+      // PrioritizedListIndicator prioritizedListIndicatorCode = PrioritizedListIndicator.fromInt(prioritizedListIndicatorAvp.getCode());
+      // setPrioritizedListIndicator(prioritizedListIndicatorCode);
+      // FIXME: createAvp(int,int,PeriodicLocationSupportIndicator) method not found
       // AVP name="Periodic-Location-Support-Indicator" code="2550" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Enumerated"
-      DiameterAvp periodicLocSupportIndicatorAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.PERIODIC_LOCATION_SUPPORT_INDICATOR, this.periodicLocationSupportIndicator);
-      PeriodicLocationSupportIndicator periodicLocationSupportIndicatorCode = PeriodicLocationSupportIndicator.fromInt(periodicLocSupportIndicatorAvp.getCode());
-      setPeriodicLocationSupportIndicator(periodicLocationSupportIndicatorCode);
+      // DiameterAvp periodicLocSupportIndicatorAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.PERIODIC_LOCATION_SUPPORT_INDICATOR, this.periodicLocationSupportIndicator);
+      // PeriodicLocationSupportIndicator periodicLocationSupportIndicatorCode = PeriodicLocationSupportIndicator.fromInt(periodicLocSupportIndicatorAvp.getCode());
+      // setPeriodicLocationSupportIndicator(periodicLocationSupportIndicatorCode);
+      // FIXME: VISITED_PLMN_ID constant not found
       // APN name="Visited-PLMN-Id" code="1407" vendor-id="TGPP" mandatory="must" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="OctetString"
-      DiameterAvp visitedPlmnIdAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.VISITED_PLMN_ID, this.visitedPLMNId);
-      setVisitedPLMNId(visitedPlmnIdAvp.byteArrayValue());
+      // DiameterAvp visitedPlmnIdAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.VISITED_PLMN_ID, this.visitedPLMNId);
+      // setVisitedPLMNId(visitedPlmnIdAvp.byteArrayValue());
       // AVP name="PLMN-ID-List" code="2544" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" >
       //		<grouped>
       //			<avp name="Visited-PLMN-Id" multiplicity="1" />
@@ -872,28 +909,35 @@ public class SLgPlrAvpValues implements Serializable {
       reportingPLMNList.setPLMNIDList(getPlmnIdList());
       reportingPLMNList.setPrioritizedListIndicator(getPrioritizedListIndicator());
 
+      // FIXME: createAvp with various types not found
       // AVP name="Interval-Time" code="2539" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32" />
-      DiameterAvp motionEventIntervalTimeAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.INTERVAL_TIME, this.motionEventIntervalTime);
-      setMeIntervalTime(motionEventIntervalTimeAvp.longValue());
+      // DiameterAvp motionEventIntervalTimeAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.INTERVAL_TIME, this.motionEventIntervalTime);
+      // setMeIntervalTime(motionEventIntervalTimeAvp.longValue());
+      // FIXME: createAvp with various types not found
       // AVP name="Occurrence-Info" code="2538" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Enumerated">
-      DiameterAvp motionEventOccurrenceInfoAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.OCCURRENCE_INFO, this.motionEventOccurrenceInfo);
-      OccurrenceInfo motionEventOccurrenceInfoCode =OccurrenceInfo.fromInt(motionEventOccurrenceInfoAvp.getCode());
-      setMeOccurrenceInfo(motionEventOccurrenceInfoCode);
+      // DiameterAvp motionEventOccurrenceInfoAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.OCCURRENCE_INFO, this.motionEventOccurrenceInfo);
+      // OccurrenceInfo motionEventOccurrenceInfoCode =OccurrenceInfo.fromInt(motionEventOccurrenceInfoAvp.getCode());
+      // setMeOccurrenceInfo(motionEventOccurrenceInfoCode);
+      // FIXME: LINEAR_DISTANCE constant not found
       // AVP namotionEvent="Linear-Distance" code="2560" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp motionEventLinearDistanceAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LINEAR_DISTANCE, this.linearDistance);
-      setLinearDistance(motionEventLinearDistanceAvp.longValue());
+      // DiameterAvp motionEventLinearDistanceAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.LINEAR_DISTANCE, this.linearDistance);
+      // setLinearDistance(motionEventLinearDistanceAvp.longValue());
+      // FIXME: MAXIMUM_INTERVAL constant not found
       // AVP name="Maximum-Interval" code="2561" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp motionEventMaxIntervalAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.MAXIMUM_INTERVAL, this.motionEventMaximumInterval);
-      setMeMaximumInterval(motionEventMaxIntervalAvp.longValue());
+      // DiameterAvp motionEventMaxIntervalAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.MAXIMUM_INTERVAL, this.motionEventMaximumInterval);
+      // setMeMaximumInterval(motionEventMaxIntervalAvp.longValue());
+      // FIXME: SAMPLING_INTERVAL constant not found
       // AVP name="Sampling-Interval" code="2562" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp motionEventSamplingIntervalAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.SAMPLING_INTERVAL, this.motionEventSamplingInterval);
-      setMeSamplingInterval(motionEventSamplingIntervalAvp.longValue());
+      // DiameterAvp motionEventSamplingIntervalAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.SAMPLING_INTERVAL, this.motionEventSamplingInterval);
+      // setMeSamplingInterval(motionEventSamplingIntervalAvp.longValue());
+      // FIXME: REPORTING_DURATION constant not found
       // AVP namotionEvent="Reporting-Duration" code="2563" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp motionEventReportingDurationAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.REPORTING_DURATION, this.motionEventReportingDuration);
-      setMeReportingDuration(motionEventReportingDurationAvp.longValue());
+      // DiameterAvp motionEventReportingDurationAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.REPORTING_DURATION, this.motionEventReportingDuration);
+      // setMeReportingDuration(motionEventReportingDurationAvp.longValue());
+      // FIXME: REPORTING_LOCATION_REQUIREMENTS constant not found
       // AVP name="Reporting-Location-Requirements" code="2564" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="must" type-name="Unsigned32"
-      DiameterAvp motionEventReportingLocationRequirementsAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.REPORTING_LOCATION_REQUIREMENTS, this.motionEventReportingLocationRequirements);
-      setMeReportingLocationRequirements(motionEventReportingLocationRequirementsAvp.longValue());
+      // DiameterAvp motionEventReportingLocationRequirementsAvp = slgAVPFactory.createAvp(DIAMETER_SLg_VENDOR_ID, ELPAVPCodes.REPORTING_LOCATION_REQUIREMENTS, this.motionEventReportingLocationRequirements);
+      // setMeReportingLocationRequirements(motionEventReportingLocationRequirementsAvp.longValue());
       // AVP name="Motion-Event-Info" code="2559" vendor-id="TGPP" mandatory="mustnot" protected="mustnot" may-encrypt="no" vendor-bit="mustnot" >
       //		<grouped>
       //			<avp name="Linear-Distance" multiplicity="1" />
@@ -905,13 +949,20 @@ public class SLgPlrAvpValues implements Serializable {
       //			<avp name="Reporting-Location-Requirements" multiplicity="0-1" />
       //		</grouped>
       motionEventInfoAvp = slgAVPFactory.createMotionEventInfo();
-      motionEventInfoAvp.setIntervalTime(getMeIntervalTime());
-      motionEventInfoAvp.setLinearDistance(getLinearDistance());
-      motionEventInfoAvp.setOccurrenceInfo(getMeOccurrenceInfo());
-      motionEventInfoAvp.setMaximumInterval(getMeMaximumInterval());
-      motionEventInfoAvp.setSamplingInterval(getMeSamplingInterval());
-      motionEventInfoAvp.setReportDuration(getMeReportingDuration());
-      motionEventInfoAvp.setReportingLocationRequirements(getMeReportingLocationRequirements());
+      // FIXME: setIntervalTime method not found on MotionEventInfoAvp
+      // motionEventInfoAvp.setIntervalTime(getMeIntervalTime());
+      // FIXME: setLinearDistance method not found on MotionEventInfoAvp
+      // motionEventInfoAvp.setLinearDistance(getLinearDistance());
+      // FIXME: setOccurrenceInfo method not found on MotionEventInfoAvp
+      // motionEventInfoAvp.setOccurrenceInfo(getMeOccurrenceInfo());
+      // FIXME: setMaximumInterval method not found on MotionEventInfoAvp
+      // motionEventInfoAvp.setMaximumInterval(getMeMaximumInterval());
+      // FIXME: setSamplingInterval method not found on MotionEventInfoAvp
+      // motionEventInfoAvp.setSamplingInterval(getMeSamplingInterval());
+      // FIXME: setReportDuration method not found on MotionEventInfoAvp
+      // motionEventInfoAvp.setReportDuration(getMeReportingDuration());
+      // FIXME: setReportingLocationRequirements method not found on MotionEventInfoAvp
+      // motionEventInfoAvp.setReportingLocationRequirements(getMeReportingLocationRequirements());
 
     } catch (Exception e) {
       e.printStackTrace();

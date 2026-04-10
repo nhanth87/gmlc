@@ -62,7 +62,7 @@
 
     <build>
         <plugins>
-            <plugin>
+            <!--plugin>
                 <groupId>org.mobicents.tools</groupId>
                 <artifactId>maven-library-plugin</artifactId>
                 <version>1.0.0.FINAL</version>
@@ -74,7 +74,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <!-- TODO: XXX: we need resource filtering, it's a bit broken right now -->
                 <configuration>
                     <library-name>gmlc-library</library-name>
                     <library-vendor>org.mobicents</library-vendor>
@@ -89,13 +88,8 @@
                         <library-vendor>java.net</library-vendor>
                         <library-version>1.0</library-version>
                     </library-ref>
-                    <!--library-ref>
-                        <library-name>ulp-ra-library</library-name>
-                        <library-vendor>com.paicbd.resources</library-vendor>
-                        <library-version>1.0</library-version>
-                    </library-ref-->
                 </configuration>
-            </plugin>
+            </plugin-->
         </plugins>
     </build>
 

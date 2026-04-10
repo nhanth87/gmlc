@@ -645,8 +645,8 @@ public class TBCDUtil {
             }
         } else if (areaType.equalsIgnoreCase("plmnId")) {
             try {
-                PlmnId plmnId = new PlmnIdImpl(mcc, mnc);
-                areaIdTbcd = bytesToHex(plmnId.getData());
+                PlmnIdImpl plmnIdImpl = new PlmnIdImpl(mcc, mnc);
+                areaIdTbcd = bytesToHex(plmnIdImpl.getData());
                 return areaIdTbcd;
             } catch (Exception e) {
                 return areaIdTbcd;

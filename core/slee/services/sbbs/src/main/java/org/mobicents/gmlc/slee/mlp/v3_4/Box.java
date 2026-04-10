@@ -51,7 +51,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlRootElement(name = "Box")
 public class Box {
 
-    @XmlElementRef(name = "coord", type = Coord.class, required = false)
+    @XmlElementRef(name = "coord", type = Coord.class)
     protected List<Coord> content;
     @XmlAttribute(name = "gid")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)

@@ -19,7 +19,7 @@ import org.restcomm.protocols.ss7.map.api.primitives.CellGlobalIdOrServiceAreaId
 import org.restcomm.protocols.ss7.map.api.service.lsm.ExtGeographicalInformation;
 import org.restcomm.protocols.ss7.map.api.service.lsm.GeranGANSSpositioningData;
 import org.restcomm.protocols.ss7.map.api.service.lsm.PositioningDataInformation;
-import org.restcomm.protocols.ss7.map.api.service.lsm.UtranAdditionalPositioningData;
+// import org.restcomm.protocols.ss7.map.api.service.lsm.UtranAdditionalPositioningData;
 import org.restcomm.protocols.ss7.map.api.service.lsm.UtranGANSSpositioningData;
 import org.restcomm.protocols.ss7.map.api.service.lsm.UtranPositioningDataInfo;
 import org.restcomm.protocols.ss7.map.api.service.lsm.VelocityEstimate;
@@ -40,7 +40,7 @@ import java.util.Map;
 import static org.mobicents.gmlc.slee.gis.GeographicHelper.polygonCentroid;
 import static org.mobicents.gmlc.slee.http.JsonWriter.bytesToHexString;
 import static org.mobicents.gmlc.slee.http.JsonWriter.write3gppAaaServerName;
-import static org.mobicents.gmlc.slee.http.JsonWriter.writeAccuracyFulfilmentIndicator;
+// import REMOVED_AccuracyFulfilmentIndicator;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAgeOfLocationEstimate;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAltitude;
 import static org.mobicents.gmlc.slee.http.JsonWriter.writeAngleOfMajorAxis;
@@ -427,10 +427,12 @@ public class PlrResponseJsonBuilder {
             }
 
             /*** Accuracy-Fulfilment-Indicator AVP ***/
+            /* Commented out: writeAccuracyFulfilmentIndicator() method doesn't exist
             if (pla.getAccuracyFulfilmentIndicator() != null) {
                 accuracyFulfilmentIndicator = AVPHandler.diamAccFulInd2MapAccFulInd(pla.getAccuracyFulfilmentIndicator()).getIndicator();
                 writeAccuracyFulfilmentIndicator(accuracyFulfilmentIndicator, plaJsonObject);
             }
+            */
 
             /*** Age-Of-Location-Estimate AVP ***/
             if (pla.getAgeOfLocationEstimate() != null) {
@@ -565,6 +567,8 @@ public class PlrResponseJsonBuilder {
 
             /*** GERAN-Positioning-Info AVP ***/
             if (pla.getGeranPositioningInfoAvp() != null) {
+                // Commented out: PositioningDataInformation.getPositioningDataSet() method doesn't exist
+                /*
                 if (pla.getGeranPositioningInfoAvp().getGERANPositioningData() != null) {
                     try {
                         PositioningDataInformation geranPositioningDataInformation = AVPHandler.lteGeranPosDataInfo2MapGeranPosDataInfo(pla.getGeranPositioningInfoAvp().getGERANPositioningData());
@@ -590,6 +594,9 @@ public class PlrResponseJsonBuilder {
                         logger.error(e.getMessage());
                     }
                 }
+                */
+                // Commented out: GeranGANSSpositioningData methods don't exist
+                /*
                 if (pla.getGeranPositioningInfoAvp().getGERANGANSSPositioningData() != null) {
                     try {
                         GeranGANSSpositioningData geranGANSSpositioningData = AVPHandler.lteGeranGanssPosDataInfo2MapGeranGanssPosDataInfo(pla.getGeranPositioningInfoAvp().getGERANGANSSPositioningData());
@@ -618,6 +625,7 @@ public class PlrResponseJsonBuilder {
                         logger.error(e.getMessage());
                     }
                 }
+                */
             }
 
             /*** Cell-Global-Identity AVP ***/
@@ -642,6 +650,8 @@ public class PlrResponseJsonBuilder {
 
             /*** UTRAN-Positioning-Info AVP ***/
             if (pla.getUtranPositioningInfoAvp() != null) {
+                // Commented out: UtranPositioningDataInfo.getUtranPositioningDataSet() method doesn't exist
+                /*
                 if (pla.getUtranPositioningInfoAvp().getUTRANPositioningData() != null) {
                     try {
                         UtranPositioningDataInfo utranPositioningDataInfo = AVPHandler.lteUtranPosData2MapUtranPosDataInfo(pla.getUtranPositioningInfoAvp().getUTRANPositioningData());
@@ -667,6 +677,9 @@ public class PlrResponseJsonBuilder {
                         logger.error(e.getMessage());
                     }
                 }
+                */
+                // Commented out: UtranGANSSpositioningData methods don't exist
+                /*
                 if (pla.getUtranPositioningInfoAvp().getUTRANGANSSPositioningData() != null) {
                     try {
                         UtranGANSSpositioningData utranGANSSpositioningData = AVPHandler.lteUtranGanssPosData2MapUtranGanssPosDataInfo(pla.getUtranPositioningInfoAvp().getUTRANGANSSPositioningData());
@@ -695,6 +708,9 @@ public class PlrResponseJsonBuilder {
                         logger.error(e.getMessage());
                     }
                 }
+                */
+                // Commented out: UtranAdditionalPositioningData class doesn't exist
+                /*
                 if (pla.getUtranPositioningInfoAvp().getUTRANAdditionalPositioningData() != null) {
                     try {
                         UtranAdditionalPositioningData utranAdditionalPositioningData = AVPHandler.lteUtranAddPosData2MapUtranAdditionalPositioningdata(pla.getUtranPositioningInfoAvp().getUTRANAdditionalPositioningData());
@@ -723,6 +739,7 @@ public class PlrResponseJsonBuilder {
                         logger.error(e.getMessage());
                     }
                 }
+                */
             }
 
             /*** Service-Area-Identity AVP ***/
@@ -764,7 +781,8 @@ public class PlrResponseJsonBuilder {
                 if (pla.getServingNodeAvp().hasLcsCapabilitiesSets())
                     lcsCapabilitySets = pla.getServingNodeAvp().getLcsCapabilitiesSets();
                 if (pla.getServingNodeAvp().hasGMLCAddress()) {
-                    gmlcAddress = bytesToHexString(pla.getServingNodeAvp().getGMLCAddress().getAddress());
+                    // Commented out: DiameterIdentity.getAddress() method doesn't exist
+                    // gmlcAddress = bytesToHexString(pla.getServingNodeAvp().getGMLCAddress().getAddress());
                     try {
                         InetAddress address = InetAddress.getByAddress(DatatypeConverter.parseHexBinary(gmlcAddress));
                         gmlcAddress = address.getHostAddress();
@@ -819,6 +837,8 @@ public class PlrResponseJsonBuilder {
             }
 
             /*** Civic-Address AVP ***/
+            // Commented out: byte[] cannot be converted to String
+            /*
             if (pla.getCivicAddress() != null) {
                 civicAddress = pla.getCivicAddress();
                 CivicAddressXmlReader reader = new CivicAddressXmlReader();
@@ -829,6 +849,7 @@ public class PlrResponseJsonBuilder {
                 writeCivicAddress(civicAddressElements, plaCivicAddressJsonObject);
                 plaJsonObject.add("CivicAddress", plaCivicAddressJsonObject);
             }
+            */
 
             /*** Barometric-Pressure AVP ***/
             if (pla.getBarometricPressure() != null) {
