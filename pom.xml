@@ -10,7 +10,7 @@
 
 	<artifactId>restcomm-gmlc-parent</artifactId>
 	<groupId>org.mobicents.gmlc</groupId>
-	<version>6.0.1-SNAPSHOT</version>
+	<version>6.0.2-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
@@ -28,8 +28,8 @@
 		<compiler.plugin.version>3.13.0</compiler.plugin.version>
 		<compile.source>11</compile.source>
 		<!-- Restcomm properties -->
-		<jss7.restcomm.version>9.2.5</jss7.restcomm.version>
-		<restcomm.resources.map.version>9.2.4</restcomm.resources.map.version>
+		<jss7.restcomm.version>9.2.7</jss7.restcomm.version>
+		<restcomm.resources.map.version>9.2.6</restcomm.resources.map.version>
 		<dialogic.version>6.7.1</dialogic.version>
 		<jslee.ext.version>7.1.83</jslee.ext.version>
 		<restcomm.resources.sip.version>2.9.94</restcomm.resources.sip.version>
@@ -39,8 +39,8 @@
 		<jodatime.version>2.9.6</jodatime.version>
 		<netty.version>4.1.66.Final</netty.version>
 		<!-- Restcomm jdiameter and jain-slee.diameter for LTE location services -->
-		<restcomm.jdiameter.version>2.0.0-303</restcomm.jdiameter.version>
-		<restcomm.slee.diameter.version>7.4.5</restcomm.slee.diameter.version>
+		<restcomm.jdiameter.version>2.0.0-304</restcomm.jdiameter.version>
+		<restcomm.slee.diameter.version>7.4.6</restcomm.slee.diameter.version>
 		<!-- Restcomm but not strictly jss7 or jdiameter -->
 		<asn.version>2.2.0-143</asn.version>
 		<stream.version>1.0.0.CR1</stream.version>

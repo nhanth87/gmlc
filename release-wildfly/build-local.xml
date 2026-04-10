@@ -11,9 +11,9 @@
     <property name="sctp.build.dir" value="C:\Users\Windows\Desktop\ethiopia-working-dir\sctp" />
     
     <!-- Versions - phải khớp với pom.xml của jSS7 và jain-slee.ss7 đã build -->
-    <property name="restcomm.gmlc.release.version" value="6.0.1-SNAPSHOT"/>
-    <property name="restcomm-jss7.version" value="9.2.5" />
-    <property name="restcomm-map-ra.version" value="9.2.4" />
+    <property name="restcomm.gmlc.release.version" value="6.0.2-SNAPSHOT"/>
+    <property name="restcomm-jss7.version" value="9.2.7" />
+    <property name="restcomm-map-ra.version" value="9.2.6" />
     <property name="sctp.version" value="2.0.10" />
     <property name="restcomm-slee.version" value="7.1.83" />
     <property name="wildfly_version" value="24.0.1" />
@@ -318,7 +318,7 @@
         <echo message="=========================================="/>
         
         <property name="diameter.dir" value="C:\Users\Windows\Desktop\ethiopia-working-dir\jain-slee.diameter\resources"/>
-        <property name="diameter.version" value="7.4.5"/>
+        <property name="diameter.version" value="7.4.6"/>
         
         <!-- Diameter Base RA (required by all Diameter RAs) -->
         <copy file="${diameter.dir}/diameter-base/du/target/diameter-restcomm-slee-ra-diameter-base-ra-DU-${diameter.version}.jar"
