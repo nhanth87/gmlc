@@ -37,7 +37,7 @@
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<restcomm.resources.http.servlet.version>7.2.0-113</restcomm.resources.http.servlet.version>
 		<jodatime.version>2.9.6</jodatime.version>
-		<netty.version>4.1.66.Final</netty.version>
+		<netty.version>4.2.11.Final</netty.version>
 		<!-- Restcomm jdiameter and jain-slee.diameter for LTE location services -->
 		<restcomm.jdiameter.version>2.0.0-304</restcomm.jdiameter.version>
 		<restcomm.slee.diameter.version>7.4.6</restcomm.slee.diameter.version>
