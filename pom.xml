@@ -1,4 +1,4 @@
-﻿<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -10,7 +10,7 @@
 
 	<artifactId>restcomm-gmlc-parent</artifactId>
 	<groupId>org.mobicents.gmlc</groupId>
-	<version>6.0.2-SNAPSHOT</version>
+	<version>6.0.3-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
@@ -28,7 +28,7 @@
 		<compiler.plugin.version>3.13.0</compiler.plugin.version>
 		<compile.source>11</compile.source>
 		<!-- Restcomm properties -->
-		<jss7.restcomm.version>9.2.7</jss7.restcomm.version>
+		<jss7.restcomm.version>9.2.10</jss7.restcomm.version>
 		<restcomm.resources.map.version>9.2.6</restcomm.resources.map.version>
 		<dialogic.version>6.7.1</dialogic.version>
 		<jslee.ext.version>7.1.83</jslee.ext.version>
@@ -40,7 +40,7 @@
 		<netty.version>4.2.11.Final</netty.version>
 		<!-- Restcomm jdiameter and jain-slee.diameter for LTE location services -->
 		<restcomm.jdiameter.version>2.0.0-304</restcomm.jdiameter.version>
-		<restcomm.slee.diameter.version>7.4.6</restcomm.slee.diameter.version>
+		<restcomm.slee.diameter.version>7.4.8</restcomm.slee.diameter.version>
 		<!-- Restcomm but not strictly jss7 or jdiameter -->
 		<asn.version>2.2.0-143</asn.version>
 		<stream.version>1.0.0.CR1</stream.version>

@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.mobicents.gmlc</groupId>
         <artifactId>services-parent</artifactId>
-        <version>6.0.2-SNAPSHOT</version>
+        <version>6.0.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>sbbs</artifactId>

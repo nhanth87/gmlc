@@ -6,7 +6,7 @@
 	<parent>
 		<artifactId>restcomm-gmlc-adminguide</artifactId>
 		<groupId>org.mobicents.gmlc.docs.adminguide</groupId>
-		<version>6.0.2-SNAPSHOT</version>
+		<version>6.0.3-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>restcomm-gmlc-adminguide-sources-asciidoc</artifactId>
